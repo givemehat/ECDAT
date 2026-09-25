@@ -48,6 +48,25 @@ def test_ml_inference_adversarial_binary(mocked_engine):
     assert pred in ['AES', 'RSA', 'SHA']
     assert 0.0 <= conf <= 1.0
 
+def test_ml_inference_not_loaded(mocked_engine):
+    mocked_engine.loaded = False
+    pred, conf, depth = mocked_engine.predict("RSA")
+    assert pred is None
+    assert conf == 0.0
+    assert depth == 0.0
+
+def test_ml_inference_successful_javalang_parse(mocked_engine):
+    # Pass a syntactically valid Java class to hit the try block of javalang
+    valid_java = "class MyClass { public void method() { int a = 1; try {} catch(Exception e){} } }"
+    pred, conf, depth = mocked_engine.predict(valid_java)
+    # The depth should have been successfully computed > 0
+    assert depth > 0.0
+
+def test_ml_inference_bad_path():
+    # Will trigger the except Exception block
+    engine = AdvancedCryptoInference(model_path="/path/that/does/not/exist.pth")
+    assert engine.loaded == False
+
 @pytest.mark.slow
 def test_ml_inference_real_model():
     engine = AdvancedCryptoInference(model_path='models/transformer_crypto_model.pth')

@@ -7,10 +7,7 @@ class AdvancedCryptoInference:
         # Forcing CPU for inference to avoid MPS fallback issues with TransformerEncoder
         self.device = torch.device("cpu")
         
-        # We need to fall back to CPU for evaluation if on MPS due to missing nested_tensor op
-        if self.device.type == 'mps':
-            import os
-            os.environ['PYTORCH_ENABLE_MPS_FALLBACK'] = '1'
+
             
         try:
             checkpoint = torch.load(model_path, map_location=self.device)
