@@ -4,7 +4,8 @@ from .model import TransformerCryptoDetector
 
 class AdvancedCryptoInference:
     def __init__(self, model_path='models/transformer_crypto_model.pth'):
-        self.device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+        # Forcing CPU for inference to avoid MPS fallback issues with TransformerEncoder
+        self.device = torch.device("cpu")
         
         # We need to fall back to CPU for evaluation if on MPS due to missing nested_tensor op
         if self.device.type == 'mps':

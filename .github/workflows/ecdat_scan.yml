@@ -1,0 +1,35 @@
+name: ECDAT Quantum Risk Scan
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+
+jobs:
+  quantum-security-scan:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install ECDAT Dependencies
+      run: |
+        pip install -r requirements.txt
+        pip install torch javalang cyclonedx-python-lib
+
+    - name: Run ECDAT DevSecOps Scan
+      run: |
+        python cli.py . --format cbom
+        
+    - name: Upload CBOM Artifact
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: ecdat-cbom-report
+        path: ecdat_report.json

@@ -75,7 +75,7 @@ class ECDATScanner:
                                     'ast_depth': ast_depth
                                 })
                                 
-                    except Exception as e:
+                    except Exception:
                         pass
                         
                 # 2. COMPILED BINARY SCANNING
