@@ -1,0 +1,1896 @@
+code,label
+"public class BrokenCryptoABICase15 {
+    public static void method2(String c) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        String cryptoAlgo = c;
+        method1(cryptoAlgo);
+    }
+    public static void method1(String crypto) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(crypto);
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(crypto);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+
+        String crypto = ""IDEA"";
+        method2(crypto);
+    }
+}",AES
+"public class BrokenCryptoABICase3 {
+    public void go(String crypto) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(crypto);
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(crypto);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        BrokenCryptoABICase3 bc = new BrokenCryptoABICase3();
+        String crypto = ""RC4"";
+        bc.go(crypto);
+    }
+}",AES
+"public class BrokenCryptoABPSCase5 {
+    public void go(int choice) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(""AES"");
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(""IDEA"");
+        if (choice > 1)
+            cipher = Cipher.getInstance(""AES/CBC/PKCS5Padding"");
+
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        BrokenCryptoABPSCase5 bc = new BrokenCryptoABPSCase5();
+        int choice=2;
+        bc.go(choice);
+    }
+}",AES
+"public class BrokenCryptoABMC1 {
+    public void go(String crypto, String cryptoKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(cryptoKey);
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(crypto);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+}",AES
+"public class BrokenCryptoABICase2 {
+    public void go(String crypto) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(crypto);
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(crypto);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        BrokenCryptoABICase2 bc = new BrokenCryptoABICase2();
+        String crypto = ""Blowfish"";
+        bc.go(crypto);
+    }
+}",AES
+"public class BrokenCryptoABPSCase4 {
+    public void go(int choice) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(""AES"");
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(""RC2"");
+        if (choice > 1)
+            cipher = Cipher.getInstance(""AES/CBC/PKCS5Padding"");
+
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        BrokenCryptoABPSCase4 bc = new BrokenCryptoABPSCase4();
+        int choice=2;
+        bc.go(choice);
+    }
+}",AES
+"public class BrokenCryptoABICase14 {
+    public static void method2(String c) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        String cryptoAlgo = c;
+        method1(cryptoAlgo);
+    }
+    public static void method1(String crypto) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(crypto);
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(crypto);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+
+        String crypto = ""RC2"";
+        method2(crypto);
+    }
+}",AES
+"public class BrokenCryptoABICase9 {
+    public void go(String crypto) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(crypto);
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(crypto);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        BrokenCryptoABICase9 bc = new BrokenCryptoABICase9();
+        String crypto = ""IDEA"";
+        bc.go(crypto);
+    }
+}",AES
+"public class BrokenCryptoBBCase1 {
+    public void go() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(""DES"");
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(""DES/ECB/PKCS5Padding"");
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        BrokenCryptoBBCase1 bc = new BrokenCryptoBBCase1();
+        bc.go();
+    }
+}",AES
+"public class BrokenCryptoABICase13 {
+    public static void method2(String c) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        String cryptoAlgo = c;
+        method1(cryptoAlgo);
+    }
+    public static void method1(String crypto) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(crypto);
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(crypto);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        String crypto = ""RC4"";
+        method2(crypto);
+    }
+}",AES
+"public class BrokenCryptoABICase5 {
+    public static final String DEFAULT_CRYPTO = ""DES/ECB/PKCS5Padding"";
+    private static char[] CRYPTO;
+    private static char[] crypto;
+
+    public static final String DEFAULT_CRYPTO_ALGO = ""DES"";
+    private static char[] CRYPTO_ALGO;
+    private static char[] crypto_algo;
+
+    public void go() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(String.valueOf(crypto_algo));
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(String.valueOf(crypto));
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+    private static void go2(){
+
+        CRYPTO = DEFAULT_CRYPTO.toCharArray();
+        CRYPTO_ALGO = DEFAULT_CRYPTO_ALGO.toCharArray();
+    }
+    private static void go3(){
+
+        crypto = CRYPTO;
+        crypto_algo = CRYPTO_ALGO;
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        BrokenCryptoABICase5 bc = new BrokenCryptoABICase5();
+        go2();
+        go3();
+        bc.go();
+    }
+}",AES
+"public class BrokenCryptoABPSCase3 {
+    public void go(int choice) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(""AES"");
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(""RC4"");
+        if (choice > 1)
+            cipher = Cipher.getInstance(""AES/CBC/PKCS5Padding"");
+
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        BrokenCryptoABPSCase3 bc = new BrokenCryptoABPSCase3();
+        int choice=2;
+        bc.go(choice);
+    }
+}",AES
+"public class BrokenCryptoABSCase1 {
+    Crypto2 crypto;
+    public BrokenCryptoABSCase1() throws NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, UnsupportedEncodingException {
+        crypto = new Crypto2(""DES/ECB/PKCS5Padding"");
+        crypto.encrypt(""abc"","""");
+    }
+}
+
+class Crypto2 {
+    Cipher cipher;
+    String defaultAlgo;
+    public Crypto2(String defAlgo) throws NoSuchPaddingException, NoSuchAlgorithmException {
+        defaultAlgo = defAlgo;
+    }
+
+    public byte[] encrypt(String txt, String passedAlgo) throws UnsupportedEncodingException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, NoSuchPaddingException {
+        if(passedAlgo.isEmpty()){
+            passedAlgo = defaultAlgo;
+        }
+
+        KeyGenerator keyGen = KeyGenerator.getInstance(defaultAlgo);
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(defaultAlgo);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+
+        byte [] txtBytes = txt.getBytes();
+        return cipher.doFinal(txtBytes);
+    }
+}",AES
+"public class BrokenCryptoABICase4 {
+    public void go(String crypto) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(crypto);
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(crypto);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        BrokenCryptoABICase4 bc = new BrokenCryptoABICase4();
+        String crypto = ""RC2"";
+        bc.go(crypto);
+    }
+}",AES
+"public class BrokenCryptoABPSCase2 {
+    public void go(int choice) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(""AES"");
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(""Blowfish"");
+        if (choice > 1)
+            cipher = Cipher.getInstance(""AES/CBC/PKCS5Padding"");
+
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        BrokenCryptoABPSCase2 bc = new BrokenCryptoABPSCase2();
+        int choice=2;
+        bc.go(choice);
+    }
+}",AES
+"public class BrokenCryptoABICase12 {
+    public static void method2(String c) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        String cryptoAlgo = c;
+        method1(cryptoAlgo);
+    }
+    public static void method1(String crypto) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(crypto);
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(crypto);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+
+        String crypto = ""Blowfish"";
+        method2(crypto);
+    }
+}",AES
+"public class BrokenCryptoABICase8 {
+    public static final String DEFAULT_CRYPTO = ""RC2"";
+    private static char[] CRYPTO;
+    private static char[] crypto;
+    public void go() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(String.valueOf(crypto));
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(String.valueOf(crypto));
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+    private static void go2(){
+        CRYPTO = DEFAULT_CRYPTO.toCharArray();
+    }
+    private static void go3(){
+        crypto = CRYPTO;
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        BrokenCryptoABICase8 bc = new BrokenCryptoABICase8();
+        go2();
+        go3();
+        bc.go();
+    }
+}",AES
+"public class BrokenCryptoBBCase3 {
+    public void go() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(""RC4"");
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(""RC4"");
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        BrokenCryptoBBCase3 bc = new BrokenCryptoBBCase3();
+        bc.go();
+    }
+}",AES
+"public class BrokenCryptoABMC4 {
+    public void go(String crypto) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(crypto);
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(crypto);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+}",AES
+"public class BrokenCryptoABMCCase1 {
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        BrokenCryptoABMC1 bc = new BrokenCryptoABMC1();
+        String crypto = ""DES/ECB/PKCS5Padding"";
+        String cryptokey = ""DES"";
+        bc.go(crypto,cryptokey);
+    }
+}",DES
+"public class BrokenCryptoABSCase3 {
+    Crypto4 crypto;
+    public BrokenCryptoABSCase3() throws NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, UnsupportedEncodingException {
+        crypto = new Crypto4(""RC4"");
+        crypto.encrypt(""abc"","""");
+    }
+}
+
+class Crypto4 {
+    Cipher cipher;
+    String defaultAlgo;
+    public Crypto4(String defAlgo) throws NoSuchPaddingException, NoSuchAlgorithmException {
+        defaultAlgo = defAlgo;
+    }
+
+    public byte[] encrypt(String txt, String passedAlgo) throws UnsupportedEncodingException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, NoSuchPaddingException {
+        if(passedAlgo.isEmpty()){
+            passedAlgo = defaultAlgo;
+        }
+
+        KeyGenerator keyGen = KeyGenerator.getInstance(defaultAlgo);
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(defaultAlgo);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+
+        byte [] txtBytes = txt.getBytes();
+        return cipher.doFinal(txtBytes);
+    }
+}",AES
+"public class BrokenCryptoABICase7 {
+    public static final String DEFAULT_CRYPTO = ""RC4"";
+    private static char[] CRYPTO;
+    private static char[] crypto;
+    public void go() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(String.valueOf(crypto));
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(String.valueOf(crypto));
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+    private static void go2(){
+        CRYPTO = DEFAULT_CRYPTO.toCharArray();
+    }
+    private static void go3(){
+        crypto = CRYPTO;
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        BrokenCryptoABICase7 bc = new BrokenCryptoABICase7();
+        go2();
+        go3();
+        bc.go();
+    }
+}",AES
+"public class BrokenCryptoABPSCase1 {
+    public void go(int choice) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(""AES"");
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(""DES/ECB/PKCS5Padding"");
+        if (choice > 1)
+            cipher = Cipher.getInstance(""AES/CBC/PKCS5Padding"");
+
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        BrokenCryptoABPSCase1 bc = new BrokenCryptoABPSCase1();
+        int choice=2;
+        bc.go(choice);
+    }
+}",AES
+"public class BrokenCryptoABICase11 {
+    public static void method2(String c, String key) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        String cryptoAlgo = c;
+        method1(cryptoAlgo,key);
+    }
+    public static void method1(String crypto,String cryptoKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(cryptoKey);
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(crypto);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        String key = ""DES"";
+        String crypto = ""DES/ECB/PKCS5Padding"";
+        method2(crypto,key);
+    }
+}",AES
+"public class BrokenCryptoABICase10 {
+    public static final String DEFAULT_CRYPTO = ""IDEA"";
+    private static char[] CRYPTO;
+    private static char[] crypto;
+    public void go() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(String.valueOf(crypto));
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(String.valueOf(crypto));
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+    private static void go2(){
+        CRYPTO = DEFAULT_CRYPTO.toCharArray();
+    }
+    private static void go3(){
+        crypto = CRYPTO;
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        BrokenCryptoABICase10 bc = new BrokenCryptoABICase10();
+        go2();
+        go3();
+        bc.go();
+    }
+
+}",AES
+"public class BrokenCryptoABICase6 {
+    public static final String DEFAULT_CRYPTO = ""Blowfish"";
+    private static char[] CRYPTO;
+    private static char[] crypto;
+    public void go() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(String.valueOf(crypto));
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(String.valueOf(crypto));
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+    private static void go2(){
+        CRYPTO = DEFAULT_CRYPTO.toCharArray();
+    }
+    private static void go3(){
+        crypto = CRYPTO;
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        BrokenCryptoABICase6 bc = new BrokenCryptoABICase6();
+        go2();
+        go3();
+        bc.go();
+    }
+}",AES
+"public class BrokenCryptoABSCase2 {
+    Crypto3 crypto;
+    public BrokenCryptoABSCase2() throws NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, UnsupportedEncodingException {
+        crypto = new Crypto3(""Blowfish"");
+        crypto.encrypt(""abc"","""");
+    }
+}
+
+class Crypto3 {
+    Cipher cipher;
+    String defaultAlgo;
+    public Crypto3(String defAlgo) throws NoSuchPaddingException, NoSuchAlgorithmException {
+        defaultAlgo = defAlgo;
+    }
+
+    public byte[] encrypt(String txt, String passedAlgo) throws UnsupportedEncodingException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, NoSuchPaddingException {
+        if(passedAlgo.isEmpty()){
+            passedAlgo = defaultAlgo;
+        }
+
+        KeyGenerator keyGen = KeyGenerator.getInstance(defaultAlgo);
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(defaultAlgo);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+
+        byte [] txtBytes = txt.getBytes();
+        return cipher.doFinal(txtBytes);
+    }
+}",AES
+"public class BrokenCryptoABMC5 {
+    public void go(String crypto) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(crypto);
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(crypto);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+}",AES
+"public class BrokenCryptoBBCase2 {
+    public void go() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(""Blowfish"");
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(""Blowfish"");
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        BrokenCryptoBBCase2 bc = new BrokenCryptoBBCase2();
+        bc.go();
+    }
+}",AES
+"public class BrokenCryptoABSCase5 {
+    Crypto6 crypto;
+    public BrokenCryptoABSCase5() throws NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, UnsupportedEncodingException {
+        crypto = new Crypto6(""IDEA"");
+        crypto.encrypt(""abc"","""");
+    }
+}
+
+
+class Crypto6 {
+    Cipher cipher;
+    String defaultAlgo;
+    public Crypto6(String defAlgo) throws NoSuchPaddingException, NoSuchAlgorithmException {
+        defaultAlgo = defAlgo;
+    }
+
+    public byte[] encrypt(String txt, String passedAlgo) throws UnsupportedEncodingException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, NoSuchPaddingException {
+        if(passedAlgo.isEmpty()){
+            passedAlgo = defaultAlgo;
+        }
+
+        KeyGenerator keyGen = KeyGenerator.getInstance(defaultAlgo);
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(defaultAlgo);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+
+        byte [] txtBytes = txt.getBytes();
+        return cipher.doFinal(txtBytes);
+    }
+}",AES
+"public class BrokenCryptoABICase1 {
+    public void go(String crypto, String keyAlgo) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(keyAlgo);
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(crypto);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        BrokenCryptoABICase1 bc = new BrokenCryptoABICase1();
+        String crypto = ""DES/ECB/PKCS5Padding"";
+        String keyAlgo = ""DES"";
+        bc.go(crypto,keyAlgo);
+    }
+}",AES
+"public class BrokenCryptoBBCase5 {
+    public void go() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(""IDEA"");
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(""IDEA"");
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        BrokenCryptoBBCase5 bc = new BrokenCryptoBBCase5();
+        bc.go();
+    }
+}",AES
+"public class BrokenCryptoABMC2 {
+    public void go(String crypto) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(crypto);
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(crypto);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+}",AES
+"public class BrokenCryptoABMC3 {
+    public void go(String crypto) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(crypto);
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(crypto);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+}",AES
+"public class BrokenCryptoBBCase4 {
+    public void go() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(""RC2"");
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(""RC2"");
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        BrokenCryptoBBCase4 bc = new BrokenCryptoBBCase4();
+        bc.go();
+    }
+}",AES
+"public class BrokenCryptoCorrected {
+    public void go() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(""AES"");
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(""AES/CBC/PKCS5Padding"");
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        BrokenCryptoBBCase1 bc = new BrokenCryptoBBCase1();
+        bc.go();
+    }
+}",AES
+"public class BrokenCryptoABSCase4 {
+    Crypto5 crypto;
+    public BrokenCryptoABSCase4() throws NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, UnsupportedEncodingException {
+        crypto = new Crypto5(""RC2"");
+        crypto.encrypt(""abc"","""");
+    }
+}
+
+
+class Crypto5 {
+    Cipher cipher;
+    String defaultAlgo;
+    public Crypto5(String defAlgo) throws NoSuchPaddingException, NoSuchAlgorithmException {
+        defaultAlgo = defAlgo;
+    }
+
+    public byte[] encrypt(String txt, String passedAlgo) throws UnsupportedEncodingException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, NoSuchPaddingException {
+        if(passedAlgo.isEmpty()){
+            passedAlgo = defaultAlgo;
+        }
+
+        KeyGenerator keyGen = KeyGenerator.getInstance(defaultAlgo);
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(defaultAlgo);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+
+        byte [] txtBytes = txt.getBytes();
+        return cipher.doFinal(txtBytes);
+    }
+}",AES
+"public class EcbInSymmCryptoCorrected {
+    public void go() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(""AES"");
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(""AES/CBC/PKCS5Padding"");
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        EcbInSymmCryptoBBCase1 bc = new EcbInSymmCryptoBBCase1();
+        bc.go();
+    }
+}",AES
+"public class EcbInSymmCryptoABICase1 {
+    public void go(String crypto) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(""AES"");
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(crypto);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        EcbInSymmCryptoABICase1 bc = new EcbInSymmCryptoABICase1();
+        String crypto = ""AES/ECB/PKCS5Padding"";
+        bc.go(crypto);
+    }
+}",AES
+"public class EcbInSymmCryptoABPSCase1 {
+    public void go(int choice) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(""AES"");
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(""AES/ECB/PKCS5Padding"");
+        if(choice>1)
+            cipher = Cipher.getInstance(""AES/CBC/PKCS5Padding"");
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        EcbInSymmCryptoABPSCase1 bc = new EcbInSymmCryptoABPSCase1();
+        int choice = 2;
+        bc.go(choice);
+    }
+}",AES
+"public class EcbInSymmCryptoABMC1 {
+
+    public void go(String crypto) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(""AES"");
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(crypto);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+}",AES
+"public class EcbInSymmCryptoBBCase1 {
+
+    public void go() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(""AES"");
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(""AES/ECB/PKCS5Padding"");
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        EcbInSymmCryptoBBCase1 bc = new EcbInSymmCryptoBBCase1();
+        bc.go();
+    }
+
+}",AES
+"public class EcbInSymmCryptoABSCase1 {
+    CryptoECB1 crypto;
+    public EcbInSymmCryptoABSCase1() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        String cryptoAlgo = ""AES/ECB/PKCS5Padding"";
+        crypto = new CryptoECB1(cryptoAlgo);
+        crypto.method1("""");
+    }
+}
+
+class CryptoECB1 {
+    String defAlgo;
+
+    public CryptoECB1(String algo) {
+        defAlgo = algo;
+    }
+
+    public void method1(String passedAlgo) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException {
+
+        if(passedAlgo.isEmpty()){
+            passedAlgo = defAlgo;
+        }
+
+        KeyGenerator keyGen = KeyGenerator.getInstance(""AES"");
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(passedAlgo);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+
+    }
+}",AES
+"public class EcbInSymmCryptoABICase2 {
+    public static final String DEFAULT_CRYPTO = ""AES/ECB/PKCS5Padding"";
+    private static char[] CRYPTO;
+    private static char[] crypto;
+    public void go() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(""AES"");
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(String.valueOf(crypto));
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+    private static void go2(){
+        CRYPTO = DEFAULT_CRYPTO.toCharArray();
+    }
+    private static void go3(){
+        crypto = CRYPTO;
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        EcbInSymmCryptoABICase2 bc = new EcbInSymmCryptoABICase2();
+        go2();
+        go3();
+        bc.go();
+    }
+}",AES
+"public class EcbInSymmCryptoABICase3 {
+    public static void method2(String c) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        String cryptoAlgo = c;
+        method1(cryptoAlgo);
+    }
+    public static void method1(String crypto) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(""AES"");
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(crypto);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        String crypto = ""AES/ECB/PKCS5Padding"";
+        method2(crypto);
+    }
+}",AES
+"public class InsecureAsymmetricCipherABMC1 {
+    public void go(int keySize) throws IOException, IllegalBlockSizeException, BadPaddingException, ClassNotFoundException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException {
+
+        KeyPairGenerator kgp = KeyPairGenerator.getInstance(""RSA"");
+        kgp.initialize(keySize);
+        KeyPair kp = kgp.generateKeyPair();
+        Cipher cipher = Cipher.getInstance(""RSA"");
+        Cipher dec = Cipher.getInstance(""RSA"");
+
+        cipher.init(Cipher.ENCRYPT_MODE, kp.getPublic());
+
+        //encrypting
+        String myMessage = new String(""Secret Message"");
+        SealedObject encryptedMessage = new SealedObject(myMessage,cipher);
+
+        //decrypting
+        dec.init(Cipher.DECRYPT_MODE, kp.getPrivate());
+
+        String message = (String) encryptedMessage.getObject(dec);
+        System.out.println(message);
+    }
+}",AES
+"public class InsecureAsymmetricCipherABICase1 {
+    public void go(int keySize) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, ClassNotFoundException {
+        KeyPairGenerator kgp = KeyPairGenerator.getInstance(""RSA"");
+        kgp.initialize(keySize);
+        KeyPair kp = kgp.generateKeyPair();
+
+        Cipher cipher = Cipher.getInstance(""RSA"");
+        cipher.init(Cipher.ENCRYPT_MODE, kp.getPublic());
+
+        //encrypting
+        String myMessage = new String(""Secret Message"");
+        SealedObject encryptedMessage = new SealedObject(myMessage,cipher);
+
+        //decrypting
+        Cipher dec = Cipher.getInstance(""RSA"");
+        dec.init(Cipher.DECRYPT_MODE, kp.getPrivate());
+
+        String message = (String) encryptedMessage.getObject(dec);
+        System.out.println(message);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, ClassNotFoundException {
+        InsecureAsymmetricCipherABICase1 bc = new InsecureAsymmetricCipherABICase1();
+
+        int keySize = 1024;
+        bc.go(keySize);
+    }
+}",AES
+"public class InsecureAsymmetricCipherABICase2 {
+    public static final int DEFAULT_KEY_SIZE = 1024;
+    private static int KEY_SIZE;
+    private static int keysize;
+    public void go(KeyPairGenerator kgp, KeyPair kp) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, ClassNotFoundException {
+
+        Cipher cipher = Cipher.getInstance(""RSA"");
+        cipher.init(Cipher.ENCRYPT_MODE, kp.getPublic());
+
+        //encrypting
+        String myMessage = new String(""Secret Message"");
+        SealedObject encryptedMessage = new SealedObject(myMessage,cipher);
+
+        //decrypting
+        Cipher dec = Cipher.getInstance(""RSA"");
+        dec.init(Cipher.DECRYPT_MODE, kp.getPrivate());
+
+        String message = (String) encryptedMessage.getObject(dec);
+        System.out.println(message);
+    }
+    private static void go2(){
+        KEY_SIZE = DEFAULT_KEY_SIZE;
+    }
+    private static void go3(){
+        keysize = KEY_SIZE;
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, ClassNotFoundException {
+        InsecureAsymmetricCipherABICase2 bc = new InsecureAsymmetricCipherABICase2();
+        go2();
+        go3();
+        KeyPairGenerator kgp = KeyPairGenerator.getInstance(""RSA"");
+        kgp.initialize(keysize);
+        KeyPair kp = kgp.generateKeyPair();
+        bc.go(kgp,kp);
+    }
+
+}",AES
+"public class InsecureAsymmetricCipherABICase3 {
+    public static void method2(int k) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, ClassNotFoundException {
+        int keySize = k;
+        method1(keySize);
+    }
+
+    public static void method1(int key) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, ClassNotFoundException {
+
+        KeyPairGenerator kgp = KeyPairGenerator.getInstance(""RSA"");
+        kgp.initialize(key);
+        KeyPair kp = kgp.generateKeyPair();
+
+
+        Cipher cipher = Cipher.getInstance(""RSA"");
+        cipher.init(Cipher.ENCRYPT_MODE, kp.getPublic());
+
+        //encrypting
+        String myMessage = new String(""Secret Message"");
+        SealedObject encryptedMessage = new SealedObject(myMessage,cipher);
+
+        //decrypting
+        Cipher dec = Cipher.getInstance(""RSA"");
+        dec.init(Cipher.DECRYPT_MODE, kp.getPrivate());
+
+        String message = (String) encryptedMessage.getObject(dec);
+        System.out.println(message);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, ClassNotFoundException {
+        int key = 1024;
+        method2(key);
+
+
+    }
+}",AES
+"public class InsecureAsymmetricCipherABPSCase1 {
+    public void go(int choice) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, ClassNotFoundException {
+        KeyPairGenerator kgp = KeyPairGenerator.getInstance(""RSA"");
+
+        int keysize;
+        if (choice>1)
+            keysize = 2048;
+        else
+            keysize = 1024;
+
+        kgp.initialize(keysize);
+        KeyPair kp = kgp.generateKeyPair();
+
+
+        Cipher cipher = Cipher.getInstance(""RSA"");
+        cipher.init(Cipher.ENCRYPT_MODE, kp.getPublic());
+
+        //encrypting
+        String myMessage = new String(""Secret Message"");
+        SealedObject encryptedMessage = new SealedObject(myMessage,cipher);
+
+        System.out.println(encryptedMessage);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, ClassNotFoundException {
+        InsecureAsymmetricCipherABPSCase1 bc = new InsecureAsymmetricCipherABPSCase1();
+        int choice = 2;
+        bc.go(choice);
+    }
+}",AES
+"public class InsecureAsymmetricCipherBBCase1 {
+    public void go() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, ClassNotFoundException {
+        KeyPairGenerator kgp = KeyPairGenerator.getInstance(""RSA"");
+        int keysize = 1024;
+        kgp.initialize(keysize);
+        KeyPair kp = kgp.generateKeyPair();
+
+
+        Cipher cipher = Cipher.getInstance(""RSA"");
+        cipher.init(Cipher.ENCRYPT_MODE, kp.getPublic());
+
+        //encrypting
+        String myMessage = new String(""Secret Message"");
+        SealedObject encryptedMessage = new SealedObject(myMessage,cipher);
+
+        //decrypting
+        Cipher dec = Cipher.getInstance(""RSA"");
+        dec.init(Cipher.DECRYPT_MODE, kp.getPrivate());
+
+        String message = (String) encryptedMessage.getObject(dec);
+        System.out.println(message);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, ClassNotFoundException {
+        InsecureAsymmetricCipherBBCase1 bc = new InsecureAsymmetricCipherBBCase1();
+        bc.go();
+    }
+}",AES
+"public class PredictableCryptographicKeyABICase1 {
+    public static void main(String [] args){
+        String key = ""defaultkey"";
+        go(key);
+    }
+
+    private static void go(String key) {
+        byte[] keyBytes = key.getBytes();
+        keyBytes = Arrays.copyOf(keyBytes,16);
+        SecretKeySpec keySpec = new SecretKeySpec(keyBytes, ""AES"");
+    }
+}",AES
+"public class PredictableCryptographicKeyABMC1 {
+    public void go(String key) {
+        byte[] keyBytes = key.getBytes();
+        keyBytes = Arrays.copyOf(keyBytes,16);
+        SecretKeySpec keySpec = new SecretKeySpec(keyBytes, ""AES"");
+    }
+}",AES
+"public class PredictableCryptographicKeyABHCase1 {
+    public static void main(String [] args) throws UnsupportedEncodingException {
+        SecureRandom random = new SecureRandom();
+        String defaultKey = String.valueOf(random.ints());
+
+        byte [] keyBytes = defaultKey.getBytes(""UTF-8"");
+        keyBytes = Arrays.copyOf(keyBytes,16);
+        SecretKeySpec keySpec = new SecretKeySpec(keyBytes, ""AES"");
+    }
+}",AES
+"public class PredictableCryptographicKeyABHCase2 {
+    public static void main(String [] args) throws UnsupportedEncodingException {
+
+        Map<String,String> hm = new HashMap<String, String>();
+        hm.put(""aaa"", ""afix"");
+        hm.put(""bbb"", ""bfix"");
+        hm.put(""ccc"", ""cfix"");
+        hm.put(""ddd"", ""dfix"");
+
+        String key = hm.get(""aaa"");
+
+        byte [] keyBytes = key.getBytes();
+        keyBytes = Arrays.copyOf(keyBytes,16);
+        SecretKeySpec keySpec = new SecretKeySpec(keyBytes, ""AES"");
+    }
+}",AES
+"public class PredictableCryptographicKeyCorrected {
+    public static void main(String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, ClassNotFoundException {
+        SecureRandom random = new SecureRandom();
+        String defaultKey = String.valueOf(random.ints());
+
+        String originalString = ""Testing"";
+        byte[] keyBytes = defaultKey.getBytes();
+        keyBytes = Arrays.copyOf(keyBytes,16);
+        SecretKeySpec keySpec = new SecretKeySpec(keyBytes, ""AES"");
+
+        Cipher cipher = Cipher.getInstance(""AES/CBC/PKCS5PADDING"");
+        cipher.init(Cipher.ENCRYPT_MODE, keySpec);
+        String encrypt = Base64.getEncoder().encodeToString(cipher.doFinal(originalString.getBytes(""UTF-8"")));
+        System.out.println(encrypt);
+
+    }
+}",AES
+"public class PredictableCryptographicKeyBBCase1 {
+    public static void main(String [] args){
+        String defaultKey = ""defaultkey"";
+        byte[] keyBytes = defaultKey.getBytes();
+        keyBytes = Arrays.copyOf(keyBytes,16);
+        SecretKeySpec keySpec = new SecretKeySpec(keyBytes, ""AES"");
+    }
+}",AES
+"public class PredictableCryptographicKeyABSCase1 {
+    Crypto crypto;
+    public PredictableCryptographicKeyABSCase1() throws NoSuchAlgorithmException, NoSuchPaddingException {
+        String passKey = PredictableCryptographicKeyABSCase1.getKey(""pass.key"");
+
+        if(passKey == null) {
+            crypto = new Crypto(""defaultkey"");
+        }
+        crypto = new Crypto(passKey);
+    }
+
+    byte[] encryptPass(String pass, String src) throws IllegalBlockSizeException, BadPaddingException, InvalidKeyException, UnsupportedEncodingException {
+        String keyStr = PredictableCryptographicKeyABSCase1.getKey(src);
+        return crypto.method1(pass, keyStr);
+    }
+
+    public static String getKey(String s) {
+        return System.getProperty(s);
+    }
+}
+
+class Crypto {
+    Cipher cipher;
+    String algoSpec = ""AES/CBC/PKCS5Padding"";
+    String algo = ""AES"";
+    String defaultKey;
+    public Crypto(String defkey) throws NoSuchPaddingException, NoSuchAlgorithmException {
+        cipher = Cipher.getInstance(algoSpec);
+        defaultKey = defkey;
+    }
+
+    public byte[] method1(String txt, String key) throws UnsupportedEncodingException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+        if(key.isEmpty()){
+            key = defaultKey;
+        }
+        byte[] keyBytes = key.getBytes(""UTF-8"");
+        byte [] txtBytes = txt.getBytes();
+        keyBytes = Arrays.copyOf(keyBytes,16);
+
+        SecretKeySpec keySpec = new SecretKeySpec(keyBytes,algo);
+        cipher.init(Cipher.ENCRYPT_MODE,keySpec);
+        return cipher.doFinal(txtBytes);
+    }
+}",AES
+"public class PredictableCryptographicKeyABICase2 {
+    public static final String DEFAULT_ENCRYPT_KEY = ""defaultkey"";
+    private static char[] ENCRYPT_KEY;
+    private static char[] encryptKey;
+    public static void main(String [] args){
+        go2();
+        go3();
+        go();
+    }
+
+    private static void go2(){
+        ENCRYPT_KEY = DEFAULT_ENCRYPT_KEY.toCharArray();
+    }
+    private static void go3(){
+        encryptKey = ENCRYPT_KEY;
+    }
+
+    private static void go() {
+        byte[] keyBytes = encryptKey.toString().getBytes();
+        keyBytes = Arrays.copyOf(keyBytes,16);
+        SecretKeySpec keySpec = new SecretKeySpec(keyBytes, ""AES"");
+    }
+}",AES
+"public class PredictableCryptographicKeyABPSCase1 {
+    public static void main(String [] args){
+        String defaultKey = ""defaultkey"";
+        int choice = 2;
+        byte[] keyBytes = defaultKey.getBytes();
+
+        if(choice>1){
+            SecureRandom random = new SecureRandom();
+            keyBytes = String.valueOf(random.ints()).getBytes();
+        }
+
+        keyBytes = Arrays.copyOf(keyBytes,16);
+
+        SecretKeySpec keySpec = new SecretKeySpec(keyBytes, ""AES"");
+    }
+
+}",AES
+"public class PredictableCryptographicKeyABICase3 {
+    public static void main(String [] args){
+        String key = ""defaultkey"";
+        method1(key);
+    }
+    public static void method1(String k){
+        String key2 = k;
+        method2(key2);
+    }
+
+    private static void method2(String key) {
+        byte[] keyBytes = key.getBytes();
+        keyBytes = Arrays.copyOf(keyBytes,16);
+        SecretKeySpec keySpec = new SecretKeySpec(keyBytes, ""AES"");
+    }
+}",AES
+"public class StaticInitializationVectorABHCase2 {
+    public void go() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(""AES"");
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(""AES/CBC/PKCS5Padding"");
+
+        String name = ""abcdef"";
+        Map<String,String> hm = new HashMap<String, String>();
+        hm.put(""aaa"", ""abcde"");
+        hm.put(""bbb"", ""fghij"");
+        hm.put(""ccc"", ""klmno"");
+        hm.put(""ddd"", ""pqrst"");
+
+        String str = hm.get(""aaa"");
+
+        byte [] bytes = str.getBytes();
+
+        IvParameterSpec ivSpec = new IvParameterSpec(bytes);
+
+        cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException {
+        StaticInitializationVectorABHCase2 siv = new StaticInitializationVectorABHCase2();
+        siv.go();
+    }
+}",AES
+"public class StaticInitializationVectorABSCase1 {
+    CryptoStaticIV1 crypto;
+    public StaticInitializationVectorABSCase1() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException {
+        byte [] bytes = ""abcde"".getBytes();
+
+        crypto = new CryptoStaticIV1(bytes);
+        crypto.method1(null);
+    }
+}
+
+class CryptoStaticIV1 {
+    byte [] defIV;
+
+    public CryptoStaticIV1(byte[] bytes) {
+        defIV = bytes;
+    }
+
+    public void method1(byte[] passedIV) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
+
+        passedIV = defIV;
+        IvParameterSpec ivSpec = new IvParameterSpec(passedIV);
+        KeyGenerator keyGen = KeyGenerator.getInstance(""AES"");
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(""AES/CBC/PKCS5Padding"");
+        cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);
+
+    }
+}",AES
+"public class StaticInitializationVectorABICase2 {
+    public static final String DEFAULT_INITIALIZATION = ""abcde"";
+    private static char[] INITIALIZATION;
+    private static char[] initialization;
+    public void go() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException {
+        IvParameterSpec ivSpec = new IvParameterSpec(new byte[]{Byte.parseByte(String.valueOf(initialization))});
+        KeyGenerator keyGen = KeyGenerator.getInstance(""AES"");
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(""AES/CBC/PKCS5Padding"");
+
+        cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);
+    }
+    private static void go2(){
+        INITIALIZATION = DEFAULT_INITIALIZATION.toCharArray();
+    }
+    private static void go3(){
+        initialization = INITIALIZATION;
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException {
+        StaticInitializationVectorABICase2 siv = new StaticInitializationVectorABICase2();
+        go2();
+        go3();
+
+        siv.go();
+    }
+}",AES
+"public class StaticInitializationVectorABMC1 {
+    public void go(byte [] bytes) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeyException {
+        IvParameterSpec ivSpec = new IvParameterSpec(bytes);
+        KeyGenerator keyGen = KeyGenerator.getInstance(""AES"");
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(""AES/CBC/PKCS5Padding"");
+
+        cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);
+    }
+}",AES
+"public class StaticInitializationVectorABICase3 {
+    public static void method2(byte[] bytes) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException {
+        IvParameterSpec ivSpec = new IvParameterSpec(bytes);
+        KeyGenerator keyGen = KeyGenerator.getInstance(""AES"");
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(""AES/CBC/PKCS5Padding"");
+
+        cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);
+    }
+    public static void method1 (byte[] bytes) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException {
+
+        method2(bytes);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException {
+        byte [] bytes = ""abcde"".getBytes();
+
+        method1(bytes);
+    }
+}",AES
+"public class StaticInitializationVectorABPSCase1 {
+    public void go(int choice) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(""AES"");
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(""AES/CBC/PKCS5Padding"");
+        SecureRandom sr = new SecureRandom();
+
+        byte [] bytes = ""abcde"".getBytes();
+
+        if(choice>1){
+            bytes = new byte[16];
+            sr.nextBytes(bytes);
+        }
+
+        IvParameterSpec ivSpec = new IvParameterSpec(bytes);
+
+        cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException {
+        StaticInitializationVectorABPSCase1 siv = new StaticInitializationVectorABPSCase1();
+        int choice = 2;
+        siv.go(choice);
+    }
+
+}",AES
+"public class StaticInitializationVectorABICase1 {
+    public void go(byte[] bytes) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException {
+        IvParameterSpec ivSpec = new IvParameterSpec(bytes);
+        KeyGenerator keyGen = KeyGenerator.getInstance(""AES"");
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(""AES/CBC/PKCS5Padding"");
+
+        cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException {
+        StaticInitializationVectorABICase1 siv = new StaticInitializationVectorABICase1();
+        byte [] bytes = ""abcde"".getBytes();
+        siv.go(bytes);
+    }
+}",AES
+"public class StaticInitializationVectorABHCase1 {
+    public void go() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException, UnsupportedEncodingException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(""AES"");
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(""AES/CBC/PKCS5Padding"");
+
+        byte [] bytes = ""abcde"".getBytes(""UTF-8"");
+
+        IvParameterSpec ivSpec = new IvParameterSpec(bytes);
+
+        cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException, UnsupportedEncodingException {
+        StaticInitializationVectorABHCase1 siv = new StaticInitializationVectorABHCase1();
+        siv.go();
+    }
+}",AES
+"public class StaticInitializationVectorBBCase1 {
+    public void go() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(""AES"");
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(""AES/CBC/PKCS5Padding"");
+
+
+        byte [] bytes = ""abcde"".getBytes();
+        IvParameterSpec ivSpec = new IvParameterSpec(bytes);
+
+        cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException {
+        StaticInitializationVectorBBCase1 siv = new StaticInitializationVectorBBCase1();
+        siv.go();
+    }
+}",AES
+"/*
+public class StaticInitializationVectorCorrected {
+    public void go() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(""AES"");
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(""AES/CBC/PKCS5Padding"");
+
+        SecureRandom sr = new SecureRandom();
+
+        BigInteger i = BigInteger.valueOf(sr.nextInt());
+        byte [] bytes = i.toByteArray();
+        IvParameterSpec ivSpec = new IvParameterSpec(bytes);
+
+        cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException {
+        StaticInitializationVectorCorrected siv = new StaticInitializationVectorCorrected();
+        siv.go();
+    }
+}
+*/
+
+public class StaticInitializationVectorCorrected {
+    public void go() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(""AES"");
+        SecretKey key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(""AES/CBC/PKCS5Padding"");
+
+        SecureRandom sr = new SecureRandom();
+
+        byte [] bytes = new byte[16];
+        sr.nextBytes(bytes);
+
+        IvParameterSpec ivSpec = new IvParameterSpec(bytes);
+
+        cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);
+    }
+
+    public static void main (String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException {
+        StaticInitializationVectorCorrected siv = new StaticInitializationVectorCorrected();
+        siv.go();
+    }
+}",AES
+"public class BrokenHashABICase7 {
+    public static final String DEFAULT_CRYPTO = ""MD4"";
+    private static char[] CRYPTO;
+    private static char[] crypto;
+    public static void main (String [] args) throws NoSuchAlgorithmException {
+        String str = ""abcdef"";
+        go2();
+        go3();
+        go(str);
+    }
+
+    private static void go2(){
+        CRYPTO = DEFAULT_CRYPTO.toCharArray();
+    }
+    private static void go3(){
+        crypto = CRYPTO;
+    }
+
+    public static void go (String str) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance(String.valueOf(crypto));
+        md.update(str.getBytes());
+        System.out.println(md.digest());
+    }
+}",SHA
+"public class BrokenHashABPSCase3 {
+    public static void main (String [] args) throws NoSuchAlgorithmException {
+        String name = ""abcdef"";
+        int choice = 2;
+        MessageDigest md = MessageDigest.getInstance(""MD4"");
+        if(choice>1)
+            md = MessageDigest.getInstance(""SHA-256"");
+        md.update(name.getBytes());
+        System.out.println(md.digest());
+    }
+}",SHA
+"public class BrokenHashABSCase3 {
+    CryptoHash3 crypto;
+    public BrokenHashABSCase3() throws NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, UnsupportedEncodingException {
+        crypto = new CryptoHash3(""MD4"");
+        crypto.encrypt(""abc"","""");
+    }
+}
+
+class CryptoHash3 {
+    String crypto;
+
+    public CryptoHash3(String defCrypto) throws NoSuchPaddingException, NoSuchAlgorithmException {
+        crypto = defCrypto;
+    }
+
+    public void encrypt(String str, String passedAlgo) throws UnsupportedEncodingException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, NoSuchPaddingException {
+        if(passedAlgo.isEmpty()){
+            passedAlgo = crypto;
+        }
+
+        MessageDigest md = MessageDigest.getInstance(crypto);
+        md.update(str.getBytes());
+        System.out.println(md.digest());
+
+    }
+}",SHA
+"public class BrokenHashABMC3 {
+    public void go(String str, String crypto) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance(crypto);
+        md.update(str.getBytes());
+        System.out.println(md.digest());
+    }
+}",SHA
+"public class BrokenHashABMC2 {
+    public void go(String str, String crypto) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance(crypto);
+        md.update(str.getBytes());
+        System.out.println(md.digest());
+    }
+}",SHA
+"public class BrokenHashBBCase4 {
+    public static void main (String [] args) throws NoSuchAlgorithmException {
+        String name = ""abcdef"";
+        MessageDigest md = MessageDigest.getInstance(""MD2"");
+        md.update(name.getBytes());
+        System.out.println(md.digest());
+    }
+}",SHA
+"public class BrokenHashABSCase2 {
+    CryptoHash2 crypto;
+    public BrokenHashABSCase2() throws NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, UnsupportedEncodingException {
+        crypto = new CryptoHash2(""MD5"");
+        crypto.encrypt(""abc"","""");
+    }
+}
+
+class CryptoHash2 {
+    String crypto;
+
+    public CryptoHash2(String defCrypto) throws NoSuchPaddingException, NoSuchAlgorithmException {
+        crypto = defCrypto;
+    }
+
+    public void encrypt(String str, String passedAlgo) throws UnsupportedEncodingException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, NoSuchPaddingException {
+        if(passedAlgo.isEmpty()){
+            passedAlgo = crypto;
+        }
+
+        MessageDigest md = MessageDigest.getInstance(crypto);
+        md.update(str.getBytes());
+        System.out.println(md.digest());
+
+    }
+}",SHA
+"public class BrokenHashABMCCase2 {
+    public static void main (String [] args) throws NoSuchAlgorithmException {
+        BrokenHashABMC2 bh = new BrokenHashABMC2();
+        String str = ""abcdef"";
+        String crypto = ""MD5"";
+        bh.go(str,crypto);
+    }
+}",MD5
+"public class BrokenHashABPSCase2 {
+    public static void main (String [] args) throws NoSuchAlgorithmException {
+        String name = ""abcdef"";
+        int choice = 2;
+        MessageDigest md = MessageDigest.getInstance(""MD5"");
+        if(choice>1)
+            md = MessageDigest.getInstance(""SHA-256"");
+        md.update(name.getBytes());
+        System.out.println(md.digest());
+    }
+}",SHA
+"public class BrokenHashABICase6 {
+    public static final String DEFAULT_CRYPTO = ""MD5"";
+    private static char[] CRYPTO;
+    private static char[] crypto;
+    public static void main (String [] args) throws NoSuchAlgorithmException {
+        String str = ""abcdef"";
+        go2();
+        go3();
+        go(str);
+    }
+
+    private static void go2(){
+        CRYPTO = DEFAULT_CRYPTO.toCharArray();
+    }
+    private static void go3(){
+        crypto = CRYPTO;
+    }
+
+    public static void go (String str) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance(String.valueOf(crypto));
+        md.update(str.getBytes());
+        System.out.println(md.digest());
+    }
+}",SHA
+"public class BrokenHashABICase12 {
+    public static void main (String [] args) throws NoSuchAlgorithmException {
+        String str = ""abcdef"";
+        String crypto = ""MD2"";
+        method2(str,crypto);
+    }
+    public static void method2 (String s, String cryptoHash) throws NoSuchAlgorithmException {
+        String str2 = s;
+        String hashAlgo = cryptoHash;
+        method1(str2,hashAlgo);
+    }
+    public static void method1 (String str, String crypto) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance(crypto);
+        md.update(str.getBytes());
+        System.out.println(md.digest());
+    }
+}",SHA
+"public class BrokenHashBBCase3 {
+    public static void main (String [] args) throws NoSuchAlgorithmException {
+        String name = ""abcdef"";
+        MessageDigest md = MessageDigest.getInstance(""MD4"");
+        md.update(name.getBytes());
+        System.out.println(md.digest());
+    }
+}",SHA
+"public class BrokenHashABICase1 {
+    public static void main (String [] args) throws NoSuchAlgorithmException {
+        String str = ""abcdef"";
+        String crypto = ""SHA1"";
+        go(str,crypto);
+    }
+    public static void go (String str, String crypto) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance(crypto);
+        md.update(str.getBytes());
+        System.out.println(md.digest());
+    }
+}",SHA
+"public class BrokenHashABSCase4 {
+    CryptoHash4 crypto;
+    public BrokenHashABSCase4() throws NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, UnsupportedEncodingException {
+        crypto = new CryptoHash4(""MD2"");
+        crypto.encrypt(""abc"","""");
+    }
+}
+
+class CryptoHash4 {
+    String crypto;
+
+    public CryptoHash4(String defCrypto) throws NoSuchPaddingException, NoSuchAlgorithmException {
+        crypto = defCrypto;
+    }
+
+    public void encrypt(String str, String passedAlgo) throws UnsupportedEncodingException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, NoSuchPaddingException {
+        if(passedAlgo.isEmpty()){
+            passedAlgo = crypto;
+        }
+
+        MessageDigest md = MessageDigest.getInstance(crypto);
+        md.update(str.getBytes());
+        System.out.println(md.digest());
+
+    }
+}",SHA
+"public class BrokenHashABPSCase4 {
+    public static void main (String [] args) throws NoSuchAlgorithmException {
+        String name = ""abcdef"";
+        int choice = 2;
+        MessageDigest md = MessageDigest.getInstance(""MD2"");
+        if(choice>1)
+            md = MessageDigest.getInstance(""SHA-256"");
+        md.update(name.getBytes());
+        System.out.println(md.digest());
+    }
+}",SHA
+"public class BrokenHashABMC4 {
+    public void go(String str, String crypto) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance(crypto);
+        md.update(str.getBytes());
+        System.out.println(md.digest());
+    }
+}",SHA
+"public class BrokenHashBBCase2 {
+    public static void main (String [] args) throws NoSuchAlgorithmException {
+        String name = ""abcdef"";
+        MessageDigest md = MessageDigest.getInstance(""MD5"");
+        md.update(name.getBytes());
+        System.out.println(md.digest());
+    }
+}",SHA
+"public class BrokenHashBBCase1 {
+    public static void main (String [] args) throws NoSuchAlgorithmException {
+        String name = ""abcdef"";
+        MessageDigest md = MessageDigest.getInstance(""SHA1"");
+        md.update(name.getBytes());
+        System.out.println(md.digest());
+    }
+}",SHA
+"public class BrokenHashABICase3 {
+    public static void main (String [] args) throws NoSuchAlgorithmException {
+        String str = ""abcdef"";
+        String crypto = ""MD4"";
+        go(str,crypto);
+    }
+    public static void go (String str, String crypto) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance(crypto);
+        md.update(str.getBytes());
+        System.out.println(md.digest());
+    }
+}",SHA
+"public class BrokenHashCorrected {
+    public static void main (String [] args) {
+        try {
+            MessageDigest md = MessageDigest.getInstance(""SHA-256"");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+    }
+}",SHA
+"public class BrokenHashABICase2 {
+    public static void main (String [] args) throws NoSuchAlgorithmException {
+        String str = ""abcdef"";
+        String crypto = ""MD5"";
+        go(str,crypto);
+    }
+    public static void go (String str, String crypto) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance(crypto);
+        md.update(str.getBytes());
+        System.out.println(md.digest());
+    }
+}",SHA
+"public class BrokenHashABSCase1 {
+    CryptoHash1 crypto;
+    public BrokenHashABSCase1() throws NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, UnsupportedEncodingException {
+        crypto = new CryptoHash1(""SHA1"");
+        crypto.encrypt(""abc"","""");
+    }
+}
+
+class CryptoHash1 {
+    String crypto;
+
+    public CryptoHash1(String defCrypto) throws NoSuchPaddingException, NoSuchAlgorithmException {
+        crypto = defCrypto;
+    }
+
+    public void encrypt(String str, String passedAlgo) throws UnsupportedEncodingException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, NoSuchPaddingException {
+        if(passedAlgo.isEmpty()){
+            passedAlgo = crypto;
+        }
+
+        MessageDigest md = MessageDigest.getInstance(crypto);
+        md.update(str.getBytes());
+        System.out.println(md.digest());
+
+    }
+}",SHA
+"public class BrokenHashABMCCase1 {
+    public static void main (String [] args) throws NoSuchAlgorithmException {
+        BrokenHashABMC1 bh = new BrokenHashABMC1();
+        String str = ""abcdef"";
+        String crypto = ""SHA1"";
+        bh.go(str,crypto);
+    }
+}",SHA
+"public class BrokenHashABPSCase1 {
+    public static void main (String [] args) throws NoSuchAlgorithmException {
+        String name = ""abcdef"";
+        int choice = 2;
+        MessageDigest md = MessageDigest.getInstance(""SHA1"");
+        if(choice>1)
+            md = MessageDigest.getInstance(""SHA-256"");
+        md.update(name.getBytes());
+        System.out.println(md.digest());
+    }
+}",SHA
+"public class BrokenHashABICase5 {
+    public static final String DEFAULT_CRYPTO = ""SHA1"";
+    private static char[] CRYPTO;
+    private static char[] crypto;
+    public static void main (String [] args) throws NoSuchAlgorithmException {
+        String str = ""abcdef"";
+        go2();
+        go3();
+        go(str);
+    }
+
+    private static void go2(){
+        CRYPTO = DEFAULT_CRYPTO.toCharArray();
+    }
+    private static void go3(){
+        crypto = CRYPTO;
+    }
+
+    public static void go (String str) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance(String.valueOf(crypto));
+        md.update(str.getBytes());
+        System.out.println(md.digest());
+    }
+}",SHA
+"public class BrokenHashABICase11 {
+    public static void main (String [] args) throws NoSuchAlgorithmException {
+        String str = ""abcdef"";
+        String crypto = ""MD4"";
+        method2(str,crypto);
+    }
+    public static void method2 (String s, String cryptoHash) throws NoSuchAlgorithmException {
+        String str2 = s;
+        String hashAlgo = cryptoHash;
+        method1(str2,hashAlgo);
+    }
+    public static void method1 (String str, String crypto) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance(crypto);
+        md.update(str.getBytes());
+        System.out.println(md.digest());
+    }
+}",SHA
+"public class BrokenHashABMC1 {
+    public void go(String str, String crypto) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance(crypto);
+        md.update(str.getBytes());
+        System.out.println(md.digest());
+    }
+}",SHA
+"public class BrokenHashABICase9 {
+    public static void main (String [] args) throws NoSuchAlgorithmException {
+        String str = ""abcdef"";
+        String crypto = ""SHA1"";
+        method2(str,crypto);
+    }
+    public static void method2 (String s, String cryptoHash) throws NoSuchAlgorithmException {
+        String str2 = s;
+        String hashAlgo = cryptoHash;
+        method1(str2,hashAlgo);
+    }
+    public static void method1 (String str, String crypto) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance(crypto);
+        md.update(str.getBytes());
+        System.out.println(md.digest());
+    }
+}",SHA
+"public class BrokenHashABICase8 {
+    public static final String DEFAULT_CRYPTO = ""MD2"";
+    private static char[] CRYPTO;
+    private static char[] crypto;
+    public static void main (String [] args) throws NoSuchAlgorithmException {
+        String str = ""abcdef"";
+        go2();
+        go3();
+        go(str);
+    }
+
+    private static void go2(){
+        CRYPTO = DEFAULT_CRYPTO.toCharArray();
+    }
+    private static void go3(){
+        crypto = CRYPTO;
+    }
+
+    public static void go (String str) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance(String.valueOf(crypto));
+        md.update(str.getBytes());
+        System.out.println(md.digest());
+    }
+}",SHA
+"public class BrokenHashABICase10 {
+    public static void main (String [] args) throws NoSuchAlgorithmException {
+        String str = ""abcdef"";
+        String crypto = ""MD5"";
+        method2(str,crypto);
+    }
+    public static void method2 (String s, String cryptoHash) throws NoSuchAlgorithmException {
+        String str2 = s;
+        String hashAlgo = cryptoHash;
+        method1(str2,hashAlgo);
+    }
+    public static void method1 (String str, String crypto) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance(crypto);
+        md.update(str.getBytes());
+        System.out.println(md.digest());
+    }
+}",SHA
+"public class BrokenHashABICase4 {
+    public static void main (String [] args) throws NoSuchAlgorithmException {
+        String str = ""abcdef"";
+        String crypto = ""MD2"";
+        go(str,crypto);
+    }
+    public static void go (String str, String crypto) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance(crypto);
+        md.update(str.getBytes());
+        System.out.println(md.digest());
+    }
+}",SHA
+"public class Main { public static void main(String[] args) { System.out.println(""Hello""); } }",None
+public class User { private String name; public String getName() { return name; } },None
+for(int i = 0; i < 10; i++) { count += i; },None
+"public void connect() { db.execute(""SELECT * FROM users""); }",None
+"String concat = ""a"" + ""b"";",None
+"List<String> list = new ArrayList<>(); list.add(""item"");",None
+"public int add(int a, int b) { return a + b; }",None
+if (user == null) throw new IllegalArgumentException();,None
+"public class Main { public static void main(String[] args) { System.out.println(""Hello""); } }",None
+public class User { private String name; public String getName() { return name; } },None
+for(int i = 0; i < 10; i++) { count += i; },None
+"public void connect() { db.execute(""SELECT * FROM users""); }",None
+"String concat = ""a"" + ""b"";",None
+"List<String> list = new ArrayList<>(); list.add(""item"");",None
+"public int add(int a, int b) { return a + b; }",None
+if (user == null) throw new IllegalArgumentException();,None
+"public class Main { public static void main(String[] args) { System.out.println(""Hello""); } }",None
+public class User { private String name; public String getName() { return name; } },None
+for(int i = 0; i < 10; i++) { count += i; },None
+"public void connect() { db.execute(""SELECT * FROM users""); }",None
+"String concat = ""a"" + ""b"";",None
+"List<String> list = new ArrayList<>(); list.add(""item"");",None
+"public int add(int a, int b) { return a + b; }",None
+if (user == null) throw new IllegalArgumentException();,None
+"public class Main { public static void main(String[] args) { System.out.println(""Hello""); } }",None
+public class User { private String name; public String getName() { return name; } },None
+for(int i = 0; i < 10; i++) { count += i; },None
+"public void connect() { db.execute(""SELECT * FROM users""); }",None
+"String concat = ""a"" + ""b"";",None
+"List<String> list = new ArrayList<>(); list.add(""item"");",None
+"public int add(int a, int b) { return a + b; }",None
+if (user == null) throw new IllegalArgumentException();,None
+"public class Main { public static void main(String[] args) { System.out.println(""Hello""); } }",None
+public class User { private String name; public String getName() { return name; } },None
+for(int i = 0; i < 10; i++) { count += i; },None
+"public void connect() { db.execute(""SELECT * FROM users""); }",None
+"String concat = ""a"" + ""b"";",None
+"List<String> list = new ArrayList<>(); list.add(""item"");",None
+"public int add(int a, int b) { return a + b; }",None
+if (user == null) throw new IllegalArgumentException();,None
+"public class Main { public static void main(String[] args) { System.out.println(""Hello""); } }",None
+public class User { private String name; public String getName() { return name; } },None
+for(int i = 0; i < 10; i++) { count += i; },None
+"public void connect() { db.execute(""SELECT * FROM users""); }",None
+"String concat = ""a"" + ""b"";",None
+"List<String> list = new ArrayList<>(); list.add(""item"");",None
+"public int add(int a, int b) { return a + b; }",None
+if (user == null) throw new IllegalArgumentException();,None
+"public class Main { public static void main(String[] args) { System.out.println(""Hello""); } }",None
+public class User { private String name; public String getName() { return name; } },None
+for(int i = 0; i < 10; i++) { count += i; },None
+"public void connect() { db.execute(""SELECT * FROM users""); }",None
+"String concat = ""a"" + ""b"";",None
+"List<String> list = new ArrayList<>(); list.add(""item"");",None
+"public int add(int a, int b) { return a + b; }",None
+if (user == null) throw new IllegalArgumentException();,None
+"public class Main { public static void main(String[] args) { System.out.println(""Hello""); } }",None
+public class User { private String name; public String getName() { return name; } },None
+for(int i = 0; i < 10; i++) { count += i; },None
+"public void connect() { db.execute(""SELECT * FROM users""); }",None
+"String concat = ""a"" + ""b"";",None
+"List<String> list = new ArrayList<>(); list.add(""item"");",None
+"public int add(int a, int b) { return a + b; }",None
+if (user == null) throw new IllegalArgumentException();,None
+"public class Main { public static void main(String[] args) { System.out.println(""Hello""); } }",None
+public class User { private String name; public String getName() { return name; } },None
+for(int i = 0; i < 10; i++) { count += i; },None
+"public void connect() { db.execute(""SELECT * FROM users""); }",None
+"String concat = ""a"" + ""b"";",None
+"List<String> list = new ArrayList<>(); list.add(""item"");",None
+"public int add(int a, int b) { return a + b; }",None
+if (user == null) throw new IllegalArgumentException();,None
+"public class Main { public static void main(String[] args) { System.out.println(""Hello""); } }",None
+public class User { private String name; public String getName() { return name; } },None
+for(int i = 0; i < 10; i++) { count += i; },None
+"public void connect() { db.execute(""SELECT * FROM users""); }",None
+"String concat = ""a"" + ""b"";",None
+"List<String> list = new ArrayList<>(); list.add(""item"");",None
+"public int add(int a, int b) { return a + b; }",None
+if (user == null) throw new IllegalArgumentException();,None
