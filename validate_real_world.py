@@ -20,10 +20,12 @@ def run_real_world_validation():
     print(f"[*] Scan completed in {scan_time:.2f} seconds.")
     print(f"[*] Discovered {len(findings)} cryptographic artefacts.\n")
     
-    # Process Mosca Risk
+    # Process Mosca Risk & Recommendations
     enriched_findings = []
+    from engine.recommender import get_pqc_recommendation
     for f in findings:
         f['risk'] = calculate_risk(f, z_collapse_time=8)
+        f['recommendation'] = get_pqc_recommendation(f)
         enriched_findings.append(f)
         
     # Generate CBOM

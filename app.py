@@ -7,7 +7,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from engine.scanner import ECDATScanner
 from engine.mosca import calculate_risk
-from engine.recommender import get_recommendation
+from engine.recommender import get_pqc_recommendation
 from engine.cbom import generate_cbom
 from engine.graph import generate_crypto_graph
 
@@ -55,7 +55,7 @@ if scan_btn:
                 y_val = override_y if override_y > 0 else None
                 
                 f['risk'] = calculate_risk(f, x_val, y_val, z_time)
-                f['recommendation'] = get_recommendation(f, f['risk'])
+                f['recommendation'] = get_pqc_recommendation(f)
                 enriched_findings.append(f)
                 
             st.success(f"Discovered {len(findings)} cryptographic assets using AI Engine!")

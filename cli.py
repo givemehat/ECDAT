@@ -16,8 +16,10 @@ def run_headless_scan(target_dir, output_format, z_time=8):
         
     enriched_findings = []
     critical_risks = 0
+    from engine.recommender import get_pqc_recommendation
     for f in findings:
         f['risk'] = calculate_risk(f, z_collapse_time=z_time)
+        f['recommendation'] = get_pqc_recommendation(f)
         if f['risk']['tier'] == 'CRITICAL':
             critical_risks += 1
         enriched_findings.append(f)
