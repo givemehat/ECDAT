@@ -1,0 +1,4 @@
+streamlit==1.32.0
+pandas==2.2.1
+cyclonedx-python-lib==7.3.0
+plotly==5.19.0
