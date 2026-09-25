@@ -2,12 +2,14 @@ import streamlit as st
 import pandas as pd
 import json
 import os
+import streamlit.components.v1 as components
 import networkx as nx
 import matplotlib.pyplot as plt
 from engine.scanner import ECDATScanner
 from engine.mosca import calculate_risk
 from engine.recommender import get_recommendation
 from engine.cbom import generate_cbom
+from engine.graph import generate_crypto_graph
 
 st.set_page_config(page_title="ECDAT Dashboard", layout="wide", page_icon="🔐")
 
@@ -59,7 +61,7 @@ if scan_btn:
             st.success(f"Discovered {len(findings)} cryptographic assets using AI Engine!")
             
             # --- TABS ---
-            tab1, tab2, tab3, tab4 = st.tabs(["📊 Risk Heatmap", "🧠 Deep Learning Analysis", "📋 Remediation", "📦 CBOM"])
+            tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Risk Heatmap", "🧠 Deep Learning Analysis", "🕸️ Topology", "📋 Remediation", "📦 CBOM"])
             
             with tab1:
                 st.subheader("Quantum Risk Distribution")
@@ -103,6 +105,12 @@ if scan_btn:
                 st.dataframe(ai_df, use_container_width=True)
                 
             with tab3:
+                st.subheader("Interactive Cryptographic Topology")
+                st.markdown("This graph shows how cryptographic primitives are distributed across your application. Red nodes indicate CRITICAL quantum risks.")
+                graph_html = generate_crypto_graph(enriched_findings)
+                components.html(graph_html, height=650, scrolling=False)
+                
+            with tab4:
                 st.subheader("Remediation Engine")
                 for f in enriched_findings:
                     with st.expander(f"{f['name']} in {f['file'].split('/')[-1]} ({f['risk']['tier']})"):
@@ -119,7 +127,7 @@ if scan_btn:
                             st.write(f"- **Latency Trade-off:** {f['recommendation']['tradeoff_latency']}")
                             st.write(f"- **Payload Trade-off:** {f['recommendation']['tradeoff_size']}")
                             
-            with tab4:
+            with tab5:
                 st.subheader("CycloneDX v1.6 CBOM")
                 cbom_json = generate_cbom(enriched_findings, enriched=True)
                 st.download_button(
