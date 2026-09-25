@@ -34,8 +34,12 @@ class AdvancedCryptoInference:
             self.loaded = False
 
     def extract_features(self, code, max_seq_len=200):
+        if not isinstance(code, str) or not code.strip():
+            # Return dummy zero tensors for empty/invalid inputs
+            return torch.zeros((1, max_seq_len), dtype=torch.long).to(self.device), torch.zeros((1, 12), dtype=torch.float).to(self.device), 0.0
+            
         # Semantic Tokens
-        tokens = [self.vocab.get(c, self.vocab['<UNK>']) for c in list(code)]
+        tokens = [self.vocab.get(c, self.vocab.get('<UNK>', 0)) for c in list(code)]
         if len(tokens) > max_seq_len:
             tokens = tokens[:max_seq_len]
         else:

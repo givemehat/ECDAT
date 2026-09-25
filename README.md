@@ -1,5 +1,7 @@
 # Enterprise Cryptographic Discovery & Analysis Tool (ECDAT)
 
+![Testing Suite](https://github.com/givemehat/ECDAT/actions/workflows/tests.yml/badge.svg)
+![DevSecOps Scan](https://github.com/givemehat/ECDAT/actions/workflows/ecdat_scan.yml/badge.svg)
 This repository contains the prototype for the Smart India Hackathon 2026 Problem Statement: **Enterprise Cryptographic Discovery & Analysis Tool (ECDAT)**.
 
 ## Features

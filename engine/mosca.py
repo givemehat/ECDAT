@@ -6,8 +6,13 @@ def calculate_risk(finding, user_x=None, user_y=None, z_collapse_time=8):
     Now dynamically calculates Y (Migration Time) based on AST complexity (ast_depth)
     and X (Data Shelf Life) based on neural network confidence if not explicitly provided.
     """
-    ast_depth = finding.get('ast_depth', 1.0)
-    dl_confidence = finding.get('dl_confidence', 0.5)
+    ast_depth = max(0.0, finding.get('ast_depth', 1.0))
+    dl_confidence = max(0.0, min(1.0, finding.get('dl_confidence', 0.5)))
+    
+    if user_x is not None and user_x < 0:
+        raise ValueError("Data Shelf Life (X) cannot be negative.")
+    if user_y is not None and user_y < 0:
+        raise ValueError("Migration Time (Y) cannot be negative.")
     
     # Advanced: If Y is not provided, estimate it using AST Depth. 
     # Deeper AST = More complex code = Harder to migrate = Higher Y

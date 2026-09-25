@@ -1,0 +1,36 @@
+name: ECDAT Testing Suite
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install ECDAT Dependencies
+      run: |
+        pip install -r requirements.txt
+        pip install torch javalang cyclonedx-python-lib
+        pip install pytest pytest-cov pytest-mock
+
+    - name: Run Test Suite with Coverage
+      run: |
+        export PYTHONPATH=.
+        pytest tests/ --cov=engine --cov-report=xml --cov-report=term-missing
+        
+    - name: Upload Coverage Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report
+        path: coverage.xml
