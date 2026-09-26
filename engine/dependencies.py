@@ -581,8 +581,16 @@ def parse_pyproject(text, path="pyproject.toml"):
 
 
 def _json_load(text, path, what):
+    """Parse JSON, tolerating a UTF-8 BOM.
+
+    A BOM (`\\ufeff`) is not whitespace to `json.loads`, so any manifest written by Windows
+    tooling -- PowerShell's `Set-Content -Encoding utf8`, older Visual Studio, many CI scripts --
+    fails to parse. npm and Node both accept a BOM in package.json, so refusing one is stricter
+    than the tools the manifest is written for, and it silently drops a whole ecosystem from the
+    inventory. Decode as `utf-8-sig`, which strips a BOM when present and is a no-op otherwise.
+    """
     try:
-        return json.loads(text)
+        return json.loads(text.lstrip("﻿"))
     except (json.JSONDecodeError, ValueError) as exc:
         raise ManifestParseError(f"{path}: invalid JSON in {what} ({exc})") from exc
 

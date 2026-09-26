@@ -141,6 +141,46 @@ def test_malformed_json_manifest_is_named_not_raised(tmp_path):
     assert scanner.coverage["manifests_parsed"] == 0
 
 
+def test_json_manifest_with_a_utf8_bom_is_parsed_not_rejected(tmp_path):
+    """A BOM must not cost us a whole ecosystem.
+
+    A UTF-8 BOM is invisible in an editor and is written routinely: PowerShell's
+    `Set-Content -Encoding utf8`, older Visual Studio, and many CI scripts all emit one. npm and
+    Node both accept it, so rejecting it is stricter than the tools the manifest is written for --
+    and the failure is invisible, because the manifest is simply absent from the inventory. This
+    was found by running the CLI against a manifest PowerShell had just written.
+    """
+    findings, scanner = scan_text(
+        tmp_path, "package.json",
+        '﻿{"dependencies": {"jose": "^5.0.0"}}')
+    assert scanner.errors == [], f"a BOM must be tolerated; got {scanner.errors}"
+    assert scanner.coverage["manifests_parsed"] == 1
+    assert [f["name"] for f in findings] == ["jose"], "the npm provider must still be found"
+
+
+def test_bom_is_tolerated_in_every_json_manifest_shape(tmp_path):
+    """The same tolerance must hold for every JSON-shaped manifest we parse, not just npm's.
+
+    `scan_text` writes through `write()`, which would not reproduce a BOM faithfully, so the
+    bytes are written directly here -- that is the whole point of the test.
+    """
+    for name, body in (
+        ("composer.json", '﻿{"require": {"phpseclib/phpseclib": "^3.0"}}'),
+        ("package.json", '﻿{"dependencies": {"jose": "^5.0.0"}}'),
+    ):
+        d = tmp_path / name.replace(".", "_")
+        d.mkdir()
+        raw = body.encode("utf-8")
+        assert raw[:3] == b"\xef\xbb\xbf", "fixture must actually carry a BOM"
+        (d / name).write_bytes(raw)
+        scanner = DependencyScanner()
+        findings = scanner.scan(str(d / name))
+        assert scanner.errors == [], f"{name} with a BOM must parse; got {scanner.errors}"
+        assert scanner.coverage["manifests_parsed"] == 1, name
+        assert findings, f"{name} must still yield its crypto provider"
+
+
+
 def test_malformed_toml_manifest_is_named_not_raised(tmp_path):
     findings, scanner = scan_text(tmp_path, "pyproject.toml", "[project\nname = broken")
     assert findings == []
