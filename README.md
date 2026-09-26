@@ -21,7 +21,7 @@
 | 3 | **Classification** by type, lifetime, business criticality | `engine/mosca.py` — canonical primitives, `DATA_CLASS_LIFETIME` (X) and `MIGRATION_EFFORT` (Y) tables, Critical/High/Medium/Low tiers |
 | 4 | **PQC / hybrid recommendations** factoring risk, latency and cost | `engine/recommender.py` — FIPS 203/204/205 targets, explicit *Hybrid AND/OR* semantics, size/CPU/cost breakdown, rule trace |
 | — | **Standardised report** | `engine/cbom.py` — CycloneDX **1.7** CBOM, validated against the published JSON Schema |
-| — | **Interactive GUI** | `app.py` — Streamlit: compliance and engineer views, topology graph, coverage panel |
+| — | **Interactive console** | `app.py` — Streamlit, four role-based views (Evidence & Honesty, Auditor, Migration Planner, Standards & Compliance). Shows `findings_total` **next to** `proven_use`, publishes unresolved-purpose findings with the evidence that would resolve them, and withholds the CBOM download unless it validates against the 1.7 schema |
 
 ---
 
@@ -111,10 +111,11 @@ engine/mosca.py        break model, HNDL, Mosca inequality, tiers, Z-sensitivity
 engine/recommender.py  FIPS-derived PQC targets, cost model, rule traces
 engine/cbom.py         CycloneDX 1.7 emitter
 engine/graph.py        PyVis topology
+engine/gui_helpers.py  streamlit-free console helpers: inline SVG, colour contrast, CBOM validation
 engine/ml/             multi-modal transformer (optional, supplemental signal)
 cli.py                 headless scanner / CI gate
 validate_cbom.py       offline schema validation
-app.py                 Streamlit dashboard
+app.py                 role-based Streamlit console
 schemas/               vendored CycloneDX 1.7 JSON Schema
 docs/CODE_REVIEW.md    review of the previous revision + what changed
 ```
