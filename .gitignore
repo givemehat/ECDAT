@@ -32,3 +32,6 @@ lib/
 
 # ---- Large cloned corpora (fetched by validate_real_world.py) ----
 data/tink-java/
+
+# ---- Third-party benchmark corpora (re-fetched at a pinned SHA by benchmark/run_benchmark.py) ----
+benchmark/corpora/

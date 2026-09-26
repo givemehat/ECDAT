@@ -1,0 +1,4783 @@
+{
+ "corpus": "cryptoapi_bench",
+ "label_kind": "hand-annotated line-level ground truth (author of this harness)",
+ "provenance": {
+  "corpus_url": "https://github.com/CryptoAPI-Bench/CryptoAPI-Bench.git",
+  "corpus_pinned_commit": "e6b6b50fef6970151300c1ac2de62e188ba6de19",
+  "citation": "Afrose, Rahaman, Yao. 'CryptoAPI-Bench: A Comprehensive Benchmark on Java Cryptographic API Misuses.' IEEE Cybersecurity Development (SecDev), 2019, pp. 49-61. DOI 10.1109/SecDev.2019.00017",
+  "notes": "203 Java micro-programmes, published and third-party. Note: these are CONSTRUCTED benchmark cases, not production code."
+ },
+ "annotation": {
+  "annotated_by": "ECDAT benchmark harness author, by direct reading of every file in scope",
+  "unit": "one (file, 1-based line) location",
+  "files_in_scope": 203,
+  "candidate_lines_reviewed": 529,
+  "positive_labels": 210,
+  "negative_labels_audited": 319,
+  "method": "Every line in scope was read. A location is POSITIVE iff it names, or binds a name to, a quantum-vulnerable cryptographic primitive in a position that determines the algorithm. A location that merely OPERATES on a primitive chosen elsewhere (cipher.init, md.update, cipher.encryptor(), .digest()) is NEGATIVE in label set L1 and is counted POSITIVE only in sensitivity variant L2, which is reported alongside L1. Comments, imports of non-primitives, PRNGs, IVs/salts, PBKDF parameter objects, key-store container formats and key/block size plumbing are NEGATIVE with a recorded reason.",
+  "independence": "Criteria are written from JCA/SSH semantics and never consult engine/scanner.py's rule table. Labels are frozen data; the harness verifies each label's verbatim source line against the pinned corpus and fails loudly on drift rather than re-deriving labels."
+ },
+ "labels": [
+  {
+   "decision": "positive",
+   "primitive": "DES",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance is given 'keyAlgo', which holds algorithm 'DES'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase1.java",
+   "line": 12,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(keyAlgo);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase1.java",
+   "line": 13,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "DES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance is given 'crypto', which holds algorithm 'DES/ECB/PKCS5Padding'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase1.java",
+   "line": 14,
+   "code": "Cipher cipher = Cipher.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase1.java",
+   "line": 15,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "DES",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='DES/ECB/PKCS5Padding', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase1.java",
+   "line": 20,
+   "code": "String crypto = \"DES/ECB/PKCS5Padding\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "DES",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'keyAlgo'='DES', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase1.java",
+   "line": 21,
+   "code": "String keyAlgo = \"DES\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "IDEA",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'DEFAULT_CRYPTO'='IDEA', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase10.java",
+   "line": 11,
+   "code": "public static final String DEFAULT_CRYPTO = \"IDEA\";"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase10.java",
+   "line": 15,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(String.valueOf(crypto));"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase10.java",
+   "line": 16,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase10.java",
+   "line": 17,
+   "code": "Cipher cipher = Cipher.getInstance(String.valueOf(crypto));"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase10.java",
+   "line": 18,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase11.java",
+   "line": 16,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(cryptoKey);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase11.java",
+   "line": 17,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "DES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance is given 'crypto', which holds algorithm 'DES/ECB/PKCS5Padding'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase11.java",
+   "line": 18,
+   "code": "Cipher cipher = Cipher.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase11.java",
+   "line": 19,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "DES",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'key'='DES', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase11.java",
+   "line": 23,
+   "code": "String key = \"DES\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "DES",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='DES/ECB/PKCS5Padding', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase11.java",
+   "line": 24,
+   "code": "String crypto = \"DES/ECB/PKCS5Padding\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "Blowfish",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance is given 'crypto', which holds algorithm 'Blowfish'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase12.java",
+   "line": 15,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase12.java",
+   "line": 16,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "Blowfish",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance is given 'crypto', which holds algorithm 'Blowfish'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase12.java",
+   "line": 17,
+   "code": "Cipher cipher = Cipher.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase12.java",
+   "line": 18,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "Blowfish",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='Blowfish', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase12.java",
+   "line": 23,
+   "code": "String crypto = \"Blowfish\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RC4",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance is given 'crypto', which holds algorithm 'RC4'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase13.java",
+   "line": 17,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase13.java",
+   "line": 18,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RC4",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance is given 'crypto', which holds algorithm 'RC4'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase13.java",
+   "line": 19,
+   "code": "Cipher cipher = Cipher.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase13.java",
+   "line": 20,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RC4",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='RC4', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase13.java",
+   "line": 24,
+   "code": "String crypto = \"RC4\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RC2",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance is given 'crypto', which holds algorithm 'RC2'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase14.java",
+   "line": 16,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase14.java",
+   "line": 17,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RC2",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance is given 'crypto', which holds algorithm 'RC2'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase14.java",
+   "line": 18,
+   "code": "Cipher cipher = Cipher.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase14.java",
+   "line": 19,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RC2",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='RC2', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase14.java",
+   "line": 24,
+   "code": "String crypto = \"RC2\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "IDEA",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance is given 'crypto', which holds algorithm 'IDEA'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase15.java",
+   "line": 16,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase15.java",
+   "line": 17,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "IDEA",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance is given 'crypto', which holds algorithm 'IDEA'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase15.java",
+   "line": 18,
+   "code": "Cipher cipher = Cipher.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase15.java",
+   "line": 19,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "IDEA",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='IDEA', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase15.java",
+   "line": 24,
+   "code": "String crypto = \"IDEA\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "Blowfish",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance is given 'crypto', which holds algorithm 'Blowfish'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase2.java",
+   "line": 12,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase2.java",
+   "line": 13,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "Blowfish",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance is given 'crypto', which holds algorithm 'Blowfish'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase2.java",
+   "line": 14,
+   "code": "Cipher cipher = Cipher.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase2.java",
+   "line": 15,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "Blowfish",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='Blowfish', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase2.java",
+   "line": 20,
+   "code": "String crypto = \"Blowfish\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RC4",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance is given 'crypto', which holds algorithm 'RC4'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase3.java",
+   "line": 12,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase3.java",
+   "line": 13,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RC4",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance is given 'crypto', which holds algorithm 'RC4'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase3.java",
+   "line": 14,
+   "code": "Cipher cipher = Cipher.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase3.java",
+   "line": 15,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RC4",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='RC4', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase3.java",
+   "line": 20,
+   "code": "String crypto = \"RC4\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RC2",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance is given 'crypto', which holds algorithm 'RC2'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase4.java",
+   "line": 12,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase4.java",
+   "line": 13,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RC2",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance is given 'crypto', which holds algorithm 'RC2'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase4.java",
+   "line": 14,
+   "code": "Cipher cipher = Cipher.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase4.java",
+   "line": 15,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RC2",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='RC2', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase4.java",
+   "line": 20,
+   "code": "String crypto = \"RC2\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "DES",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'DEFAULT_CRYPTO'='DES/ECB/PKCS5Padding', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase5.java",
+   "line": 11,
+   "code": "public static final String DEFAULT_CRYPTO = \"DES/ECB/PKCS5Padding\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "DES",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'DEFAULT_CRYPTO_ALGO'='DES', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase5.java",
+   "line": 15,
+   "code": "public static final String DEFAULT_CRYPTO_ALGO = \"DES\";"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase5.java",
+   "line": 20,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(String.valueOf(crypto_algo));"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase5.java",
+   "line": 21,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase5.java",
+   "line": 22,
+   "code": "Cipher cipher = Cipher.getInstance(String.valueOf(crypto));"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase5.java",
+   "line": 23,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "Blowfish",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'DEFAULT_CRYPTO'='Blowfish', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase6.java",
+   "line": 11,
+   "code": "public static final String DEFAULT_CRYPTO = \"Blowfish\";"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase6.java",
+   "line": 15,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(String.valueOf(crypto));"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase6.java",
+   "line": 16,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase6.java",
+   "line": 17,
+   "code": "Cipher cipher = Cipher.getInstance(String.valueOf(crypto));"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase6.java",
+   "line": 18,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RC4",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'DEFAULT_CRYPTO'='RC4', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase7.java",
+   "line": 11,
+   "code": "public static final String DEFAULT_CRYPTO = \"RC4\";"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase7.java",
+   "line": 15,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(String.valueOf(crypto));"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase7.java",
+   "line": 16,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase7.java",
+   "line": 17,
+   "code": "Cipher cipher = Cipher.getInstance(String.valueOf(crypto));"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase7.java",
+   "line": 18,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RC2",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'DEFAULT_CRYPTO'='RC2', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase8.java",
+   "line": 11,
+   "code": "public static final String DEFAULT_CRYPTO = \"RC2\";"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase8.java",
+   "line": 15,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(String.valueOf(crypto));"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase8.java",
+   "line": 16,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase8.java",
+   "line": 17,
+   "code": "Cipher cipher = Cipher.getInstance(String.valueOf(crypto));"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase8.java",
+   "line": 18,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "IDEA",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance is given 'crypto', which holds algorithm 'IDEA'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase9.java",
+   "line": 12,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase9.java",
+   "line": 13,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "IDEA",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance is given 'crypto', which holds algorithm 'IDEA'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase9.java",
+   "line": 14,
+   "code": "Cipher cipher = Cipher.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase9.java",
+   "line": 15,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "IDEA",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='IDEA', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase9.java",
+   "line": 20,
+   "code": "String crypto = \"IDEA\";"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMC1.java",
+   "line": 12,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(cryptoKey);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMC1.java",
+   "line": 13,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMC1.java",
+   "line": 14,
+   "code": "Cipher cipher = Cipher.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMC1.java",
+   "line": 15,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMC2.java",
+   "line": 12,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMC2.java",
+   "line": 13,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMC2.java",
+   "line": 14,
+   "code": "Cipher cipher = Cipher.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMC2.java",
+   "line": 15,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMC3.java",
+   "line": 12,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMC3.java",
+   "line": 13,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMC3.java",
+   "line": 14,
+   "code": "Cipher cipher = Cipher.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMC3.java",
+   "line": 15,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMC4.java",
+   "line": 12,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMC4.java",
+   "line": 13,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMC4.java",
+   "line": 14,
+   "code": "Cipher cipher = Cipher.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMC4.java",
+   "line": 15,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMC5.java",
+   "line": 12,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMC5.java",
+   "line": 13,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMC5.java",
+   "line": 14,
+   "code": "Cipher cipher = Cipher.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMC5.java",
+   "line": 15,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "DES",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='DES/ECB/PKCS5Padding', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase1.java",
+   "line": 10,
+   "code": "String crypto = \"DES/ECB/PKCS5Padding\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "DES",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'cryptokey'='DES', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase1.java",
+   "line": 11,
+   "code": "String cryptokey = \"DES\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "Blowfish",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='Blowfish', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase2.java",
+   "line": 10,
+   "code": "String crypto = \"Blowfish\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RC4",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='RC4', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase3.java",
+   "line": 11,
+   "code": "String crypto = \"RC4\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RC2",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='RC2', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase4.java",
+   "line": 10,
+   "code": "String crypto = \"RC2\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "IDEA",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='IDEA', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase5.java",
+   "line": 10,
+   "code": "String crypto = \"IDEA\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase1.java",
+   "line": 12,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase1.java",
+   "line": 13,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "DES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'DES/ECB/PKCS5Padding'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase1.java",
+   "line": 14,
+   "code": "Cipher cipher = Cipher.getInstance(\"DES/ECB/PKCS5Padding\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'AES/CBC/PKCS5Padding'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase1.java",
+   "line": 16,
+   "code": "cipher = Cipher.getInstance(\"AES/CBC/PKCS5Padding\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase1.java",
+   "line": 18,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase2.java",
+   "line": 11,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase2.java",
+   "line": 12,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "Blowfish",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'Blowfish'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase2.java",
+   "line": 13,
+   "code": "Cipher cipher = Cipher.getInstance(\"Blowfish\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'AES/CBC/PKCS5Padding'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase2.java",
+   "line": 15,
+   "code": "cipher = Cipher.getInstance(\"AES/CBC/PKCS5Padding\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase2.java",
+   "line": 17,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase3.java",
+   "line": 12,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase3.java",
+   "line": 13,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RC4",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'RC4'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase3.java",
+   "line": 14,
+   "code": "Cipher cipher = Cipher.getInstance(\"RC4\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'AES/CBC/PKCS5Padding'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase3.java",
+   "line": 16,
+   "code": "cipher = Cipher.getInstance(\"AES/CBC/PKCS5Padding\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase3.java",
+   "line": 18,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase4.java",
+   "line": 12,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase4.java",
+   "line": 13,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RC2",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'RC2'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase4.java",
+   "line": 14,
+   "code": "Cipher cipher = Cipher.getInstance(\"RC2\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'AES/CBC/PKCS5Padding'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase4.java",
+   "line": 16,
+   "code": "cipher = Cipher.getInstance(\"AES/CBC/PKCS5Padding\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase4.java",
+   "line": 18,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase5.java",
+   "line": 11,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase5.java",
+   "line": 12,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "IDEA",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'IDEA'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase5.java",
+   "line": 13,
+   "code": "Cipher cipher = Cipher.getInstance(\"IDEA\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'AES/CBC/PKCS5Padding'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase5.java",
+   "line": 15,
+   "code": "cipher = Cipher.getInstance(\"AES/CBC/PKCS5Padding\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase5.java",
+   "line": 17,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "DES",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='DES/ECB/PKCS5Padding', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase1.java",
+   "line": 11,
+   "code": "crypto = new Crypto2(\"DES/ECB/PKCS5Padding\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase1.java",
+   "line": 17,
+   "code": "Cipher cipher;"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase1.java",
+   "line": 28,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(defaultAlgo);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase1.java",
+   "line": 29,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase1.java",
+   "line": 30,
+   "code": "Cipher cipher = Cipher.getInstance(defaultAlgo);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase1.java",
+   "line": 31,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase1.java",
+   "line": 34,
+   "code": "return cipher.doFinal(txtBytes);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "Blowfish",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='Blowfish', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase2.java",
+   "line": 11,
+   "code": "crypto = new Crypto3(\"Blowfish\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase2.java",
+   "line": 17,
+   "code": "Cipher cipher;"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase2.java",
+   "line": 28,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(defaultAlgo);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase2.java",
+   "line": 29,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase2.java",
+   "line": 30,
+   "code": "Cipher cipher = Cipher.getInstance(defaultAlgo);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase2.java",
+   "line": 31,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase2.java",
+   "line": 34,
+   "code": "return cipher.doFinal(txtBytes);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RC4",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='RC4', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase3.java",
+   "line": 11,
+   "code": "crypto = new Crypto4(\"RC4\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase3.java",
+   "line": 17,
+   "code": "Cipher cipher;"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase3.java",
+   "line": 28,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(defaultAlgo);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase3.java",
+   "line": 29,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase3.java",
+   "line": 30,
+   "code": "Cipher cipher = Cipher.getInstance(defaultAlgo);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase3.java",
+   "line": 31,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase3.java",
+   "line": 34,
+   "code": "return cipher.doFinal(txtBytes);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RC2",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='RC2', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase4.java",
+   "line": 11,
+   "code": "crypto = new Crypto5(\"RC2\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase4.java",
+   "line": 18,
+   "code": "Cipher cipher;"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase4.java",
+   "line": 29,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(defaultAlgo);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase4.java",
+   "line": 30,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase4.java",
+   "line": 31,
+   "code": "Cipher cipher = Cipher.getInstance(defaultAlgo);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase4.java",
+   "line": 32,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase4.java",
+   "line": 35,
+   "code": "return cipher.doFinal(txtBytes);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "IDEA",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='IDEA', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase5.java",
+   "line": 11,
+   "code": "crypto = new Crypto6(\"IDEA\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase5.java",
+   "line": 18,
+   "code": "Cipher cipher;"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase5.java",
+   "line": 29,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(defaultAlgo);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase5.java",
+   "line": 30,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase5.java",
+   "line": 31,
+   "code": "Cipher cipher = Cipher.getInstance(defaultAlgo);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase5.java",
+   "line": 32,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase5.java",
+   "line": 35,
+   "code": "return cipher.doFinal(txtBytes);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "DES",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'DES'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase1.java",
+   "line": 13,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"DES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase1.java",
+   "line": 14,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "DES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'DES/ECB/PKCS5Padding'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase1.java",
+   "line": 15,
+   "code": "Cipher cipher = Cipher.getInstance(\"DES/ECB/PKCS5Padding\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase1.java",
+   "line": 16,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "Blowfish",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'Blowfish'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase2.java",
+   "line": 12,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"Blowfish\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase2.java",
+   "line": 13,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "Blowfish",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'Blowfish'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase2.java",
+   "line": 14,
+   "code": "Cipher cipher = Cipher.getInstance(\"Blowfish\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase2.java",
+   "line": 15,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RC4",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'RC4'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase3.java",
+   "line": 12,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"RC4\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase3.java",
+   "line": 13,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RC4",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'RC4'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase3.java",
+   "line": 14,
+   "code": "Cipher cipher = Cipher.getInstance(\"RC4\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase3.java",
+   "line": 15,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RC2",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'RC2'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase4.java",
+   "line": 12,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"RC2\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase4.java",
+   "line": 13,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RC2",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'RC2'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase4.java",
+   "line": 14,
+   "code": "Cipher cipher = Cipher.getInstance(\"RC2\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase4.java",
+   "line": 15,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "IDEA",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'IDEA'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase5.java",
+   "line": 12,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"IDEA\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase5.java",
+   "line": 13,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "IDEA",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'IDEA'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase5.java",
+   "line": 14,
+   "code": "Cipher cipher = Cipher.getInstance(\"IDEA\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase5.java",
+   "line": 15,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoCorrected.java",
+   "line": 12,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoCorrected.java",
+   "line": 13,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'AES/CBC/PKCS5Padding'",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoCorrected.java",
+   "line": 14,
+   "code": "Cipher cipher = Cipher.getInstance(\"AES/CBC/PKCS5Padding\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoCorrected.java",
+   "line": 15,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA-1",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='SHA1', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase1.java",
+   "line": 9,
+   "code": "String crypto = \"SHA1\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA-1",
+   "break_model": "grover",
+   "reason": "P1: MessageDigest.getInstance is given 'crypto', which holds algorithm 'SHA1'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase1.java",
+   "line": 13,
+   "code": "MessageDigest md = MessageDigest.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase1.java",
+   "line": 14,
+   "code": "md.update(str.getBytes());"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD5",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='MD5', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase10.java",
+   "line": 9,
+   "code": "String crypto = \"MD5\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD5",
+   "break_model": "grover",
+   "reason": "P1: MessageDigest.getInstance is given 'crypto', which holds algorithm 'MD5'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase10.java",
+   "line": 18,
+   "code": "MessageDigest md = MessageDigest.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase10.java",
+   "line": 19,
+   "code": "md.update(str.getBytes());"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD4",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='MD4', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase11.java",
+   "line": 9,
+   "code": "String crypto = \"MD4\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD4",
+   "break_model": "grover",
+   "reason": "P1: MessageDigest.getInstance is given 'crypto', which holds algorithm 'MD4'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase11.java",
+   "line": 18,
+   "code": "MessageDigest md = MessageDigest.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase11.java",
+   "line": 19,
+   "code": "md.update(str.getBytes());"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD2",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='MD2', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase12.java",
+   "line": 9,
+   "code": "String crypto = \"MD2\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD2",
+   "break_model": "grover",
+   "reason": "P1: MessageDigest.getInstance is given 'crypto', which holds algorithm 'MD2'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase12.java",
+   "line": 18,
+   "code": "MessageDigest md = MessageDigest.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase12.java",
+   "line": 19,
+   "code": "md.update(str.getBytes());"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD5",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='MD5', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase2.java",
+   "line": 9,
+   "code": "String crypto = \"MD5\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD5",
+   "break_model": "grover",
+   "reason": "P1: MessageDigest.getInstance is given 'crypto', which holds algorithm 'MD5'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase2.java",
+   "line": 13,
+   "code": "MessageDigest md = MessageDigest.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase2.java",
+   "line": 14,
+   "code": "md.update(str.getBytes());"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD4",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='MD4', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase3.java",
+   "line": 9,
+   "code": "String crypto = \"MD4\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD4",
+   "break_model": "grover",
+   "reason": "P1: MessageDigest.getInstance is given 'crypto', which holds algorithm 'MD4'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase3.java",
+   "line": 13,
+   "code": "MessageDigest md = MessageDigest.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase3.java",
+   "line": 14,
+   "code": "md.update(str.getBytes());"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD2",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='MD2', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase4.java",
+   "line": 9,
+   "code": "String crypto = \"MD2\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD2",
+   "break_model": "grover",
+   "reason": "P1: MessageDigest.getInstance is given 'crypto', which holds algorithm 'MD2'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase4.java",
+   "line": 13,
+   "code": "MessageDigest md = MessageDigest.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase4.java",
+   "line": 14,
+   "code": "md.update(str.getBytes());"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA-1",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'DEFAULT_CRYPTO'='SHA1', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase5.java",
+   "line": 7,
+   "code": "public static final String DEFAULT_CRYPTO = \"SHA1\";"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase5.java",
+   "line": 25,
+   "code": "MessageDigest md = MessageDigest.getInstance(String.valueOf(crypto));"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase5.java",
+   "line": 26,
+   "code": "md.update(str.getBytes());"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD5",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'DEFAULT_CRYPTO'='MD5', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase6.java",
+   "line": 7,
+   "code": "public static final String DEFAULT_CRYPTO = \"MD5\";"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase6.java",
+   "line": 25,
+   "code": "MessageDigest md = MessageDigest.getInstance(String.valueOf(crypto));"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase6.java",
+   "line": 26,
+   "code": "md.update(str.getBytes());"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD4",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'DEFAULT_CRYPTO'='MD4', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase7.java",
+   "line": 7,
+   "code": "public static final String DEFAULT_CRYPTO = \"MD4\";"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase7.java",
+   "line": 25,
+   "code": "MessageDigest md = MessageDigest.getInstance(String.valueOf(crypto));"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase7.java",
+   "line": 26,
+   "code": "md.update(str.getBytes());"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD2",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'DEFAULT_CRYPTO'='MD2', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase8.java",
+   "line": 7,
+   "code": "public static final String DEFAULT_CRYPTO = \"MD2\";"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase8.java",
+   "line": 25,
+   "code": "MessageDigest md = MessageDigest.getInstance(String.valueOf(crypto));"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase8.java",
+   "line": 26,
+   "code": "md.update(str.getBytes());"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA-1",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='SHA1', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase9.java",
+   "line": 9,
+   "code": "String crypto = \"SHA1\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA-1",
+   "break_model": "grover",
+   "reason": "P1: MessageDigest.getInstance is given 'crypto', which holds algorithm 'SHA1'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase9.java",
+   "line": 18,
+   "code": "MessageDigest md = MessageDigest.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase9.java",
+   "line": 19,
+   "code": "md.update(str.getBytes());"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMC1.java",
+   "line": 8,
+   "code": "MessageDigest md = MessageDigest.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMC1.java",
+   "line": 9,
+   "code": "md.update(str.getBytes());"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMC2.java",
+   "line": 8,
+   "code": "MessageDigest md = MessageDigest.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMC2.java",
+   "line": 9,
+   "code": "md.update(str.getBytes());"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMC3.java",
+   "line": 8,
+   "code": "MessageDigest md = MessageDigest.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMC3.java",
+   "line": 9,
+   "code": "md.update(str.getBytes());"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMC4.java",
+   "line": 8,
+   "code": "MessageDigest md = MessageDigest.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMC4.java",
+   "line": 9,
+   "code": "md.update(str.getBytes());"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA-1",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='SHA1', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMCCase1.java",
+   "line": 9,
+   "code": "String crypto = \"SHA1\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD5",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='MD5', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMCCase2.java",
+   "line": 9,
+   "code": "String crypto = \"MD5\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD4",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='MD4', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMCCase3.java",
+   "line": 9,
+   "code": "String crypto = \"MD4\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD2",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='MD2', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMCCase4.java",
+   "line": 9,
+   "code": "String crypto = \"MD2\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA-1",
+   "break_model": "grover",
+   "reason": "P1: MessageDigest.getInstance selects algorithm 'SHA1'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABPSCase1.java",
+   "line": 9,
+   "code": "MessageDigest md = MessageDigest.getInstance(\"SHA1\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA-256",
+   "break_model": "grover",
+   "reason": "P1: MessageDigest.getInstance selects algorithm 'SHA-256'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABPSCase1.java",
+   "line": 11,
+   "code": "md = MessageDigest.getInstance(\"SHA-256\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABPSCase1.java",
+   "line": 12,
+   "code": "md.update(name.getBytes());"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD5",
+   "break_model": "grover",
+   "reason": "P1: MessageDigest.getInstance selects algorithm 'MD5'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABPSCase2.java",
+   "line": 9,
+   "code": "MessageDigest md = MessageDigest.getInstance(\"MD5\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA-256",
+   "break_model": "grover",
+   "reason": "P1: MessageDigest.getInstance selects algorithm 'SHA-256'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABPSCase2.java",
+   "line": 11,
+   "code": "md = MessageDigest.getInstance(\"SHA-256\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABPSCase2.java",
+   "line": 12,
+   "code": "md.update(name.getBytes());"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD4",
+   "break_model": "grover",
+   "reason": "P1: MessageDigest.getInstance selects algorithm 'MD4'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABPSCase3.java",
+   "line": 9,
+   "code": "MessageDigest md = MessageDigest.getInstance(\"MD4\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA-256",
+   "break_model": "grover",
+   "reason": "P1: MessageDigest.getInstance selects algorithm 'SHA-256'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABPSCase3.java",
+   "line": 11,
+   "code": "md = MessageDigest.getInstance(\"SHA-256\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABPSCase3.java",
+   "line": 12,
+   "code": "md.update(name.getBytes());"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD2",
+   "break_model": "grover",
+   "reason": "P1: MessageDigest.getInstance selects algorithm 'MD2'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABPSCase4.java",
+   "line": 9,
+   "code": "MessageDigest md = MessageDigest.getInstance(\"MD2\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA-256",
+   "break_model": "grover",
+   "reason": "P1: MessageDigest.getInstance selects algorithm 'SHA-256'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABPSCase4.java",
+   "line": 11,
+   "code": "md = MessageDigest.getInstance(\"SHA-256\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABPSCase4.java",
+   "line": 12,
+   "code": "md.update(name.getBytes());"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA-1",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='SHA1', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase1.java",
+   "line": 12,
+   "code": "crypto = new CryptoHash1(\"SHA1\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA-1",
+   "break_model": "grover",
+   "reason": "P1: MessageDigest.getInstance is given 'crypto', which holds algorithm 'SHA1'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase1.java",
+   "line": 29,
+   "code": "MessageDigest md = MessageDigest.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase1.java",
+   "line": 30,
+   "code": "md.update(str.getBytes());"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD5",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='MD5', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase2.java",
+   "line": 14,
+   "code": "crypto = new CryptoHash2(\"MD5\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD5",
+   "break_model": "grover",
+   "reason": "P1: MessageDigest.getInstance is given 'crypto', which holds algorithm 'MD5'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase2.java",
+   "line": 31,
+   "code": "MessageDigest md = MessageDigest.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase2.java",
+   "line": 32,
+   "code": "md.update(str.getBytes());"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD4",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='MD4', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase3.java",
+   "line": 14,
+   "code": "crypto = new CryptoHash3(\"MD4\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD4",
+   "break_model": "grover",
+   "reason": "P1: MessageDigest.getInstance is given 'crypto', which holds algorithm 'MD4'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase3.java",
+   "line": 31,
+   "code": "MessageDigest md = MessageDigest.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase3.java",
+   "line": 32,
+   "code": "md.update(str.getBytes());"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD2",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='MD2', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase4.java",
+   "line": 14,
+   "code": "crypto = new CryptoHash4(\"MD2\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD2",
+   "break_model": "grover",
+   "reason": "P1: MessageDigest.getInstance is given 'crypto', which holds algorithm 'MD2'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase4.java",
+   "line": 31,
+   "code": "MessageDigest md = MessageDigest.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase4.java",
+   "line": 32,
+   "code": "md.update(str.getBytes());"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA-1",
+   "break_model": "grover",
+   "reason": "P1: MessageDigest.getInstance selects algorithm 'SHA1'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashBBCase1.java",
+   "line": 9,
+   "code": "MessageDigest md = MessageDigest.getInstance(\"SHA1\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashBBCase1.java",
+   "line": 10,
+   "code": "md.update(name.getBytes());"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD5",
+   "break_model": "grover",
+   "reason": "P1: MessageDigest.getInstance selects algorithm 'MD5'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashBBCase2.java",
+   "line": 9,
+   "code": "MessageDigest md = MessageDigest.getInstance(\"MD5\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashBBCase2.java",
+   "line": 10,
+   "code": "md.update(name.getBytes());"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD4",
+   "break_model": "grover",
+   "reason": "P1: MessageDigest.getInstance selects algorithm 'MD4'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashBBCase3.java",
+   "line": 9,
+   "code": "MessageDigest md = MessageDigest.getInstance(\"MD4\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashBBCase3.java",
+   "line": 10,
+   "code": "md.update(name.getBytes());"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD2",
+   "break_model": "grover",
+   "reason": "P1: MessageDigest.getInstance selects algorithm 'MD2'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashBBCase4.java",
+   "line": 9,
+   "code": "MessageDigest md = MessageDigest.getInstance(\"MD2\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashBBCase4.java",
+   "line": 10,
+   "code": "md.update(name.getBytes());"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA-256",
+   "break_model": "grover",
+   "reason": "P1: MessageDigest.getInstance selects algorithm 'SHA-256'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashCorrected.java",
+   "line": 10,
+   "code": "MessageDigest md = MessageDigest.getInstance(\"SHA-256\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashCorrected.java",
+   "line": 11,
+   "code": "md.update(name.getBytes());"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase1.java",
+   "line": 10,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase1.java",
+   "line": 12,
+   "code": "keyGen.init(secRandom);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase1.java",
+   "line": 13,
+   "code": "Key key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "HMAC",
+   "break_model": "grover",
+   "reason": "P1: Mac.getInstance selects algorithm 'HmacMD5'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase1.java",
+   "line": 16,
+   "code": "Mac mac = Mac.getInstance(\"HmacMD5\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase1.java",
+   "line": 17,
+   "code": "mac.init(key);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase1.java",
+   "line": 19,
+   "code": "String msg = new String(\"TSE2021\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase1.java",
+   "line": 21,
+   "code": "byte[] macResult = mac.doFinal(bytes);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase2.java",
+   "line": 10,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase2.java",
+   "line": 12,
+   "code": "keyGen.init(secRandom);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase2.java",
+   "line": 13,
+   "code": "Key key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "HMAC",
+   "break_model": "grover",
+   "reason": "P1: Mac.getInstance selects algorithm 'HmacSHA1'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase2.java",
+   "line": 16,
+   "code": "Mac mac = Mac.getInstance(\"HmacSHA1\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase2.java",
+   "line": 17,
+   "code": "mac.init(key);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase2.java",
+   "line": 19,
+   "code": "String msg = new String(\"TSE2021\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase2.java",
+   "line": 21,
+   "code": "byte[] macResult = mac.doFinal(bytes);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacCorrected.java",
+   "line": 10,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacCorrected.java",
+   "line": 12,
+   "code": "keyGen.init(secRandom);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacCorrected.java",
+   "line": 13,
+   "code": "Key key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "HMAC",
+   "break_model": "grover",
+   "reason": "P1: Mac.getInstance selects algorithm 'HmacSHA256'",
+   "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacCorrected.java",
+   "line": 16,
+   "code": "Mac mac = Mac.getInstance(\"HmacSHA256\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacCorrected.java",
+   "line": 17,
+   "code": "mac.init(key);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacCorrected.java",
+   "line": 19,
+   "code": "String msg = new String(\"TSE2021\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacCorrected.java",
+   "line": 21,
+   "code": "byte[] macResult = mac.doFinal(bytes);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P2: SecretKeySpec names algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABHCase1.java",
+   "line": 15,
+   "code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P2: SecretKeySpec names algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABICase1.java",
+   "line": 18,
+   "code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P2: SecretKeySpec names algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABICase2.java",
+   "line": 27,
+   "code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P2: SecretKeySpec names algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABICase3.java",
+   "line": 22,
+   "code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P2: SecretKeySpec names algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABMC1.java",
+   "line": 10,
+   "code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABSCase1.java",
+   "line": 38,
+   "code": "Cipher cipher;"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'algoSpec'='AES/CBC/PKCS5Padding', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABSCase1.java",
+   "line": 39,
+   "code": "String algoSpec = \"AES/CBC/PKCS5Padding\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'algo'='AES', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABSCase1.java",
+   "line": 40,
+   "code": "String algo = \"AES\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance is given 'algoSpec', which holds algorithm 'AES/CBC/PKCS5Padding'",
+   "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABSCase1.java",
+   "line": 43,
+   "code": "cipher = Cipher.getInstance(algoSpec);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P2: SecretKeySpec algorithm argument 'algo' holds 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABSCase1.java",
+   "line": 55,
+   "code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes,algo);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABSCase1.java",
+   "line": 56,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE,keySpec);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABSCase1.java",
+   "line": 57,
+   "code": "return cipher.doFinal(txtBytes);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P2: SecretKeySpec names algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringBBCase1.java",
+   "line": 18,
+   "code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'AES/CBC/PKCS5PADDING'",
+   "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringBBCase1.java",
+   "line": 22,
+   "code": "Cipher cipher = Cipher.getInstance(\"AES/CBC/PKCS5PADDING\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringBBCase1.java",
+   "line": 23,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, keySpec);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringBBCase1.java",
+   "line": 24,
+   "code": "String encrypt = Base64.getEncoder().encodeToString(cipher.doFinal(originalString.getBytes(\"UTF-8\")));"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P2: SecretKeySpec names algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringCorrected.java",
+   "line": 17,
+   "code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'AES/CBC/PKCS5PADDING'",
+   "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringCorrected.java",
+   "line": 21,
+   "code": "Cipher cipher = Cipher.getInstance(\"AES/CBC/PKCS5PADDING\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringCorrected.java",
+   "line": 22,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, keySpec);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringCorrected.java",
+   "line": 23,
+   "code": "String encrypt = Base64.getEncoder().encodeToString(cipher.doFinal(originalString.getBytes(\"UTF-8\")));"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase1.java",
+   "line": 12,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase1.java",
+   "line": 13,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance is given 'crypto', which holds algorithm 'AES/ECB/PKCS5Padding'",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase1.java",
+   "line": 14,
+   "code": "Cipher cipher = Cipher.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase1.java",
+   "line": 15,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='AES/ECB/PKCS5Padding', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase1.java",
+   "line": 20,
+   "code": "String crypto = \"AES/ECB/PKCS5Padding\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'DEFAULT_CRYPTO'='AES/ECB/PKCS5Padding', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase2.java",
+   "line": 11,
+   "code": "public static final String DEFAULT_CRYPTO = \"AES/ECB/PKCS5Padding\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase2.java",
+   "line": 15,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase2.java",
+   "line": 16,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase2.java",
+   "line": 17,
+   "code": "Cipher cipher = Cipher.getInstance(String.valueOf(crypto));"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase2.java",
+   "line": 18,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase3.java",
+   "line": 16,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase3.java",
+   "line": 17,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance is given 'crypto', which holds algorithm 'AES/ECB/PKCS5Padding'",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase3.java",
+   "line": 18,
+   "code": "Cipher cipher = Cipher.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase3.java",
+   "line": 19,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='AES/ECB/PKCS5Padding', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase3.java",
+   "line": 23,
+   "code": "String crypto = \"AES/ECB/PKCS5Padding\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABMC1.java",
+   "line": 13,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABMC1.java",
+   "line": 14,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABMC1.java",
+   "line": 15,
+   "code": "Cipher cipher = Cipher.getInstance(crypto);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABMC1.java",
+   "line": 16,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'crypto'='AES/ECB/PKCS5Padding', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABMCCase1.java",
+   "line": 10,
+   "code": "String crypto = \"AES/ECB/PKCS5Padding\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABPSCase1.java",
+   "line": 11,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABPSCase1.java",
+   "line": 12,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'AES/ECB/PKCS5Padding'",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABPSCase1.java",
+   "line": 13,
+   "code": "Cipher cipher = Cipher.getInstance(\"AES/ECB/PKCS5Padding\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'AES/CBC/PKCS5Padding'",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABPSCase1.java",
+   "line": 15,
+   "code": "cipher = Cipher.getInstance(\"AES/CBC/PKCS5Padding\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABPSCase1.java",
+   "line": 16,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'cryptoAlgo'='AES/ECB/PKCS5Padding', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABSCase1.java",
+   "line": 13,
+   "code": "String cryptoAlgo = \"AES/ECB/PKCS5Padding\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABSCase1.java",
+   "line": 32,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABSCase1.java",
+   "line": 33,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABSCase1.java",
+   "line": 34,
+   "code": "Cipher cipher = Cipher.getInstance(passedAlgo);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABSCase1.java",
+   "line": 35,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoBBCase1.java",
+   "line": 12,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoBBCase1.java",
+   "line": 13,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'AES/ECB/PKCS5Padding'",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoBBCase1.java",
+   "line": 14,
+   "code": "Cipher cipher = Cipher.getInstance(\"AES/ECB/PKCS5Padding\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoBBCase1.java",
+   "line": 15,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoCorrected.java",
+   "line": 12,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoCorrected.java",
+   "line": 13,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'AES/CBC/PKCS5Padding'",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoCorrected.java",
+   "line": 14,
+   "code": "Cipher cipher = Cipher.getInstance(\"AES/CBC/PKCS5Padding\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoCorrected.java",
+   "line": 15,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, key);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase1.java",
+   "line": 10,
+   "code": "public class InsecureAsymmetricCipherABICase1 {"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P1: KeyPairGenerator.getInstance selects algorithm 'RSA'",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase1.java",
+   "line": 12,
+   "code": "KeyPairGenerator kgp = KeyPairGenerator.getInstance(\"RSA\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase1.java",
+   "line": 14,
+   "code": "KeyPair kp = kgp.generateKeyPair();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase1.java",
+   "line": 16,
+   "code": "Cipher cipher = Cipher.getInstance(\"RSA\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase1.java",
+   "line": 17,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, kp.getPublic());"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase1.java",
+   "line": 20,
+   "code": "String myMessage = new String(\"Secret Message\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase1.java",
+   "line": 24,
+   "code": "Cipher dec = Cipher.getInstance(\"RSA\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase1.java",
+   "line": 25,
+   "code": "dec.init(Cipher.DECRYPT_MODE, kp.getPrivate());"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase1.java",
+   "line": 32,
+   "code": "InsecureAsymmetricCipherABICase1 bc = new InsecureAsymmetricCipherABICase1();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase2.java",
+   "line": 10,
+   "code": "public class InsecureAsymmetricCipherABICase2 {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase2.java",
+   "line": 14,
+   "code": "public void go(KeyPairGenerator kgp, KeyPair kp) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, ClassNotFoundException {"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase2.java",
+   "line": 16,
+   "code": "Cipher cipher = Cipher.getInstance(\"RSA\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase2.java",
+   "line": 17,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, kp.getPublic());"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase2.java",
+   "line": 20,
+   "code": "String myMessage = new String(\"Secret Message\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase2.java",
+   "line": 24,
+   "code": "Cipher dec = Cipher.getInstance(\"RSA\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase2.java",
+   "line": 25,
+   "code": "dec.init(Cipher.DECRYPT_MODE, kp.getPrivate());"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase2.java",
+   "line": 38,
+   "code": "InsecureAsymmetricCipherABICase2 bc = new InsecureAsymmetricCipherABICase2();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P1: KeyPairGenerator.getInstance selects algorithm 'RSA'",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase2.java",
+   "line": 41,
+   "code": "KeyPairGenerator kgp = KeyPairGenerator.getInstance(\"RSA\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase2.java",
+   "line": 43,
+   "code": "KeyPair kp = kgp.generateKeyPair();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase3.java",
+   "line": 10,
+   "code": "public class InsecureAsymmetricCipherABICase3 {"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P1: KeyPairGenerator.getInstance selects algorithm 'RSA'",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase3.java",
+   "line": 18,
+   "code": "KeyPairGenerator kgp = KeyPairGenerator.getInstance(\"RSA\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase3.java",
+   "line": 20,
+   "code": "KeyPair kp = kgp.generateKeyPair();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase3.java",
+   "line": 23,
+   "code": "Cipher cipher = Cipher.getInstance(\"RSA\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase3.java",
+   "line": 24,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, kp.getPublic());"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase3.java",
+   "line": 27,
+   "code": "String myMessage = new String(\"Secret Message\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase3.java",
+   "line": 31,
+   "code": "Cipher dec = Cipher.getInstance(\"RSA\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase3.java",
+   "line": 32,
+   "code": "dec.init(Cipher.DECRYPT_MODE, kp.getPrivate());"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABMC1.java",
+   "line": 10,
+   "code": "public class InsecureAsymmetricCipherABMC1 {"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P1: KeyPairGenerator.getInstance selects algorithm 'RSA'",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABMC1.java",
+   "line": 13,
+   "code": "KeyPairGenerator kgp = KeyPairGenerator.getInstance(\"RSA\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABMC1.java",
+   "line": 15,
+   "code": "KeyPair kp = kgp.generateKeyPair();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABMC1.java",
+   "line": 16,
+   "code": "Cipher cipher = Cipher.getInstance(\"RSA\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABMC1.java",
+   "line": 17,
+   "code": "Cipher dec = Cipher.getInstance(\"RSA\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABMC1.java",
+   "line": 19,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, kp.getPublic());"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABMC1.java",
+   "line": 22,
+   "code": "String myMessage = new String(\"Secret Message\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABMC1.java",
+   "line": 26,
+   "code": "dec.init(Cipher.DECRYPT_MODE, kp.getPrivate());"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABMCCase1.java",
+   "line": 10,
+   "code": "public class InsecureAsymmetricCipherABMCCase1 {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABMCCase1.java",
+   "line": 12,
+   "code": "InsecureAsymmetricCipherABMC1 bc = new InsecureAsymmetricCipherABMC1();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABPSCase1.java",
+   "line": 6,
+   "code": "public class InsecureAsymmetricCipherABPSCase1 {"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P1: KeyPairGenerator.getInstance selects algorithm 'RSA'",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABPSCase1.java",
+   "line": 8,
+   "code": "KeyPairGenerator kgp = KeyPairGenerator.getInstance(\"RSA\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABPSCase1.java",
+   "line": 17,
+   "code": "KeyPair kp = kgp.generateKeyPair();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABPSCase1.java",
+   "line": 20,
+   "code": "Cipher cipher = Cipher.getInstance(\"RSA\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABPSCase1.java",
+   "line": 21,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, kp.getPublic());"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABPSCase1.java",
+   "line": 24,
+   "code": "String myMessage = new String(\"Secret Message\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABPSCase1.java",
+   "line": 31,
+   "code": "InsecureAsymmetricCipherABPSCase1 bc = new InsecureAsymmetricCipherABPSCase1();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherBBCase1.java",
+   "line": 7,
+   "code": "public class InsecureAsymmetricCipherBBCase1 {"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P1: KeyPairGenerator.getInstance selects algorithm 'RSA'",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherBBCase1.java",
+   "line": 9,
+   "code": "KeyPairGenerator kgp = KeyPairGenerator.getInstance(\"RSA\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherBBCase1.java",
+   "line": 12,
+   "code": "KeyPair kp = kgp.generateKeyPair();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherBBCase1.java",
+   "line": 15,
+   "code": "Cipher cipher = Cipher.getInstance(\"RSA\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherBBCase1.java",
+   "line": 16,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, kp.getPublic());"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherBBCase1.java",
+   "line": 19,
+   "code": "String myMessage = new String(\"Secret Message\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherBBCase1.java",
+   "line": 23,
+   "code": "Cipher dec = Cipher.getInstance(\"RSA\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherBBCase1.java",
+   "line": 24,
+   "code": "dec.init(Cipher.DECRYPT_MODE, kp.getPrivate());"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherBBCase1.java",
+   "line": 31,
+   "code": "InsecureAsymmetricCipherBBCase1 bc = new InsecureAsymmetricCipherBBCase1();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P2: SecretKeySpec names algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABHCase2.java",
+   "line": 33,
+   "code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P2: SecretKeySpec names algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABICase1.java",
+   "line": 16,
+   "code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P2: SecretKeySpec names algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABICase2.java",
+   "line": 27,
+   "code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P2: SecretKeySpec names algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABICase3.java",
+   "line": 18,
+   "code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P2: SecretKeySpec names algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABMC1.java",
+   "line": 11,
+   "code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P2: SecretKeySpec names algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABPSCase1.java",
+   "line": 17,
+   "code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABSCase1.java",
+   "line": 38,
+   "code": "Cipher cipher;"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'algoSpec'='AES/CBC/PKCS5Padding', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABSCase1.java",
+   "line": 39,
+   "code": "String algoSpec = \"AES/CBC/PKCS5Padding\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P3: taint source -- binds 'algo'='AES', which selects the cryptographic algorithm downstream",
+   "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABSCase1.java",
+   "line": 40,
+   "code": "String algo = \"AES\";"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance is given 'algoSpec', which holds algorithm 'AES/CBC/PKCS5Padding'",
+   "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABSCase1.java",
+   "line": 43,
+   "code": "cipher = Cipher.getInstance(algoSpec);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P2: SecretKeySpec algorithm argument 'algo' holds 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABSCase1.java",
+   "line": 55,
+   "code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes,algo);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABSCase1.java",
+   "line": 56,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE,keySpec);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABSCase1.java",
+   "line": 57,
+   "code": "return cipher.doFinal(txtBytes);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P2: SecretKeySpec names algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyBBCase1.java",
+   "line": 11,
+   "code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P2: SecretKeySpec names algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyCorrected.java",
+   "line": 17,
+   "code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'AES/CBC/PKCS5PADDING'",
+   "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyCorrected.java",
+   "line": 21,
+   "code": "Cipher cipher = Cipher.getInstance(\"AES/CBC/PKCS5PADDING\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyCorrected.java",
+   "line": 22,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE, keySpec);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyCorrected.java",
+   "line": 23,
+   "code": "String encrypt = Base64.getEncoder().encodeToString(cipher.doFinal(originalString.getBytes(\"UTF-8\")));"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABHCase1.java",
+   "line": 11,
+   "code": "public class PredictableKeyStorePasswordABHCase1 {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABHCase1.java",
+   "line": 13,
+   "code": "public static void main(String args[]) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABHCase1.java",
+   "line": 14,
+   "code": "PredictableKeyStorePasswordBBCase1 pksp = new PredictableKeyStorePasswordBBCase1();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABHCase1.java",
+   "line": 18,
+   "code": "public void go() throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "KeyStore container format (JKS), not a cryptographic primitive",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABHCase1.java",
+   "line": 24,
+   "code": "KeyStore ks = KeyStore.getInstance(type);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABHCase1.java",
+   "line": 25,
+   "code": "cacerts = new URL(\"https://www.google.com\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABHCase2.java",
+   "line": 12,
+   "code": "public class PredictableKeyStorePasswordABHCase2 {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABHCase2.java",
+   "line": 14,
+   "code": "public static void main(String args[]) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABHCase2.java",
+   "line": 15,
+   "code": "PredictableKeyStorePasswordBBCase1 pksp = new PredictableKeyStorePasswordBBCase1();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABHCase2.java",
+   "line": 19,
+   "code": "public void go() throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "KeyStore container format (JKS), not a cryptographic primitive",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABHCase2.java",
+   "line": 29,
+   "code": "KeyStore ks = KeyStore.getInstance(type);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABHCase2.java",
+   "line": 30,
+   "code": "cacerts = new URL(\"https://www.google.com\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABICase1.java",
+   "line": 10,
+   "code": "public class PredictableKeyStorePasswordABICase1 {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABICase1.java",
+   "line": 12,
+   "code": "public static void main(String args[]) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABICase1.java",
+   "line": 13,
+   "code": "PredictableKeyStorePasswordABICase1 pksp = new PredictableKeyStorePasswordABICase1();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABICase1.java",
+   "line": 18,
+   "code": "public void go(String key) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "KeyStore container format (JKS), not a cryptographic primitive",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABICase1.java",
+   "line": 20,
+   "code": "KeyStore ks = KeyStore.getInstance(type);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABICase1.java",
+   "line": 21,
+   "code": "cacerts = new URL(\"https://www.google.com\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABICase2.java",
+   "line": 10,
+   "code": "public class PredictableKeyStorePasswordABICase2 {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABICase2.java",
+   "line": 15,
+   "code": "public static void main(String [] args) throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABICase2.java",
+   "line": 16,
+   "code": "PredictableKeyStorePasswordABICase2 pksp = new PredictableKeyStorePasswordABICase2();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABICase2.java",
+   "line": 29,
+   "code": "private void go() throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "KeyStore container format (JKS), not a cryptographic primitive",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABICase2.java",
+   "line": 31,
+   "code": "KeyStore ks = KeyStore.getInstance(type);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABICase2.java",
+   "line": 32,
+   "code": "cacerts = new URL(\"https://www.google.com\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABICase3.java",
+   "line": 10,
+   "code": "public class PredictableKeyStorePasswordABICase3 {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABICase3.java",
+   "line": 12,
+   "code": "public static void main(String args[]) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABICase3.java",
+   "line": 13,
+   "code": "PredictableKeyStorePasswordABICase3 pkspac = new PredictableKeyStorePasswordABICase3();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABICase3.java",
+   "line": 18,
+   "code": "public void method1(String k) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABICase3.java",
+   "line": 23,
+   "code": "public void method2(String key) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "KeyStore container format (JKS), not a cryptographic primitive",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABICase3.java",
+   "line": 25,
+   "code": "KeyStore ks = KeyStore.getInstance(type);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABICase3.java",
+   "line": 26,
+   "code": "cacerts = new URL(\"https://www.google.com\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABMC1.java",
+   "line": 11,
+   "code": "public class PredictableKeyStorePasswordABMC1 {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABMC1.java",
+   "line": 13,
+   "code": "public void go(String key) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "KeyStore container format (JKS), not a cryptographic primitive",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABMC1.java",
+   "line": 15,
+   "code": "KeyStore ks = KeyStore.getInstance(type);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABMC1.java",
+   "line": 16,
+   "code": "cacerts = new URL(\"https://www.google.com\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABMCCase1.java",
+   "line": 8,
+   "code": "public class PredictableKeyStorePasswordABMCCase1 {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABMCCase1.java",
+   "line": 9,
+   "code": "public static void main(String args[]) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABMCCase1.java",
+   "line": 10,
+   "code": "PredictableKeyStorePasswordABMC1 pksp = new PredictableKeyStorePasswordABMC1();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABPSCase1.java",
+   "line": 11,
+   "code": "public class PredictableKeyStorePasswordABPSCase1 {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABPSCase1.java",
+   "line": 13,
+   "code": "public static void main(String args[]) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABPSCase1.java",
+   "line": 14,
+   "code": "PredictableKeyStorePasswordABPSCase1 pksp = new PredictableKeyStorePasswordABPSCase1();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABPSCase1.java",
+   "line": 19,
+   "code": "public void go(int choice) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "KeyStore container format (JKS), not a cryptographic primitive",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABPSCase1.java",
+   "line": 21,
+   "code": "KeyStore ks = KeyStore.getInstance(type);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABPSCase1.java",
+   "line": 22,
+   "code": "cacerts = new URL(\"https://www.google.com\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABSCase1.java",
+   "line": 10,
+   "code": "public class PredictableKeyStorePasswordABSCase1 {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABSCase1.java",
+   "line": 11,
+   "code": "CryptoPredictableKeyStorePassword1 crypto;"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABSCase1.java",
+   "line": 12,
+   "code": "public PredictableKeyStorePasswordABSCase1() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABSCase1.java",
+   "line": 14,
+   "code": "crypto = new CryptoPredictableKeyStorePassword1(key);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABSCase1.java",
+   "line": 19,
+   "code": "class CryptoPredictableKeyStorePassword1 {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABSCase1.java",
+   "line": 23,
+   "code": "public CryptoPredictableKeyStorePassword1(String key){"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABSCase1.java",
+   "line": 27,
+   "code": "public void method1(String passedKey) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "KeyStore container format (JKS), not a cryptographic primitive",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABSCase1.java",
+   "line": 32,
+   "code": "KeyStore ks = KeyStore.getInstance(type);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABSCase1.java",
+   "line": 33,
+   "code": "cacerts = new URL(\"https://www.google.com\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordBBCase1.java",
+   "line": 10,
+   "code": "public class PredictableKeyStorePasswordBBCase1 {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordBBCase1.java",
+   "line": 13,
+   "code": "public static void main(String args[]) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordBBCase1.java",
+   "line": 14,
+   "code": "PredictableKeyStorePasswordBBCase1 pksp = new PredictableKeyStorePasswordBBCase1();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordBBCase1.java",
+   "line": 18,
+   "code": "public void go() throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "KeyStore container format (JKS), not a cryptographic primitive",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordBBCase1.java",
+   "line": 20,
+   "code": "KeyStore ks = KeyStore.getInstance(type);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordBBCase1.java",
+   "line": 21,
+   "code": "cacerts = new URL(\"https://www.google.com\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordCorrected.java",
+   "line": 11,
+   "code": "public class PredictableKeyStorePasswordCorrected {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordCorrected.java",
+   "line": 13,
+   "code": "public static void main(String args[]) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordCorrected.java",
+   "line": 14,
+   "code": "PredictableKeyStorePasswordCorrected pksp = new PredictableKeyStorePasswordCorrected();"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordCorrected.java",
+   "line": 18,
+   "code": "public void go() throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "KeyStore container format (JKS), not a cryptographic primitive",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordCorrected.java",
+   "line": 20,
+   "code": "KeyStore ks = KeyStore.getInstance(type);"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordCorrected.java",
+   "line": 21,
+   "code": "cacerts = new URL(\"https://www.google.com\");"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABHCase1.java",
+   "line": 15,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABHCase1.java",
+   "line": 16,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'AES/CBC/PKCS5Padding'",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABHCase1.java",
+   "line": 17,
+   "code": "Cipher cipher = Cipher.getInstance(\"AES/CBC/PKCS5Padding\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABHCase1.java",
+   "line": 23,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABHCase2.java",
+   "line": 16,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABHCase2.java",
+   "line": 17,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'AES/CBC/PKCS5Padding'",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABHCase2.java",
+   "line": 18,
+   "code": "Cipher cipher = Cipher.getInstance(\"AES/CBC/PKCS5Padding\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABHCase2.java",
+   "line": 33,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABICase1.java",
+   "line": 13,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABICase1.java",
+   "line": 14,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'AES/CBC/PKCS5Padding'",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABICase1.java",
+   "line": 15,
+   "code": "Cipher cipher = Cipher.getInstance(\"AES/CBC/PKCS5Padding\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABICase1.java",
+   "line": 17,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABICase2.java",
+   "line": 18,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABICase2.java",
+   "line": 19,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'AES/CBC/PKCS5Padding'",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABICase2.java",
+   "line": 20,
+   "code": "Cipher cipher = Cipher.getInstance(\"AES/CBC/PKCS5Padding\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABICase2.java",
+   "line": 22,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABICase3.java",
+   "line": 13,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABICase3.java",
+   "line": 14,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'AES/CBC/PKCS5Padding'",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABICase3.java",
+   "line": 15,
+   "code": "Cipher cipher = Cipher.getInstance(\"AES/CBC/PKCS5Padding\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABICase3.java",
+   "line": 17,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABMC1.java",
+   "line": 15,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABMC1.java",
+   "line": 16,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'AES/CBC/PKCS5Padding'",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABMC1.java",
+   "line": 17,
+   "code": "Cipher cipher = Cipher.getInstance(\"AES/CBC/PKCS5Padding\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABMC1.java",
+   "line": 19,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABPSCase1.java",
+   "line": 12,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABPSCase1.java",
+   "line": 13,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'AES/CBC/PKCS5Padding'",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABPSCase1.java",
+   "line": 14,
+   "code": "Cipher cipher = Cipher.getInstance(\"AES/CBC/PKCS5Padding\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABPSCase1.java",
+   "line": 26,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABSCase1.java",
+   "line": 33,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABSCase1.java",
+   "line": 34,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'AES/CBC/PKCS5Padding'",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABSCase1.java",
+   "line": 35,
+   "code": "Cipher cipher = Cipher.getInstance(\"AES/CBC/PKCS5Padding\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABSCase1.java",
+   "line": 36,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorBBCase1.java",
+   "line": 12,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorBBCase1.java",
+   "line": 13,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'AES/CBC/PKCS5Padding'",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorBBCase1.java",
+   "line": 14,
+   "code": "Cipher cipher = Cipher.getInstance(\"AES/CBC/PKCS5Padding\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorBBCase1.java",
+   "line": 20,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorCorrected.java",
+   "line": 17,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorCorrected.java",
+   "line": 18,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'AES/CBC/PKCS5Padding'",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorCorrected.java",
+   "line": 19,
+   "code": "Cipher cipher = Cipher.getInstance(\"AES/CBC/PKCS5Padding\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorCorrected.java",
+   "line": 27,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorCorrected.java",
+   "line": 39,
+   "code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named or determined on this line",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorCorrected.java",
+   "line": 40,
+   "code": "SecretKey key = keyGen.generateKey();"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: Cipher.getInstance selects algorithm 'AES/CBC/PKCS5Padding'",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorCorrected.java",
+   "line": 41,
+   "code": "Cipher cipher = Cipher.getInstance(\"AES/CBC/PKCS5Padding\");"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorCorrected.java",
+   "line": 50,
+   "code": "cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);"
+  }
+ ]
+}

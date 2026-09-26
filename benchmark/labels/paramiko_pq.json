@@ -1,0 +1,3685 @@
+{
+ "corpus": "paramiko",
+ "label_kind": "hand-annotated line-level ground truth (author of this harness)",
+ "provenance": {
+  "corpus_url": "https://github.com/paramiko/paramiko.git",
+  "corpus_pinned_commit": "142f593e40ad767c5e3556cbace66dc84589620c",
+  "citation": "paramiko -- Python SSH implementation. https://github.com/paramiko/paramiko",
+  "notes": "Real production library, not a constructed benchmark. Scoped to the 'paramiko/' package directory; 'tests/' and 'sites/' are excluded, and that exclusion is part of the declared measurement scope."
+ },
+ "annotation": {
+  "annotated_by": "ECDAT benchmark harness author, by direct reading of every file in scope",
+  "unit": "one (file, 1-based line) location",
+  "files_in_scope": 42,
+  "candidate_lines_reviewed": 407,
+  "positive_labels": 240,
+  "negative_labels_audited": 167,
+  "method": "Every line in scope was read. A location is POSITIVE iff it names, or binds a name to, a quantum-vulnerable cryptographic primitive in a position that determines the algorithm. A location that merely OPERATES on a primitive chosen elsewhere (cipher.init, md.update, cipher.encryptor(), .digest()) is NEGATIVE in label set L1 and is counted POSITIVE only in sensitivity variant L2, which is reported alongside L1. Comments, imports of non-primitives, PRNGs, IVs/salts, PBKDF parameter objects, key-store container formats and key/block size plumbing are NEGATIVE with a recorded reason.",
+  "independence": "Criteria are written from JCA/SSH semantics and never consult engine/scanner.py's rule table. Labels are frozen data; the harness verifies each label's verbatim source line against the pinned corpus and fails loudly on drift rather than re-deriving labels."
+ },
+ "labels": [
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/__init__.py",
+   "line": 70,
+   "code": "from paramiko.ecdsakey import ECDSAKey"
+  },
+  {
+   "decision": "positive",
+   "primitive": "Ed25519",
+   "break_model": "shor",
+   "reason": "P1: names the Ed25519 primitive in executable code",
+   "file": "paramiko/__init__.py",
+   "line": 71,
+   "code": "from paramiko.ed25519key import Ed25519Key"
+  },
+  {
+   "decision": "positive",
+   "primitive": "Ed25519",
+   "break_model": "shor",
+   "reason": "P1: names the Ed25519 primitive in executable code",
+   "file": "paramiko/__init__.py",
+   "line": 115,
+   "code": "key_classes = [RSAKey, Ed25519Key, ECDSAKey]"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/agent.py",
+   "line": 45,
+   "code": "SSH_AGENT_RSA_SHA2_256 = 2"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/agent.py",
+   "line": 46,
+   "code": "SSH_AGENT_RSA_SHA2_512 = 4"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/agent.py",
+   "line": 49,
+   "code": "# SHA256 flag set it won't continue looking at the SHA512 one; it"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'rsa-sha2-256' names a quantum-vulnerable primitive",
+   "file": "paramiko/agent.py",
+   "line": 53,
+   "code": "\"rsa-sha2-256\": SSH_AGENT_RSA_SHA2_256,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'rsa-sha2-512' names a quantum-vulnerable primitive",
+   "file": "paramiko/agent.py",
+   "line": 54,
+   "code": "\"rsa-sha2-512\": SSH_AGENT_RSA_SHA2_512,"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/agent.py",
+   "line": 460,
+   "code": "# Prefer inner_key.asbytes, since that will differ for eg RSA-CERT"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/agent.py",
+   "line": 489,
+   "code": "# RSA-CERT 'keys' - those end up always degrading to ssh-rsa type"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/agent.py",
+   "line": 491,
+   "code": "# even if everything else wants SHA2 (including our flag map)."
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/auth_handler.py",
+   "line": 266,
+   "code": "For RSA, this will be one of the SHA2 algorithms, depending on our"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/auth_handler.py",
+   "line": 269,
+   "code": "# Short-circuit for non-RSA keys"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/auth_handler.py",
+   "line": 279,
+   "code": "# Only consider RSA algos from our list, lest we agree on another!"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/auth_handler.py",
+   "line": 282,
+   "code": "# Short-circuit negatively if user disabled all RSA algos (heh)"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/auth_handler.py",
+   "line": 285,
+   "code": "\"An RSA key was specified, but no RSA pubkey algorithms are configured!\"  # noqa"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/auth_handler.py",
+   "line": 318,
+   "code": "msg = f\"Server did not send a server-sig-algs list; defaulting to first RSA algorithm in our list: {pubkey_algo}\"  # noqa"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/auth_handler.py",
+   "line": 472,
+   "code": "# TODO: ok is this a spot where it can say a SHA2 dealie in some"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/auth_handler.py",
+   "line": 478,
+   "code": "# \"ssh-rsa\" in its first field."
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/auth_handler.py",
+   "line": 714,
+   "code": "# NOTE: key_type here may be just key type (\"rsa-sha2-256\") or may be"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/auth_handler.py",
+   "line": 715,
+   "code": "# the cert form if cert was loaded (\"ssh-rsa-cert-v01@openssh.com\")"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/client.py",
+   "line": 34,
+   "code": "from paramiko.ecdsakey import ECDSAKey"
+  },
+  {
+   "decision": "positive",
+   "primitive": "Ed25519",
+   "break_model": "shor",
+   "reason": "P1: names the Ed25519 primitive in executable code",
+   "file": "paramiko/client.py",
+   "line": 35,
+   "code": "from paramiko.ed25519key import Ed25519Key"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'ssh-rsa' names a quantum-vulnerable primitive",
+   "file": "paramiko/client.py",
+   "line": 430,
+   "code": "if keytype == \"ssh-rsa\":"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'rsa-sha2-512' names a quantum-vulnerable primitive",
+   "file": "paramiko/client.py",
+   "line": 431,
+   "code": "if \"rsa-sha2-512\" in sec_opts.key_types:"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'rsa-sha2-512' names a quantum-vulnerable primitive",
+   "file": "paramiko/client.py",
+   "line": 432,
+   "code": "keytype = \"rsa-sha2-512\""
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'rsa-sha2-256' names a quantum-vulnerable primitive",
+   "file": "paramiko/client.py",
+   "line": 433,
+   "code": "elif \"rsa-sha2-256\" in sec_opts.key_types:"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'rsa-sha2-256' names a quantum-vulnerable primitive",
+   "file": "paramiko/client.py",
+   "line": 434,
+   "code": "keytype = \"rsa-sha2-256\""
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/client.py",
+   "line": 453,
+   "code": "# offering an ssh-rsa-via-sha2 key as \"ssh-rsa\" still, and the"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/client.py",
+   "line": 455,
+   "code": "# \"ssh-rsa\")"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/client.py",
+   "line": 690,
+   "code": "for pkey_class in (RSAKey, ECDSAKey, Ed25519Key):"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/client.py",
+   "line": 730,
+   "code": "(ECDSAKey, \"ecdsa\"),"
+  },
+  {
+   "decision": "positive",
+   "primitive": "Ed25519",
+   "break_model": "shor",
+   "reason": "P1: names the Ed25519 primitive in executable code",
+   "file": "paramiko/client.py",
+   "line": 731,
+   "code": "(Ed25519Key, \"ed25519\"),"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA1",
+   "break_model": "grover",
+   "reason": "P3: binds 'sha1' to the sha1 hash, which is used as a digest below",
+   "file": "paramiko/config.py",
+   "line": 31,
+   "code": "from hashlib import sha1"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA1",
+   "break_model": "grover",
+   "reason": "P1: calls sha1(), selecting the sha1 digest",
+   "file": "paramiko/config.py",
+   "line": 449,
+   "code": "\"%C\": sha1(tohash.encode()).hexdigest(),"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/ecdsakey.py",
+   "line": 20,
+   "code": "ECDSA keys"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/ecdsakey.py",
+   "line": 41,
+   "code": "class _ECDSACurve:"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/ecdsakey.py",
+   "line": 43,
+   "code": "Represents a specific ECDSA Curve (nistp256, nistp384, etc)."
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/ecdsakey.py",
+   "line": 52,
+   "code": "self.key_length = curve_class.key_size"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA-256",
+   "break_model": "grover",
+   "reason": "P2: binds the SHA256 hash to an SSH signature scheme",
+   "file": "paramiko/ecdsakey.py",
+   "line": 59,
+   "code": "self.hash_object = hashes.SHA256"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA-384",
+   "break_model": "grover",
+   "reason": "P2: binds the SHA384 hash to an SSH signature scheme",
+   "file": "paramiko/ecdsakey.py",
+   "line": 61,
+   "code": "self.hash_object = hashes.SHA384"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA-512",
+   "break_model": "grover",
+   "reason": "P2: binds the SHA512 hash to an SSH signature scheme",
+   "file": "paramiko/ecdsakey.py",
+   "line": 63,
+   "code": "self.hash_object = hashes.SHA512"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/ecdsakey.py",
+   "line": 68,
+   "code": "class _ECDSACurveSet:"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/ecdsakey.py",
+   "line": 70,
+   "code": "A collection to hold the ECDSA curves. Allows querying by oid and by key"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/ecdsakey.py",
+   "line": 71,
+   "code": "format identifier. The two ways in which ECDSAKey needs to be able to look"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/ecdsakey.py",
+   "line": 97,
+   "code": "class ECDSAKey(PKey):"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/ecdsakey.py",
+   "line": 99,
+   "code": "Representation of an ECDSA key which can be used to sign and verify SSH2"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/ecdsakey.py",
+   "line": 103,
+   "code": "_ECDSA_CURVES = _ECDSACurveSet("
+  },
+  {
+   "decision": "positive",
+   "primitive": "secp256r1",
+   "break_model": "shor",
+   "reason": "P1: ec.SECP256R1 selects the SECP256R1 primitive",
+   "file": "paramiko/ecdsakey.py",
+   "line": 105,
+   "code": "_ECDSACurve(ec.SECP256R1, \"nistp256\"),"
+  },
+  {
+   "decision": "positive",
+   "primitive": "secp384r1",
+   "break_model": "shor",
+   "reason": "P1: ec.SECP384R1 selects the SECP384R1 primitive",
+   "file": "paramiko/ecdsakey.py",
+   "line": 106,
+   "code": "_ECDSACurve(ec.SECP384R1, \"nistp384\"),"
+  },
+  {
+   "decision": "positive",
+   "primitive": "secp521r1",
+   "break_model": "shor",
+   "reason": "P1: ec.SECP521R1 selects the SECP521R1 primitive",
+   "file": "paramiko/ecdsakey.py",
+   "line": 107,
+   "code": "_ECDSACurve(ec.SECP521R1, \"nistp521\"),"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/ecdsakey.py",
+   "line": 137,
+   "code": "self.ecdsa_curve = self._ECDSA_CURVES.get_by_curve_class(c_class)"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/ecdsakey.py",
+   "line": 144,
+   "code": "# that into _ECDSACurveSet.get_by_key_format_identifier(), but it"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/ecdsakey.py",
+   "line": 149,
+   "code": "self.ecdsa_curve = self._ECDSA_CURVES.get_by_key_format_identifier("
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/ecdsakey.py",
+   "line": 152,
+   "code": "key_types = self._ECDSA_CURVES.get_key_format_identifier_list()"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/ecdsakey.py",
+   "line": 176,
+   "code": "return cls._ECDSA_CURVES.get_key_format_identifier_list()"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/ecdsakey.py",
+   "line": 191,
+   "code": "key_size_bytes = (key.curve.key_size + 7) // 8"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/ecdsakey.py",
+   "line": 194,
+   "code": "x_bytes = b\"\\x00\" * (key_size_bytes - len(x_bytes)) + x_bytes"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/ecdsakey.py",
+   "line": 197,
+   "code": "y_bytes = b\"\\x00\" * (key_size_bytes - len(y_bytes)) + y_bytes"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: ec.ECDSA selects the ECDSA primitive",
+   "file": "paramiko/ecdsakey.py",
+   "line": 224,
+   "code": "ecdsa = ec.ECDSA(self.ecdsa_curve.hash_object())"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/ecdsakey.py",
+   "line": 225,
+   "code": "sig = self.signing_key.sign(data, ecdsa)"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/ecdsakey.py",
+   "line": 241,
+   "code": "self.verifying_key.verify("
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: ec.ECDSA selects the ECDSA primitive",
+   "file": "paramiko/ecdsakey.py",
+   "line": 242,
+   "code": "signature, data, ec.ECDSA(self.ecdsa_curve.hash_object())"
+  },
+  {
+   "decision": "positive",
+   "primitive": "EllipticCurvePrivateKey",
+   "break_model": "shor",
+   "reason": "P1: names the EllipticCurvePrivateKey primitive in executable code",
+   "file": "paramiko/ecdsakey.py",
+   "line": 250,
+   "code": "def private_key(self) -> Optional[ec.EllipticCurvePrivateKey]:"
+  },
+  {
+   "decision": "positive",
+   "primitive": "secp256r1",
+   "break_model": "shor",
+   "reason": "P1: ec.SECP256R1 selects the SECP256R1 primitive",
+   "file": "paramiko/ecdsakey.py",
+   "line": 254,
+   "code": "def generate(cls, curve=ec.SECP256R1(), progress_func=None, bits=None):"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/ecdsakey.py",
+   "line": 256,
+   "code": "Generate a new private ECDSA key.  This factory function can be used to"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/ecdsakey.py",
+   "line": 260,
+   "code": ":returns: A new private key (`.ECDSAKey`) object"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/ecdsakey.py",
+   "line": 263,
+   "code": "curve = cls._ECDSA_CURVES.get_by_key_length(bits)"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/ecdsakey.py",
+   "line": 269,
+   "code": "return ECDSAKey(vals=(private_key, private_key.public_key()))"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/ecdsakey.py",
+   "line": 302,
+   "code": "curve = self._ECDSA_CURVES.get_by_key_format_identifier(name)"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/ecdsakey.py",
+   "line": 318,
+   "code": "self.ecdsa_curve = self._ECDSA_CURVES.get_by_curve_class(curve_class)"
+  },
+  {
+   "decision": "positive",
+   "primitive": "Ed25519",
+   "break_model": "shor",
+   "reason": "P1: names the Ed25519 primitive in executable code",
+   "file": "paramiko/ed25519key.py",
+   "line": 30,
+   "code": "class Ed25519Key(PKey):"
+  },
+  {
+   "decision": "positive",
+   "primitive": "Ed25519",
+   "break_model": "shor",
+   "reason": "P1: names the Ed25519 primitive in executable code",
+   "file": "paramiko/ed25519key.py",
+   "line": 32,
+   "code": "Representation of an `Ed25519 <https://ed25519.cr.yp.to/>`_ key."
+  },
+  {
+   "decision": "positive",
+   "primitive": "Ed25519",
+   "break_model": "shor",
+   "reason": "P1: names the Ed25519 primitive in executable code",
+   "file": "paramiko/ed25519key.py",
+   "line": 35,
+   "code": "Ed25519 key support was added to OpenSSH in version 6.5."
+  },
+  {
+   "decision": "positive",
+   "primitive": "Ed25519",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'ssh-ed25519' names a quantum-vulnerable primitive",
+   "file": "paramiko/ed25519key.py",
+   "line": 42,
+   "code": "name = \"ssh-ed25519\""
+  },
+  {
+   "decision": "positive",
+   "primitive": "Ed25519",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'ssh-ed25519-cert-v01@openssh.com' names a quantum-vulnerable primitive",
+   "file": "paramiko/ed25519key.py",
+   "line": 55,
+   "code": "cert_type=\"ssh-ed25519-cert-v01@openssh.com\","
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/ed25519key.py",
+   "line": 74,
+   "code": "# OpenSSH moves to it, but for now this is just for Ed25519 keys."
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/ed25519key.py",
+   "line": 203,
+   "code": "m.add_string(self._signing_key.sign(data).signature)"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/ed25519key.py",
+   "line": 211,
+   "code": "self._verifying_key.verify(data, msg.get_binary())"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA1",
+   "break_model": "grover",
+   "reason": "P3: binds 'sha1' to the sha1 hash, which is used as a digest below",
+   "file": "paramiko/hostkeys.py",
+   "line": 25,
+   "code": "from hashlib import sha1"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/hostkeys.py",
+   "line": 26,
+   "code": "from hmac import HMAC"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA1",
+   "break_model": "grover",
+   "reason": "P1: calls sha1(), selecting the sha1 digest",
+   "file": "paramiko/hostkeys.py",
+   "line": 294,
+   "code": "salt = os.urandom(sha1().digest_size)"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA1",
+   "break_model": "grover",
+   "reason": "P1: calls sha1(), selecting the sha1 digest",
+   "file": "paramiko/hostkeys.py",
+   "line": 299,
+   "code": "assert len(salt) == sha1().digest_size"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "computes a MAC; the digest arrives as an argument, so no primitive is named on this line",
+   "file": "paramiko/hostkeys.py",
+   "line": 300,
+   "code": "hmac = HMAC(salt, b(hostname), sha1).digest()"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/hostkeys.py",
+   "line": 301,
+   "code": "hostkey = \"|1|{}|{}\".format(u(encodebytes(salt)), u(encodebytes(hmac)))"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/kex_curve25519.py",
+   "line": 2,
+   "code": "import hashlib"
+  },
+  {
+   "decision": "positive",
+   "primitive": "X25519",
+   "break_model": "shor",
+   "reason": "P3: binds the imported ( names to the x25519 primitive",
+   "file": "paramiko/kex_curve25519.py",
+   "line": 6,
+   "code": "from cryptography.hazmat.primitives.asymmetric.x25519 import ("
+  },
+  {
+   "decision": "positive",
+   "primitive": "X25519",
+   "break_model": "shor",
+   "reason": "P1: names the X25519 primitive in executable code",
+   "file": "paramiko/kex_curve25519.py",
+   "line": 7,
+   "code": "X25519PrivateKey,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "X25519",
+   "break_model": "shor",
+   "reason": "P1: names the X25519 primitive in executable code",
+   "file": "paramiko/kex_curve25519.py",
+   "line": 8,
+   "code": "X25519PublicKey,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDH",
+   "break_model": "shor",
+   "reason": "P1: names the ECDH primitive in executable code",
+   "file": "paramiko/kex_curve25519.py",
+   "line": 16,
+   "code": "_MSG_KEXECDH_INIT, _MSG_KEXECDH_REPLY = range(30, 32)"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDH",
+   "break_model": "shor",
+   "reason": "P1: names the ECDH primitive in executable code",
+   "file": "paramiko/kex_curve25519.py",
+   "line": 17,
+   "code": "c_MSG_KEXECDH_INIT, c_MSG_KEXECDH_REPLY = [byte_chr(c) for c in range(30, 32)]"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA256",
+   "break_model": "grover",
+   "reason": "P1: hashlib.sha256 selects the sha256 digest",
+   "file": "paramiko/kex_curve25519.py",
+   "line": 21,
+   "code": "hash_algo = hashlib.sha256"
+  },
+  {
+   "decision": "positive",
+   "primitive": "X25519",
+   "break_model": "shor",
+   "reason": "P1: names the X25519 primitive in executable code",
+   "file": "paramiko/kex_curve25519.py",
+   "line": 30,
+   "code": "X25519PrivateKey.generate()"
+  },
+  {
+   "decision": "positive",
+   "primitive": "X25519",
+   "break_model": "shor",
+   "reason": "P1: names the X25519 primitive in executable code",
+   "file": "paramiko/kex_curve25519.py",
+   "line": 45,
+   "code": "self.key = X25519PrivateKey.generate()"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDH",
+   "break_model": "shor",
+   "reason": "P1: names the ECDH primitive in executable code",
+   "file": "paramiko/kex_curve25519.py",
+   "line": 47,
+   "code": "self.transport._expect_packet(_MSG_KEXECDH_INIT)"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDH",
+   "break_model": "shor",
+   "reason": "P1: names the ECDH primitive in executable code",
+   "file": "paramiko/kex_curve25519.py",
+   "line": 51,
+   "code": "m.add_byte(c_MSG_KEXECDH_INIT)"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDH",
+   "break_model": "shor",
+   "reason": "P1: names the ECDH primitive in executable code",
+   "file": "paramiko/kex_curve25519.py",
+   "line": 58,
+   "code": "self.transport._expect_packet(_MSG_KEXECDH_REPLY)"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDH",
+   "break_model": "shor",
+   "reason": "P1: names the ECDH primitive in executable code",
+   "file": "paramiko/kex_curve25519.py",
+   "line": 61,
+   "code": "if self.transport.server_mode and (ptype == _MSG_KEXECDH_INIT):"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDH",
+   "break_model": "shor",
+   "reason": "P1: names the ECDH primitive in executable code",
+   "file": "paramiko/kex_curve25519.py",
+   "line": 63,
+   "code": "elif not self.transport.server_mode and (ptype == _MSG_KEXECDH_REPLY):"
+  },
+  {
+   "decision": "positive",
+   "primitive": "X25519",
+   "break_model": "shor",
+   "reason": "P1: names the X25519 primitive in executable code",
+   "file": "paramiko/kex_curve25519.py",
+   "line": 71,
+   "code": "peer_key = X25519PublicKey.from_public_bytes(peer_key_bytes)"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "paramiko/kex_curve25519.py",
+   "line": 90,
+   "code": "H = self.hash_algo(hm.asbytes()).digest()"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDH",
+   "break_model": "shor",
+   "reason": "P1: names the ECDH primitive in executable code",
+   "file": "paramiko/kex_curve25519.py",
+   "line": 97,
+   "code": "m.add_byte(c_MSG_KEXECDH_REPLY)"
+  },
+  {
+   "decision": "positive",
+   "primitive": "X25519",
+   "break_model": "shor",
+   "reason": "P1: names the X25519 primitive in executable code",
+   "file": "paramiko/kex_curve25519.py",
+   "line": 109,
+   "code": "peer_key = X25519PublicKey.from_public_bytes(peer_key_bytes)"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "paramiko/kex_curve25519.py",
+   "line": 129,
+   "code": "self.transport._set_K_H(K, self.hash_algo(hm.asbytes()).digest())"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDH",
+   "break_model": "shor",
+   "reason": "P1: names the ECDH primitive in executable code",
+   "file": "paramiko/kex_ecdh_nist.py",
+   "line": 2,
+   "code": "Ephemeral Elliptic Curve Diffie-Hellman (ECDH) key exchange"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA256",
+   "break_model": "grover",
+   "reason": "P3: binds 'sha256' to the sha256 hash, which is used as a digest below",
+   "file": "paramiko/kex_ecdh_nist.py",
+   "line": 6,
+   "code": "from hashlib import sha256, sha384, sha512"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDH",
+   "break_model": "shor",
+   "reason": "P1: names the ECDH primitive in executable code",
+   "file": "paramiko/kex_ecdh_nist.py",
+   "line": 15,
+   "code": "_MSG_KEXECDH_INIT, _MSG_KEXECDH_REPLY = range(30, 32)"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDH",
+   "break_model": "shor",
+   "reason": "P1: names the ECDH primitive in executable code",
+   "file": "paramiko/kex_ecdh_nist.py",
+   "line": 16,
+   "code": "c_MSG_KEXECDH_INIT, c_MSG_KEXECDH_REPLY = [byte_chr(c) for c in range(30, 32)]"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDH",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'ecdh-sha2-nistp256' names a quantum-vulnerable primitive",
+   "file": "paramiko/kex_ecdh_nist.py",
+   "line": 21,
+   "code": "name = \"ecdh-sha2-nistp256\""
+  },
+  {
+   "decision": "positive",
+   "primitive": "secp256r1",
+   "break_model": "shor",
+   "reason": "P1: ec.SECP256R1 selects the SECP256R1 primitive",
+   "file": "paramiko/kex_ecdh_nist.py",
+   "line": 23,
+   "code": "curve = ec.SECP256R1()"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDH",
+   "break_model": "shor",
+   "reason": "P1: names the ECDH primitive in executable code",
+   "file": "paramiko/kex_ecdh_nist.py",
+   "line": 35,
+   "code": "self.transport._expect_packet(_MSG_KEXECDH_INIT)"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDH",
+   "break_model": "shor",
+   "reason": "P1: names the ECDH primitive in executable code",
+   "file": "paramiko/kex_ecdh_nist.py",
+   "line": 38,
+   "code": "m.add_byte(c_MSG_KEXECDH_INIT)"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDH",
+   "break_model": "shor",
+   "reason": "P1: names the ECDH primitive in executable code",
+   "file": "paramiko/kex_ecdh_nist.py",
+   "line": 47,
+   "code": "self.transport._expect_packet(_MSG_KEXECDH_REPLY)"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDH",
+   "break_model": "shor",
+   "reason": "P1: names the ECDH primitive in executable code",
+   "file": "paramiko/kex_ecdh_nist.py",
+   "line": 50,
+   "code": "if self.transport.server_mode and (ptype == _MSG_KEXECDH_INIT):"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDH",
+   "break_model": "shor",
+   "reason": "P1: names the ECDH primitive in executable code",
+   "file": "paramiko/kex_ecdh_nist.py",
+   "line": 52,
+   "code": "elif not self.transport.server_mode and (ptype == _MSG_KEXECDH_REPLY):"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDH",
+   "break_model": "shor",
+   "reason": "P1: names the ECDH primitive in executable code",
+   "file": "paramiko/kex_ecdh_nist.py",
+   "line": 55,
+   "code": "\"KexECDH asked to handle packet type {:d}\".format(ptype)"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDH",
+   "break_model": "shor",
+   "reason": "P1: ec.ECDH selects the ECDH primitive",
+   "file": "paramiko/kex_ecdh_nist.py",
+   "line": 71,
+   "code": "K = self.P.exchange(ec.ECDH(), self.Q_C)"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "paramiko/kex_ecdh_nist.py",
+   "line": 91,
+   "code": "H = self.hash_algo(hm.asbytes()).digest()"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDH",
+   "break_model": "shor",
+   "reason": "P1: names the ECDH primitive in executable code",
+   "file": "paramiko/kex_ecdh_nist.py",
+   "line": 98,
+   "code": "m.add_byte(c_MSG_KEXECDH_REPLY)"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDH",
+   "break_model": "shor",
+   "reason": "P1: ec.ECDH selects the ECDH primitive",
+   "file": "paramiko/kex_ecdh_nist.py",
+   "line": 117,
+   "code": "K = self.P.exchange(ec.ECDH(), self.Q_S)"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "paramiko/kex_ecdh_nist.py",
+   "line": 137,
+   "code": "self.transport._set_K_H(K, self.hash_algo(hm.asbytes()).digest())"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDH",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'ecdh-sha2-nistp384' names a quantum-vulnerable primitive",
+   "file": "paramiko/kex_ecdh_nist.py",
+   "line": 143,
+   "code": "name = \"ecdh-sha2-nistp384\""
+  },
+  {
+   "decision": "positive",
+   "primitive": "secp384r1",
+   "break_model": "shor",
+   "reason": "P1: ec.SECP384R1 selects the SECP384R1 primitive",
+   "file": "paramiko/kex_ecdh_nist.py",
+   "line": 145,
+   "code": "curve = ec.SECP384R1()"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDH",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'ecdh-sha2-nistp521' names a quantum-vulnerable primitive",
+   "file": "paramiko/kex_ecdh_nist.py",
+   "line": 149,
+   "code": "name = \"ecdh-sha2-nistp521\""
+  },
+  {
+   "decision": "positive",
+   "primitive": "secp521r1",
+   "break_model": "shor",
+   "reason": "P1: ec.SECP521R1 selects the SECP521R1 primitive",
+   "file": "paramiko/kex_ecdh_nist.py",
+   "line": 151,
+   "code": "curve = ec.SECP521R1()"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA256",
+   "break_model": "grover",
+   "reason": "P3: binds 'sha256' to the sha256 hash, which is used as a digest below",
+   "file": "paramiko/kex_gex.py",
+   "line": 26,
+   "code": "from hashlib import sha256"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/kex_gex.py",
+   "line": 50,
+   "code": "class KexGexSHA256:"
+  },
+  {
+   "decision": "positive",
+   "primitive": "Diffie-Hellman",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'diffie-hellman-group-exchange-sha256' names a quantum-vulnerable primitive",
+   "file": "paramiko/kex_gex.py",
+   "line": 51,
+   "code": "name = \"diffie-hellman-group-exchange-sha256\""
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "paramiko/kex_gex.py",
+   "line": 236,
+   "code": "H = self.hash_algo(hm.asbytes()).digest()"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "paramiko/kex_gex.py",
+   "line": 278,
+   "code": "self.transport._set_K_H(K, self.hash_algo(hm.asbytes()).digest())"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA256",
+   "break_model": "grover",
+   "reason": "P3: binds 'sha256' to the sha256 hash, which is used as a digest below",
+   "file": "paramiko/kex_group14.py",
+   "line": 26,
+   "code": "from hashlib import sha256"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/kex_group14.py",
+   "line": 40,
+   "code": "class KexGroup14SHA256:"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/kex_group14.py",
+   "line": 74,
+   "code": "msg = \"KexGroup14SHA256 asked to handle packet type {:d}\""
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "paramiko/kex_group14.py",
+   "line": 117,
+   "code": "self.transport._set_K_H(K, self.hash_algo(hm.asbytes()).digest())"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "paramiko/kex_group14.py",
+   "line": 141,
+   "code": "H = self.hash_algo(hm.asbytes()).digest()"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA512",
+   "break_model": "grover",
+   "reason": "P3: binds 'sha512' to the sha512 hash, which is used as a digest below",
+   "file": "paramiko/kex_group16.py",
+   "line": 24,
+   "code": "from hashlib import sha512"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/kex_group16.py",
+   "line": 26,
+   "code": "from paramiko.kex_group14 import KexGroup14SHA256"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/kex_group16.py",
+   "line": 29,
+   "code": "class KexGroup16SHA512(KexGroup14SHA256):"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDH",
+   "break_model": "shor",
+   "reason": "P1: names the ECDH primitive in executable code",
+   "file": "paramiko/kex_mlkem.py",
+   "line": 9,
+   "code": "ECDH/X25519 key agreement; the final shared secret is the hash of the"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/kex_mlkem.py",
+   "line": 15,
+   "code": "import hashlib"
+  },
+  {
+   "decision": "positive",
+   "primitive": "X25519",
+   "break_model": "shor",
+   "reason": "P3: binds the imported ( names to the x25519 primitive",
+   "file": "paramiko/kex_mlkem.py",
+   "line": 20,
+   "code": "from cryptography.hazmat.primitives.asymmetric.x25519 import ("
+  },
+  {
+   "decision": "positive",
+   "primitive": "X25519",
+   "break_model": "shor",
+   "reason": "P1: names the X25519 primitive in executable code",
+   "file": "paramiko/kex_mlkem.py",
+   "line": 21,
+   "code": "X25519PrivateKey,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "X25519",
+   "break_model": "shor",
+   "reason": "P1: names the X25519 primitive in executable code",
+   "file": "paramiko/kex_mlkem.py",
+   "line": 22,
+   "code": "X25519PublicKey,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "X25519",
+   "break_model": "shor",
+   "reason": "P1: names the X25519 primitive in executable code",
+   "file": "paramiko/kex_mlkem.py",
+   "line": 45,
+   "code": "class KexMLKEM768X25519:"
+  },
+  {
+   "decision": "positive",
+   "primitive": "X25519",
+   "break_model": "shor",
+   "reason": "P1: names the X25519 primitive in executable code",
+   "file": "paramiko/kex_mlkem.py",
+   "line": 49,
+   "code": "Combines ML-KEM-768 (FIPS 203) with X25519. The shared secret is"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/kex_mlkem.py",
+   "line": 50,
+   "code": "``SHA-256(K_PQ || K_CL)`` where ``K_PQ`` is the ML-KEM secret and"
+  },
+  {
+   "decision": "positive",
+   "primitive": "X25519",
+   "break_model": "shor",
+   "reason": "P1: names the X25519 primitive in executable code",
+   "file": "paramiko/kex_mlkem.py",
+   "line": 51,
+   "code": "``K_CL`` is the X25519 shared secret."
+  },
+  {
+   "decision": "positive",
+   "primitive": "X25519",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'mlkem768x25519-sha256' names a quantum-vulnerable primitive",
+   "file": "paramiko/kex_mlkem.py",
+   "line": 54,
+   "code": "name = \"mlkem768x25519-sha256\""
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA256",
+   "break_model": "grover",
+   "reason": "P1: hashlib.sha256 selects the sha256 digest",
+   "file": "paramiko/kex_mlkem.py",
+   "line": 55,
+   "code": "hash_algo = hashlib.sha256"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/kex_mlkem.py",
+   "line": 56,
+   "code": "# Fixed sizes from FIPS 203 (ML-KEM-768) and RFC 7748 (X25519)."
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "byte-length constant naming a component size, not a primitive",
+   "file": "paramiko/kex_mlkem.py",
+   "line": 59,
+   "code": "_X25519_PUBKEY_BYTES = 32"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "byte-length constant naming a component size, not a primitive",
+   "file": "paramiko/kex_mlkem.py",
+   "line": 60,
+   "code": "_C_INIT_BYTES = _MLKEM_PUBKEY_BYTES + _X25519_PUBKEY_BYTES"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "byte-length constant naming a component size, not a primitive",
+   "file": "paramiko/kex_mlkem.py",
+   "line": 61,
+   "code": "_S_REPLY_BYTES = _MLKEM_CIPHERTEXT_BYTES + _X25519_PUBKEY_BYTES"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/kex_mlkem.py",
+   "line": 67,
+   "code": "# Our ephemeral X25519 private key (both roles)."
+  },
+  {
+   "decision": "positive",
+   "primitive": "X25519",
+   "break_model": "shor",
+   "reason": "P1: names the X25519 primitive in executable code",
+   "file": "paramiko/kex_mlkem.py",
+   "line": 76,
+   "code": "X25519PrivateKey.generate()"
+  },
+  {
+   "decision": "positive",
+   "primitive": "X25519",
+   "break_model": "shor",
+   "reason": "P1: names the X25519 primitive in executable code",
+   "file": "paramiko/kex_mlkem.py",
+   "line": 84,
+   "code": "self.x25519_key = X25519PrivateKey.generate()"
+  },
+  {
+   "decision": "positive",
+   "primitive": "X25519",
+   "break_model": "shor",
+   "reason": "P1: names the X25519 primitive in executable code",
+   "file": "paramiko/kex_mlkem.py",
+   "line": 111,
+   "code": "peer = X25519PublicKey.from_public_bytes(peer_pub_bytes)"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/kex_mlkem.py",
+   "line": 138,
+   "code": "# X25519 with the client's ephemeral public value."
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "paramiko/kex_mlkem.py",
+   "line": 141,
+   "code": "K_bytes = self.hash_algo(k_pq + k_cl).digest()"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "paramiko/kex_mlkem.py",
+   "line": 160,
+   "code": "H = self.hash_algo(hm.asbytes()).digest()"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "paramiko/kex_mlkem.py",
+   "line": 194,
+   "code": "K_bytes = self.hash_algo(k_pq + k_cl).digest()"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "paramiko/kex_mlkem.py",
+   "line": 212,
+   "code": "H = self.hash_algo(hm.asbytes()).digest()"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/packet.py",
+   "line": 29,
+   "code": "from hmac import HMAC"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "helper call; the primitive is determined by the caller",
+   "file": "paramiko/packet.py",
+   "line": 46,
+   "code": "def compute_hmac(key, message, digest_class):"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "computes a MAC; the digest arrives as an argument, so no primitive is named on this line",
+   "file": "paramiko/packet.py",
+   "line": 47,
+   "code": "return HMAC(key, message, digest_class).digest()"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/packet.py",
+   "line": 100,
+   "code": "self.__block_size_out = 8"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/packet.py",
+   "line": 101,
+   "code": "self.__block_size_in = 8"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/packet.py",
+   "line": 155,
+   "code": "block_size,"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/packet.py",
+   "line": 165,
+   "code": "Switch outbound data cipher."
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/packet.py",
+   "line": 170,
+   "code": "self.__block_size_out = block_size"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/packet.py",
+   "line": 189,
+   "code": "block_size,"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/packet.py",
+   "line": 198,
+   "code": "Switch inbound data cipher."
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/packet.py",
+   "line": 202,
+   "code": "self.__block_size_in = block_size"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/packet.py",
+   "line": 445,
+   "code": "# under AES-GCM, so like EtM, it's not encrypted. See"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/packet.py",
+   "line": 447,
+   "code": "out = packet[0:4] + self.__block_engine_out.encrypt("
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/packet.py",
+   "line": 455,
+   "code": "# Append an MAC when needed (eg, not under AES-GCM)"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "helper call; the primitive is determined by the caller",
+   "file": "paramiko/packet.py",
+   "line": 459,
+   "code": "out += compute_hmac("
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/packet.py",
+   "line": 496,
+   "code": "header = self.read_all(self.__block_size_in, check_rekey=True)"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/packet.py",
+   "line": 499,
+   "code": "remaining = packet_size - self.__block_size_in + 4"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "helper call; the primitive is determined by the caller",
+   "file": "paramiko/packet.py",
+   "line": 506,
+   "code": "my_mac = compute_hmac("
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/packet.py",
+   "line": 519,
+   "code": "packet_size - self.__block_size_in + 4 + self.__mac_size_in"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/packet.py",
+   "line": 522,
+   "code": "header = self.__block_engine_in.decrypt(self.__iv_in, packet, aad)"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/packet.py",
+   "line": 543,
+   "code": "if (packet_size - len(leftover)) % self.__block_size_in != 0:"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "helper call; the primitive is determined by the caller",
+   "file": "paramiko/packet.py",
+   "line": 564,
+   "code": "my_mac = compute_hmac("
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/packet.py",
+   "line": 678,
+   "code": "bsize = self.__block_size_out"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD5",
+   "break_model": "grover",
+   "reason": "P3: binds 'md5' to the md5 hash, which is used as a digest below",
+   "file": "paramiko/pkey.py",
+   "line": 29,
+   "code": "from hashlib import md5, sha256"
+  },
+  {
+   "decision": "positive",
+   "primitive": "EC",
+   "break_model": "shor",
+   "reason": "P3: binds the imported ( names to the ec primitive",
+   "file": "paramiko/pkey.py",
+   "line": 37,
+   "code": "from cryptography.hazmat.primitives.asymmetric.ec import ("
+  },
+  {
+   "decision": "positive",
+   "primitive": "EllipticCurvePrivateKey",
+   "break_model": "shor",
+   "reason": "P1: names the EllipticCurvePrivateKey primitive in executable code",
+   "file": "paramiko/pkey.py",
+   "line": 38,
+   "code": "EllipticCurvePrivateKey,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ED25519",
+   "break_model": "shor",
+   "reason": "P3: binds the imported Ed25519PrivateKey names to the ed25519 primitive",
+   "file": "paramiko/pkey.py",
+   "line": 40,
+   "code": "from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P3: binds the imported RSAPrivateKey names to the rsa primitive",
+   "file": "paramiko/pkey.py",
+   "line": 41,
+   "code": "from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/pkey.py",
+   "line": 50,
+   "code": "# TripleDES is moving from `cryptography.hazmat.primitives.ciphers.algorithms`"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/pkey.py",
+   "line": 59,
+   "code": "from cryptography.hazmat.decrepit.ciphers.algorithms import TripleDES"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/pkey.py",
+   "line": 61,
+   "code": "from cryptography.hazmat.primitives.ciphers.algorithms import TripleDES"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P1: names the RSAPrivateKey primitive in executable code",
+   "file": "paramiko/pkey.py",
+   "line": 103,
+   "code": "PrivateKey = Union[RSAPrivateKey, EllipticCurvePrivateKey, Ed25519PrivateKey]"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/pkey.py",
+   "line": 128,
+   "code": "\"AES-128-CBC\": {"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: algorithms.AES selects the AES primitive",
+   "file": "paramiko/pkey.py",
+   "line": 129,
+   "code": "\"cipher\": algorithms.AES,"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/pkey.py",
+   "line": 134,
+   "code": "\"AES-256-CBC\": {"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: algorithms.AES selects the AES primitive",
+   "file": "paramiko/pkey.py",
+   "line": 135,
+   "code": "\"cipher\": algorithms.AES,"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/pkey.py",
+   "line": 140,
+   "code": "\"DES-EDE3-CBC\": {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/pkey.py",
+   "line": 141,
+   "code": "\"cipher\": TripleDES,"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/pkey.py",
+   "line": 149,
+   "code": "BEGIN_TAG = re.compile(r\"^-{5}BEGIN (RSA|EC|OPENSSH) PRIVATE KEY-{5}\\s*$\")"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/pkey.py",
+   "line": 150,
+   "code": "END_TAG = re.compile(r\"^-{5}END (RSA|EC|OPENSSH) PRIVATE KEY-{5}\\s*$\")"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/pkey.py",
+   "line": 173,
+   "code": "from paramiko import ECDSAKey, Ed25519Key, RSAKey"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P1: rsa.RSAPrivateKey performs an RSA operation, broken outright by Shor's algorithm",
+   "file": "paramiko/pkey.py",
+   "line": 212,
+   "code": "if isinstance(loaded, asymmetric.rsa.RSAPrivateKey):"
+  },
+  {
+   "decision": "positive",
+   "primitive": "Ed25519",
+   "break_model": "shor",
+   "reason": "P1: names the Ed25519 primitive in executable code",
+   "file": "paramiko/pkey.py",
+   "line": 214,
+   "code": "elif isinstance(loaded, asymmetric.ed25519.Ed25519PrivateKey):"
+  },
+  {
+   "decision": "positive",
+   "primitive": "Ed25519",
+   "break_model": "shor",
+   "reason": "P1: names the Ed25519 primitive in executable code",
+   "file": "paramiko/pkey.py",
+   "line": 215,
+   "code": "key_class = Ed25519Key"
+  },
+  {
+   "decision": "positive",
+   "primitive": "EllipticCurvePrivateKey",
+   "break_model": "shor",
+   "reason": "P1: names the EllipticCurvePrivateKey primitive in executable code",
+   "file": "paramiko/pkey.py",
+   "line": 216,
+   "code": "elif isinstance(loaded, asymmetric.ec.EllipticCurvePrivateKey):"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/pkey.py",
+   "line": 217,
+   "code": "key_class = ECDSAKey"
+  },
+  {
+   "decision": "positive",
+   "primitive": "Ed25519",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'ssh-ed25519' names a quantum-vulnerable primitive",
+   "file": "paramiko/pkey.py",
+   "line": 234,
+   "code": "For example, ``PKey.from_type_string(\"ssh-ed25519\", <public bytes>)``"
+  },
+  {
+   "decision": "positive",
+   "primitive": "Ed25519",
+   "break_model": "shor",
+   "reason": "P1: names the Ed25519 primitive in executable code",
+   "file": "paramiko/pkey.py",
+   "line": 235,
+   "code": "will (if successful) return a new `.Ed25519Key`."
+  },
+  {
+   "decision": "positive",
+   "primitive": "Ed25519",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'ssh-ed25519' names a quantum-vulnerable primitive",
+   "file": "paramiko/pkey.py",
+   "line": 238,
+   "code": "The key type, eg ``\"ssh-ed25519\"``."
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/pkey.py",
+   "line": 268,
+   "code": "implementation suffices; see `.ECDSAKey` for one example of an"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'ssh-rsa' names a quantum-vulnerable primitive",
+   "file": "paramiko/pkey.py",
+   "line": 338,
+   "code": "example, ``\"ssh-rsa\"``)."
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/pkey.py",
+   "line": 357,
+   "code": "# Nuke any eg ECDSA suffix, OpenSSH does basically this too."
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/pkey.py",
+   "line": 383,
+   "code": "Return an MD5 fingerprint of the public part of this key.  Nothing"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/pkey.py",
+   "line": 387,
+   "code": "a 16-byte `string <str>` (binary) of the MD5 fingerprint, in SSH"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD5",
+   "break_model": "grover",
+   "reason": "P1: calls md5(), selecting the md5 digest",
+   "file": "paramiko/pkey.py",
+   "line": 390,
+   "code": "return md5(self.asbytes()).digest()"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/pkey.py",
+   "line": 397,
+   "code": "Currently only does SHA256 (the OpenSSH default)."
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA256",
+   "break_model": "grover",
+   "reason": "P1: calls sha256(), selecting the sha256 digest",
+   "file": "paramiko/pkey.py",
+   "line": 401,
+   "code": "hashy = sha256(bytes(self))"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "paramiko/pkey.py",
+   "line": 403,
+   "code": "b64ed = encodebytes(hashy.digest())"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/pkey.py",
+   "line": 553,
+   "code": "``\"RSA\"`` (or etc), the tag used to mark the data block."
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/pkey.py",
+   "line": 658,
+   "code": "unpadder = padding.PKCS7(cipher.block_size).unpadder()"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'aes256-cbc' names a quantum-vulnerable primitive",
+   "file": "paramiko/pkey.py",
+   "line": 691,
+   "code": "if cipher == b(\"aes256-cbc\"):"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'aes256-ctr' names a quantum-vulnerable primitive",
+   "file": "paramiko/pkey.py",
+   "line": 693,
+   "code": "elif cipher == b(\"aes256-ctr\"):"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/pkey.py",
+   "line": 698,
+   "code": "cipher.decode(\"utf-8\")"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: algorithms.AES selects the AES primitive",
+   "file": "paramiko/pkey.py",
+   "line": 727,
+   "code": "algorithms.AES(key), mode(iv), default_backend()"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/pkey.py",
+   "line": 852,
+   "code": "it was (e.g. ECDSA.)"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/pkey.py",
+   "line": 855,
+   "code": "# but eg ECDSA is a 1:N mapping."
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/rsakey.py",
+   "line": 20,
+   "code": "RSA keys."
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/rsakey.py",
+   "line": 37,
+   "code": "Representation of an RSA key which can be used to sign and verify SSH2"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'ssh-rsa' names a quantum-vulnerable primitive",
+   "file": "paramiko/rsakey.py",
+   "line": 41,
+   "code": "name = \"ssh-rsa\""
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA-256",
+   "break_model": "grover",
+   "reason": "P2: binds the SHA256 hash to an SSH signature scheme",
+   "file": "paramiko/rsakey.py",
+   "line": 43,
+   "code": "\"rsa-sha2-256\": hashes.SHA256,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA-256",
+   "break_model": "grover",
+   "reason": "P2: binds the SHA256 hash to an SSH signature scheme",
+   "file": "paramiko/rsakey.py",
+   "line": 44,
+   "code": "\"rsa-sha2-256-cert-v01@openssh.com\": hashes.SHA256,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA-512",
+   "break_model": "grover",
+   "reason": "P2: binds the SHA512 hash to an SSH signature scheme",
+   "file": "paramiko/rsakey.py",
+   "line": 45,
+   "code": "\"rsa-sha2-512\": hashes.SHA512,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA-512",
+   "break_model": "grover",
+   "reason": "P2: binds the SHA512 hash to an SSH signature scheme",
+   "file": "paramiko/rsakey.py",
+   "line": 46,
+   "code": "\"rsa-sha2-512-cert-v01@openssh.com\": hashes.SHA512,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'ssh-rsa-cert-v01@openssh.com' names a quantum-vulnerable primitive",
+   "file": "paramiko/rsakey.py",
+   "line": 76,
+   "code": "cert_type=\"ssh-rsa-cert-v01@openssh.com\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P1: rsa.RSAPublicNumbers performs an RSA operation, broken outright by Shor's algorithm",
+   "file": "paramiko/rsakey.py",
+   "line": 78,
+   "code": "self.key = rsa.RSAPublicNumbers("
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/rsakey.py",
+   "line": 84,
+   "code": "# NOTE: we no longer want to have ssh-rsa+SHA1 in HASHES but we still"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/rsakey.py",
+   "line": 86,
+   "code": "# other parts of system will enforce the use of SHA2 signing algos)."
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'ssh-rsa' names a quantum-vulnerable primitive",
+   "file": "paramiko/rsakey.py",
+   "line": 89,
+   "code": "\"ssh-rsa\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'ssh-rsa-cert-v01@openssh.com' names a quantum-vulnerable primitive",
+   "file": "paramiko/rsakey.py",
+   "line": 90,
+   "code": "\"ssh-rsa-cert-v01@openssh.com\","
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/rsakey.py",
+   "line": 95,
+   "code": "return self.key.key_size"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P1: rsa.RSAPrivateKey performs an RSA operation, broken outright by Shor's algorithm",
+   "file": "paramiko/rsakey.py",
+   "line": 98,
+   "code": "def private_key(self) -> Optional[rsa.RSAPrivateKey]:"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P1: rsa.RSAPrivateKey performs an RSA operation, broken outright by Shor's algorithm",
+   "file": "paramiko/rsakey.py",
+   "line": 99,
+   "code": "return self.key if isinstance(self.key, rsa.RSAPrivateKey) else None"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P1: rsa.RSAPrivateKey performs an RSA operation, broken outright by Shor's algorithm",
+   "file": "paramiko/rsakey.py",
+   "line": 103,
+   "code": "if isinstance(self.key, rsa.RSAPrivateKey):"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P1: rsa.RSAPrivateKey performs an RSA operation, broken outright by Shor's algorithm",
+   "file": "paramiko/rsakey.py",
+   "line": 132,
+   "code": "return isinstance(self.key, rsa.RSAPrivateKey)"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/rsakey.py",
+   "line": 137,
+   "code": "sig = self.key.sign("
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P1: rsa.RSAPrivateKey performs an RSA operation, broken outright by Shor's algorithm",
+   "file": "paramiko/rsakey.py",
+   "line": 155,
+   "code": "if isinstance(key, rsa.RSAPrivateKey):"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/rsakey.py",
+   "line": 158,
+   "code": "# NOTE: pad received signature with leading zeros, key.verify()"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/rsakey.py",
+   "line": 161,
+   "code": "diff = key.key_size - len(sign) * 8"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/rsakey.py",
+   "line": 166,
+   "code": "key.verify("
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/rsakey.py",
+   "line": 177,
+   "code": "Generate a new private RSA key.  This factory function can be used to"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P1: rsa.generate_private_key performs an RSA operation, broken outright by Shor's algorithm",
+   "file": "paramiko/rsakey.py",
+   "line": 184,
+   "code": "key = rsa.generate_private_key("
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/rsakey.py",
+   "line": 185,
+   "code": "public_exponent=65537, key_size=bits, backend=default_backend()"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/rsakey.py",
+   "line": 192,
+   "code": "data = self._read_private_key_file(\"RSA\", filename, password)"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/rsakey.py",
+   "line": 196,
+   "code": "data = self._read_private_key(\"RSA\", file_obj, password)"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P1: rsa.RSAPublicNumbers performs an RSA operation, broken outright by Shor's algorithm",
+   "file": "paramiko/rsakey.py",
+   "line": 210,
+   "code": "public_numbers = rsa.RSAPublicNumbers(e=e, n=n)"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P1: rsa.RSAPrivateNumbers performs an RSA operation, broken outright by Shor's algorithm",
+   "file": "paramiko/rsakey.py",
+   "line": 211,
+   "code": "key = rsa.RSAPrivateNumbers("
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P1: rsa.RSAPrivateKey performs an RSA operation, broken outright by Shor's algorithm",
+   "file": "paramiko/rsakey.py",
+   "line": 222,
+   "code": "assert isinstance(key, rsa.RSAPrivateKey)"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/sftp_file.py",
+   "line": 358,
+   "code": "def check(self, hash_algorithm, offset=0, length=0, block_size=0):"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/sftp_file.py",
+   "line": 368,
+   "code": "Normally, ``block_size`` will be 0 (the default), and this method will"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/sftp_file.py",
+   "line": 370,
+   "code": "string of length 16 for MD5, or 20 for SHA-1).  If a non-zero"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/sftp_file.py",
+   "line": 371,
+   "code": "``block_size`` is given, each chunk of the file (from ``offset`` to"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/sftp_file.py",
+   "line": 372,
+   "code": "``offset + length``) of ``block_size`` bytes is computed as a separate"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA-1",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'sha1' names a quantum-vulnerable primitive",
+   "file": "paramiko/sftp_file.py",
+   "line": 376,
+   "code": "For example, ``check('sha1', 0, 1024, 512)`` will return a string of"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/sftp_file.py",
+   "line": 377,
+   "code": "length 40.  The first 20 bytes will be the SHA-1 of the first 512 bytes"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/sftp_file.py",
+   "line": 378,
+   "code": "of the file, and the last 20 bytes will be the SHA-1 of the next 512"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA-1",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'sha1' names a quantum-vulnerable primitive",
+   "file": "paramiko/sftp_file.py",
+   "line": 382,
+   "code": "the name of the hash algorithm to use (normally ``\"sha1\"`` or"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD5",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'md5' names a quantum-vulnerable primitive",
+   "file": "paramiko/sftp_file.py",
+   "line": 383,
+   "code": "``\"md5\"``)"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/sftp_file.py",
+   "line": 389,
+   "code": ":param int block_size:"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/sftp_file.py",
+   "line": 411,
+   "code": "block_size,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD5",
+   "break_model": "grover",
+   "reason": "P3: binds 'md5' to the md5 hash, which is used as a digest below",
+   "file": "paramiko/sftp_server.py",
+   "line": 26,
+   "code": "from hashlib import md5, sha1"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA-1",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'sha1' names a quantum-vulnerable primitive",
+   "file": "paramiko/sftp_server.py",
+   "line": 83,
+   "code": "_hash_class = {\"sha1\": sha1, \"md5\": md5}"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/sftp_server.py",
+   "line": 298,
+   "code": "block_size = msg.get_int()"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/sftp_server.py",
+   "line": 324,
+   "code": "if block_size == 0:"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/sftp_server.py",
+   "line": 325,
+   "code": "block_size = length"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/sftp_server.py",
+   "line": 326,
+   "code": "if block_size < 256:"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/sftp_server.py",
+   "line": 335,
+   "code": "blocklen = min(block_size, start + length - offset)"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "paramiko/sftp_server.py",
+   "line": 350,
+   "code": "sum_out += hash_obj.digest()"
+  },
+  {
+   "decision": "positive",
+   "primitive": "MD5",
+   "break_model": "grover",
+   "reason": "P3: binds 'md5' to the md5 hash, which is used as a digest below",
+   "file": "paramiko/transport.py",
+   "line": 30,
+   "code": "from hashlib import md5, sha1, sha256, sha512"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/transport.py",
+   "line": 97,
+   "code": "from paramiko.ecdsakey import ECDSAKey"
+  },
+  {
+   "decision": "positive",
+   "primitive": "Ed25519",
+   "break_model": "shor",
+   "reason": "P1: names the Ed25519 primitive in executable code",
+   "file": "paramiko/transport.py",
+   "line": 98,
+   "code": "from paramiko.ed25519key import Ed25519Key"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/transport.py",
+   "line": 101,
+   "code": "from paramiko.kex_gex import KexGexSHA256"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/transport.py",
+   "line": 102,
+   "code": "from paramiko.kex_group14 import KexGroup14SHA256"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/transport.py",
+   "line": 103,
+   "code": "from paramiko.kex_group16 import KexGroup16SHA512"
+  },
+  {
+   "decision": "positive",
+   "primitive": "X25519",
+   "break_model": "shor",
+   "reason": "P1: names the X25519 primitive in executable code",
+   "file": "paramiko/transport.py",
+   "line": 104,
+   "code": "from paramiko.kex_mlkem import KexMLKEM768X25519"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/transport.py",
+   "line": 126,
+   "code": "# TripleDES is moving from `cryptography.hazmat.primitives.ciphers.algorithms`"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/transport.py",
+   "line": 135,
+   "code": "from cryptography.hazmat.decrepit.ciphers.algorithms import TripleDES"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/transport.py",
+   "line": 137,
+   "code": "from cryptography.hazmat.primitives.ciphers.algorithms import TripleDES"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'aes128-ctr' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 177,
+   "code": "\"aes128-ctr\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'aes192-ctr' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 178,
+   "code": "\"aes192-ctr\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'aes256-ctr' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 179,
+   "code": "\"aes256-ctr\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'aes128-cbc' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 180,
+   "code": "\"aes128-cbc\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'aes192-cbc' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 181,
+   "code": "\"aes192-cbc\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'aes256-cbc' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 182,
+   "code": "\"aes256-cbc\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "3DES",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier '3des-cbc' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 183,
+   "code": "\"3des-cbc\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'aes128-gcm@openssh.com' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 184,
+   "code": "\"aes128-gcm@openssh.com\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'aes256-gcm@openssh.com' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 185,
+   "code": "\"aes256-gcm@openssh.com\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "HMAC",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'hmac-sha2-256' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 188,
+   "code": "\"hmac-sha2-256\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "HMAC",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'hmac-sha2-512' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 189,
+   "code": "\"hmac-sha2-512\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "HMAC",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'hmac-sha2-256-etm@openssh.com' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 190,
+   "code": "\"hmac-sha2-256-etm@openssh.com\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "HMAC",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'hmac-sha2-512-etm@openssh.com' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 191,
+   "code": "\"hmac-sha2-512-etm@openssh.com\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "HMAC",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'hmac-sha1' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 192,
+   "code": "\"hmac-sha1\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "HMAC",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'hmac-md5' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 193,
+   "code": "\"hmac-md5\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "HMAC",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'hmac-sha1-96' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 194,
+   "code": "\"hmac-sha1-96\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "HMAC",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'hmac-md5-96' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 195,
+   "code": "\"hmac-md5-96\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "Ed25519",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'ssh-ed25519' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 199,
+   "code": "\"ssh-ed25519\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'ecdsa-sha2-nistp256' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 200,
+   "code": "\"ecdsa-sha2-nistp256\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'ecdsa-sha2-nistp384' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 201,
+   "code": "\"ecdsa-sha2-nistp384\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'ecdsa-sha2-nistp521' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 202,
+   "code": "\"ecdsa-sha2-nistp521\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'rsa-sha2-512' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 203,
+   "code": "\"rsa-sha2-512\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'rsa-sha2-256' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 204,
+   "code": "\"rsa-sha2-256\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "Ed25519",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'ssh-ed25519' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 208,
+   "code": "\"ssh-ed25519\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'ecdsa-sha2-nistp256' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 209,
+   "code": "\"ecdsa-sha2-nistp256\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'ecdsa-sha2-nistp384' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 210,
+   "code": "\"ecdsa-sha2-nistp384\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'ecdsa-sha2-nistp521' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 211,
+   "code": "\"ecdsa-sha2-nistp521\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'rsa-sha2-512' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 212,
+   "code": "\"rsa-sha2-512\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'rsa-sha2-256' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 213,
+   "code": "\"rsa-sha2-256\","
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/transport.py",
+   "line": 215,
+   "code": "_preferred_kex = ("
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDH",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'ecdh-sha2-nistp256' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 216,
+   "code": "\"ecdh-sha2-nistp256\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDH",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'ecdh-sha2-nistp384' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 217,
+   "code": "\"ecdh-sha2-nistp384\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDH",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'ecdh-sha2-nistp521' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 218,
+   "code": "\"ecdh-sha2-nistp521\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "Diffie-Hellman",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'diffie-hellman-group-exchange-sha256' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 220,
+   "code": "\"diffie-hellman-group-exchange-sha256\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "Curve25519",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'curve25519-sha256@libssh.org' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 224,
+   "code": "_preferred_kex = (\"curve25519-sha256@libssh.org\",) + _preferred_kex"
+  },
+  {
+   "decision": "positive",
+   "primitive": "X25519",
+   "break_model": "shor",
+   "reason": "P1: names the X25519 primitive in executable code",
+   "file": "paramiko/transport.py",
+   "line": 225,
+   "code": "if KexMLKEM768X25519.is_available():"
+  },
+  {
+   "decision": "positive",
+   "primitive": "X25519",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'mlkem768x25519-sha256' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 226,
+   "code": "_preferred_kex = (\"mlkem768x25519-sha256\",) + _preferred_kex"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'aes128-ctr' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 230,
+   "code": "\"aes128-ctr\": {"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: algorithms.AES selects the AES primitive",
+   "file": "paramiko/transport.py",
+   "line": 231,
+   "code": "\"class\": algorithms.AES,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'aes192-ctr' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 236,
+   "code": "\"aes192-ctr\": {"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: algorithms.AES selects the AES primitive",
+   "file": "paramiko/transport.py",
+   "line": 237,
+   "code": "\"class\": algorithms.AES,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'aes256-ctr' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 242,
+   "code": "\"aes256-ctr\": {"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: algorithms.AES selects the AES primitive",
+   "file": "paramiko/transport.py",
+   "line": 243,
+   "code": "\"class\": algorithms.AES,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'aes128-cbc' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 248,
+   "code": "\"aes128-cbc\": {"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: algorithms.AES selects the AES primitive",
+   "file": "paramiko/transport.py",
+   "line": 249,
+   "code": "\"class\": algorithms.AES,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'aes192-cbc' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 254,
+   "code": "\"aes192-cbc\": {"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: algorithms.AES selects the AES primitive",
+   "file": "paramiko/transport.py",
+   "line": 255,
+   "code": "\"class\": algorithms.AES,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'aes256-cbc' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 260,
+   "code": "\"aes256-cbc\": {"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P1: algorithms.AES selects the AES primitive",
+   "file": "paramiko/transport.py",
+   "line": 261,
+   "code": "\"class\": algorithms.AES,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "3DES",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier '3des-cbc' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 266,
+   "code": "\"3des-cbc\": {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/transport.py",
+   "line": 267,
+   "code": "\"class\": TripleDES,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'aes128-gcm@openssh.com' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 272,
+   "code": "\"aes128-gcm@openssh.com\": {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/transport.py",
+   "line": 273,
+   "code": "\"class\": aead.AESGCM,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "AES",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'aes256-gcm@openssh.com' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 279,
+   "code": "\"aes256-gcm@openssh.com\": {"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/transport.py",
+   "line": 280,
+   "code": "\"class\": aead.AESGCM,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "HMAC",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'hmac-sha1' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 289,
+   "code": "\"hmac-sha1\": {\"class\": sha1, \"size\": 20},"
+  },
+  {
+   "decision": "positive",
+   "primitive": "HMAC",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'hmac-sha1-96' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 290,
+   "code": "\"hmac-sha1-96\": {\"class\": sha1, \"size\": 12},"
+  },
+  {
+   "decision": "positive",
+   "primitive": "HMAC",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'hmac-sha2-256' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 291,
+   "code": "\"hmac-sha2-256\": {\"class\": sha256, \"size\": 32},"
+  },
+  {
+   "decision": "positive",
+   "primitive": "HMAC",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'hmac-sha2-256-etm@openssh.com' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 292,
+   "code": "\"hmac-sha2-256-etm@openssh.com\": {\"class\": sha256, \"size\": 32},"
+  },
+  {
+   "decision": "positive",
+   "primitive": "HMAC",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'hmac-sha2-512' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 293,
+   "code": "\"hmac-sha2-512\": {\"class\": sha512, \"size\": 64},"
+  },
+  {
+   "decision": "positive",
+   "primitive": "HMAC",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'hmac-sha2-512-etm@openssh.com' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 294,
+   "code": "\"hmac-sha2-512-etm@openssh.com\": {\"class\": sha512, \"size\": 64},"
+  },
+  {
+   "decision": "positive",
+   "primitive": "HMAC",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'hmac-md5' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 295,
+   "code": "\"hmac-md5\": {\"class\": md5, \"size\": 16},"
+  },
+  {
+   "decision": "positive",
+   "primitive": "HMAC",
+   "break_model": "grover",
+   "reason": "P4: algorithm identifier 'hmac-md5-96' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 296,
+   "code": "\"hmac-md5-96\": {\"class\": md5, \"size\": 12},"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/transport.py",
+   "line": 301,
+   "code": "# ssh-rsa in not-using-SHA1 contexts?"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'rsa-sha2-256' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 312,
+   "code": "\"rsa-sha2-256\": RSAKey,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'rsa-sha2-256-cert-v01@openssh.com' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 313,
+   "code": "\"rsa-sha2-256-cert-v01@openssh.com\": RSAKey,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'rsa-sha2-512' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 314,
+   "code": "\"rsa-sha2-512\": RSAKey,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'rsa-sha2-512-cert-v01@openssh.com' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 315,
+   "code": "\"rsa-sha2-512-cert-v01@openssh.com\": RSAKey,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/transport.py",
+   "line": 316,
+   "code": "\"ecdsa-sha2-nistp256\": ECDSAKey,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/transport.py",
+   "line": 317,
+   "code": "\"ecdsa-sha2-nistp256-cert-v01@openssh.com\": ECDSAKey,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/transport.py",
+   "line": 318,
+   "code": "\"ecdsa-sha2-nistp384\": ECDSAKey,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/transport.py",
+   "line": 319,
+   "code": "\"ecdsa-sha2-nistp384-cert-v01@openssh.com\": ECDSAKey,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/transport.py",
+   "line": 320,
+   "code": "\"ecdsa-sha2-nistp521\": ECDSAKey,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDSA",
+   "break_model": "shor",
+   "reason": "P1: names the ECDSA primitive in executable code",
+   "file": "paramiko/transport.py",
+   "line": 321,
+   "code": "\"ecdsa-sha2-nistp521-cert-v01@openssh.com\": ECDSAKey,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "Ed25519",
+   "break_model": "shor",
+   "reason": "P1: names the Ed25519 primitive in executable code",
+   "file": "paramiko/transport.py",
+   "line": 322,
+   "code": "\"ssh-ed25519\": Ed25519Key,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "Ed25519",
+   "break_model": "shor",
+   "reason": "P1: names the Ed25519 primitive in executable code",
+   "file": "paramiko/transport.py",
+   "line": 323,
+   "code": "\"ssh-ed25519-cert-v01@openssh.com\": Ed25519Key,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "Diffie-Hellman",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'diffie-hellman-group-exchange-sha256' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 327,
+   "code": "\"diffie-hellman-group-exchange-sha256\": KexGexSHA256,"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/transport.py",
+   "line": 328,
+   "code": "\"diffie-hellman-group14-sha256\": KexGroup14SHA256,"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/transport.py",
+   "line": 329,
+   "code": "\"diffie-hellman-group16-sha512\": KexGroup16SHA512,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDH",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'ecdh-sha2-nistp256' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 330,
+   "code": "\"ecdh-sha2-nistp256\": KexNistp256,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDH",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'ecdh-sha2-nistp384' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 331,
+   "code": "\"ecdh-sha2-nistp384\": KexNistp384,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "ECDH",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'ecdh-sha2-nistp521' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 332,
+   "code": "\"ecdh-sha2-nistp521\": KexNistp521,"
+  },
+  {
+   "decision": "positive",
+   "primitive": "Curve25519",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'curve25519-sha256@libssh.org' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 335,
+   "code": "_kex_info[\"curve25519-sha256@libssh.org\"] = KexCurve25519"
+  },
+  {
+   "decision": "positive",
+   "primitive": "X25519",
+   "break_model": "shor",
+   "reason": "P1: names the X25519 primitive in executable code",
+   "file": "paramiko/transport.py",
+   "line": 336,
+   "code": "if KexMLKEM768X25519.is_available():"
+  },
+  {
+   "decision": "positive",
+   "primitive": "X25519",
+   "break_model": "shor",
+   "reason": "P1: names the X25519 primitive in executable code",
+   "file": "paramiko/transport.py",
+   "line": 337,
+   "code": "_kex_info[\"mlkem768x25519-sha256\"] = KexMLKEM768X25519"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/transport.py",
+   "line": 408,
+   "code": "inside ``_preferred_kex``. Values should exactly match members of"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/transport.py",
+   "line": 601,
+   "code": "def preferred_kex(self):"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/transport.py",
+   "line": 791,
+   "code": "# Handle SHA-2 extensions for RSA by ensuring that lookups into"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'rsa-sha2-256' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 795,
+   "code": "self.server_key_dict[\"rsa-sha2-256\"] = key"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'rsa-sha2-512' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 796,
+   "code": "self.server_key_dict[\"rsa-sha2-512\"] = key"
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'rsa-sha2-512' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 1322,
+   "code": "\"rsa-sha2-512\","
+  },
+  {
+   "decision": "positive",
+   "primitive": "RSA",
+   "break_model": "shor",
+   "reason": "P4: algorithm identifier 'rsa-sha2-256' names a quantum-vulnerable primitive",
+   "file": "paramiko/transport.py",
+   "line": 1323,
+   "code": "\"rsa-sha2-256\","
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/transport.py",
+   "line": 1858,
+   "code": "# TODO: like, here, can a host offer \"ssh-rsa\" but request SHA2, or are"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "comment",
+   "file": "paramiko/transport.py",
+   "line": 1884,
+   "code": "# Fallback to SHA1 for kex engines that fail to specify a hex"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "paramiko/transport.py",
+   "line": 1896,
+   "code": "out = sofar = hash_algo(m.asbytes()).digest()"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "paramiko/transport.py",
+   "line": 1902,
+   "code": "digest = hash_algo(m.asbytes()).digest()"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "paramiko/transport.py",
+   "line": 1924,
+   "code": "return cipher.encryptor()"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "paramiko/transport.py",
+   "line": 1926,
+   "code": "return cipher.decryptor()"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/transport.py",
+   "line": 2271,
+   "code": "kex_algos = list(self.preferred_kex)"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/transport.py",
+   "line": 2432,
+   "code": "filter(self.preferred_kex.__contains__, kex_algo_list)"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/transport.py",
+   "line": 2436,
+   "code": "filter(kex_algo_list.__contains__, self.preferred_kex)"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/transport.py",
+   "line": 2595,
+   "code": "block_size = info[\"block-size\"]"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/transport.py",
+   "line": 2596,
+   "code": "key_size = info[\"key-size\"]"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/transport.py",
+   "line": 2598,
+   "code": "iv_size = info.get(\"iv-size\", block_size)"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/transport.py",
+   "line": 2601,
+   "code": "key_in = self._compute_key(\"C\", key_size)"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/transport.py",
+   "line": 2604,
+   "code": "key_in = self._compute_key(\"D\", key_size)"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/transport.py",
+   "line": 2625,
+   "code": "block_size=block_size,"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/transport.py",
+   "line": 2663,
+   "code": "block_size = info[\"block-size\"]"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/transport.py",
+   "line": 2664,
+   "code": "key_size = info[\"key-size\"]"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/transport.py",
+   "line": 2666,
+   "code": "iv_size = info.get(\"iv-size\", block_size)"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/transport.py",
+   "line": 2669,
+   "code": "key_out = self._compute_key(\"D\", key_size)"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/transport.py",
+   "line": 2672,
+   "code": "key_out = self._compute_key(\"C\", key_size)"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/transport.py",
+   "line": 2690,
+   "code": "sdctr = self.local_cipher.endswith(\"-ctr\")"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "key/block size plumbing; names no primitive",
+   "file": "paramiko/transport.py",
+   "line": 2694,
+   "code": "block_size=block_size,"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/transport.py",
+   "line": 3111,
+   "code": "return self._transport._preferred_kex"
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "no quantum-vulnerable primitive is named on this line",
+   "file": "paramiko/transport.py",
+   "line": 3115,
+   "code": "self._set(\"_preferred_kex\", \"_kex_info\", x)"
+  },
+  {
+   "decision": "positive",
+   "primitive": "SHA256",
+   "break_model": "grover",
+   "reason": "P1: hashlib.sha256 selects the sha256 digest",
+   "file": "paramiko/util.py",
+   "line": 149,
+   "code": "as ``hashlib.sha256``."
+  },
+  {
+   "decision": "negative",
+   "primitive": null,
+   "break_model": "not-affected",
+   "reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
+   "file": "paramiko/util.py",
+   "line": 166,
+   "code": "digest = hash_obj.digest()"
+  }
+ ]
+}
