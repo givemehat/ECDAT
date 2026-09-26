@@ -35,3 +35,6 @@ data/tink-java/
 
 # ---- Third-party benchmark corpora (re-fetched at a pinned SHA by benchmark/run_benchmark.py) ----
 benchmark/corpora/
+
+# Scratch commit-message files
+.gitmsg.txt
