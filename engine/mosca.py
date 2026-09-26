@@ -257,10 +257,22 @@ def calculate_risk(finding, user_x=None, user_y=None, z_collapse_time=None,
     y_base, y_adjust, y_reason = _resolve_y(finding, user_y)
     y_years = y_base + y_adjust
 
-    total = x_years + y_years
-    margin = round(total - z_years, 2)
-    is_vulnerable = bool(subject and total > z_years)
-    hndl_exposed = bool(subject and horizon == HORIZON_CONFIDENTIALITY and x_years > z_years)
+    # Round to a precision far finer than any real input BEFORE comparing, because the verdict
+    # and the displayed numbers must not disagree. In binary floating point 0.1 + 21.1 is
+    # 21.200000000000003, which is > 21.2, so the tool would print "x_y: 21.2" next to "z: 21.2"
+    # and still claim RISK. A reader who checks the arithmetic loses trust in every other number
+    # in the report -- the most damaging way this tool could fail, and precisely the
+    # self-contradiction we criticise competitors for.
+    #
+    # 1e-9 years is ~30 microseconds. No meaningful input differs at that scale, so quantising
+    # cannot change a real verdict; it only removes representation noise.
+    PRECISION = 9
+    total = round(x_years + y_years, PRECISION)
+    z_cmp = round(float(z_years), PRECISION)
+    x_cmp = round(float(x_years), PRECISION)
+    margin = round(total - z_cmp, 2)
+    is_vulnerable = bool(subject and total > z_cmp)
+    hndl_exposed = bool(subject and horizon == HORIZON_CONFIDENTIALITY and x_cmp > z_cmp)
     effective_bits = _grover_effective_bits(name, key_length)
 
     tier = _tier(break_model, subject, is_vulnerable, hndl_exposed, margin, effective_bits)

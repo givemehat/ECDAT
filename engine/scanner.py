@@ -445,7 +445,19 @@ class ECDATScanner:
             self._note_error(image_path, f"not a readable container image ({exc})")
             return []
         try:
-            for member in opened.getmembers():
+            # `getmembers()` is INSIDE the guard, and that is the whole point. In stream mode
+            # ("r:") the archive is parsed lazily: a truncated file opens without error and only
+            # raises when the members are read. With this call outside the try, one corrupt .tar
+            # -- a partially-written `docker save`, an interrupted upload -- raises ReadError out
+            # of scan_directory and destroys every other finding in the tree, because os.walk
+            # never finishes. A scan must degrade to "this file could not be read", never to
+            # "the whole scan died".
+            members = opened.getmembers()
+        except (tarfile.TarError, OSError, EOFError) as exc:
+            self._note_error(image_path, f"not a readable container image ({exc})")
+            return []
+        try:
+            for member in members:
                 if not member.isfile():
                     continue
                 name = member.name.lower()
@@ -509,10 +521,23 @@ class ECDATScanner:
         """
         findings = []
         if os.path.isfile(directory_path):
-            return self._scan_path(directory_path)
+            # A single-file scan must go through the SAME de-duplication and coverage
+            # finalisation as a directory scan. Returning early here made the same bytes on disk
+            # give two different answers depending on how they were submitted: duplicates survived,
+            # `scanners_run` stayed empty, and `ml_reason` was never resolved. Both are documented
+            # entry points, so they must agree.
+            self.coverage["files_seen"] += 1
+            if is_credential_store(os.path.basename(directory_path)):
+                self._note_error(directory_path, "credential store: contents never read")
+            elif resolve_within(os.path.dirname(os.path.abspath(directory_path)) or ".",
+                                directory_path) is None:
+                self._note_error(directory_path, "symlink escapes the scan root: not followed")
+            else:
+                findings.extend(self._scan_path(directory_path))
+            return self._finalise(findings)
         if not os.path.isdir(directory_path):
             self._note_error(directory_path, "path does not exist or is not a directory")
-            return findings
+            return self._finalise(findings)
         # Filesystem containment policy (see engine/fspolicy.py): refuse a synthetic filesystem
         # outright, and never follow a symlink out of the scan root.
         try:
@@ -539,7 +564,15 @@ class ECDATScanner:
             self.coverage["ml_reason"] = self.ml.reason
         else:
             self.coverage["ml_reason"] = "disabled"
+        return self._finalise(findings)
 
+    def _finalise(self, findings):
+        """De-duplicate and close the coverage manifest. Shared by every entry point.
+
+        Extracted so a single-file scan and a directory scan cannot drift apart: when this ran
+        only at the end of the directory path, `cli.py file.py` returned duplicates and an empty
+        `scanners_run`, so the same bytes gave two different answers.
+        """
         # Deduplicate: same file + same name + same rule + same line = one finding.
         unique, seen = [], set()
         for f in findings:
@@ -568,6 +601,12 @@ class ECDATScanner:
         if lowered.endswith(BINARY_EXTENSIONS):
             self._note_scanned()
             return self._scan_binary_file(fpath)
+        # Out of scope by extension. It MUST still be counted as skipped, otherwise
+        # `files_seen` exceeds `files_scanned + files_skipped` and the coverage manifest
+        # cannot account for every file it walked. A number that does not add up makes the
+        # whole manifest untrustworthy -- it is the one artefact whose entire job is to be
+        # believed, so a silent drop here undoes the point of having it.
+        self.coverage["files_skipped"] += 1
         return []
 
     # ------------------------------------------------------------------ coverage

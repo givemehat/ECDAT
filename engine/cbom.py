@@ -26,6 +26,7 @@ document, keeps all ECDAT-specific values in a documented `ecd:` property namesp
 document stays valid, and `validate_real_world.py` now performs local schema validation.
 """
 import json
+import re
 import uuid
 from datetime import datetime, timezone
 
@@ -115,6 +116,46 @@ def _nist_quantum_level(finding, primitive):
     return 0
 
 
+def _coerce_int(value):
+    """Best-effort int, or None. A CBOM generator must never crash on a malformed finding.
+
+    `key_length` arrives from regex capture groups and from third-party inputs, so it can be any
+    string. `int('unknown')` raises ValueError and would abort the whole report -- turning one
+    bad field into a total scan failure. An unknown key size is a reportable condition, not a
+    fatal one: it is simply omitted and the artefact stays in the CBOM.
+    """
+    if value is None or isinstance(value, bool):
+        return None
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+# CycloneDX 1.7 types `algorithmProperties.mode` as a CLOSED enum with nine values. Modes such as
+# XTS, GCM-SIV, EAX, OCB and SIV are real, widely deployed AEAD/cipher modes but are NOT in it.
+# The schema provides `other` and `unknown` precisely so an unrecognised mode can be
+# represented; emitting a raw lowercase mode name would produce a document that fails validation,
+# so a mode outside the enum degrades to `other` and the verbatim value is preserved in the
+# namespaced `ecd:` properties where it costs the document nothing.
+CYCLONEDX_MODES = {"cbc", "ecb", "ccm", "gcm", "cfb", "ofb", "ctr"}
+
+
+def _canonical_mode(raw):
+    """Map a free-text cipher mode onto the CycloneDX closed enum, or None if unrecognised."""
+    m = str(raw or "").strip().lower().replace("_", "-")
+    if not m:
+        return None
+    if m in CYCLONEDX_MODES:
+        return m
+    # A compound name such as "GCM-SIV" or "AES-256-GCM" resolves to its base mode when the
+    # base is a member of the enum; otherwise it is genuinely `other`.
+    for part in re.split(r"[-/ ]+", m):
+        if part in CYCLONEDX_MODES:
+            return part
+    return "other"
+
+
 def _algorithm_properties(finding, primitive):
     props = {
         "primitive": primitive,
@@ -122,15 +163,21 @@ def _algorithm_properties(finding, primitive):
         "cryptoFunctions": ["keygen"],
     }
     key_length = finding.get("key_length")
+    key_bits = _coerce_int(key_length)
     if key_length:
+        # The raw value is still worth recording (e.g. "unknown"), but only a real integer can
+        # be a CycloneDX parameterSetIdentifier consumer would recognise.
         props["parameterSetIdentifier"] = str(key_length)
     if finding.get("mode"):
-        props["mode"] = str(finding["mode"]).lower()
+        mode = _canonical_mode(finding["mode"])
+        if mode:
+            props["mode"] = mode
     if finding.get("curve"):
         props["curve"] = str(finding["curve"])
     # `uses` (at-rest / tls / signing) has no CycloneDX field; it is emitted as an `ecd:uses`
     # property instead, so it never invalidates the base document.
-    props["classicalSecurityLevel"] = int(key_length) if key_length and primitive in ("pke", "signature", "key-agreement", "kem") else 0
+    props["classicalSecurityLevel"] = (
+        key_bits if key_bits and primitive in ("pke", "signature", "key-agreement", "kem") else 0)
     if not props["classicalSecurityLevel"] and primitive == "hash":
         props["classicalSecurityLevel"] = 128
     props["nistQuantumSecurityLevel"] = _nist_quantum_level(finding, primitive)
@@ -171,6 +218,11 @@ def _ecd_properties(finding, risk, recommendation):
 
     if finding.get("line"):
         out.append({"name": f"{PROPERTY_NS}:line", "value": str(finding["line"])})
+    if finding.get("mode"):
+        # The verbatim mode, alongside the schema-constrained `algorithmProperties.mode`. A mode
+        # like "GCM-SIV" or "XTS" is not in the CycloneDX closed enum and is emitted there as
+        # `other`; recording what it actually was prevents that from being a silent loss.
+        out.append({"name": f"{PROPERTY_NS}:mode_verbatim", "value": str(finding["mode"])})
     if finding.get("dl_confidence") is not None:
         out.append({"name": f"{PROPERTY_NS}:detector_confidence",
                     "value": str(finding.get("dl_confidence"))})
@@ -255,14 +307,23 @@ def generate_cbom(findings, enriched=False, subject_name="ECDAT-Scanned-Artefact
             continue
 
         algo = _algorithm_properties(f, primitive)
+        # `dict.get(k, default)` returns None when the key EXISTS with a None value, so a
+        # finding from an external source carrying `"name": null` produced `"name": null` and an
+        # invalid document. Falling back only on falsy covers both the missing key and the null.
+        # The value is also coerced to a hashable string: a JSON inventory can legitimately carry
+        # a list or dict for `name`, and an unhashable key raises TypeError deep inside a dict
+        # lookup -- taking the whole report down over one malformed field.
+        algo_name = f.get("name")
+        if not isinstance(algo_name, str) or not algo_name:
+            algo_name = "unknown"
         component = {
             "type": "cryptographic-asset",
             "bom-ref": ref,
-            "name": f.get("name", "unknown"),
+            "name": algo_name,
             "cryptoProperties": {"assetType": "algorithm", "algorithmProperties": algo},
             "properties": _ecd_properties(f, risk, recommendation),
         }
-        oid = OID_BY_NAME.get(f.get("name", ""))
+        oid = OID_BY_NAME.get(algo_name)
         if oid:
             component["cryptoProperties"]["oid"] = oid
         if f.get("line"):
@@ -278,16 +339,25 @@ def generate_cbom(findings, enriched=False, subject_name="ECDAT-Scanned-Artefact
             uses_targets.append(ref)
 
     if uses_targets:
+        # NO `dependencyType` field here. The vendored CycloneDX 1.7 `definitions.dependency`
+        # allows only `ref`, `dependsOn` and `provides`, and sets additionalProperties:false --
+        # emitting `dependencyType` makes the document invalid for every consumer that validates
+        # it, which defeats the purpose of publishing a CBOM at all. The `implements` vs `uses`
+        # distinction the design intends is expressed through `compositions` and component
+        # `type`, not through a field on a dependency edge. Findings with no `file` are ambient
+        # or global, so the subject genuinely does use them; that is what `dependsOn` says.
         dependencies.append({
             "ref": subject_name,
             "dependsOn": uses_targets,
-            "dependencyType": "uses",
         })
 
     timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    metadata_component = {"type": "application", "name": subject_name}
-    if subject_version:
-        metadata_component["version"] = subject_version
+    metadata_component = {"type": "application", "name": str(subject_name)}
+    if subject_version is not None and str(subject_version).strip():
+        # CycloneDX types `component.version` as a string. A caller passing `1` (an int) would
+        # otherwise produce a document that fails schema validation, so coerce rather than
+        # reject: the value is still meaningful as text and refusing it would be unhelpful.
+        metadata_component["version"] = str(subject_version)
 
     metadata = {
         "timestamp": timestamp,

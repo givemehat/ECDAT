@@ -120,6 +120,20 @@ def _rec(algorithm, action, justification, size, latency, rule_trace,
     }
 
 
+def _copy(rec):
+    """Return an independent copy of a record.
+
+    NO_ACTION is a module-level constant, so returning it directly would hand every caller the
+    SAME dict. A GUI, a report writer or a test that added a key or reordered `notes` would
+    silently mutate the constant for the lifetime of the process, and the corruption would appear
+    far from its cause -- exactly the class of bug that is nearly impossible to debug later.
+    """
+    out = dict(rec)
+    out["standard_basis"] = list(rec.get("standard_basis", []))
+    out["notes"] = list(rec.get("notes", []))
+    return out
+
+
 NO_ACTION = _rec(
     "No migration required",
     "No immediate action required",
@@ -291,7 +305,7 @@ def get_pqc_recommendation(finding):
                 extra_notes=(PERF_NOTES["cnsa"], PERF_NOTES["nist_dates"]),
             )
         if int(key_len) >= 192:
-            return NO_ACTION
+            return _copy(NO_ACTION)
         return _rec(
             "AES-256",
             "Upgrade key size (policy-driven, not quantum-driven)",
@@ -319,7 +333,7 @@ def get_pqc_recommendation(finding):
                 "RULE-HASH-LEGACY: hash=SHA-1/MD5 -> replace for classical reasons",
                 standard_basis=("FIPS 180-4",),
             )
-        return NO_ACTION
+        return _copy(NO_ACTION)
 
     # ------------------------------------------------------------- Shor-vulnerable: key establishment
     if primitive in ("pke", "key-agreement", "kem"):

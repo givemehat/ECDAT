@@ -1,0 +1,48 @@
+fix: 13 real defects found by property/differential/fuzz testing
+
+Every one of these was found by a test that had to be capable of failing, and every
+one is fixed at the source rather than asserted around. Documented in
+docs/HAND-160-property-bugs.md. Suite: 393 passed/13 failed -> 406 passed/0 failed.
+
+engine/scanner.py
+  * A truncated container image crashed the WHOLE scan. In stream mode a tar opens
+    without error and only raises when members are read, so getmembers() sat outside
+    the guard and a ReadError escaped scan_directory. Blast radius: one corrupt .tar
+    -- a partially-written `docker save`, an interrupted upload -- destroyed every
+    other finding in the tree, because os.walk never finished.
+  * Scanning a single file returned early, skipping de-duplication and coverage
+    finalisation. The same bytes gave two different answers depending on how they were
+    submitted, and coverage_manifest()["scanners_run"] was empty while findings were
+    returned -- the honesty artefact stating the opposite of the truth. Both entry
+    points now share _finalise().
+  * Out-of-scope files were counted as seen but recorded nowhere, so
+    files_seen > files_scanned + files_skipped and the manifest could not account for
+    every file it walked.
+
+engine/mosca.py
+  * The report could contradict itself. 0.1 + 21.1 evaluates to 21.200000000000003 in
+    binary floating point, so with Z=21.2 the tool printed "x_y: 21.2" beside "z: 21.2"
+    and still claimed RISK. A reader who checks the arithmetic loses trust in every
+    other number in the report. Values are now quantised to 1e-9 years (~30
+    microseconds) before the comparison, which no real input can distinguish.
+
+engine/cbom.py
+  * `dependencyType` is not a CycloneDX 1.7 field. The vendored schema permits only
+    ref/dependsOn/provides with additionalProperties:false, so any finding without a
+    `file` key produced a document invalid for every consumer that validates it --
+    reached by ambient crypto or a re-imported inventory. The existing schema test
+    never hit it because scanner output always carries a file.
+  * Cipher `mode` was emitted verbatim into a CLOSED nine-value enum. XTS, GCM-SIV,
+    EAX, OCB and SIV are real deployed modes and were all rejected. Unrecognised modes
+    now degrade to `other`, with the verbatim value kept in `ecd:mode_verbatim`.
+  * int(key_length) took the whole report down on "2048 bits" or "unknown".
+  * f.get("name", "unknown") returns None when the key exists with a null value, and an
+    unhashable name (a list from a JSON import) raised TypeError in the OID lookup.
+  * subject_version was passed through untyped; CycloneDX requires a string.
+
+engine/recommender.py
+  * NO_ACTION is a module-level constant returned by reference, so any caller that
+    mutated it corrupted every later call for the life of the process.
+
+Full suite green; emitted CBOM still validates against CycloneDX 1.7; app.py imports
+cleanly.
