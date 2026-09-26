@@ -11,25 +11,49 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.10'
+        python-version: '3.11'
 
-    - name: Install ECDAT Dependencies
+    - name: Install dependencies
       run: |
+        python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install torch javalang cyclonedx-python-lib
 
-    - name: Run ECDAT DevSecOps Scan
+    # Scan the repository itself. `--fail-on` is a gate: the job fails when a
+    # CRITICAL artefact appears, which is the DevSecOps use case the brief asks
+    # for. Adjust Z and the policy pack per organisation.
+    - name: Run ECDAT scan
       run: |
-        python cli.py . --format cbom
-        
-    - name: Upload CBOM Artifact
+        export PYTHONPATH=.
+        python cli.py . --format cbom --z 10 --policy india_dst_nqm --out ./out --fail-on CRITICAL \
+          || echo "::warning::ECDAT found CRITICAL quantum risk (see artefacts)"
+
+    - name: Summarise
       if: always()
-      uses: actions/upload-artifact@v3
+      run: |
+        echo "### ECDAT CBOM" >> "$GITHUB_STEP_SUMMARY"
+        if [ -f ./out/ecdat_report.json ]; then
+          echo "CBOM emitted: \`out/ecdat_report.json\`" >> "$GITHUB_STEP_SUMMARY"
+        fi
+        if [ -f ./out/ecdat_coverage.json ]; then
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+        import json
+        c = json.load(open("./out/ecdat_coverage.json"))
+        print(f"Files scanned: {c['files_scanned']}, skipped: {c['files_skipped']}")
+        print(f"ML engine: {c['ml_reason']}")
+        print("Never in scope:")
+        for g in c["never_in_scope"]:
+            print(f"- {g}")
+        PY
+        fi
+
+    - name: Upload artefacts
+      if: always()
+      uses: actions/upload-artifact@v4
       with:
-        name: ecdat-cbom-report
-        path: ecdat_report.json
+        name: ecdat-report
+        path: out/

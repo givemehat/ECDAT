@@ -1,139 +1,198 @@
-import streamlit as st
-import pandas as pd
+"""ECDAT Streamlit dashboard.
+
+Two views over the same scan: an ENGINEER view (provenance, dependency topology, rule traces) and
+a COMPLIANCE view (tier counts, policy deadlines, coverage gaps). The split mirrors the two
+audiences the brief names: security engineers and non-technical/compliance stakeholders.
+"""
 import json
 import os
+
+import pandas as pd
+import streamlit as st
 import streamlit.components.v1 as components
-import networkx as nx
-import matplotlib.pyplot as plt
+
 from engine.scanner import ECDATScanner
-from engine.mosca import calculate_risk
+from engine.mosca import calculate_risk, DEFAULT_Z, Z_PRESETS, POLICY_DEADLINES, DATA_CLASS_LIFETIME
 from engine.recommender import get_pqc_recommendation
 from engine.cbom import generate_cbom
 from engine.graph import generate_crypto_graph
 
-st.set_page_config(page_title="ECDAT Dashboard", layout="wide", page_icon="🔐")
+st.set_page_config(page_title="ECDAT", layout="wide", page_icon="🔐")
+st.title("ECDAT — Enterprise Cryptographic Discovery & Analysis Tool")
+st.caption("Smart India Hackathon 2026 · SIH26164 · NTRO · Blockchain & Cybersecurity")
 
-st.title("ECDAT: Enterprise Cryptographic Discovery & Analysis Tool")
-st.markdown("Smart India Hackathon 2026 - Advanced Deep Learning Prototype")
 
-@st.cache_resource
-def get_scanner():
-    # Cache the scanner so the PyTorch model isn't reloaded on every button click
-    return ECDATScanner()
+@st.cache_resource(show_spinner="Initialising scanner…")
+def get_scanner(enable_ml):
+    return ECDATScanner(enable_ml=enable_ml)
 
-scanner = get_scanner()
 
-# Sidebar for controls
-with st.sidebar:
-    st.header("Configuration")
-    target_dir = st.text_input("Target Directory to Scan", value="./dummy_target")
-    
-    st.subheader("Mosca's Theorem Parameters")
-    st.markdown("Formula: $X + Y > Z$")
-    z_time = st.slider("Z (Years to Quantum Computer)", min_value=1, max_value=20, value=8)
-    
-    st.markdown("*(Note: X and Y are now dynamically calculated by the AI using AST Depth & Confidence, but you can override them below)*")
-    override_x = st.number_input("Override X (0 for AI-driven)", value=0)
-    override_y = st.number_input("Override Y (0 for AI-driven)", value=0)
-    
-    scan_btn = st.button("Run Deep Discovery Scan", type="primary")
+st.sidebar.header("Configuration")
+target_dir = st.sidebar.text_input("Target (directory, file, or container-image tar)", value="./dummy_target")
+enable_ml = st.sidebar.checkbox("Enable PyTorch transformer (supplemental signal)", value=True)
 
-if scan_btn:
-    if not os.path.exists(target_dir):
-        st.error(f"Directory {target_dir} not found!")
-    else:
-        with st.spinner("Initializing Multi-Modal PyTorch Engine and Scanning..."):
-            findings = scanner.scan_directory(target_dir)
-            
-        if not findings:
-            st.warning("No cryptographic assets found in the target directory.")
-        else:
-            # Enrichment phase using AI metrics
-            enriched_findings = []
-            for f in findings:
-                x_val = override_x if override_x > 0 else None
-                y_val = override_y if override_y > 0 else None
-                
-                f['risk'] = calculate_risk(f, x_val, y_val, z_time)
-                f['recommendation'] = get_pqc_recommendation(f)
-                enriched_findings.append(f)
-                
-            st.success(f"Discovered {len(findings)} cryptographic assets using AI Engine!")
-            
-            # --- TABS ---
-            tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Risk Heatmap", "🧠 Deep Learning Analysis", "🕸️ Topology", "📋 Remediation", "📦 CBOM"])
-            
-            with tab1:
-                st.subheader("Quantum Risk Distribution")
-                col1, col2, col3 = st.columns(3)
-                
-                critical_count = sum(1 for f in enriched_findings if f['risk']['tier'] == 'CRITICAL')
-                high_count = sum(1 for f in enriched_findings if f['risk']['tier'] == 'HIGH')
-                low_count = sum(1 for f in enriched_findings if f['risk']['tier'] in ['LOW', 'MEDIUM'])
-                
-                col1.metric("Critical Quantum Risk", critical_count)
-                col2.metric("High Quantum Risk", high_count)
-                col3.metric("Low/Medium Risk", low_count)
-                
-                # Table for executive view
-                df = pd.DataFrame([{
-                    "Artefact": f['file'].split('/')[-1],
-                    "Algorithm": f['name'],
-                    "X (Data Life)": f['risk']['x'],
-                    "Y (Migration)": f['risk']['y'],
-                    "X+Y > Z": f['risk']['is_vulnerable'],
-                    "Risk Tier": f['risk']['tier']
-                } for f in enriched_findings])
-                
-                st.dataframe(df.style.applymap(
-                    lambda v: 'background-color: #ff4b4b' if v == 'CRITICAL' else ('background-color: #ff9f36' if v == 'HIGH' else ''),
-                    subset=['Risk Tier']
-                ), use_container_width=True)
-                
-            with tab2:
-                st.subheader("Multi-Modal AI Inference Results")
-                st.markdown("Here you can see the inner workings of our Transformer model. It extracts the AST (Abstract Syntax Tree) depth to estimate Migration Complexity (Y), and assigns a Neural Network confidence score.")
-                
-                ai_df = pd.DataFrame([{
-                    "File": f['file'].split('/')[-1],
-                    "AI Prediction": f['name'],
-                    "Neural Confidence": f"{f.get('dl_confidence', 0)*100:.2f}%",
-                    "AST Code Depth": f.get('ast_depth', 0),
-                    "Derived Y (Migration)": f['risk']['y']
-                } for f in enriched_findings])
-                
-                st.dataframe(ai_df, use_container_width=True)
-                
-            with tab3:
-                st.subheader("Interactive Cryptographic Topology")
-                st.markdown("This graph shows how cryptographic primitives are distributed across your application. Red nodes indicate CRITICAL quantum risks.")
-                graph_html = generate_crypto_graph(enriched_findings)
-                components.html(graph_html, height=650, scrolling=False)
-                
-            with tab4:
-                st.subheader("Remediation Engine")
-                for f in enriched_findings:
-                    with st.expander(f"{f['name']} in {f['file'].split('/')[-1]} ({f['risk']['tier']})"):
-                        rc, rcol1, rcol2 = st.columns([1, 2, 2])
-                        with rcol1:
-                            st.markdown("**AI Risk Analysis:**")
-                            st.write(f"- **Threat:** {f['risk']['threat']}")
-                            st.write(f"- **Mosca Score:** $X({f['risk']['x']}) + Y({f['risk']['y']}) = {f['risk']['x_y']}$")
-                            st.write(f"- **AI Confidence:** {f.get('dl_confidence', 0)*100:.1f}%")
-                        with rcol2:
-                            st.markdown("**PQC Recommendation:**")
-                            st.write(f"- **Action:** {f['recommendation']['action']}")
-                            st.write(f"- **Target Algorithm:** {f['recommendation']['algorithm']}")
-                            st.write(f"- **Latency Trade-off:** {f['recommendation']['tradeoff_latency']}")
-                            st.write(f"- **Payload Trade-off:** {f['recommendation']['tradeoff_size']}")
-                            
-            with tab5:
-                st.subheader("CycloneDX v1.6 CBOM")
-                cbom_json = generate_cbom(enriched_findings, enriched=True)
-                st.download_button(
-                    label="Download CBOM JSON",
-                    file_name="ecdat_cbom.json",
-                    mime="application/json",
-                    data=cbom_json
-                )
-                st.json(json.loads(cbom_json))
+st.sidebar.subheader("Mosca parameters")
+z_name = st.sidebar.selectbox("Z preset (years until a CRQC)", list(Z_PRESETS), index=1)
+z_years = st.sidebar.slider("Z (years)", min_value=1, max_value=30, value=int(Z_PRESETS[z_name]["years"]))
+st.sidebar.caption(Z_PRESETS[z_name]["basis"])
+policy = st.sidebar.selectbox("Compliance policy", list(POLICY_DEADLINES), index=0)
+st.sidebar.caption(POLICY_DEADLINES[policy]["label"])
+st.sidebar.caption(
+    "Z is a cryptanalytic estimate, not a compliance deadline. Deadlines are shown separately.")
+
+st.sidebar.subheader("Classification overrides")
+data_class = st.sidebar.selectbox("Data lifetime class (X)", list(DATA_CLASS_LIFETIME),
+                                  index=list(DATA_CLASS_LIFETIME).index("operational-record"))
+st.sidebar.caption(DATA_CLASS_LIFETIME[data_class]["note"])
+x_override = st.sidebar.number_input("Override X (years, 0 = use class)", min_value=0, value=0)
+y_override = st.sidebar.number_input("Override Y (years, 0 = use artefact class)", min_value=0, value=0)
+
+run = st.sidebar.button("Run discovery scan", type="primary")
+
+if not run:
+    st.info("Configure the target on the left, then run a scan. "
+            "Everything below reflects a single scan at a single point in time.")
+    st.stop()
+
+if not os.path.exists(target_dir):
+    st.error(f"Target not found: {target_dir}")
+    st.stop()
+
+scanner = get_scanner(enable_ml)
+with st.spinner("Scanning…"):
+    findings = scanner.scan_directory(target_dir)
+    coverage = scanner.coverage_manifest()
+
+for f in findings:
+    f["data_class"] = data_class
+    f["risk"] = calculate_risk(f, user_x=(x_override or None), user_y=(y_override or None),
+                               z_collapse_time=z_years, policy=policy)
+    f["recommendation"] = get_pqc_recommendation(f)
+
+st.success(f"{len(findings)} cryptographic artefact(s) discovered.")
+
+crit = [f for f in findings if f["risk"]["tier"] == "CRITICAL"]
+high = [f for f in findings if f["risk"]["tier"] == "HIGH"]
+med = [f for f in findings if f["risk"]["tier"] == "MEDIUM"]
+low = [f for f in findings if f["risk"]["tier"] == "LOW"]
+hndl = [f for f in findings if f["risk"]["hndl_exposed"]]
+
+m1, m2, m3, m4, m5 = st.columns(5)
+m1.metric("Critical", len(crit))
+m2.metric("High", len(high))
+m3.metric("Medium", len(med))
+m4.metric("Low", len(low))
+m5.metric("HNDL exposed now", len(hndl))
+
+st.subheader("Coverage — what this scan did and did not examine")
+c1, c2 = st.columns(2)
+with c1:
+    st.markdown("**Scanned**")
+    st.write(f"- Files scanned: **{coverage['files_scanned']}**")
+    st.write(f"- Files skipped: **{coverage['files_skipped']}**")
+    st.write(f"- Scanners run: `{', '.join(coverage['scanners_run']) or 'n/a'}`")
+    st.write(f"- ML engine: `{coverage['ml_reason']}`")
+    if coverage["errors"]:
+        st.warning("These files could NOT be read. A zero-finding result is not evidence of safety here.")
+        st.dataframe(pd.DataFrame(coverage["errors"]), use_container_width=True)
+with c2:
+    st.markdown("**Never in scope** (need a different sensor or an attestation)")
+    for gap in coverage["never_in_scope"]:
+        st.write(f"- {gap}")
+
+if hndl:
+    st.error(f"**{len(hndl)} artefact(s) are exposed to harvest-now-decrypt-later.** "
+             "Traffic or ciphertext captured today is retroactively readable once a CRQC exists, "
+             "and migrating later cannot undo that.")
+
+view = st.radio("View", ["Compliance", "Engineer", "Topology", "Recommendations", "CBOM"],
+                horizontal=True)
+
+if view == "Compliance":
+    st.subheader("Quantum-readiness posture")
+    st.write(f"Policy: **{POLICY_DEADLINES[policy]['label']}** — deadline "
+             f"**{POLICY_DEADLINES[policy]['year']}** · Z = **{z_years} years**")
+    rows = []
+    for f in findings:
+        r = f["risk"]
+        band = r.get("z_band", {})
+        rows.append({
+            "Artefact": f["name"], "Primitive": f["primitive"], "Tier": r["tier"],
+            "HNDL now": "YES" if r["hndl_exposed"] else "",
+            "X": r["x"], "Y": r["y"], "X+Y": r["x_y"], "Z": r["z"], "Margin": r["margin"],
+            "Z-band": " → ".join(f"{k}:{v}" for k, v in band.items()),
+            "Stable across Z": "yes" if r["z_stable"] else "**flips**",
+            "Location": f"{f['file']}:{f.get('line')}",
+        })
+    df = pd.DataFrame(rows).sort_values(["Tier", "Margin"], ascending=[True, False])
+    st.dataframe(df, use_container_width=True)
+
+    st.subheader("Why each tier")
+    for f in findings:
+        r = f["risk"]
+        with st.expander(f"{f['name']} — {r['tier']}"
+                         + ("  ⚠ HNDL EXPOSED" if r["hndl_exposed"] else "")):
+            st.write(f"- **Break model:** {r['break_model']} ({r['threat']})")
+            st.write(f"- **Mosca:** X({r['x']}) + Y({r['y']}) = {r['x_y']} vs Z({r['z']}) → "
+                     f"margin {r['margin']} → **{r['tier']}**")
+            st.write(f"- **Z-band:** {r.get('z_band')} (stable across the window: {r['z_stable']})")
+            st.write(f"- **X came from:** {r['x_reason']}")
+            st.write(f"- **Y came from:** {r['y_reason']}")
+            st.write(f"- **Recommendation:** {f['recommendation']['algorithm']} — "
+                     f"{f['recommendation']['action']}")
+
+elif view == "Engineer":
+    st.subheader("Findings with provenance")
+    rows = [{
+        "File": f["file"], "Line": f.get("line"), "Artefact": f["name"],
+        "Primitive": f["primitive"], "Key size": f.get("key_length", ""),
+        "Uses": f.get("uses", ""), "Evidence": f.get("evidence_class", ""),
+        "Rule": f.get("rule_id", ""), "Scanner": f.get("scanner", ""),
+        "Detector confidence": f.get("dl_confidence", ""),
+        "AST depth": f.get("ast_depth", ""),
+    } for f in findings]
+    st.dataframe(pd.DataFrame(rows), use_container_width=True)
+    st.caption("Rule IDs map 1:1 to the detection table in engine/scanner.py (RULES).")
+
+elif view == "Topology":
+    st.subheader("Cryptographic topology")
+    st.caption("Edges are 'uses'. A library finding is presence evidence, not proof that a "
+               "consumer calls it.")
+    components.html(generate_crypto_graph(findings), height=650, scrolling=False)
+
+elif view == "Recommendations":
+    st.subheader("PQC / hybrid recommendations")
+    for f in findings:
+        rec = f["recommendation"]
+        with st.expander(f"{f['name']} ({f['primitive']}) → {rec['algorithm']}"):
+            st.write(f"**Action:** {rec['action']}")
+            st.write(f"**Why:** {rec['justification']}")
+            st.write(f"**Rule:** `{rec['rule_trace']}`")
+            st.write(f"**Standard basis:** {', '.join(rec['standard_basis']) or 'n/a'}")
+            st.write(f"**Size impact:** {rec['tradeoff_size']}")
+            st.write(f"**Latency impact:** {rec['tradeoff_latency']}")
+            st.write(f"**Cost band:** {rec['cost_band']}")
+            if rec.get("hybrid_semantics"):
+                st.write(f"**Hybrid semantics:** {rec['hybrid_semantics']}")
+            if rec.get("ossification_risk", "N/A") != "N/A":
+                st.write(f"**Deployment risk:** {rec['ossification_risk']}")
+            for note in rec.get("notes", []):
+                st.caption(note)
+
+else:
+    st.subheader("CycloneDX v1.7 CBOM")
+    st.caption("Validates against the published 1.7 schema: "
+               "`python validate_cbom.py ecdat_report.json`")
+    doc = generate_cbom(findings, enriched=True,
+                        subject_name=os.path.basename(target_dir.rstrip("/\\")),
+                        coverage=coverage)
+    st.download_button("Download CBOM (JSON)", "ecdat_report.json", "application/json", doc)
+    st.download_button("Download recommendations (JSON)", "ecdat_recommendations.json",
+                       "application/json",
+                       json.dumps([{"artefact": f["name"], "risk": f["risk"],
+                                    "recommendation": f["recommendation"]} for f in findings],
+                                  indent=2))
+    st.download_button("Download coverage manifest", "ecdat_coverage.json", "application/json",
+                       json.dumps(coverage, indent=2))
+    st.json(json.loads(doc))
+
