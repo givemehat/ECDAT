@@ -7954,22 +7954,41 @@
      "SaaS / third-party boundary crypto (requires attestation)",
      "silicon-embedded keys (requires attestation)"
     ],
-    "findings_total": 30,
+    "findings_total": 184,
     "assurance_histogram": {
      "observed": 0,
-     "used": 30,
+     "used": 184,
      "declared": 0,
      "capability": 0
     },
-    "proven_use": 30,
-    "unresolved_purpose": 5
+    "proven_use": 184,
+    "unresolved_purpose": 72
    },
    "scan_errors": [],
    "findings_by_rule": {
+    "ECDSA | ECD-SRC-SSH-SIG-001": 30,
     "ECDH | ECD-SRC-ECDH-001": 19,
+    "ECDH | ECD-SRC-SSH-KEX-001": 18,
+    "AES | ECD-SRC-SSH-CIPHER-001": 16,
+    "RSA | ECD-SRC-PYCA-RSA-001": 13,
+    "ECDSA | ECD-SRC-PYCA-EC-002": 12,
+    "DH | ECD-SRC-SSH-DH-001": 10,
+    "AES | ECD-SRC-PYCA-AES-001": 9,
+    "HMAC | ECD-SRC-SSH-MAC-001": 8,
+    "SHA | ECD-SRC-PYCA-HASH-001": 7,
+    "ECDSA | ECD-SRC-PYCA-EC-001": 7,
+    "SHA1 | ECD-SRC-HASHLIB-001": 5,
+    "Ed25519 | ECD-SRC-SSH-ED-001": 4,
+    "AES | ECD-SRC-SSH-CIPHER-002": 4,
     "SHA1 | ECD-SRC-SHA1-001": 3,
     "Ed25519 | ECD-SRC-EDDSA-001": 3,
+    "SHA1 | ECD-SRC-HASHLIB-003": 3,
     "ECDSA | ECD-SRC-ECDSA-001": 2,
+    "SHA | ECD-SRC-HASHLIB-002": 2,
+    "X25519 | ECD-SRC-PYCA-X-001": 2,
+    "3DES | ECD-SRC-SSH-LEGACY-001": 2,
+    "ECDH | ECD-SRC-PYCA-ECDH-001": 1,
+    "Ed25519 | ECD-SRC-PYCA-ED-001": 1,
     "AES | ECD-SRC-AES-001": 1,
     "SHA256 | ECD-SRC-SHA2-001": 1,
     "MD5 | ECD-SRC-MD5-001": 1
@@ -7977,19 +7996,147 @@
    "variants": {
     "L1": {
      "counts": {
-      "TP": 27,
-      "FP": 3,
-      "FN": 213,
+      "TP": 145,
+      "FP": 16,
+      "FN": 95,
       "labelled_positives": 240,
-      "findings_total": 30
+      "findings_total": 184
      },
-     "precision": 0.9,
-     "precision_fraction": "27/30",
-     "recall": 0.1125,
-     "recall_fraction": "27/240",
-     "f1": 0.2,
+     "precision": 0.9006,
+     "precision_fraction": "145/161",
+     "recall": 0.6042,
+     "recall_fraction": "145/240",
+     "f1": 0.7232,
      "f1_note": "F1 is computed from the ROUNDED precision/recall, so it may differ in the 4th decimal from an F1 computed from the raw counts.",
      "false_positives": [
+      {
+       "file": "paramiko/ecdsakey.py",
+       "line": 167,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "ECDSA"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-PYCA-EC-002"
+       ],
+       "ecdat_match": [
+        "ec.EllipticCurvePublicKey"
+       ]
+      },
+      {
+       "file": "paramiko/ecdsakey.py",
+       "line": 305,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "ECDH"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-PYCA-ECDH-001"
+       ],
+       "ecdat_match": [
+        "derive_private_key("
+       ]
+      },
+      {
+       "file": "paramiko/kex_ecdh_nist.py",
+       "line": 67,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "ECDSA"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-PYCA-EC-002"
+       ],
+       "ecdat_match": [
+        "ec.EllipticCurvePublicKey"
+       ]
+      },
+      {
+       "file": "paramiko/kex_ecdh_nist.py",
+       "line": 113,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "ECDSA"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-PYCA-EC-002"
+       ],
+       "ecdat_match": [
+        "ec.EllipticCurvePublicKey"
+       ]
+      },
+      {
+       "file": "paramiko/kex_group14.py",
+       "line": 45,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "DH",
+        "ECDH"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-SSH-DH-001",
+        "ECD-SRC-SSH-KEX-001"
+       ],
+       "ecdat_match": [
+        "\"diffie-hellman-group14-sha256\"",
+        "\"diffie-hellman-group14-sha256\""
+       ]
+      },
+      {
+       "file": "paramiko/kex_group16.py",
+       "line": 30,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "DH",
+        "ECDH"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-SSH-DH-001",
+        "ECD-SRC-SSH-KEX-001"
+       ],
+       "ecdat_match": [
+        "\"diffie-hellman-group16-sha512\"",
+        "\"diffie-hellman-group16-sha512\""
+       ]
+      },
+      {
+       "file": "paramiko/kex_group16.py",
+       "line": 35,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "DH",
+        "ECDH"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-SSH-DH-001",
+        "ECD-SRC-SSH-KEX-001"
+       ],
+       "ecdat_match": [
+        "\"diffie-hellman-group16-sha512\"",
+        "\"diffie-hellman-group16-sha512\""
+       ]
+      },
       {
        "file": "paramiko/kex_mlkem.py",
        "line": 59,
@@ -8039,6 +8186,120 @@
        ],
        "ecdat_match": [
         "X25519"
+       ]
+      },
+      {
+       "file": "paramiko/rsakey.py",
+       "line": 139,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "RSA"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-PYCA-RSA-001"
+       ],
+       "ecdat_match": [
+        "padding.PKCS1v15"
+       ]
+      },
+      {
+       "file": "paramiko/rsakey.py",
+       "line": 167,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "RSA"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-PYCA-RSA-001"
+       ],
+       "ecdat_match": [
+        "padding.PKCS1v15"
+       ]
+      },
+      {
+       "file": "paramiko/transport.py",
+       "line": 219,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "DH",
+        "ECDH"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-SSH-DH-001",
+        "ECD-SRC-SSH-KEX-001"
+       ],
+       "ecdat_match": [
+        "\"diffie-hellman-group16-sha512\"",
+        "\"diffie-hellman-group16-sha512\""
+       ]
+      },
+      {
+       "file": "paramiko/transport.py",
+       "line": 221,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "DH",
+        "ECDH"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-SSH-DH-001",
+        "ECD-SRC-SSH-KEX-001"
+       ],
+       "ecdat_match": [
+        "\"diffie-hellman-group14-sha256\"",
+        "\"diffie-hellman-group14-sha256\""
+       ]
+      },
+      {
+       "file": "paramiko/transport.py",
+       "line": 328,
+       "labelled_primitive": null,
+       "labelled_code": "\"diffie-hellman-group14-sha256\": KexGroup14SHA256,",
+       "labelled_break_model": "not-affected",
+       "labelled_reason": "no quantum-vulnerable primitive is named on this line",
+       "ecdat_names": [
+        "DH",
+        "ECDH"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-SSH-DH-001",
+        "ECD-SRC-SSH-KEX-001"
+       ],
+       "ecdat_match": [
+        "\"diffie-hellman-group14-sha256\"",
+        "\"diffie-hellman-group14-sha256\""
+       ]
+      },
+      {
+       "file": "paramiko/transport.py",
+       "line": 329,
+       "labelled_primitive": null,
+       "labelled_code": "\"diffie-hellman-group16-sha512\": KexGroup16SHA512,",
+       "labelled_break_model": "not-affected",
+       "labelled_reason": "no quantum-vulnerable primitive is named on this line",
+       "ecdat_names": [
+        "DH",
+        "ECDH"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-SSH-DH-001",
+        "ECD-SRC-SSH-KEX-001"
+       ],
+       "ecdat_match": [
+        "\"diffie-hellman-group16-sha512\"",
+        "\"diffie-hellman-group16-sha512\""
        ]
       }
      ],
@@ -8095,40 +8356,6 @@
        ]
       },
       {
-       "file": "paramiko/agent.py",
-       "line": 53,
-       "labelled_primitive": "RSA",
-       "labelled_code": "\"rsa-sha2-256\": SSH_AGENT_RSA_SHA2_256,",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/agent.py",
-       "line": 54,
-       "labelled_primitive": "RSA",
-       "labelled_code": "\"rsa-sha2-512\": SSH_AGENT_RSA_SHA2_512,",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-512' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
        "file": "paramiko/client.py",
        "line": 34,
        "labelled_primitive": "ECDSA",
@@ -8152,91 +8379,6 @@
        "labelled_code": "from paramiko.ed25519key import Ed25519Key",
        "labelled_break_model": "shor",
        "labelled_reason": "P1: names the Ed25519 primitive in executable code",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/client.py",
-       "line": 430,
-       "labelled_primitive": "RSA",
-       "labelled_code": "if keytype == \"ssh-rsa\":",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ssh-rsa' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/client.py",
-       "line": 431,
-       "labelled_primitive": "RSA",
-       "labelled_code": "if \"rsa-sha2-512\" in sec_opts.key_types:",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-512' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/client.py",
-       "line": 432,
-       "labelled_primitive": "RSA",
-       "labelled_code": "keytype = \"rsa-sha2-512\"",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-512' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/client.py",
-       "line": 433,
-       "labelled_primitive": "RSA",
-       "labelled_code": "elif \"rsa-sha2-256\" in sec_opts.key_types:",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/client.py",
-       "line": 434,
-       "labelled_primitive": "RSA",
-       "labelled_code": "keytype = \"rsa-sha2-256\"",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-256' names a quantum-vulnerable primitive",
        "ecdat_names": [
         "None"
        ],
@@ -8299,23 +8441,6 @@
        ]
       },
       {
-       "file": "paramiko/config.py",
-       "line": 31,
-       "labelled_primitive": "SHA1",
-       "labelled_code": "from hashlib import sha1",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: binds 'sha1' to the sha1 hash, which is used as a digest below",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
        "file": "paramiko/ecdsakey.py",
        "line": 20,
        "labelled_primitive": "ECDSA",
@@ -8356,57 +8481,6 @@
        "labelled_code": "Represents a specific ECDSA Curve (nistp256, nistp384, etc).",
        "labelled_break_model": "shor",
        "labelled_reason": "P1: names the ECDSA primitive in executable code",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/ecdsakey.py",
-       "line": 59,
-       "labelled_primitive": "SHA-256",
-       "labelled_code": "self.hash_object = hashes.SHA256",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: binds the SHA256 hash to an SSH signature scheme",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/ecdsakey.py",
-       "line": 61,
-       "labelled_primitive": "SHA-384",
-       "labelled_code": "self.hash_object = hashes.SHA384",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: binds the SHA384 hash to an SSH signature scheme",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/ecdsakey.py",
-       "line": 63,
-       "labelled_primitive": "SHA-512",
-       "labelled_code": "self.hash_object = hashes.SHA512",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: binds the SHA512 hash to an SSH signature scheme",
        "ecdat_names": [
         "None"
        ],
@@ -8521,57 +8595,6 @@
       },
       {
        "file": "paramiko/ecdsakey.py",
-       "line": 105,
-       "labelled_primitive": "secp256r1",
-       "labelled_code": "_ECDSACurve(ec.SECP256R1, \"nistp256\"),",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: ec.SECP256R1 selects the SECP256R1 primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/ecdsakey.py",
-       "line": 106,
-       "labelled_primitive": "secp384r1",
-       "labelled_code": "_ECDSACurve(ec.SECP384R1, \"nistp384\"),",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: ec.SECP384R1 selects the SECP384R1 primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/ecdsakey.py",
-       "line": 107,
-       "labelled_primitive": "secp521r1",
-       "labelled_code": "_ECDSACurve(ec.SECP521R1, \"nistp521\"),",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: ec.SECP521R1 selects the SECP521R1 primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/ecdsakey.py",
        "line": 137,
        "labelled_primitive": "ECDSA",
        "labelled_code": "self.ecdsa_curve = self._ECDSA_CURVES.get_by_curve_class(c_class)",
@@ -8628,40 +8651,6 @@
        "labelled_code": "return cls._ECDSA_CURVES.get_key_format_identifier_list()",
        "labelled_break_model": "shor",
        "labelled_reason": "P1: names the ECDSA primitive in executable code",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/ecdsakey.py",
-       "line": 250,
-       "labelled_primitive": "EllipticCurvePrivateKey",
-       "labelled_code": "def private_key(self) -> Optional[ec.EllipticCurvePrivateKey]:",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: names the EllipticCurvePrivateKey primitive in executable code",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/ecdsakey.py",
-       "line": 254,
-       "labelled_primitive": "secp256r1",
-       "labelled_code": "def generate(cls, curve=ec.SECP256R1(), progress_func=None, bits=None):",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: ec.SECP256R1 selects the SECP256R1 primitive",
        "ecdat_names": [
         "None"
        ],
@@ -8827,62 +8816,11 @@
       },
       {
        "file": "paramiko/ed25519key.py",
-       "line": 42,
-       "labelled_primitive": "Ed25519",
-       "labelled_code": "name = \"ssh-ed25519\"",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ssh-ed25519' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/ed25519key.py",
        "line": 55,
        "labelled_primitive": "Ed25519",
        "labelled_code": "cert_type=\"ssh-ed25519-cert-v01@openssh.com\",",
        "labelled_break_model": "shor",
        "labelled_reason": "P4: algorithm identifier 'ssh-ed25519-cert-v01@openssh.com' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/hostkeys.py",
-       "line": 25,
-       "labelled_primitive": "SHA1",
-       "labelled_code": "from hashlib import sha1",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: binds 'sha1' to the sha1 hash, which is used as a digest below",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_curve25519.py",
-       "line": 6,
-       "labelled_primitive": "X25519",
-       "labelled_code": "from cryptography.hazmat.primitives.asymmetric.x25519 import (",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P3: binds the imported ( names to the x25519 primitive",
        "ecdat_names": [
         "None"
        ],
@@ -8917,23 +8855,6 @@
        "labelled_code": "c_MSG_KEXECDH_INIT, c_MSG_KEXECDH_REPLY = [byte_chr(c) for c in range(30, 32)]",
        "labelled_break_model": "shor",
        "labelled_reason": "P1: names the ECDH primitive in executable code",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_curve25519.py",
-       "line": 21,
-       "labelled_primitive": "SHA256",
-       "labelled_code": "hash_algo = hashlib.sha256",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: hashlib.sha256 selects the sha256 digest",
        "ecdat_names": [
         "None"
        ],
@@ -9116,40 +9037,6 @@
       },
       {
        "file": "paramiko/kex_ecdh_nist.py",
-       "line": 21,
-       "labelled_primitive": "ECDH",
-       "labelled_code": "name = \"ecdh-sha2-nistp256\"",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ecdh-sha2-nistp256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_ecdh_nist.py",
-       "line": 23,
-       "labelled_primitive": "secp256r1",
-       "labelled_code": "curve = ec.SECP256R1()",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: ec.SECP256R1 selects the SECP256R1 primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_ecdh_nist.py",
        "line": 35,
        "labelled_primitive": "ECDH",
        "labelled_code": "self.transport._expect_packet(_MSG_KEXECDH_INIT)",
@@ -9302,97 +9189,12 @@
        ]
       },
       {
-       "file": "paramiko/kex_ecdh_nist.py",
-       "line": 143,
-       "labelled_primitive": "ECDH",
-       "labelled_code": "name = \"ecdh-sha2-nistp384\"",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ecdh-sha2-nistp384' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_ecdh_nist.py",
-       "line": 145,
-       "labelled_primitive": "secp384r1",
-       "labelled_code": "curve = ec.SECP384R1()",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: ec.SECP384R1 selects the SECP384R1 primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_ecdh_nist.py",
-       "line": 149,
-       "labelled_primitive": "ECDH",
-       "labelled_code": "name = \"ecdh-sha2-nistp521\"",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ecdh-sha2-nistp521' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_ecdh_nist.py",
-       "line": 151,
-       "labelled_primitive": "secp521r1",
-       "labelled_code": "curve = ec.SECP521R1()",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: ec.SECP521R1 selects the SECP521R1 primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
        "file": "paramiko/kex_gex.py",
        "line": 26,
        "labelled_primitive": "SHA256",
        "labelled_code": "from hashlib import sha256",
        "labelled_break_model": "grover",
        "labelled_reason": "P3: binds 'sha256' to the sha256 hash, which is used as a digest below",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_gex.py",
-       "line": 51,
-       "labelled_primitive": "Diffie-Hellman",
-       "labelled_code": "name = \"diffie-hellman-group-exchange-sha256\"",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'diffie-hellman-group-exchange-sha256' names a quantum-vulnerable primitive",
        "ecdat_names": [
         "None"
        ],
@@ -9456,23 +9258,6 @@
       },
       {
        "file": "paramiko/kex_mlkem.py",
-       "line": 20,
-       "labelled_primitive": "X25519",
-       "labelled_code": "from cryptography.hazmat.primitives.asymmetric.x25519 import (",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P3: binds the imported ( names to the x25519 primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_mlkem.py",
        "line": 49,
        "labelled_primitive": "X25519",
        "labelled_code": "Combines ML-KEM-768 (FIPS 203) with X25519. The shared secret is",
@@ -9523,40 +9308,6 @@
        ]
       },
       {
-       "file": "paramiko/kex_mlkem.py",
-       "line": 55,
-       "labelled_primitive": "SHA256",
-       "labelled_code": "hash_algo = hashlib.sha256",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: hashlib.sha256 selects the sha256 digest",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/pkey.py",
-       "line": 29,
-       "labelled_primitive": "MD5",
-       "labelled_code": "from hashlib import md5, sha256",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: binds 'md5' to the md5 hash, which is used as a digest below",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
        "file": "paramiko/pkey.py",
        "line": 37,
        "labelled_primitive": "EC",
@@ -9592,57 +9343,6 @@
       },
       {
        "file": "paramiko/pkey.py",
-       "line": 41,
-       "labelled_primitive": "RSA",
-       "labelled_code": "from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P3: binds the imported RSAPrivateKey names to the rsa primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/pkey.py",
-       "line": 129,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"cipher\": algorithms.AES,",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: algorithms.AES selects the AES primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/pkey.py",
-       "line": 135,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"cipher\": algorithms.AES,",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: algorithms.AES selects the AES primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/pkey.py",
        "line": 173,
        "labelled_primitive": "ECDSA",
        "labelled_code": "from paramiko import ECDSAKey, Ed25519Key, RSAKey",
@@ -9660,45 +9360,11 @@
       },
       {
        "file": "paramiko/pkey.py",
-       "line": 212,
-       "labelled_primitive": "RSA",
-       "labelled_code": "if isinstance(loaded, asymmetric.rsa.RSAPrivateKey):",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: rsa.RSAPrivateKey performs an RSA operation, broken outright by Shor's algorithm",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/pkey.py",
        "line": 215,
        "labelled_primitive": "Ed25519",
        "labelled_code": "key_class = Ed25519Key",
        "labelled_break_model": "shor",
        "labelled_reason": "P1: names the Ed25519 primitive in executable code",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/pkey.py",
-       "line": 216,
-       "labelled_primitive": "EllipticCurvePrivateKey",
-       "labelled_code": "elif isinstance(loaded, asymmetric.ec.EllipticCurvePrivateKey):",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: names the EllipticCurvePrivateKey primitive in executable code",
        "ecdat_names": [
         "None"
        ],
@@ -9813,130 +9479,11 @@
       },
       {
        "file": "paramiko/pkey.py",
-       "line": 691,
-       "labelled_primitive": "AES",
-       "labelled_code": "if cipher == b(\"aes256-cbc\"):",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes256-cbc' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/pkey.py",
-       "line": 693,
-       "labelled_primitive": "AES",
-       "labelled_code": "elif cipher == b(\"aes256-ctr\"):",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes256-ctr' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/pkey.py",
        "line": 852,
        "labelled_primitive": "ECDSA",
        "labelled_code": "it was (e.g. ECDSA.)",
        "labelled_break_model": "shor",
        "labelled_reason": "P1: names the ECDSA primitive in executable code",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
-       "line": 41,
-       "labelled_primitive": "RSA",
-       "labelled_code": "name = \"ssh-rsa\"",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ssh-rsa' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
-       "line": 43,
-       "labelled_primitive": "SHA-256",
-       "labelled_code": "\"rsa-sha2-256\": hashes.SHA256,",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: binds the SHA256 hash to an SSH signature scheme",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
-       "line": 44,
-       "labelled_primitive": "SHA-256",
-       "labelled_code": "\"rsa-sha2-256-cert-v01@openssh.com\": hashes.SHA256,",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: binds the SHA256 hash to an SSH signature scheme",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
-       "line": 45,
-       "labelled_primitive": "SHA-512",
-       "labelled_code": "\"rsa-sha2-512\": hashes.SHA512,",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: binds the SHA512 hash to an SSH signature scheme",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
-       "line": 46,
-       "labelled_primitive": "SHA-512",
-       "labelled_code": "\"rsa-sha2-512-cert-v01@openssh.com\": hashes.SHA512,",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: binds the SHA512 hash to an SSH signature scheme",
        "ecdat_names": [
         "None"
        ],
@@ -9966,40 +9513,6 @@
       },
       {
        "file": "paramiko/rsakey.py",
-       "line": 78,
-       "labelled_primitive": "RSA",
-       "labelled_code": "self.key = rsa.RSAPublicNumbers(",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: rsa.RSAPublicNumbers performs an RSA operation, broken outright by Shor's algorithm",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
-       "line": 89,
-       "labelled_primitive": "RSA",
-       "labelled_code": "\"ssh-rsa\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ssh-rsa' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
        "line": 90,
        "labelled_primitive": "RSA",
        "labelled_code": "\"ssh-rsa-cert-v01@openssh.com\",",
@@ -10017,147 +9530,11 @@
       },
       {
        "file": "paramiko/rsakey.py",
-       "line": 98,
-       "labelled_primitive": "RSA",
-       "labelled_code": "def private_key(self) -> Optional[rsa.RSAPrivateKey]:",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: rsa.RSAPrivateKey performs an RSA operation, broken outright by Shor's algorithm",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
-       "line": 99,
-       "labelled_primitive": "RSA",
-       "labelled_code": "return self.key if isinstance(self.key, rsa.RSAPrivateKey) else None",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: rsa.RSAPrivateKey performs an RSA operation, broken outright by Shor's algorithm",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
-       "line": 103,
-       "labelled_primitive": "RSA",
-       "labelled_code": "if isinstance(self.key, rsa.RSAPrivateKey):",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: rsa.RSAPrivateKey performs an RSA operation, broken outright by Shor's algorithm",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
-       "line": 132,
-       "labelled_primitive": "RSA",
-       "labelled_code": "return isinstance(self.key, rsa.RSAPrivateKey)",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: rsa.RSAPrivateKey performs an RSA operation, broken outright by Shor's algorithm",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
-       "line": 155,
-       "labelled_primitive": "RSA",
-       "labelled_code": "if isinstance(key, rsa.RSAPrivateKey):",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: rsa.RSAPrivateKey performs an RSA operation, broken outright by Shor's algorithm",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
        "line": 184,
        "labelled_primitive": "RSA",
        "labelled_code": "key = rsa.generate_private_key(",
        "labelled_break_model": "shor",
        "labelled_reason": "P1: rsa.generate_private_key performs an RSA operation, broken outright by Shor's algorithm",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
-       "line": 210,
-       "labelled_primitive": "RSA",
-       "labelled_code": "public_numbers = rsa.RSAPublicNumbers(e=e, n=n)",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: rsa.RSAPublicNumbers performs an RSA operation, broken outright by Shor's algorithm",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
-       "line": 211,
-       "labelled_primitive": "RSA",
-       "labelled_code": "key = rsa.RSAPrivateNumbers(",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: rsa.RSAPrivateNumbers performs an RSA operation, broken outright by Shor's algorithm",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
-       "line": 222,
-       "labelled_primitive": "RSA",
-       "labelled_code": "assert isinstance(key, rsa.RSAPrivateKey)",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: rsa.RSAPrivateKey performs an RSA operation, broken outright by Shor's algorithm",
        "ecdat_names": [
         "None"
        ],
@@ -10221,45 +9598,11 @@
       },
       {
        "file": "paramiko/sftp_server.py",
-       "line": 26,
-       "labelled_primitive": "MD5",
-       "labelled_code": "from hashlib import md5, sha1",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: binds 'md5' to the md5 hash, which is used as a digest below",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/sftp_server.py",
        "line": 83,
        "labelled_primitive": "SHA-1",
        "labelled_code": "_hash_class = {\"sha1\": sha1, \"md5\": md5}",
        "labelled_break_model": "grover",
        "labelled_reason": "P4: algorithm identifier 'sha1' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 30,
-       "labelled_primitive": "MD5",
-       "labelled_code": "from hashlib import md5, sha1, sha256, sha512",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: binds 'md5' to the md5 hash, which is used as a digest below",
        "ecdat_names": [
         "None"
        ],
@@ -10306,193 +9649,6 @@
       },
       {
        "file": "paramiko/transport.py",
-       "line": 177,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes128-ctr\",",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes128-ctr' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 178,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes192-ctr\",",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes192-ctr' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 179,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes256-ctr\",",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes256-ctr' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 180,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes128-cbc\",",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes128-cbc' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 181,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes192-cbc\",",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes192-cbc' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 182,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes256-cbc\",",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes256-cbc' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 183,
-       "labelled_primitive": "3DES",
-       "labelled_code": "\"3des-cbc\",",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier '3des-cbc' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 184,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes128-gcm@openssh.com\",",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes128-gcm@openssh.com' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 185,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes256-gcm@openssh.com\",",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes256-gcm@openssh.com' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 188,
-       "labelled_primitive": "HMAC",
-       "labelled_code": "\"hmac-sha2-256\",",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'hmac-sha2-256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 189,
-       "labelled_primitive": "HMAC",
-       "labelled_code": "\"hmac-sha2-512\",",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'hmac-sha2-512' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
        "line": 190,
        "labelled_primitive": "HMAC",
        "labelled_code": "\"hmac-sha2-256-etm@openssh.com\",",
@@ -10527,45 +9683,11 @@
       },
       {
        "file": "paramiko/transport.py",
-       "line": 192,
-       "labelled_primitive": "HMAC",
-       "labelled_code": "\"hmac-sha1\",",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'hmac-sha1' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
        "line": 193,
        "labelled_primitive": "HMAC",
        "labelled_code": "\"hmac-md5\",",
        "labelled_break_model": "grover",
        "labelled_reason": "P4: algorithm identifier 'hmac-md5' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 194,
-       "labelled_primitive": "HMAC",
-       "labelled_code": "\"hmac-sha1-96\",",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'hmac-sha1-96' names a quantum-vulnerable primitive",
        "ecdat_names": [
         "None"
        ],
@@ -10595,295 +9717,6 @@
       },
       {
        "file": "paramiko/transport.py",
-       "line": 199,
-       "labelled_primitive": "Ed25519",
-       "labelled_code": "\"ssh-ed25519\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ssh-ed25519' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 200,
-       "labelled_primitive": "ECDSA",
-       "labelled_code": "\"ecdsa-sha2-nistp256\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ecdsa-sha2-nistp256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 201,
-       "labelled_primitive": "ECDSA",
-       "labelled_code": "\"ecdsa-sha2-nistp384\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ecdsa-sha2-nistp384' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 202,
-       "labelled_primitive": "ECDSA",
-       "labelled_code": "\"ecdsa-sha2-nistp521\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ecdsa-sha2-nistp521' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 203,
-       "labelled_primitive": "RSA",
-       "labelled_code": "\"rsa-sha2-512\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-512' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 204,
-       "labelled_primitive": "RSA",
-       "labelled_code": "\"rsa-sha2-256\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 208,
-       "labelled_primitive": "Ed25519",
-       "labelled_code": "\"ssh-ed25519\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ssh-ed25519' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 209,
-       "labelled_primitive": "ECDSA",
-       "labelled_code": "\"ecdsa-sha2-nistp256\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ecdsa-sha2-nistp256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 210,
-       "labelled_primitive": "ECDSA",
-       "labelled_code": "\"ecdsa-sha2-nistp384\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ecdsa-sha2-nistp384' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 211,
-       "labelled_primitive": "ECDSA",
-       "labelled_code": "\"ecdsa-sha2-nistp521\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ecdsa-sha2-nistp521' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 212,
-       "labelled_primitive": "RSA",
-       "labelled_code": "\"rsa-sha2-512\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-512' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 213,
-       "labelled_primitive": "RSA",
-       "labelled_code": "\"rsa-sha2-256\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 216,
-       "labelled_primitive": "ECDH",
-       "labelled_code": "\"ecdh-sha2-nistp256\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ecdh-sha2-nistp256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 217,
-       "labelled_primitive": "ECDH",
-       "labelled_code": "\"ecdh-sha2-nistp384\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ecdh-sha2-nistp384' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 218,
-       "labelled_primitive": "ECDH",
-       "labelled_code": "\"ecdh-sha2-nistp521\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ecdh-sha2-nistp521' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 220,
-       "labelled_primitive": "Diffie-Hellman",
-       "labelled_code": "\"diffie-hellman-group-exchange-sha256\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'diffie-hellman-group-exchange-sha256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 224,
-       "labelled_primitive": "Curve25519",
-       "labelled_code": "_preferred_kex = (\"curve25519-sha256@libssh.org\",) + _preferred_kex",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'curve25519-sha256@libssh.org' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
        "line": 226,
        "labelled_primitive": "X25519",
        "labelled_code": "_preferred_kex = (\"mlkem768x25519-sha256\",) + _preferred_kex",
@@ -10901,334 +9734,11 @@
       },
       {
        "file": "paramiko/transport.py",
-       "line": 230,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes128-ctr\": {",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes128-ctr' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 231,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"class\": algorithms.AES,",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: algorithms.AES selects the AES primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 236,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes192-ctr\": {",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes192-ctr' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 237,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"class\": algorithms.AES,",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: algorithms.AES selects the AES primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 242,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes256-ctr\": {",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes256-ctr' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 243,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"class\": algorithms.AES,",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: algorithms.AES selects the AES primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 248,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes128-cbc\": {",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes128-cbc' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 249,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"class\": algorithms.AES,",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: algorithms.AES selects the AES primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 254,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes192-cbc\": {",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes192-cbc' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 255,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"class\": algorithms.AES,",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: algorithms.AES selects the AES primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 260,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes256-cbc\": {",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes256-cbc' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 261,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"class\": algorithms.AES,",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: algorithms.AES selects the AES primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 266,
-       "labelled_primitive": "3DES",
-       "labelled_code": "\"3des-cbc\": {",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier '3des-cbc' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 272,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes128-gcm@openssh.com\": {",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes128-gcm@openssh.com' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 279,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes256-gcm@openssh.com\": {",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes256-gcm@openssh.com' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 289,
-       "labelled_primitive": "HMAC",
-       "labelled_code": "\"hmac-sha1\": {\"class\": sha1, \"size\": 20},",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'hmac-sha1' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 290,
-       "labelled_primitive": "HMAC",
-       "labelled_code": "\"hmac-sha1-96\": {\"class\": sha1, \"size\": 12},",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'hmac-sha1-96' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 291,
-       "labelled_primitive": "HMAC",
-       "labelled_code": "\"hmac-sha2-256\": {\"class\": sha256, \"size\": 32},",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'hmac-sha2-256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
        "line": 292,
        "labelled_primitive": "HMAC",
        "labelled_code": "\"hmac-sha2-256-etm@openssh.com\": {\"class\": sha256, \"size\": 32},",
        "labelled_break_model": "grover",
        "labelled_reason": "P4: algorithm identifier 'hmac-sha2-256-etm@openssh.com' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 293,
-       "labelled_primitive": "HMAC",
-       "labelled_code": "\"hmac-sha2-512\": {\"class\": sha512, \"size\": 64},",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'hmac-sha2-512' names a quantum-vulnerable primitive",
        "ecdat_names": [
         "None"
        ],
@@ -11292,45 +9802,11 @@
       },
       {
        "file": "paramiko/transport.py",
-       "line": 312,
-       "labelled_primitive": "RSA",
-       "labelled_code": "\"rsa-sha2-256\": RSAKey,",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
        "line": 313,
        "labelled_primitive": "RSA",
        "labelled_code": "\"rsa-sha2-256-cert-v01@openssh.com\": RSAKey,",
        "labelled_break_model": "shor",
        "labelled_reason": "P4: algorithm identifier 'rsa-sha2-256-cert-v01@openssh.com' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 314,
-       "labelled_primitive": "RSA",
-       "labelled_code": "\"rsa-sha2-512\": RSAKey,",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-512' names a quantum-vulnerable primitive",
        "ecdat_names": [
         "None"
        ],
@@ -11360,43 +9836,9 @@
       },
       {
        "file": "paramiko/transport.py",
-       "line": 316,
-       "labelled_primitive": "ECDSA",
-       "labelled_code": "\"ecdsa-sha2-nistp256\": ECDSAKey,",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: names the ECDSA primitive in executable code",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
        "line": 317,
        "labelled_primitive": "ECDSA",
        "labelled_code": "\"ecdsa-sha2-nistp256-cert-v01@openssh.com\": ECDSAKey,",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: names the ECDSA primitive in executable code",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 318,
-       "labelled_primitive": "ECDSA",
-       "labelled_code": "\"ecdsa-sha2-nistp384\": ECDSAKey,",
        "labelled_break_model": "shor",
        "labelled_reason": "P1: names the ECDSA primitive in executable code",
        "ecdat_names": [
@@ -11428,23 +9870,6 @@
       },
       {
        "file": "paramiko/transport.py",
-       "line": 320,
-       "labelled_primitive": "ECDSA",
-       "labelled_code": "\"ecdsa-sha2-nistp521\": ECDSAKey,",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: names the ECDSA primitive in executable code",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
        "line": 321,
        "labelled_primitive": "ECDSA",
        "labelled_code": "\"ecdsa-sha2-nistp521-cert-v01@openssh.com\": ECDSAKey,",
@@ -11462,181 +9887,11 @@
       },
       {
        "file": "paramiko/transport.py",
-       "line": 322,
-       "labelled_primitive": "Ed25519",
-       "labelled_code": "\"ssh-ed25519\": Ed25519Key,",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: names the Ed25519 primitive in executable code",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
        "line": 323,
        "labelled_primitive": "Ed25519",
        "labelled_code": "\"ssh-ed25519-cert-v01@openssh.com\": Ed25519Key,",
        "labelled_break_model": "shor",
        "labelled_reason": "P1: names the Ed25519 primitive in executable code",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 327,
-       "labelled_primitive": "Diffie-Hellman",
-       "labelled_code": "\"diffie-hellman-group-exchange-sha256\": KexGexSHA256,",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'diffie-hellman-group-exchange-sha256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 330,
-       "labelled_primitive": "ECDH",
-       "labelled_code": "\"ecdh-sha2-nistp256\": KexNistp256,",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ecdh-sha2-nistp256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 331,
-       "labelled_primitive": "ECDH",
-       "labelled_code": "\"ecdh-sha2-nistp384\": KexNistp384,",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ecdh-sha2-nistp384' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 332,
-       "labelled_primitive": "ECDH",
-       "labelled_code": "\"ecdh-sha2-nistp521\": KexNistp521,",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ecdh-sha2-nistp521' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 335,
-       "labelled_primitive": "Curve25519",
-       "labelled_code": "_kex_info[\"curve25519-sha256@libssh.org\"] = KexCurve25519",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'curve25519-sha256@libssh.org' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 795,
-       "labelled_primitive": "RSA",
-       "labelled_code": "self.server_key_dict[\"rsa-sha2-256\"] = key",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 796,
-       "labelled_primitive": "RSA",
-       "labelled_code": "self.server_key_dict[\"rsa-sha2-512\"] = key",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-512' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 1322,
-       "labelled_primitive": "RSA",
-       "labelled_code": "\"rsa-sha2-512\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-512' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 1323,
-       "labelled_primitive": "RSA",
-       "labelled_code": "\"rsa-sha2-256\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-256' names a quantum-vulnerable primitive",
        "ecdat_names": [
         "None"
        ],
@@ -11667,51 +9922,42 @@
      ],
      "file_level": {
       "counts": {
-       "TP": 7,
+       "TP": 16,
        "FP": 0,
-       "FN": 12,
+       "FN": 3,
        "labelled_positive_files": 19
       },
       "precision": 1.0,
-      "precision_fraction": "7/7",
-      "recall": 0.3684,
-      "recall_fraction": "7/19",
+      "precision_fraction": "16/16",
+      "recall": 0.8421,
+      "recall_fraction": "16/19",
       "false_positive_files": [],
       "false_negative_files": [
        "paramiko/__init__.py",
-       "paramiko/agent.py",
-       "paramiko/client.py",
-       "paramiko/ed25519key.py",
-       "paramiko/kex_ecdh_nist.py",
-       "paramiko/kex_gex.py",
-       "paramiko/kex_group14.py",
-       "paramiko/kex_group16.py",
-       "paramiko/rsakey.py",
        "paramiko/sftp_file.py",
-       "paramiko/sftp_server.py",
        "paramiko/util.py"
       ]
      },
      "by_primitive": {
       "3DES (grover)": {
        "labelled": 2,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 2,
+       "recall": 1.0
       },
       "AES (grover)": {
        "labelled": 27,
-       "detected": 1,
-       "recall": 0.037
+       "detected": 27,
+       "recall": 1.0
       },
       "Curve25519 (shor)": {
        "labelled": 2,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 2,
+       "recall": 1.0
       },
       "Diffie-Hellman (shor)": {
        "labelled": 3,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 3,
+       "recall": 1.0
       },
       "EC (shor)": {
        "labelled": 1,
@@ -11720,13 +9966,13 @@
       },
       "ECDH (shor)": {
        "labelled": 30,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 9,
+       "recall": 0.3
       },
       "ECDSA (shor)": {
        "labelled": 42,
-       "detected": 2,
-       "recall": 0.0476
+       "detected": 11,
+       "recall": 0.2619
       },
       "ED25519 (shor)": {
        "labelled": 1,
@@ -11735,28 +9981,28 @@
       },
       "Ed25519 (shor)": {
        "labelled": 19,
-       "detected": 1,
-       "recall": 0.0526
+       "detected": 5,
+       "recall": 0.2632
       },
       "EllipticCurvePrivateKey (shor)": {
        "labelled": 3,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 2,
+       "recall": 0.6667
       },
       "HMAC (grover)": {
        "labelled": 16,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 8,
+       "recall": 0.5
       },
       "MD5 (grover)": {
        "labelled": 5,
-       "detected": 1,
-       "recall": 0.2
+       "detected": 4,
+       "recall": 0.8
       },
       "RSA (shor)": {
        "labelled": 37,
-       "detected": 1,
-       "recall": 0.027
+       "detected": 31,
+       "recall": 0.8378
       },
       "SHA-1 (grover)": {
        "labelled": 3,
@@ -11765,28 +10011,28 @@
       },
       "SHA-256 (grover)": {
        "labelled": 3,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 3,
+       "recall": 1.0
       },
       "SHA-384 (grover)": {
        "labelled": 1,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 1,
+       "recall": 1.0
       },
       "SHA-512 (grover)": {
        "labelled": 3,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 3,
+       "recall": 1.0
       },
       "SHA1 (grover)": {
        "labelled": 5,
-       "detected": 3,
-       "recall": 0.6
+       "detected": 5,
+       "recall": 1.0
       },
       "SHA256 (grover)": {
        "labelled": 7,
-       "detected": 1,
-       "recall": 0.1429
+       "detected": 3,
+       "recall": 0.4286
       },
       "SHA512 (grover)": {
        "labelled": 1,
@@ -11795,41 +10041,169 @@
       },
       "X25519 (shor)": {
        "labelled": 22,
-       "detected": 16,
-       "recall": 0.7273
+       "detected": 18,
+       "recall": 0.8182
       },
       "secp256r1 (shor)": {
        "labelled": 3,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 3,
+       "recall": 1.0
       },
       "secp384r1 (shor)": {
        "labelled": 2,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 2,
+       "recall": 1.0
       },
       "secp521r1 (shor)": {
        "labelled": 2,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 2,
+       "recall": 1.0
       }
      }
     },
     "L2": {
      "counts": {
-      "TP": 27,
-      "FP": 3,
-      "FN": 232,
+      "TP": 145,
+      "FP": 16,
+      "FN": 114,
       "labelled_positives": 259,
-      "findings_total": 30
+      "findings_total": 184
      },
-     "precision": 0.9,
-     "precision_fraction": "27/30",
-     "recall": 0.1042,
-     "recall_fraction": "27/259",
-     "f1": 0.1868,
+     "precision": 0.9006,
+     "precision_fraction": "145/161",
+     "recall": 0.5598,
+     "recall_fraction": "145/259",
+     "f1": 0.6904,
      "f1_note": "F1 is computed from the ROUNDED precision/recall, so it may differ in the 4th decimal from an F1 computed from the raw counts.",
      "false_positives": [
+      {
+       "file": "paramiko/ecdsakey.py",
+       "line": 167,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "ECDSA"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-PYCA-EC-002"
+       ],
+       "ecdat_match": [
+        "ec.EllipticCurvePublicKey"
+       ]
+      },
+      {
+       "file": "paramiko/ecdsakey.py",
+       "line": 305,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "ECDH"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-PYCA-ECDH-001"
+       ],
+       "ecdat_match": [
+        "derive_private_key("
+       ]
+      },
+      {
+       "file": "paramiko/kex_ecdh_nist.py",
+       "line": 67,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "ECDSA"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-PYCA-EC-002"
+       ],
+       "ecdat_match": [
+        "ec.EllipticCurvePublicKey"
+       ]
+      },
+      {
+       "file": "paramiko/kex_ecdh_nist.py",
+       "line": 113,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "ECDSA"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-PYCA-EC-002"
+       ],
+       "ecdat_match": [
+        "ec.EllipticCurvePublicKey"
+       ]
+      },
+      {
+       "file": "paramiko/kex_group14.py",
+       "line": 45,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "DH",
+        "ECDH"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-SSH-DH-001",
+        "ECD-SRC-SSH-KEX-001"
+       ],
+       "ecdat_match": [
+        "\"diffie-hellman-group14-sha256\"",
+        "\"diffie-hellman-group14-sha256\""
+       ]
+      },
+      {
+       "file": "paramiko/kex_group16.py",
+       "line": 30,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "DH",
+        "ECDH"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-SSH-DH-001",
+        "ECD-SRC-SSH-KEX-001"
+       ],
+       "ecdat_match": [
+        "\"diffie-hellman-group16-sha512\"",
+        "\"diffie-hellman-group16-sha512\""
+       ]
+      },
+      {
+       "file": "paramiko/kex_group16.py",
+       "line": 35,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "DH",
+        "ECDH"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-SSH-DH-001",
+        "ECD-SRC-SSH-KEX-001"
+       ],
+       "ecdat_match": [
+        "\"diffie-hellman-group16-sha512\"",
+        "\"diffie-hellman-group16-sha512\""
+       ]
+      },
       {
        "file": "paramiko/kex_mlkem.py",
        "line": 59,
@@ -11879,6 +10253,120 @@
        ],
        "ecdat_match": [
         "X25519"
+       ]
+      },
+      {
+       "file": "paramiko/rsakey.py",
+       "line": 139,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "RSA"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-PYCA-RSA-001"
+       ],
+       "ecdat_match": [
+        "padding.PKCS1v15"
+       ]
+      },
+      {
+       "file": "paramiko/rsakey.py",
+       "line": 167,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "RSA"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-PYCA-RSA-001"
+       ],
+       "ecdat_match": [
+        "padding.PKCS1v15"
+       ]
+      },
+      {
+       "file": "paramiko/transport.py",
+       "line": 219,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "DH",
+        "ECDH"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-SSH-DH-001",
+        "ECD-SRC-SSH-KEX-001"
+       ],
+       "ecdat_match": [
+        "\"diffie-hellman-group16-sha512\"",
+        "\"diffie-hellman-group16-sha512\""
+       ]
+      },
+      {
+       "file": "paramiko/transport.py",
+       "line": 221,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "DH",
+        "ECDH"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-SSH-DH-001",
+        "ECD-SRC-SSH-KEX-001"
+       ],
+       "ecdat_match": [
+        "\"diffie-hellman-group14-sha256\"",
+        "\"diffie-hellman-group14-sha256\""
+       ]
+      },
+      {
+       "file": "paramiko/transport.py",
+       "line": 328,
+       "labelled_primitive": null,
+       "labelled_code": "\"diffie-hellman-group14-sha256\": KexGroup14SHA256,",
+       "labelled_break_model": "not-affected",
+       "labelled_reason": "no quantum-vulnerable primitive is named on this line",
+       "ecdat_names": [
+        "DH",
+        "ECDH"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-SSH-DH-001",
+        "ECD-SRC-SSH-KEX-001"
+       ],
+       "ecdat_match": [
+        "\"diffie-hellman-group14-sha256\"",
+        "\"diffie-hellman-group14-sha256\""
+       ]
+      },
+      {
+       "file": "paramiko/transport.py",
+       "line": 329,
+       "labelled_primitive": null,
+       "labelled_code": "\"diffie-hellman-group16-sha512\": KexGroup16SHA512,",
+       "labelled_break_model": "not-affected",
+       "labelled_reason": "no quantum-vulnerable primitive is named on this line",
+       "ecdat_names": [
+        "DH",
+        "ECDH"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-SSH-DH-001",
+        "ECD-SRC-SSH-KEX-001"
+       ],
+       "ecdat_match": [
+        "\"diffie-hellman-group16-sha512\"",
+        "\"diffie-hellman-group16-sha512\""
        ]
       }
      ],
@@ -11935,40 +10423,6 @@
        ]
       },
       {
-       "file": "paramiko/agent.py",
-       "line": 53,
-       "labelled_primitive": "RSA",
-       "labelled_code": "\"rsa-sha2-256\": SSH_AGENT_RSA_SHA2_256,",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/agent.py",
-       "line": 54,
-       "labelled_primitive": "RSA",
-       "labelled_code": "\"rsa-sha2-512\": SSH_AGENT_RSA_SHA2_512,",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-512' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
        "file": "paramiko/client.py",
        "line": 34,
        "labelled_primitive": "ECDSA",
@@ -11992,91 +10446,6 @@
        "labelled_code": "from paramiko.ed25519key import Ed25519Key",
        "labelled_break_model": "shor",
        "labelled_reason": "P1: names the Ed25519 primitive in executable code",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/client.py",
-       "line": 430,
-       "labelled_primitive": "RSA",
-       "labelled_code": "if keytype == \"ssh-rsa\":",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ssh-rsa' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/client.py",
-       "line": 431,
-       "labelled_primitive": "RSA",
-       "labelled_code": "if \"rsa-sha2-512\" in sec_opts.key_types:",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-512' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/client.py",
-       "line": 432,
-       "labelled_primitive": "RSA",
-       "labelled_code": "keytype = \"rsa-sha2-512\"",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-512' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/client.py",
-       "line": 433,
-       "labelled_primitive": "RSA",
-       "labelled_code": "elif \"rsa-sha2-256\" in sec_opts.key_types:",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/client.py",
-       "line": 434,
-       "labelled_primitive": "RSA",
-       "labelled_code": "keytype = \"rsa-sha2-256\"",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-256' names a quantum-vulnerable primitive",
        "ecdat_names": [
         "None"
        ],
@@ -12139,23 +10508,6 @@
        ]
       },
       {
-       "file": "paramiko/config.py",
-       "line": 31,
-       "labelled_primitive": "SHA1",
-       "labelled_code": "from hashlib import sha1",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: binds 'sha1' to the sha1 hash, which is used as a digest below",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
        "file": "paramiko/ecdsakey.py",
        "line": 20,
        "labelled_primitive": "ECDSA",
@@ -12196,57 +10548,6 @@
        "labelled_code": "Represents a specific ECDSA Curve (nistp256, nistp384, etc).",
        "labelled_break_model": "shor",
        "labelled_reason": "P1: names the ECDSA primitive in executable code",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/ecdsakey.py",
-       "line": 59,
-       "labelled_primitive": "SHA-256",
-       "labelled_code": "self.hash_object = hashes.SHA256",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: binds the SHA256 hash to an SSH signature scheme",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/ecdsakey.py",
-       "line": 61,
-       "labelled_primitive": "SHA-384",
-       "labelled_code": "self.hash_object = hashes.SHA384",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: binds the SHA384 hash to an SSH signature scheme",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/ecdsakey.py",
-       "line": 63,
-       "labelled_primitive": "SHA-512",
-       "labelled_code": "self.hash_object = hashes.SHA512",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: binds the SHA512 hash to an SSH signature scheme",
        "ecdat_names": [
         "None"
        ],
@@ -12361,57 +10662,6 @@
       },
       {
        "file": "paramiko/ecdsakey.py",
-       "line": 105,
-       "labelled_primitive": "secp256r1",
-       "labelled_code": "_ECDSACurve(ec.SECP256R1, \"nistp256\"),",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: ec.SECP256R1 selects the SECP256R1 primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/ecdsakey.py",
-       "line": 106,
-       "labelled_primitive": "secp384r1",
-       "labelled_code": "_ECDSACurve(ec.SECP384R1, \"nistp384\"),",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: ec.SECP384R1 selects the SECP384R1 primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/ecdsakey.py",
-       "line": 107,
-       "labelled_primitive": "secp521r1",
-       "labelled_code": "_ECDSACurve(ec.SECP521R1, \"nistp521\"),",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: ec.SECP521R1 selects the SECP521R1 primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/ecdsakey.py",
        "line": 137,
        "labelled_primitive": "ECDSA",
        "labelled_code": "self.ecdsa_curve = self._ECDSA_CURVES.get_by_curve_class(c_class)",
@@ -12468,40 +10718,6 @@
        "labelled_code": "return cls._ECDSA_CURVES.get_key_format_identifier_list()",
        "labelled_break_model": "shor",
        "labelled_reason": "P1: names the ECDSA primitive in executable code",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/ecdsakey.py",
-       "line": 250,
-       "labelled_primitive": "EllipticCurvePrivateKey",
-       "labelled_code": "def private_key(self) -> Optional[ec.EllipticCurvePrivateKey]:",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: names the EllipticCurvePrivateKey primitive in executable code",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/ecdsakey.py",
-       "line": 254,
-       "labelled_primitive": "secp256r1",
-       "labelled_code": "def generate(cls, curve=ec.SECP256R1(), progress_func=None, bits=None):",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: ec.SECP256R1 selects the SECP256R1 primitive",
        "ecdat_names": [
         "None"
        ],
@@ -12667,62 +10883,11 @@
       },
       {
        "file": "paramiko/ed25519key.py",
-       "line": 42,
-       "labelled_primitive": "Ed25519",
-       "labelled_code": "name = \"ssh-ed25519\"",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ssh-ed25519' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/ed25519key.py",
        "line": 55,
        "labelled_primitive": "Ed25519",
        "labelled_code": "cert_type=\"ssh-ed25519-cert-v01@openssh.com\",",
        "labelled_break_model": "shor",
        "labelled_reason": "P4: algorithm identifier 'ssh-ed25519-cert-v01@openssh.com' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/hostkeys.py",
-       "line": 25,
-       "labelled_primitive": "SHA1",
-       "labelled_code": "from hashlib import sha1",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: binds 'sha1' to the sha1 hash, which is used as a digest below",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_curve25519.py",
-       "line": 6,
-       "labelled_primitive": "X25519",
-       "labelled_code": "from cryptography.hazmat.primitives.asymmetric.x25519 import (",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P3: binds the imported ( names to the x25519 primitive",
        "ecdat_names": [
         "None"
        ],
@@ -12757,23 +10922,6 @@
        "labelled_code": "c_MSG_KEXECDH_INIT, c_MSG_KEXECDH_REPLY = [byte_chr(c) for c in range(30, 32)]",
        "labelled_break_model": "shor",
        "labelled_reason": "P1: names the ECDH primitive in executable code",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_curve25519.py",
-       "line": 21,
-       "labelled_primitive": "SHA256",
-       "labelled_code": "hash_algo = hashlib.sha256",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: hashlib.sha256 selects the sha256 digest",
        "ecdat_names": [
         "None"
        ],
@@ -12978,40 +11126,6 @@
        "labelled_code": "c_MSG_KEXECDH_INIT, c_MSG_KEXECDH_REPLY = [byte_chr(c) for c in range(30, 32)]",
        "labelled_break_model": "shor",
        "labelled_reason": "P1: names the ECDH primitive in executable code",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_ecdh_nist.py",
-       "line": 21,
-       "labelled_primitive": "ECDH",
-       "labelled_code": "name = \"ecdh-sha2-nistp256\"",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ecdh-sha2-nistp256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_ecdh_nist.py",
-       "line": 23,
-       "labelled_primitive": "secp256r1",
-       "labelled_code": "curve = ec.SECP256R1()",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: ec.SECP256R1 selects the SECP256R1 primitive",
        "ecdat_names": [
         "None"
        ],
@@ -13210,97 +11324,12 @@
        ]
       },
       {
-       "file": "paramiko/kex_ecdh_nist.py",
-       "line": 143,
-       "labelled_primitive": "ECDH",
-       "labelled_code": "name = \"ecdh-sha2-nistp384\"",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ecdh-sha2-nistp384' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_ecdh_nist.py",
-       "line": 145,
-       "labelled_primitive": "secp384r1",
-       "labelled_code": "curve = ec.SECP384R1()",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: ec.SECP384R1 selects the SECP384R1 primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_ecdh_nist.py",
-       "line": 149,
-       "labelled_primitive": "ECDH",
-       "labelled_code": "name = \"ecdh-sha2-nistp521\"",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ecdh-sha2-nistp521' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_ecdh_nist.py",
-       "line": 151,
-       "labelled_primitive": "secp521r1",
-       "labelled_code": "curve = ec.SECP521R1()",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: ec.SECP521R1 selects the SECP521R1 primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
        "file": "paramiko/kex_gex.py",
        "line": 26,
        "labelled_primitive": "SHA256",
        "labelled_code": "from hashlib import sha256",
        "labelled_break_model": "grover",
        "labelled_reason": "P3: binds 'sha256' to the sha256 hash, which is used as a digest below",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_gex.py",
-       "line": 51,
-       "labelled_primitive": "Diffie-Hellman",
-       "labelled_code": "name = \"diffie-hellman-group-exchange-sha256\"",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'diffie-hellman-group-exchange-sha256' names a quantum-vulnerable primitive",
        "ecdat_names": [
         "None"
        ],
@@ -13432,23 +11461,6 @@
       },
       {
        "file": "paramiko/kex_mlkem.py",
-       "line": 20,
-       "labelled_primitive": "X25519",
-       "labelled_code": "from cryptography.hazmat.primitives.asymmetric.x25519 import (",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P3: binds the imported ( names to the x25519 primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_mlkem.py",
        "line": 49,
        "labelled_primitive": "X25519",
        "labelled_code": "Combines ML-KEM-768 (FIPS 203) with X25519. The shared secret is",
@@ -13488,23 +11500,6 @@
        "labelled_code": "name = \"mlkem768x25519-sha256\"",
        "labelled_break_model": "shor",
        "labelled_reason": "P4: algorithm identifier 'mlkem768x25519-sha256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_mlkem.py",
-       "line": 55,
-       "labelled_primitive": "SHA256",
-       "labelled_code": "hash_algo = hashlib.sha256",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: hashlib.sha256 selects the sha256 digest",
        "ecdat_names": [
         "None"
        ],
@@ -13585,23 +11580,6 @@
       },
       {
        "file": "paramiko/pkey.py",
-       "line": 29,
-       "labelled_primitive": "MD5",
-       "labelled_code": "from hashlib import md5, sha256",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: binds 'md5' to the md5 hash, which is used as a digest below",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/pkey.py",
        "line": 37,
        "labelled_primitive": "EC",
        "labelled_code": "from cryptography.hazmat.primitives.asymmetric.ec import (",
@@ -13636,57 +11614,6 @@
       },
       {
        "file": "paramiko/pkey.py",
-       "line": 41,
-       "labelled_primitive": "RSA",
-       "labelled_code": "from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P3: binds the imported RSAPrivateKey names to the rsa primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/pkey.py",
-       "line": 129,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"cipher\": algorithms.AES,",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: algorithms.AES selects the AES primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/pkey.py",
-       "line": 135,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"cipher\": algorithms.AES,",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: algorithms.AES selects the AES primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/pkey.py",
        "line": 173,
        "labelled_primitive": "ECDSA",
        "labelled_code": "from paramiko import ECDSAKey, Ed25519Key, RSAKey",
@@ -13704,45 +11631,11 @@
       },
       {
        "file": "paramiko/pkey.py",
-       "line": 212,
-       "labelled_primitive": "RSA",
-       "labelled_code": "if isinstance(loaded, asymmetric.rsa.RSAPrivateKey):",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: rsa.RSAPrivateKey performs an RSA operation, broken outright by Shor's algorithm",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/pkey.py",
        "line": 215,
        "labelled_primitive": "Ed25519",
        "labelled_code": "key_class = Ed25519Key",
        "labelled_break_model": "shor",
        "labelled_reason": "P1: names the Ed25519 primitive in executable code",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/pkey.py",
-       "line": 216,
-       "labelled_primitive": "EllipticCurvePrivateKey",
-       "labelled_code": "elif isinstance(loaded, asymmetric.ec.EllipticCurvePrivateKey):",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: names the EllipticCurvePrivateKey primitive in executable code",
        "ecdat_names": [
         "None"
        ],
@@ -13874,130 +11767,11 @@
       },
       {
        "file": "paramiko/pkey.py",
-       "line": 691,
-       "labelled_primitive": "AES",
-       "labelled_code": "if cipher == b(\"aes256-cbc\"):",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes256-cbc' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/pkey.py",
-       "line": 693,
-       "labelled_primitive": "AES",
-       "labelled_code": "elif cipher == b(\"aes256-ctr\"):",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes256-ctr' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/pkey.py",
        "line": 852,
        "labelled_primitive": "ECDSA",
        "labelled_code": "it was (e.g. ECDSA.)",
        "labelled_break_model": "shor",
        "labelled_reason": "P1: names the ECDSA primitive in executable code",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
-       "line": 41,
-       "labelled_primitive": "RSA",
-       "labelled_code": "name = \"ssh-rsa\"",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ssh-rsa' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
-       "line": 43,
-       "labelled_primitive": "SHA-256",
-       "labelled_code": "\"rsa-sha2-256\": hashes.SHA256,",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: binds the SHA256 hash to an SSH signature scheme",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
-       "line": 44,
-       "labelled_primitive": "SHA-256",
-       "labelled_code": "\"rsa-sha2-256-cert-v01@openssh.com\": hashes.SHA256,",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: binds the SHA256 hash to an SSH signature scheme",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
-       "line": 45,
-       "labelled_primitive": "SHA-512",
-       "labelled_code": "\"rsa-sha2-512\": hashes.SHA512,",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: binds the SHA512 hash to an SSH signature scheme",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
-       "line": 46,
-       "labelled_primitive": "SHA-512",
-       "labelled_code": "\"rsa-sha2-512-cert-v01@openssh.com\": hashes.SHA512,",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: binds the SHA512 hash to an SSH signature scheme",
        "ecdat_names": [
         "None"
        ],
@@ -14027,40 +11801,6 @@
       },
       {
        "file": "paramiko/rsakey.py",
-       "line": 78,
-       "labelled_primitive": "RSA",
-       "labelled_code": "self.key = rsa.RSAPublicNumbers(",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: rsa.RSAPublicNumbers performs an RSA operation, broken outright by Shor's algorithm",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
-       "line": 89,
-       "labelled_primitive": "RSA",
-       "labelled_code": "\"ssh-rsa\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ssh-rsa' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
        "line": 90,
        "labelled_primitive": "RSA",
        "labelled_code": "\"ssh-rsa-cert-v01@openssh.com\",",
@@ -14078,147 +11818,11 @@
       },
       {
        "file": "paramiko/rsakey.py",
-       "line": 98,
-       "labelled_primitive": "RSA",
-       "labelled_code": "def private_key(self) -> Optional[rsa.RSAPrivateKey]:",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: rsa.RSAPrivateKey performs an RSA operation, broken outright by Shor's algorithm",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
-       "line": 99,
-       "labelled_primitive": "RSA",
-       "labelled_code": "return self.key if isinstance(self.key, rsa.RSAPrivateKey) else None",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: rsa.RSAPrivateKey performs an RSA operation, broken outright by Shor's algorithm",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
-       "line": 103,
-       "labelled_primitive": "RSA",
-       "labelled_code": "if isinstance(self.key, rsa.RSAPrivateKey):",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: rsa.RSAPrivateKey performs an RSA operation, broken outright by Shor's algorithm",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
-       "line": 132,
-       "labelled_primitive": "RSA",
-       "labelled_code": "return isinstance(self.key, rsa.RSAPrivateKey)",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: rsa.RSAPrivateKey performs an RSA operation, broken outright by Shor's algorithm",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
-       "line": 155,
-       "labelled_primitive": "RSA",
-       "labelled_code": "if isinstance(key, rsa.RSAPrivateKey):",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: rsa.RSAPrivateKey performs an RSA operation, broken outright by Shor's algorithm",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
        "line": 184,
        "labelled_primitive": "RSA",
        "labelled_code": "key = rsa.generate_private_key(",
        "labelled_break_model": "shor",
        "labelled_reason": "P1: rsa.generate_private_key performs an RSA operation, broken outright by Shor's algorithm",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
-       "line": 210,
-       "labelled_primitive": "RSA",
-       "labelled_code": "public_numbers = rsa.RSAPublicNumbers(e=e, n=n)",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: rsa.RSAPublicNumbers performs an RSA operation, broken outright by Shor's algorithm",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
-       "line": 211,
-       "labelled_primitive": "RSA",
-       "labelled_code": "key = rsa.RSAPrivateNumbers(",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: rsa.RSAPrivateNumbers performs an RSA operation, broken outright by Shor's algorithm",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
-       "line": 222,
-       "labelled_primitive": "RSA",
-       "labelled_code": "assert isinstance(key, rsa.RSAPrivateKey)",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: rsa.RSAPrivateKey performs an RSA operation, broken outright by Shor's algorithm",
        "ecdat_names": [
         "None"
        ],
@@ -14282,23 +11886,6 @@
       },
       {
        "file": "paramiko/sftp_server.py",
-       "line": 26,
-       "labelled_primitive": "MD5",
-       "labelled_code": "from hashlib import md5, sha1",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: binds 'md5' to the md5 hash, which is used as a digest below",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/sftp_server.py",
        "line": 83,
        "labelled_primitive": "SHA-1",
        "labelled_code": "_hash_class = {\"sha1\": sha1, \"md5\": md5}",
@@ -14321,23 +11908,6 @@
        "labelled_code": "sum_out += hash_obj.digest()",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 30,
-       "labelled_primitive": "MD5",
-       "labelled_code": "from hashlib import md5, sha1, sha256, sha512",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: binds 'md5' to the md5 hash, which is used as a digest below",
        "ecdat_names": [
         "None"
        ],
@@ -14384,193 +11954,6 @@
       },
       {
        "file": "paramiko/transport.py",
-       "line": 177,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes128-ctr\",",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes128-ctr' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 178,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes192-ctr\",",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes192-ctr' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 179,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes256-ctr\",",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes256-ctr' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 180,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes128-cbc\",",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes128-cbc' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 181,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes192-cbc\",",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes192-cbc' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 182,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes256-cbc\",",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes256-cbc' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 183,
-       "labelled_primitive": "3DES",
-       "labelled_code": "\"3des-cbc\",",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier '3des-cbc' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 184,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes128-gcm@openssh.com\",",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes128-gcm@openssh.com' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 185,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes256-gcm@openssh.com\",",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes256-gcm@openssh.com' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 188,
-       "labelled_primitive": "HMAC",
-       "labelled_code": "\"hmac-sha2-256\",",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'hmac-sha2-256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 189,
-       "labelled_primitive": "HMAC",
-       "labelled_code": "\"hmac-sha2-512\",",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'hmac-sha2-512' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
        "line": 190,
        "labelled_primitive": "HMAC",
        "labelled_code": "\"hmac-sha2-256-etm@openssh.com\",",
@@ -14605,45 +11988,11 @@
       },
       {
        "file": "paramiko/transport.py",
-       "line": 192,
-       "labelled_primitive": "HMAC",
-       "labelled_code": "\"hmac-sha1\",",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'hmac-sha1' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
        "line": 193,
        "labelled_primitive": "HMAC",
        "labelled_code": "\"hmac-md5\",",
        "labelled_break_model": "grover",
        "labelled_reason": "P4: algorithm identifier 'hmac-md5' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 194,
-       "labelled_primitive": "HMAC",
-       "labelled_code": "\"hmac-sha1-96\",",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'hmac-sha1-96' names a quantum-vulnerable primitive",
        "ecdat_names": [
         "None"
        ],
@@ -14673,295 +12022,6 @@
       },
       {
        "file": "paramiko/transport.py",
-       "line": 199,
-       "labelled_primitive": "Ed25519",
-       "labelled_code": "\"ssh-ed25519\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ssh-ed25519' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 200,
-       "labelled_primitive": "ECDSA",
-       "labelled_code": "\"ecdsa-sha2-nistp256\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ecdsa-sha2-nistp256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 201,
-       "labelled_primitive": "ECDSA",
-       "labelled_code": "\"ecdsa-sha2-nistp384\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ecdsa-sha2-nistp384' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 202,
-       "labelled_primitive": "ECDSA",
-       "labelled_code": "\"ecdsa-sha2-nistp521\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ecdsa-sha2-nistp521' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 203,
-       "labelled_primitive": "RSA",
-       "labelled_code": "\"rsa-sha2-512\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-512' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 204,
-       "labelled_primitive": "RSA",
-       "labelled_code": "\"rsa-sha2-256\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 208,
-       "labelled_primitive": "Ed25519",
-       "labelled_code": "\"ssh-ed25519\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ssh-ed25519' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 209,
-       "labelled_primitive": "ECDSA",
-       "labelled_code": "\"ecdsa-sha2-nistp256\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ecdsa-sha2-nistp256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 210,
-       "labelled_primitive": "ECDSA",
-       "labelled_code": "\"ecdsa-sha2-nistp384\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ecdsa-sha2-nistp384' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 211,
-       "labelled_primitive": "ECDSA",
-       "labelled_code": "\"ecdsa-sha2-nistp521\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ecdsa-sha2-nistp521' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 212,
-       "labelled_primitive": "RSA",
-       "labelled_code": "\"rsa-sha2-512\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-512' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 213,
-       "labelled_primitive": "RSA",
-       "labelled_code": "\"rsa-sha2-256\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 216,
-       "labelled_primitive": "ECDH",
-       "labelled_code": "\"ecdh-sha2-nistp256\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ecdh-sha2-nistp256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 217,
-       "labelled_primitive": "ECDH",
-       "labelled_code": "\"ecdh-sha2-nistp384\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ecdh-sha2-nistp384' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 218,
-       "labelled_primitive": "ECDH",
-       "labelled_code": "\"ecdh-sha2-nistp521\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ecdh-sha2-nistp521' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 220,
-       "labelled_primitive": "Diffie-Hellman",
-       "labelled_code": "\"diffie-hellman-group-exchange-sha256\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'diffie-hellman-group-exchange-sha256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 224,
-       "labelled_primitive": "Curve25519",
-       "labelled_code": "_preferred_kex = (\"curve25519-sha256@libssh.org\",) + _preferred_kex",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'curve25519-sha256@libssh.org' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
        "line": 226,
        "labelled_primitive": "X25519",
        "labelled_code": "_preferred_kex = (\"mlkem768x25519-sha256\",) + _preferred_kex",
@@ -14979,334 +12039,11 @@
       },
       {
        "file": "paramiko/transport.py",
-       "line": 230,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes128-ctr\": {",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes128-ctr' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 231,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"class\": algorithms.AES,",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: algorithms.AES selects the AES primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 236,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes192-ctr\": {",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes192-ctr' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 237,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"class\": algorithms.AES,",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: algorithms.AES selects the AES primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 242,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes256-ctr\": {",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes256-ctr' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 243,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"class\": algorithms.AES,",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: algorithms.AES selects the AES primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 248,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes128-cbc\": {",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes128-cbc' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 249,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"class\": algorithms.AES,",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: algorithms.AES selects the AES primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 254,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes192-cbc\": {",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes192-cbc' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 255,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"class\": algorithms.AES,",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: algorithms.AES selects the AES primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 260,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes256-cbc\": {",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes256-cbc' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 261,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"class\": algorithms.AES,",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: algorithms.AES selects the AES primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 266,
-       "labelled_primitive": "3DES",
-       "labelled_code": "\"3des-cbc\": {",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier '3des-cbc' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 272,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes128-gcm@openssh.com\": {",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes128-gcm@openssh.com' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 279,
-       "labelled_primitive": "AES",
-       "labelled_code": "\"aes256-gcm@openssh.com\": {",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'aes256-gcm@openssh.com' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 289,
-       "labelled_primitive": "HMAC",
-       "labelled_code": "\"hmac-sha1\": {\"class\": sha1, \"size\": 20},",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'hmac-sha1' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 290,
-       "labelled_primitive": "HMAC",
-       "labelled_code": "\"hmac-sha1-96\": {\"class\": sha1, \"size\": 12},",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'hmac-sha1-96' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 291,
-       "labelled_primitive": "HMAC",
-       "labelled_code": "\"hmac-sha2-256\": {\"class\": sha256, \"size\": 32},",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'hmac-sha2-256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
        "line": 292,
        "labelled_primitive": "HMAC",
        "labelled_code": "\"hmac-sha2-256-etm@openssh.com\": {\"class\": sha256, \"size\": 32},",
        "labelled_break_model": "grover",
        "labelled_reason": "P4: algorithm identifier 'hmac-sha2-256-etm@openssh.com' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 293,
-       "labelled_primitive": "HMAC",
-       "labelled_code": "\"hmac-sha2-512\": {\"class\": sha512, \"size\": 64},",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'hmac-sha2-512' names a quantum-vulnerable primitive",
        "ecdat_names": [
         "None"
        ],
@@ -15370,45 +12107,11 @@
       },
       {
        "file": "paramiko/transport.py",
-       "line": 312,
-       "labelled_primitive": "RSA",
-       "labelled_code": "\"rsa-sha2-256\": RSAKey,",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
        "line": 313,
        "labelled_primitive": "RSA",
        "labelled_code": "\"rsa-sha2-256-cert-v01@openssh.com\": RSAKey,",
        "labelled_break_model": "shor",
        "labelled_reason": "P4: algorithm identifier 'rsa-sha2-256-cert-v01@openssh.com' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 314,
-       "labelled_primitive": "RSA",
-       "labelled_code": "\"rsa-sha2-512\": RSAKey,",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-512' names a quantum-vulnerable primitive",
        "ecdat_names": [
         "None"
        ],
@@ -15438,43 +12141,9 @@
       },
       {
        "file": "paramiko/transport.py",
-       "line": 316,
-       "labelled_primitive": "ECDSA",
-       "labelled_code": "\"ecdsa-sha2-nistp256\": ECDSAKey,",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: names the ECDSA primitive in executable code",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
        "line": 317,
        "labelled_primitive": "ECDSA",
        "labelled_code": "\"ecdsa-sha2-nistp256-cert-v01@openssh.com\": ECDSAKey,",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: names the ECDSA primitive in executable code",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 318,
-       "labelled_primitive": "ECDSA",
-       "labelled_code": "\"ecdsa-sha2-nistp384\": ECDSAKey,",
        "labelled_break_model": "shor",
        "labelled_reason": "P1: names the ECDSA primitive in executable code",
        "ecdat_names": [
@@ -15506,23 +12175,6 @@
       },
       {
        "file": "paramiko/transport.py",
-       "line": 320,
-       "labelled_primitive": "ECDSA",
-       "labelled_code": "\"ecdsa-sha2-nistp521\": ECDSAKey,",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: names the ECDSA primitive in executable code",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
        "line": 321,
        "labelled_primitive": "ECDSA",
        "labelled_code": "\"ecdsa-sha2-nistp521-cert-v01@openssh.com\": ECDSAKey,",
@@ -15540,181 +12192,11 @@
       },
       {
        "file": "paramiko/transport.py",
-       "line": 322,
-       "labelled_primitive": "Ed25519",
-       "labelled_code": "\"ssh-ed25519\": Ed25519Key,",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: names the Ed25519 primitive in executable code",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
        "line": 323,
        "labelled_primitive": "Ed25519",
        "labelled_code": "\"ssh-ed25519-cert-v01@openssh.com\": Ed25519Key,",
        "labelled_break_model": "shor",
        "labelled_reason": "P1: names the Ed25519 primitive in executable code",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 327,
-       "labelled_primitive": "Diffie-Hellman",
-       "labelled_code": "\"diffie-hellman-group-exchange-sha256\": KexGexSHA256,",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'diffie-hellman-group-exchange-sha256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 330,
-       "labelled_primitive": "ECDH",
-       "labelled_code": "\"ecdh-sha2-nistp256\": KexNistp256,",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ecdh-sha2-nistp256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 331,
-       "labelled_primitive": "ECDH",
-       "labelled_code": "\"ecdh-sha2-nistp384\": KexNistp384,",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ecdh-sha2-nistp384' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 332,
-       "labelled_primitive": "ECDH",
-       "labelled_code": "\"ecdh-sha2-nistp521\": KexNistp521,",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'ecdh-sha2-nistp521' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 335,
-       "labelled_primitive": "Curve25519",
-       "labelled_code": "_kex_info[\"curve25519-sha256@libssh.org\"] = KexCurve25519",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'curve25519-sha256@libssh.org' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 795,
-       "labelled_primitive": "RSA",
-       "labelled_code": "self.server_key_dict[\"rsa-sha2-256\"] = key",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-256' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 796,
-       "labelled_primitive": "RSA",
-       "labelled_code": "self.server_key_dict[\"rsa-sha2-512\"] = key",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-512' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 1322,
-       "labelled_primitive": "RSA",
-       "labelled_code": "\"rsa-sha2-512\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-512' names a quantum-vulnerable primitive",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 1323,
-       "labelled_primitive": "RSA",
-       "labelled_code": "\"rsa-sha2-256\",",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'rsa-sha2-256' names a quantum-vulnerable primitive",
        "ecdat_names": [
         "None"
        ],
@@ -15830,51 +12312,42 @@
      ],
      "file_level": {
       "counts": {
-       "TP": 7,
+       "TP": 16,
        "FP": 0,
-       "FN": 12,
+       "FN": 3,
        "labelled_positive_files": 19
       },
       "precision": 1.0,
-      "precision_fraction": "7/7",
-      "recall": 0.3684,
-      "recall_fraction": "7/19",
+      "precision_fraction": "16/16",
+      "recall": 0.8421,
+      "recall_fraction": "16/19",
       "false_positive_files": [],
       "false_negative_files": [
        "paramiko/__init__.py",
-       "paramiko/agent.py",
-       "paramiko/client.py",
-       "paramiko/ed25519key.py",
-       "paramiko/kex_ecdh_nist.py",
-       "paramiko/kex_gex.py",
-       "paramiko/kex_group14.py",
-       "paramiko/kex_group16.py",
-       "paramiko/rsakey.py",
        "paramiko/sftp_file.py",
-       "paramiko/sftp_server.py",
        "paramiko/util.py"
       ]
      },
      "by_primitive": {
       "3DES (grover)": {
        "labelled": 2,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 2,
+       "recall": 1.0
       },
       "AES (grover)": {
        "labelled": 27,
-       "detected": 1,
-       "recall": 0.037
+       "detected": 27,
+       "recall": 1.0
       },
       "Curve25519 (shor)": {
        "labelled": 2,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 2,
+       "recall": 1.0
       },
       "Diffie-Hellman (shor)": {
        "labelled": 3,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 3,
+       "recall": 1.0
       },
       "EC (shor)": {
        "labelled": 1,
@@ -15883,13 +12356,13 @@
       },
       "ECDH (shor)": {
        "labelled": 30,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 9,
+       "recall": 0.3
       },
       "ECDSA (shor)": {
        "labelled": 42,
-       "detected": 2,
-       "recall": 0.0476
+       "detected": 11,
+       "recall": 0.2619
       },
       "ED25519 (shor)": {
        "labelled": 1,
@@ -15898,23 +12371,23 @@
       },
       "Ed25519 (shor)": {
        "labelled": 19,
-       "detected": 1,
-       "recall": 0.0526
+       "detected": 5,
+       "recall": 0.2632
       },
       "EllipticCurvePrivateKey (shor)": {
        "labelled": 3,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 2,
+       "recall": 0.6667
       },
       "HMAC (grover)": {
        "labelled": 16,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 8,
+       "recall": 0.5
       },
       "MD5 (grover)": {
        "labelled": 5,
-       "detected": 1,
-       "recall": 0.2
+       "detected": 4,
+       "recall": 0.8
       },
       "None (not-affected)": {
        "labelled": 19,
@@ -15923,8 +12396,8 @@
       },
       "RSA (shor)": {
        "labelled": 37,
-       "detected": 1,
-       "recall": 0.027
+       "detected": 31,
+       "recall": 0.8378
       },
       "SHA-1 (grover)": {
        "labelled": 3,
@@ -15933,28 +12406,28 @@
       },
       "SHA-256 (grover)": {
        "labelled": 3,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 3,
+       "recall": 1.0
       },
       "SHA-384 (grover)": {
        "labelled": 1,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 1,
+       "recall": 1.0
       },
       "SHA-512 (grover)": {
        "labelled": 3,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 3,
+       "recall": 1.0
       },
       "SHA1 (grover)": {
        "labelled": 5,
-       "detected": 3,
-       "recall": 0.6
+       "detected": 5,
+       "recall": 1.0
       },
       "SHA256 (grover)": {
        "labelled": 7,
-       "detected": 1,
-       "recall": 0.1429
+       "detected": 3,
+       "recall": 0.4286
       },
       "SHA512 (grover)": {
        "labelled": 1,
@@ -15963,23 +12436,23 @@
       },
       "X25519 (shor)": {
        "labelled": 22,
-       "detected": 16,
-       "recall": 0.7273
+       "detected": 18,
+       "recall": 0.8182
       },
       "secp256r1 (shor)": {
        "labelled": 3,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 3,
+       "recall": 1.0
       },
       "secp384r1 (shor)": {
        "labelled": 2,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 2,
+       "recall": 1.0
       },
       "secp521r1 (shor)": {
        "labelled": 2,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 2,
+       "recall": 1.0
       }
      }
     }

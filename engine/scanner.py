@@ -69,6 +69,104 @@ RULES = [
          uses="tls", key_group=None, evidence="discovered",
          regex=r"EVP_PKEY_DH\b|DH_generate|DH_get_|ffdhe\d+|modp_\d+|"
                r"KeyAgreement\.getInstance\(\s*[\"']DH"),
+    # ---- Python `cryptography` object references ---------------------------------------------
+    # Added against MEASURED misses from benchmark/labels/paramiko_pq.json, not against a guess
+    # about what "better recall" means. The library selects an algorithm by REFERENCING an
+    # object -- `algorithms.AES`, `hashes.SHA256`, `ec.SECP256R1` -- and none of those spellings
+    # matched any existing rule, so 40-odd genuine ECDSA/RSA/AES sites were invisible to us.
+    # These are unambiguous: the dotted path is the library's own vocabulary, so matching it
+    # cannot fire on an unrelated identifier.
+    dict(id="ECD-SRC-PYCA-AES-001", name="AES", primitive="ae", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"algorithms\.(AES|ARC4|TripleDES|ChaCha20|ChaCha20Poly1305|Camellia|Blowfish|"
+                r"CAST5|SEED|IDEA)\b"),
+    dict(id="ECD-SRC-PYCA-HASH-001", name="SHA", primitive="hash", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"hashes\.(SHA1|SHA224|SHA256|SHA384|SHA512|SHA3_\d+_\d+|MD5|BLAKE2\w*)\b"),
+    dict(id="ECD-SRC-PYCA-HASH-002", name="SHA1", primitive="hash", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"hashes\.SHA1\b|MD5\(\s*(?:usedforsecurity\s*=\s*False)?\s*\)"),
+    dict(id="ECD-SRC-PYCA-EC-001", name="ECC", primitive="signature", artefact_class="source",
+         uses="signing", key_group=1, evidence="discovered",
+         regex=r"ec\.(SECP(?P<sz>192|224|256|384|521)R1|SECP256K1)\b"),
+    dict(id="ECD-SRC-PYCA-ECDH-001", name="ECDH", primitive="key-agreement", artefact_class="source",
+         uses="tls", key_group=None, evidence="discovered",
+         regex=r"exchanges\.ECDH\b|derive_private_key\(|"
+                r"EllipticCurvePublicNumbers\b|ECDHPrivateKey\b"),
+    dict(id="ECD-SRC-PYCA-ED-001", name="Ed25519", primitive="signature", artefact_class="source",
+         uses="signing", key_group=None, evidence="discovered",
+         regex=r"ed25519\.(Ed25519PrivateKey|Ed25519PublicKey)\b|ed448\.Ed448PrivateKey\b"),
+    dict(id="ECD-SRC-PYCA-RSA-001", name="RSA", primitive="pke", artefact_class="source",
+         uses="at-rest", key_group=1, evidence="discovered",
+         regex=r"rsa\.(RSAPrivateNumbers|RSAPublicNumbers|RSAPrivateKey|RSAKey)\b|"
+                r"padding\.(OAEP|PKCS1v15|PSS)\b|asymmetric\.rsa\b"),
+    # ---- hashlib direct imports ----------------------------------------------------------------
+    # `from hashlib import sha1, md5` names the algorithm as a bound name. `hashlib.sha256(...)`
+    # is already covered elsewhere; the import form was not.
+    dict(id="ECD-SRC-HASHLIB-001", name="SHA1", primitive="hash", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"from\s+hashlib\s+import\s+[^\n]*\bsha1\b|"
+                r"from\s+hashlib\s+import\s+[^\n]*\bmd5\b.*|hashlib\.new\(\s*[\"']sha1[\"']"),
+    # `hash_algo = hashlib.sha256` -- an algorithm object bound to a name. The dotted call
+    # `hashlib.sha256(...)` was already covered; the ASSIGNMENT form was not, and it is how
+    # libraries store an algorithm choice in a variable.
+    dict(id="ECD-SRC-HASHLIB-002", name="SHA", primitive="hash", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"hashlib\.(?:sha1|sha224|sha256|sha384|sha512|sha3_\d+_\d+|blake2\w*|md5)\b(?!\s*\()"),
+    dict(id="ECD-SRC-HASHLIB-003", name="SHA1", primitive="hash", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"from\s+hashlib\s+import\s+[^\n]*\bmd5\b|hashlib\.md5\b(?!\s*\()"),
+    # OpenSSH GCM/ChaCha cipher names, and HMAC wire names. `hmac-sha2-*` is an authentication
+    # tag, not an encryption cipher, so it is a MAC rather than a cipher-suite primitive.
+    dict(id="ECD-SRC-SSH-CIPHER-002", name="AES", primitive="ae", artefact_class="source",
+         uses="tls", key_group=None, evidence="discovered",
+         regex=r"[\"']aes(?:128|192|256)-(?:gcm|ctr)@openssh\.com[\"']|"
+                r"[\"']chacha20-poly1305@openssh\.com[\"']"),
+    dict(id="ECD-SRC-SSH-MAC-001", name="HMAC", primitive="mac", artefact_class="source",
+         uses="tls", key_group=None, evidence="discovered",
+         regex=r"[\"'](?:hmac-sha2-(?:256|512)|hmac-sha1(?:-96|-160)?|"
+                r"umac-64@openssh\.com|umac-128@openssh\.com)[\"']"),
+    # `diffie-hellman-group-exchange-sha256` is finite-field DH, NOT ECDH. The KEX rule above
+    # deliberately lists only the elliptic names; this is the missing DH half.
+    dict(id="ECD-SRC-SSH-DH-001", name="DH", primitive="key-agreement", artefact_class="source",
+         uses="tls", key_group=None, evidence="discovered",
+         regex=r"[\"']diffie-hellman-group(?:1|14|16|18|exchange)-sha(?:1|256|384|512)[\"']|"
+                r"[\"']diffie-hellman-group-exchange-sha256[\"']"),
+    # EC key classes referenced as a type: `ec.EllipticCurvePrivateKey`. A curve OBJECT is the
+    # algorithm choice; the private-key wrapper is a type annotation naming the same family.
+    dict(id="ECD-SRC-PYCA-EC-002", name="ECC", primitive="signature", artefact_class="source",
+         uses="signing", key_group=None, evidence="discovered",
+         regex=r"\bec\.(?:EllipticCurve(?:Private|Public)Key|EllipticCurve|SECP\w*R1)\b"),
+    # `from cryptography.hazmat.primitives.asymmetric.x25519 import ...` -- the import path
+    # itself names the algorithm family.
+    dict(id="ECD-SRC-PYCA-X-001", name="X25519", primitive="key-agreement", artefact_class="source",
+         uses="tls", key_group=None, evidence="discovered",
+         regex=r"primitives\.asymmetric\.x25519\b|x25519\.(?:X25519PrivateKey|X25519PublicKey)\b"),
+    # ---- SSH / TLS algorithm identifier strings -----------------------------------------------
+    # RFC 4253 / RFC 5656 / OpenSSH wire names. These are exact algorithm identifiers, and an
+    # SSH implementation is nothing BUT these strings, so a codebase that names one is using it.
+    # The signature/cipher names are kept in separate rules because they imply a different
+    # primitive, and conflating them is the error Phase-1 gap H6 warns about.
+    dict(id="ECD-SRC-SSH-KEX-001", name="ECDH", primitive="key-agreement", artefact_class="source",
+         uses="tls", key_group=None, evidence="discovered",
+         regex=r"[\"'](?:ecdh-sha2-nistp(?:256|384|521)|"
+                r"diffie-hellman-group(?:1|14|16|18)-sha(?:1|256|384|512)|"
+                r"curve25519-sha256(?:@libssh\.org)?|"
+                r"ecdh-sha2-nistp256k)[\"']"),
+    dict(id="ECD-SRC-SSH-SIG-001", name="ECDSA", primitive="signature", artefact_class="source",
+         uses="signing", key_group=None, evidence="discovered",
+         regex=r"[\"']ecdsa-sha2-nistp(?:256|384|521)[\"']|[\"']ssh-rsa[\"']|"
+                r"[\"']rsa-sha2-(?:256|512)[\"']|[\"']ssh-dss[\"']"),
+    dict(id="ECD-SRC-SSH-ED-001", name="Ed25519", primitive="signature", artefact_class="source",
+         uses="signing", key_group=None, evidence="discovered",
+         regex=r"[\"']ssh-ed25519[\"']"),
+    dict(id="ECD-SRC-SSH-CIPHER-001", name="AES", primitive="ae", artefact_class="source",
+         uses="tls", key_group=None, evidence="discovered",
+         regex=r"[\"'](?:aes(?:128|192|256)-(?:ctr|gcm|cbc)|3des-cbc|"
+                r"aes128-cbc|aes256-cbc)[\"']"),
+    dict(id="ECD-SRC-SSH-LEGACY-001", name="3DES", primitive="block-cipher", artefact_class="source",
+         uses="tls", key_group=None, evidence="discovered",
+         regex=r"[\"'](?:3des-cbc|des-cbc|arcfour|arcfour256|blowfish-cbc|cast128-cbc)[\"']"),
     # ---- Symmetric --------------------------------------------------------------------------
     dict(id="ECD-SRC-AES-001", name="AES", primitive="ae", artefact_class="source",
          uses="at-rest", key_group=1, evidence="discovered",

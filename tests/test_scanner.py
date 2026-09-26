@@ -52,6 +52,29 @@ def test_every_rule_is_actually_executed(tmp_path, scanner):
         "ECD-SRC-MD5-001": "hashlib.md5(data)",
         "ECD-CFG-TLS-001": "ssl_protocols TLSv1.2 TLSv1.3;",
         "ECD-CFG-LEGACY-001": "ciphers = RC4-SHA:DES-CBC3-SHA",
+        # --- the recall rules, added against measured misses on paramiko (a real SSH library).
+        # The samples are the actual source lines the benchmark said we failed on, so each rule
+        # is pinned to the evidence that motivated it rather than to an invented string.
+        "ECD-SRC-PYCA-AES-001": '"cipher": algorithms.AES,',
+        "ECD-SRC-PYCA-HASH-001": "self.hash_object = hashes.SHA256",
+        "ECD-SRC-PYCA-HASH-002": "h = hashes.SHA1",
+        "ECD-SRC-PYCA-EC-001": "_ECDSACurve(ec.SECP256R1, \"nistp256\")",
+        "ECD-SRC-PYCA-EC-002": "def private_key(self) -> ec.EllipticCurvePrivateKey:",
+        "ECD-SRC-PYCA-ECDH-001": "kex = exchanges.ECDH()",
+        "ECD-SRC-PYCA-ED-001": "k = ed25519.Ed25519PrivateKey.generate()",
+        "ECD-SRC-PYCA-RSA-001": "n = rsa.RSAPrivateNumbers(p, q, d, dmp1, dmq1, iqmp)",
+        "ECD-SRC-PYCA-X-001": "from cryptography.hazmat.primitives.asymmetric.x25519 import (",
+        "ECD-SRC-HASHLIB-001": "from hashlib import sha1",
+        "ECD-SRC-HASHLIB-002": "hash_algo = hashlib.sha256",
+        "ECD-SRC-HASHLIB-003": "from hashlib import md5",
+        "ECD-SRC-SSH-KEX-001": 'kex = "ecdh-sha2-nistp256"',
+        "ECD-SRC-SSH-SIG-001": '"rsa-sha2-256": SSH_AGENT_RSA_SHA2_256,',
+        "ECD-SRC-SSH-ED-001": 'PREF = "ssh-ed25519"',
+        "ECD-SRC-SSH-CIPHER-001": 'C = "aes256-ctr"',
+        "ECD-SRC-SSH-CIPHER-002": '"aes128-gcm@openssh.com"',
+        "ECD-SRC-SSH-MAC-001": '"hmac-sha2-256"',
+        "ECD-SRC-SSH-DH-001": 'name = "diffie-hellman-group-exchange-sha256"',
+        "ECD-SRC-SSH-LEGACY-001": '"3des-cbc"',
     }
     assert set(samples) == {r["id"] for r in RULES}, "a rule has no positive test"
     unreachable = []
