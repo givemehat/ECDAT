@@ -272,6 +272,9 @@ class ECDATScanner:
         self.ml = _LazyML() if enable_ml else None
         self.saw_container = False
         self.errors = []        # files that could not be read: "clean" must never mean "unread"
+        # Paths counted as scanned, so `_note_error` can convert one to "skipped" rather than
+        # double-counting it. See `_note_error` for why the manifest must still add up.
+        self._counted_scanned = set()
         self.coverage = {
             "scanners_run": set(),
             "files_seen": 0,
@@ -283,12 +286,25 @@ class ECDATScanner:
     # ------------------------------------------------------------------ internals
 
     def _note_error(self, path, reason):
+        """Record that a file could not be read, and count it as SKIPPED, not scanned.
+
+        `_scan_path` counts a file as scanned BEFORE the read is attempted, because a read
+        failure is only knowable afterwards. Without undoing that here, one undecodable file is
+        counted as both scanned and skipped and the manifest double-counts it: an end-to-end test
+        caught `seen=5, scanned=4, skipped=2`, which is not a number anyone can trust. The
+        invariant `files_seen == files_scanned + files_skipped` is the whole point of the
+        manifest, so a file we could not read counts once, as skipped.
+        """
         self.errors.append({"file": path, "reason": reason})
+        if path in self._counted_scanned:
+            self._counted_scanned.discard(path)
+            self.coverage["files_scanned"] -= 1
         self.coverage["files_skipped"] += 1
 
-    def _note_scanned(self):
+    def _note_scanned(self, path=None):
         self.coverage["files_scanned"] += 1
-
+        if path is not None:
+            self._counted_scanned.add(path)
     def _ml_predict_windowed(self, content):
         """Run the transformer over the head of the content (documented window, not the whole
         file). Returns (label, confidence, ast_depth). The model only ever sees the first
@@ -589,17 +605,17 @@ class ECDATScanner:
         lowered = fpath.lower()
         if lowered.endswith(CONTAINER_EXTENSIONS):
             self.saw_container = True
-            self._note_scanned()
+            self._note_scanned(fpath)
             return self._scan_container_image(fpath)
         if lowered.endswith(SOURCE_EXTENSIONS):
-            self._note_scanned()
+            self._note_scanned(fpath)
             return self._scan_source_file(fpath)
         # Config-like paths are scanned regardless of extension.
         if os.path.basename(fpath).lower() in CONFIG_FILENAMES or lowered.endswith(CONFIG_EXTENSIONS):
-            self._note_scanned()
+            self._note_scanned(fpath)
             return self._scan_source_file(fpath)
         if lowered.endswith(BINARY_EXTENSIONS):
-            self._note_scanned()
+            self._note_scanned(fpath)
             return self._scan_binary_file(fpath)
         # Out of scope by extension. It MUST still be counted as skipped, otherwise
         # `files_seen` exceeds `files_scanned + files_skipped` and the coverage manifest

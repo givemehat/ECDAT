@@ -25,6 +25,7 @@ FLOORS = {
     "test_scanner.py": 12,
     "test_cbom.py": 8,
     "test_recommender.py": 8,
+    "test_cbom_schema.py": 8,
     "test_purpose.py": 6,
     "test_fspolicy.py": 10,
     "test_properties.py": 15,
