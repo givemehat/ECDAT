@@ -93,6 +93,11 @@ PERF_NOTES = {
 }
 
 
+from engine.purpose import (PURPOSE_SIGNATURE, PURPOSE_KEY_ESTABLISHMENT, PURPOSE_CONFIDENTIALITY,
+                            PURPOSE_UNRESOLVED, PURPOSE_TO_PRIMITIVE, resolve_purpose,
+                            resolve_assurance)
+
+
 def _rec(algorithm, action, justification, size, latency, rule_trace,
          hybrid_semantics=None, standard_basis=(), cost_band="LOW",
          ossification_risk="N/A", extra_notes=()):
@@ -188,6 +193,42 @@ def get_pqc_recommendation(finding):
     mode = str(finding.get("mode", "")).lower()
     uses = str(finding.get("uses", "")).lower()
     primitive = _normalise_primitive(finding.get("primitive", ""), name)
+
+    # Purpose and assurance are RESOLVED from the finding's evidence, not assumed. When the
+    # purpose is unresolved we refuse to name a PQC target rather than guess (adopted from the
+    # competitive analysis, item C2): an unresolved finding a human reviews is worth more than
+    # a resolved one that is wrong.
+    purpose, purpose_signals, purpose_reason = resolve_purpose(finding)
+    assurance, assurance_reason = resolve_assurance(finding)
+
+    # When the evidence CONFLICTS on purpose, or proves only that a key was GENERATED, we refuse to
+    # name a target. Recommending ML-KEM for something that might be a signature is a confident
+    # wrong answer; naming nothing and saying what would resolve it is a reviewable one.
+    #
+    # Scope of the refusal: only where the PRIMITIVE does not already disambiguate. If the scanner
+    # already typed the finding `signature` or `key-agreement`, that classification is itself
+    # evidence and re-litigating it would over-refuse -- `RSA` with `primitive=signature` gets
+    # ML-DSA regardless of an ambiguous mode string. The genuinely ambiguous case is `pke`, where
+    # RSA may either wrap a key or sign, and `unknown`.
+    purpose_ambiguous = purpose == PURPOSE_UNRESOLVED and bool(purpose_signals)
+    if purpose_ambiguous and primitive in ("pke", "unknown"):
+        seen = ", ".join(purpose_signals)
+        return _rec(
+            "Unresolved -- purpose must be determined before a target can be named",
+            "Resolve the cryptographic purpose, then re-scan",
+            f"No post-quantum target is named, because the evidence does not settle what this "
+            f"primitive is FOR. Purpose decides the replacement and neither ML-KEM nor ML-DSA "
+            f"substitutes for the other, so guessing here would be confidently wrong. Evidence "
+            f"seen: {seen}. {purpose_reason}. "
+            f"WHAT WOULD RESOLVE IT: the call site that consumes this primitive, the certificate "
+            f"KeyUsage extension, or a handshake/server log naming the negotiated suite.",
+            "N/A -- no target named", "N/A -- no target named",
+            "RULE-PURPOSE-UNRESOLVED: primitive=pke/unknown and purpose signals are conflicting or "
+            "generation-only -> decline to name a PQC target and name the resolving evidence",
+            cost_band="UNKNOWN",
+            extra_notes=(f"purpose={purpose}", f"signals={seen}",
+                         f"assurance={assurance} ({assurance_reason})"),
+        )
 
     # ------------------------------------------------------------- protocol / configuration evidence
     # Checked FIRST: a name like "TLS-1.2-SHA" would otherwise be caught by the hash branch below.

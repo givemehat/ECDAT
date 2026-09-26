@@ -32,10 +32,16 @@ def run_headless_scan(target_dir, output_format="text", z_time=DEFAULT_Z,
 
     scanner = ECDATScanner(enable_ml=enable_ml)
     findings = scanner.scan_directory(target_dir)
-    coverage = scanner.coverage_manifest()
+    coverage = scanner.coverage_manifest(findings)
 
     print(f"[*] Files scanned: {coverage['files_scanned']}  skipped: {coverage['files_skipped']}")
     print(f"    ML engine: {coverage['ml_reason']}")
+    # The raw total alone is misleading: it mixes proven call sites with capabilities nothing
+    # calls. Both numbers are shown so the reader can tell which is which.
+    print(f"[*] Findings: {coverage['findings_total']} total, "
+          f"{coverage['proven_use']} with proven use (used/observed), "
+          f"{coverage['unresolved_purpose']} with unresolved purpose")
+    print(f"    Assurance: {json.dumps(coverage['assurance_histogram'])}")
     if coverage["errors"]:
         print(f"[!] {len(coverage['errors'])} file(s) could not be read -- these are NOT clean:")
         for err in coverage["errors"][:10]:

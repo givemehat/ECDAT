@@ -14,6 +14,10 @@ import os
 import re
 import tarfile
 
+from engine.fspolicy import check_root, is_credential_store, resolve_within
+from engine.purpose import (PURPOSE_UNRESOLVED, assurance_histogram, proven_use_count,
+                            resolve_purpose, unresolved_purpose_count)
+
 SOURCE_EXTENSIONS = (".py", ".java", ".c", ".cpp", ".cc", ".h", ".hpp", ".cs", ".go", ".rs", ".js", ".ts")
 CONFIG_EXTENSIONS = (".cnf", ".conf", ".cfg", ".ini", ".properties", ".yaml", ".yml", ".json", ".xml", ".toml")
 BINARY_EXTENSIONS = (".so", ".dll", ".dylib", ".bin", ".elf", ".exe", ".a", ".o", ".jar", ".war")
@@ -208,6 +212,52 @@ CURVE_KEY_SIZES = {
 CURVE_KEY_SIZES_LOWER = {k.lower(): v for k, v in CURVE_KEY_SIZES.items()}
 
 
+# ---------------------------------------------------------------------------------------------
+# Comment blanking.
+#
+# A regex that matches inside a comment reports a cryptographic primitive the program does not
+# use. Measured on the adversarial decoy suite (tests/fixtures/decoys), this was our single
+# largest false-positive source: a Java file whose only mention of `KeyPairGenerator.getInstance
+# ("RSA")` sat inside a Javadoc block was reported as an RSA finding.
+#
+# The text is blanked, not deleted: every replaced character becomes a space and newlines are
+# preserved, so every byte OFFSET survives and reported line numbers stay correct. A `.replace`
+# that dropped the comment would shift every subsequent line -- silently corrupting every
+# location in the CBOM. There is a regression test for exactly that.
+# ---------------------------------------------------------------------------------------------
+_C_LINE_COMMENT = re.compile(r"//[^\n]*")
+_C_BLOCK_COMMENT = re.compile(r"/\*.*?\*/", re.DOTALL)
+_PY_HASH_COMMENT = re.compile(r"#[^\n]*")
+_PY_DOCSTRING = re.compile(r"(?:[rRbBuUfF]{0,2})(?:\"\"\"|''').*?(?:\"\"\"|''')", re.DOTALL)
+
+
+def _blank(match):
+    """Erase matched text while preserving length and line structure."""
+    return re.sub(r"[^\n]", " ", match.group(0))
+
+
+def _strip_comments(content, path):
+    """Blank comments and Python docstrings so rules match CODE, not prose.
+
+    Deliberately conservative: a construct it cannot identify is left untouched, because erasing
+    something that matters is worse than reporting a mention. Python `#` handling applies only to
+    Python-family files -- `#` opens a comment in the config formats we scan but means something
+    else on a C preprocessor line.
+    """
+    lower = (path or "").lower()
+    try:
+        text = _C_BLOCK_COMMENT.sub(_blank, content)
+        text = _C_LINE_COMMENT.sub(_blank, text)
+        if lower.endswith((".py", ".pyw")):
+            # A '#' inside a string is not a comment; the docstring pass runs first so a
+            # triple-quoted block containing a '#' is removed as one unit.
+            text = _PY_DOCSTRING.sub(_blank, text)
+            text = _PY_HASH_COMMENT.sub(_blank, text)
+        return text
+    except re.error:                                    # pathological nesting: leave as-is
+        return content
+
+
 class ECDATScanner:
     """Scan source files, binaries and container images for cryptographic artefacts.
 
@@ -249,6 +299,9 @@ class ECDATScanner:
         return pred, float(conf or 0.0), float(depth or 0.0)
 
     def _match_rules(self, file_path, content):
+        # Rules run against comment-stripped text so a mention in prose is not a finding. Offsets
+        # are preserved, so `line` below still points at the original source line.
+        content = _strip_comments(content, file_path)
         findings = []
         lowered_name = os.path.basename(file_path).lower()
         is_config = lowered_name in CONFIG_FILENAMES or file_path.lower().endswith(CONFIG_EXTENSIONS)
@@ -460,10 +513,26 @@ class ECDATScanner:
         if not os.path.isdir(directory_path):
             self._note_error(directory_path, "path does not exist or is not a directory")
             return findings
-        for root, _, files in os.walk(directory_path):
+        # Filesystem containment policy (see engine/fspolicy.py): refuse a synthetic filesystem
+        # outright, and never follow a symlink out of the scan root.
+        try:
+            real_root = check_root(directory_path)
+        except Exception as exc:                                   # noqa: BLE001
+            self._note_error(directory_path, f"refused by filesystem policy: {exc}")
+            return findings
+
+        for root, dirs, files in os.walk(real_root):
+            dirs[:] = [d for d in dirs
+                       if resolve_within(real_root, os.path.join(root, d))]
             for fname in files:
                 self.coverage["files_seen"] += 1
                 fpath = os.path.join(root, fname)
+                if is_credential_store(fname):
+                    self._note_error(fpath, "credential store: contents never read")
+                    continue
+                if resolve_within(real_root, fpath) is None:
+                    self._note_error(fpath, "symlink escapes the scan root: not followed")
+                    continue
                 findings.extend(self._scan_path(fpath))
         if self.ml is not None:
             self.ml.initialise()
@@ -503,10 +572,15 @@ class ECDATScanner:
 
     # ------------------------------------------------------------------ coverage
 
-    def coverage_manifest(self):
+    def coverage_manifest(self, findings=None):
         """What was scanned, what failed, and what was never in scope. Callers should render
-        this alongside results so 'not found' and 'not examined' are distinguishable."""
-        return {
+        this alongside results so 'not found' and 'not examined' are distinguishable.
+
+        When `findings` is supplied, the assurance breakdown and the proven-use count are
+        included: the raw finding total is misleading on its own, because it mixes proven call
+        sites with capabilities nothing invokes.
+        """
+        manifest = {
             "scanners_run": sorted(self.coverage["scanners_run"]),
             "files_seen": self.coverage["files_seen"],
             "files_scanned": self.coverage["files_scanned"],
@@ -522,6 +596,15 @@ class ECDATScanner:
                 "silicon-embedded keys (requires attestation)",
             ],
         }
+        if findings is not None:
+            manifest["findings_total"] = len(findings)
+            manifest["assurance_histogram"] = assurance_histogram(findings)
+            manifest["proven_use"] = proven_use_count(findings)
+            # Count unresolved purpose only where a PQC target is actually in question. A hash or
+            # a symmetric cipher has no purpose ambiguity that matters -- counting them would
+            # inflate a number that should mean "a human must look at this".
+            manifest["unresolved_purpose"] = unresolved_purpose_count(findings)
+        return manifest
 
 
 

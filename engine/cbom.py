@@ -29,6 +29,8 @@ import json
 import uuid
 from datetime import datetime, timezone
 
+from engine.purpose import PURPOSE_UNRESOLVED, resolve_assurance, resolve_purpose
+
 SPEC_VERSION = "1.7"
 PROPERTY_NS = "ecd"          # ECDAT-namespaced extension properties
 
@@ -149,6 +151,24 @@ def _ecd_properties(finding, risk, recommendation):
     ):
         if value:
             out.append({"name": f"{PROPERTY_NS}:{key}", "value": str(value)})
+
+    # Assurance answers "what does the evidence PROVE?", which is a different question from
+    # confidence ("is this identification correct?"). A dependency on a crypto library can be a
+    # CERTAIN identification of something that proves very little, so the two must both be
+    # exported or a reader cannot tell which they are looking at.
+    assurance, assurance_reason = resolve_assurance(finding)
+    out.append({"name": f"{PROPERTY_NS}:assurance", "value": assurance})
+    out.append({"name": f"{PROPERTY_NS}:assurance_meaning", "value": assurance_reason})
+
+    # Purpose decides which PQC family replaces the primitive, and is itself sometimes
+    # unresolvable from static evidence. Exporting it makes the recommendation auditable.
+    purpose, purpose_signals, purpose_reason = resolve_purpose(finding)
+    out.append({"name": f"{PROPERTY_NS}:purpose", "value": purpose})
+    if purpose_signals:
+        out.append({"name": f"{PROPERTY_NS}:purpose_signals", "value": "; ".join(purpose_signals)})
+    if purpose == PURPOSE_UNRESOLVED:
+        out.append({"name": f"{PROPERTY_NS}:purpose_note", "value": purpose_reason})
+
     if finding.get("line"):
         out.append({"name": f"{PROPERTY_NS}:line", "value": str(finding["line"])})
     if finding.get("dl_confidence") is not None:
@@ -283,6 +303,22 @@ def generate_cbom(findings, enriched=False, subject_name="ECDAT-Scanned-Artefact
             {"name": f"{PROPERTY_NS}:coverage.ml_reason", "value": str(coverage.get("ml_reason", ""))},
             {"name": f"{PROPERTY_NS}:coverage.never_in_scope", "value": json.dumps(coverage.get("never_in_scope", []))},
         ]
+        # Report the PROVEN-use count next to the raw total. Reporting "412 quantum-vulnerable
+        # assets" when 300 are capabilities nothing calls is the easiest way for a discovery tool
+        # to mislead, so the two numbers are published together or the raw one is meaningless.
+        if "assurance_histogram" in coverage:
+            hist = coverage["assurance_histogram"]
+            metadata["properties"].append(
+                {"name": f"{PROPERTY_NS}:assurance_histogram", "value": json.dumps(hist)})
+        if "proven_use" in coverage:
+            metadata["properties"].append(
+                {"name": f"{PROPERTY_NS}:proven_use", "value": str(coverage["proven_use"])})
+        if "findings_total" in coverage:
+            metadata["properties"].append(
+                {"name": f"{PROPERTY_NS}:findings_total", "value": str(coverage["findings_total"])})
+        if "unresolved_purpose" in coverage:
+            metadata["properties"].append(
+                {"name": f"{PROPERTY_NS}:unresolved_purpose", "value": str(coverage["unresolved_purpose"])})
 
     cbom = {
         "bomFormat": "CycloneDX",
