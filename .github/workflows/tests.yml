@@ -22,7 +22,9 @@ jobs:
     # `pip install requirements.txt` and then a second, ad-hoc
     # `pip install torch javalang cyclonedx-python-lib` -- which is how the
     # incomplete requirements.txt went unnoticed. Everything the code imports
-    # must now be declared in requirements.txt.
+    # must now be declared in requirements.txt, INCLUDING test-only imports:
+    # `hypothesis` was missing for three test modules, so a fresh clone failed at
+    # collection. The step below asserts that, so it cannot regress silently.
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -30,12 +32,27 @@ jobs:
         pip install pytest pytest-cov
 
     - name: Verify no undeclared imports
-      run: python -m pip install pip-audit && pip-audit --requirement requirements.txt --no-deps || true
+      # Real check, not just a vulnerability audit: collect the test suite and fail if anything
+      # is missing. A dependency audit cannot see an unimported-but-required package.
+      run: |
+        python -m pytest tests --collect-only -q > /dev/null
 
     - name: Run test suite
       run: |
         export PYTHONPATH=.
         pytest tests/ -v --cov=engine --cov-report=xml --cov-report=term-missing
+
+    - name: Mutation-test the engine
+      # A passing suite is not evidence of correctness. This injects deliberate defects and
+      # requires the suite to catch them; it fails the build if any survives.
+      run: |
+        export PYTHONPATH=.
+        python mutation_test.py
+
+    - name: Per-file test report with thin-coverage warnings
+      run: |
+        export PYTHONPATH=.
+        python run_tests_by_file.py
 
     - name: Validate the emitted CBOM against the CycloneDX 1.7 schema
       run: |

@@ -33,3 +33,14 @@ requests>=2.31
 # not required at runtime, but it is useful for cross-checking output against the spec.
 cyclonedx-python-lib>=7.3.0
 
+# ---- TEST-ONLY dependencies ----
+# These are imported by tests/, never by engine/. They are declared HERE rather than in a
+# separate requirements-dev.txt because the CI workflow installs only requirements.txt plus
+# `pytest`, so an undeclared test dependency produces a collection error on a fresh clone and
+# in CI -- which is exactly what happened with hypothesis before this entry was added.
+pytest>=8.0
+
+# Property-based testing. tests/test_properties.py and tests/test_differential.py generate
+# inputs with `derandomize=True` so every failure is reproducible from the test files alone.
+hypothesis>=6.100
+

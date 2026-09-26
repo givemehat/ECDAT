@@ -76,6 +76,47 @@ QUANTUM_BROKEN = 0
 QUANTUM_CATEGORY = {"AES-128": 1, "AES-192": 3, "AES-256": 5,
                     "ML-KEM-512": 1, "ML-KEM-768": 3, "ML-KEM-1024": 5}
 
+# NIST SP 800-57 security strength in bits, for `classicalSecurityLevel`. That field means
+# "equivalent security in BITS", not key length: RSA-2048 is 2048-bit key but ~112-bit
+# security. Reporting the key length there overstates every asymmetric algorithm by an order
+# of magnitude, and it is the number a consumer reads to judge adequacy.
+CLASSICAL_STRENGTH_BITS = {
+    "RSA-1024": 80, "RSA-2048": 112, "RSA-3072": 128, "RSA-4096": 152,
+    "EC-P-192": 96, "EC-P-224": 112, "EC-P-256": 128, "EC-P-384": 192, "EC-P-521": 256,
+    "X25519": 128, "X448": 224, "Ed25519": 128, "Ed448": 224,
+    "DSA-2048": 112,
+    "ML-KEM-512": 128, "ML-KEM-768": 192, "ML-KEM-1024": 256,
+    "ML-DSA-44": 128, "ML-DSA-65": 192, "ML-DSA-87": 256,
+    "SLH-DSA-SHA2-128s": 128, "SLH-DSA-SHA2-192s": 192, "SLH-DSA-SHA2-256s": 256,
+    "AES-128": 128, "AES-192": 192, "AES-256": 256,
+    "SHA-256": 128, "SHA-384": 192, "SHA-512": 256,
+    "SHA-1": 87, "MD5": 0, "3DES": 112,
+}
+
+# Post-quantum algorithm families, matched on the name BEFORE any primitive-based rule. ML-KEM,
+# ML-DSA, SLH-DSA and FN-DSA are the standardised replacements: a CRQC does not break them, so
+# they must never inherit the "broken by Shor" verdict that applies to the primitives they
+# replace. Getting this backwards is the most damaging possible error in this file -- the tool
+# would label its own migration recommendation as quantum-vulnerable.
+PQC_FAMILIES = ("ML-KEM", "ML-KSA", "ML-DSA", "SLH-DSA", "FN-DSA", "FALCON", "XMMS")
+
+# Cryptographic function, inferred from purpose. CycloneDX types `cryptoFunctions` as a list
+# from a closed vocabulary, and hardcoding "keygen" for a signing-only artefact is simply wrong.
+_CRYPTO_FUNCTIONS = {
+    "signature": ["sign", "verify", "keygen"],
+    "key-establishment": ["keygen", "encapsulate", "decapsulate", "keyderive"],
+    "confidentiality": ["keygen", "encrypt", "decrypt", "keyderive"],
+    "hash": ["digest", "tag"],
+    "mac": ["tag", "generate", "verify"],
+    "ae": ["encrypt", "decrypt", "tag", "keygen"],
+    "block-cipher": ["encrypt", "decrypt", "keygen"],
+    "stream-cipher": ["encrypt", "decrypt", "keygen"],
+    "kdf": ["keyderive"],
+    "kem": ["keygen", "encapsulate", "decapsulate"],
+    "drbg": ["generate"],
+    "unknown": ["keygen"],
+}
+
 OID_BY_NAME = {
     "AES-128-GCM": "2.16.840.1.101.3.4.1.6",
     "AES-256-GCM": "2.16.840.1.101.3.4.1.46",
@@ -91,6 +132,18 @@ def _canonical_primitive(primitive):
     return PRIMITIVE_ENUM.get(str(primitive or "").lower(), "unknown")
 
 
+def _is_pqc(name):
+    """True when the name is a standardised post-quantum algorithm family.
+
+    Checked BEFORE any primitive rule, because ML-KEM has primitive `kem` and ML-DSA has
+    primitive `signature` -- the same primitive values as RSA and ECDSA. Ordering the primitive
+    check first made every PQC algorithm inherit the "broken by Shor" verdict, so the tool
+    labelled its own migration recommendation `nistQuantumSecurityLevel: 0`.
+    """
+    upper = str(name or "").upper()
+    return any(f in upper for f in PQC_FAMILIES)
+
+
 def _nist_quantum_level(finding, primitive):
     """0 when the primitive is broken by a CRQC (Shor), else a NIST category where known.
 
@@ -99,18 +152,27 @@ def _nist_quantum_level(finding, primitive):
     NIST security categories. Returning 0 is therefore the CBOM-native way to say "a CRQC breaks
     this" -- it is not a severity score.
     """
-    if primitive in ("pke", "signature", "key-agreement", "kem"):
-        return QUANTUM_BROKEN
     name = str(finding.get("name", "")).upper()
     key_length = finding.get("key_length")
+
+    # A standardised post-quantum algorithm is NOT broken by Shor. This must be tested first.
+    if _is_pqc(name):
+        if name in QUANTUM_CATEGORY:
+            return QUANTUM_CATEGORY[name]
+        # Parameter-set families: 512/44/128s -> 1, 768/65/192s -> 3, 1024/87/256s -> 5.
+        for token, level in (("512", 1), ("44", 1), ("128s", 1),
+                             ("768", 3), ("65", 3), ("192s", 3),
+                             ("1024", 5), ("87", 5), ("256s", 5)):
+            if token in name:
+                return level
+        return 3                     # a PQC family we do not have a level for is not "broken"
+
+    if primitive in ("pke", "signature", "key-agreement", "kem"):
+        return QUANTUM_BROKEN
     if "AES" in name:
         if key_length:
             return QUANTUM_CATEGORY.get(f"AES-{key_length}", 0)
         return 0
-    if "ML-KEM" in name:
-        return QUANTUM_CATEGORY.get(name, 0)
-    if "ML-DSA" in name or "SLH-DSA" in name:
-        return QUANTUM_CATEGORY.get(name, 0)
     if primitive == "hash":
         return 1 if "SHA256" in name or "SHA-256" in name else 0
     return 0
@@ -156,14 +218,68 @@ def _canonical_mode(raw):
     return "other"
 
 
+def _classical_strength(finding, primitive):
+    """Equivalent security in BITS (NIST SP 800-57), for `classicalSecurityLevel`.
+
+    That field means security strength, NOT key length. RSA-2048 has a 2048-bit key but ~112-bit
+    security; reporting 2048 overstated every asymmetric algorithm by more than an order of
+    magnitude, and this is the number a downstream consumer reads to judge adequacy. The raw key
+    length is still emitted, correctly, as `parameterSetIdentifier`.
+    """
+    name = str(finding.get("name", "") or "")
+    upper = name.upper()
+    if upper in CLASSICAL_STRENGTH_BITS:
+        return CLASSICAL_STRENGTH_BITS[upper]
+    for key, bits in CLASSICAL_STRENGTH_BITS.items():
+        if key in upper:
+            return bits
+    key_bits = _coerce_int(finding.get("key_length"))
+    # A bare family name plus a key length is the shape the SCANNER emits: "RSA" + 2048. Look the
+    # parameter set up from the length, otherwise every finding from our own rules would report
+    # strength 0 -- technically "not stated" while the information was sitting in the same dict.
+    if key_bits and upper:
+        for family, table in (
+            ("RSA", {"1024": 80, "2048": 112, "3072": 128, "4096": 152}),
+            ("DSA", {"1024": 80, "2048": 112, "3072": 128}),
+            ("EC", {"192": 96, "224": 112, "256": 128, "384": 192, "521": 256}),
+            ("ECDSA", {"192": 96, "224": 112, "256": 128, "384": 192, "521": 256}),
+        ):
+            if family in upper and str(key_bits) in table:
+                return table[str(key_bits)]
+    # Fall back on the primitive: symmetric and hash primitives are judged by key/digest size,
+    # which for these IS the strength. Asymmetric without a recognised parameter set is unknown,
+    # and 0 is the honest answer -- it means "not stated", not "zero security".
+    if primitive in ("ae", "block-cipher", "stream-cipher", "mac", "hash", "xof", "kdf"):
+        return key_bits or 0
+    if primitive == "drbg":
+        return 0
+    return 0
+
+
+def _crypto_functions(finding, primitive):
+    """The cryptographic functions this asset provides, per CycloneDX's closed vocabulary.
+
+    Hardcoding ["keygen"] for every artefact was simply wrong: a signing key does not encrypt and
+    a digest is not a key generator. The purpose model already resolves what a finding is FOR, so
+    the function list follows the purpose when known and the primitive otherwise.
+    """
+    try:
+        purpose = resolve_purpose(finding)[0]
+    except Exception:                                    # noqa: BLE001 - never fail a report
+        purpose = PURPOSE_UNRESOLVED
+    fns = _CRYPTO_FUNCTIONS.get(purpose)
+    if fns is None:
+        fns = _CRYPTO_FUNCTIONS.get(primitive, _CRYPTO_FUNCTIONS["unknown"])
+    return list(fns)
+
+
 def _algorithm_properties(finding, primitive):
     props = {
         "primitive": primitive,
         "executionEnvironment": "software-plain-ram",
-        "cryptoFunctions": ["keygen"],
+        "cryptoFunctions": _crypto_functions(finding, primitive),
     }
     key_length = finding.get("key_length")
-    key_bits = _coerce_int(key_length)
     if key_length:
         # The raw value is still worth recording (e.g. "unknown"), but only a real integer can
         # be a CycloneDX parameterSetIdentifier consumer would recognise.
@@ -176,8 +292,8 @@ def _algorithm_properties(finding, primitive):
         props["curve"] = str(finding["curve"])
     # `uses` (at-rest / tls / signing) has no CycloneDX field; it is emitted as an `ecd:uses`
     # property instead, so it never invalidates the base document.
-    props["classicalSecurityLevel"] = (
-        key_bits if key_bits and primitive in ("pke", "signature", "key-agreement", "kem") else 0)
+    # classicalSecurityLevel is EQUIVALENT SECURITY IN BITS (NIST SP 800-57), not key length.
+    props["classicalSecurityLevel"] = _classical_strength(finding, primitive)
     if not props["classicalSecurityLevel"] and primitive == "hash":
         props["classicalSecurityLevel"] = 128
     props["nistQuantumSecurityLevel"] = _nist_quantum_level(finding, primitive)
