@@ -16,7 +16,7 @@
 
 | # | Brief requirement | Implementation |
 |---|---|---|
-| 1 | **Discovery & cataloguing** of algorithms, keys, protocols, libraries | `engine/scanner.py` — **67-rule** detection table covering Python, Java (JCA), C/C++, C#, Go, Rust, JS/TS, **PHP** and **Ruby**, plus config files, binaries and **container images** |
+| 1 | **Discovery & cataloguing** of algorithms, keys, protocols, libraries | `engine/scanner.py` — **67-rule** detection table covering **Python, Java (JCA), C/C++ (OpenSSL), PHP and Ruby**, plus SSH/TLS wire identifiers, config files, binaries, certificates, dependency manifests, container images and a live network probe. **Go, Rust, JavaScript and TypeScript have no rules yet** — see *What this cannot see* |
 | 2 | **Quantum risk assessment**, flagging risks to sensitive data | `engine/mosca.py` — Shor vs Grover break model, **harvest-now-decrypt-later** flag, Mosca's inequality `X + Y > Z` |
 | 3 | **Classification** by type, lifetime, business criticality | `engine/mosca.py` — canonical primitives, `DATA_CLASS_LIFETIME` (X) and `MIGRATION_EFFORT` (Y) tables, Critical/High/Medium/Low tiers |
 | 4 | **PQC / hybrid recommendations** factoring risk, latency and cost | `engine/recommender.py` — FIPS 203/204/205 targets, explicit *Hybrid AND/OR* semantics, size/CPU/cost breakdown, rule trace |
@@ -79,6 +79,53 @@ Two things this table is meant to make obvious:
 The corpus supplies *locations*; the labels come from `benchmark/annotate.py`, which opens each
 file at the labelled line and classifies it by a stated rule. That separation is deliberate: a
 corpus that graded our own output would be measuring nothing.
+
+---
+
+## What this cannot see
+
+Stated plainly, because a discovery tool that overstates its coverage is worse than no tool.
+
+**Measured**
+- The benchmark scores **detection only**. It says nothing about whether our *risk tiers* or
+  *recommendations* are correct. Those are the parts a reviewer will actually challenge, and they
+  are **not** covered by an external corpus.
+- **PHP and Ruby recall is unmeasured.** There is no labelled corpus for either language. The rule
+  packs are verified against real API calls and adversarial decoys, and that is the whole of the
+  evidence. No recall figure is claimed for them.
+- Detection accuracy on a corpus of hand-constructed micro-programmes (CryptoAPI-Bench) is not the
+  same as accuracy on a large production codebase. paramiko is the real-library number, and it is
+  the lower one.
+
+**Not implemented**
+- **Go, Rust, JavaScript and TypeScript have no rules.** The table covers Python, Java, C/C++,
+  PHP and Ruby. An estate whose crypto lives in a Go service is currently invisible to the source
+  scanner.
+- No interprocedural data-flow. A helper that forwards an algorithm name to a real call is not
+  connected to it; rules match text, and the miss is reported rather than guessed.
+- Obfuscated or runtime-assembled cipher names (`"AE"+"S"`) produce no finding.
+- A cipher name assigned to a constant in one function and used in another is found at the
+  **declaration**, not linked to the call site.
+
+**Not independently reviewed**
+- The classifications follow **NIST IR 8547** (an *Initial Public Draft* — not a final standard)
+  and the **CycloneDX 1.7** specification as we read them. They **have not been reviewed by an
+  external cryptographer.**
+- Byte sizes for ML-KEM and ML-DSA parameter sets are consistent with the round-3 submissions but
+  are **not yet traced to the FIPS PDFs**; both standards carry errata notices dated after
+  publication. See [`research/sources/INDEX.md`](research/sources/INDEX.md).
+- NIST IR 8547's transition table is *strength-dependent*: 112-bit classical public-key is
+  **deprecated** rather than disallowed, while ≥ 128-bit is disallowed after 2035. We currently
+  apply one flat year. This is a known simplification, recorded rather than hidden.
+
+---
+
+## Provenance
+
+No third-party or competing implementation was copied, referenced, or consulted. Every detection
+rule was derived from **our own measurements of our own misses** against public corpora, and the
+standard-derived figures trace to NIST publications listed in
+[`research/sources/`](research/sources/INDEX.md). See [`PROVENANCE.md`](PROVENANCE.md).
 
 ---
 

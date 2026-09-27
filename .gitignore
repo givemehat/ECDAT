@@ -45,3 +45,9 @@ benchmark/corpora/
 
 # Scratch commit-message files
 .gitmsg.txt
+
+# ---- Published PDFs fetched to VERIFY research notes ----
+# NIST publications are not ours to redistribute. research/sources/ cites the canonical URL for
+# each document, and the verification step (download, extract, diff against our figures)
+# is re-runnable by anyone from those URLs.
+*.pdf
