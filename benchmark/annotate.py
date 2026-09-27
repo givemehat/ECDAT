@@ -46,6 +46,31 @@ CORPORA = {
         "notes": ("203 Java micro-programmes, published and third-party. Note: these are "
                   "CONSTRUCTED benchmark cases, not production code."),
     },
+    # A hand-picked FILE SET rather than a subtree, which is why it is the first corpus declared
+    # this way. The scope is the three files in ssh/ that DEFINE the algorithm tables: the cipher
+    # mode registry, the MAC mode registry, and the ML-KEM hybrid KEX. Those three are where a
+    # Go estate's cryptographic surface is actually enumerated, so they carry more signal per
+    # line than the other 28 files in the package -- and, decisively, they are the three that
+    # were read end to end and annotated. The remaining 28 are NOT annotated and are therefore
+    # NOT scanned: widening the scope to them would make recall unknowable, not better.
+    "xcrypto_ssh_algorithms": {
+        "kind": "external",
+        "lang": "go",
+        "url": "https://github.com/golang/crypto.git",
+        "pinned": "7a4a4d6beae2222add4437a0910bd48414e19211",
+        "scan_subdir": "ssh",
+        "scan_files": ["ssh/cipher.go", "ssh/mac.go", "ssh/mlkem.go"],
+        "extensions": (".go",),
+        "citation": ("golang.org/x/crypto -- Go's official cryptography library. "
+                     "https://github.com/golang/crypto"),
+        "notes": ("Real production library, not a constructed benchmark. N NARROW scope: three "
+                  "hand-read files from the ssh/ package (the cipher, MAC and ML-KEM algorithm "
+                  "tables). Chosen because they enumerate the algorithm surface, and because they "
+                  "are the only files in the package that have been read in full. The other 28 "
+                  "non-test files in ssh/ are NOT annotated and NOT scanned. This corpus contains "
+                  "REAL post-quantum code: ssh/mlkem.go implements a hybrid ML-KEM-768 + X25519 SSH "
+                  "key exchange (draft-kampanakis-curdle-ssh-pq-ke-05)."),
+    },
     "paramiko": {
         "kind": "external",
         "lang": "python",

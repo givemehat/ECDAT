@@ -213,9 +213,26 @@ def evaluate(name, spec, force_fetch):
     labels = load_labels(name)
     n_checked = verify_labels(name, spec, root, labels)
 
-    scan_root = os.path.join(root, spec["scan_subdir"].replace("/", os.sep))
     scanner = ECDATScanner(enable_ml=False)
-    findings = scanner.scan_directory(scan_root)
+    # A corpus is normally measured by walking a directory. `scan_files` exists for the case
+    # where the honest unit of measurement is a HAND-PICKED SET OF FILES rather than a whole
+    # subtree -- which is not a convenience. It is the only way to publish a number from a
+    # subset of a package that has been fully read, without silently widening the scope to
+    # files nobody annotated. It is deliberately opt-in per corpus: if a spec has `scan_files`,
+    # exactly those files are scanned and nothing else, so the scope in the label file and the
+    # scope measured cannot drift apart.
+    if spec.get("scan_files"):
+        findings = []
+        for rel in spec["scan_files"]:
+            path = os.path.join(root, rel.replace("/", os.sep))
+            if not os.path.isfile(path):
+                raise IntegrityError(
+                    "corpus %s declares scan_files entry %r which is not present at the pinned "
+                    "commit" % (name, rel))
+            findings.extend(scanner._scan_path(path))
+    else:
+        scan_root = os.path.join(root, spec["scan_subdir"].replace("/", os.sep))
+        findings = scanner.scan_directory(scan_root)
 
     for f in findings:
         f["_loc"] = (os.path.relpath(f.get("file", ""), root).replace("\\", "/"),
@@ -229,7 +246,9 @@ def evaluate(name, spec, force_fetch):
         "corpus_pinned_commit": head,
         "citation": spec["citation"],
         "corpus_notes": spec["notes"],
-        "scan_root_relative": spec["scan_subdir"],
+        "scan_root_relative": (spec.get("scan_files") and
+                               "explicit file list: %s" % ", ".join(spec["scan_files"])) or
+                              spec["scan_subdir"],
         "ground_truth": {
             "label_file": "benchmark/labels/%s_pq.json" % name,
             "label_kind": labels["label_kind"],

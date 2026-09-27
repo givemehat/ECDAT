@@ -66,7 +66,7 @@ def test_every_rule_is_actually_executed(tmp_path, scanner):
         # ECD-SRC-PYCA-EC-002 was removed as a strict subset of -001: the curve was reported
         # twice from two rule_ids, and the second carried no extra information. The dedup key
         # includes rule_id, so two rules with the same name never collapse.
-        "ECD-SRC-PYCA-ECDH-001": "kex = exchanges.ECDH()",
+        "ECD-SRC-PYCA-ECDH-001": "k = ECDHPrivateKey.generate()",
         "ECD-SRC-PYCA-ED-001": "k = ed25519.Ed25519PrivateKey.generate()",
         "ECD-SRC-PYCA-RSA-001": "n = rsa.RSAPrivateNumbers(p, q, d, dmp1, dmq1, iqmp)",
         "ECD-SRC-PYCA-X-001": "from cryptography.hazmat.primitives.asymmetric.x25519 import (",
@@ -165,6 +165,8 @@ def test_every_rule_is_actually_executed(tmp_path, scanner):
         "ECD-JS-SIG-001": "crypto.createSign('RSA-SHA1')",
         "ECD-JS-SIG-002": "s = crypto.constants.RSA_PKCS1_PSS_PADDING;",
         "ECD-JS-SIG-003": "crypto.createSign('ecdsa-with-SHA256')",
+        # --- dedup + recall fixes found by probing the SSH rule set directly.
+        "ECD-SRC-SSH-DH-002": 'KEX = "ffdh2048-sha256"',
     }
     assert set(samples) == {r["id"] for r in RULES}, "a rule has no positive test"
     # A rule declared `artefact_class="config"` only fires for a file the scanner recognises as

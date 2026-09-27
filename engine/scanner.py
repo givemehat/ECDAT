@@ -501,10 +501,18 @@ RULES = [
     dict(id="ECD-SRC-PYCA-EC-001", name="ECC", primitive="signature", artefact_class="source",
          uses="signing", key_group=1, evidence="discovered",
          regex=r"ec\.(SECP(?P<sz>192|224|256|384|521)R1|SECP256K1)\b"),
+    # `exchanges.ECDH` is deliberately NOT here. ECD-SRC-ECDH-001 already matches `ECDH_compute_key`
+    # and the Java/OpenSSL ECDH forms, and listing the Python class in two rules made a single
+    # `exchanges.ECDH()` reference report the same asset twice -- inflating the finding count and
+    # the CBOM component list. One asset, one finding.
     dict(id="ECD-SRC-PYCA-ECDH-001", name="ECDH", primitive="key-agreement", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
-         regex=r"exchanges\.ECDH\b|derive_private_key\(|"
-                r"EllipticCurvePublicNumbers\b|ECDHPrivateKey\b"),
+         regex=r"derive_private_key\(|EllipticCurvePublicNumbers\b|ECDHPrivateKey\b"),
+    # RFC 7919 finite-field groups. These are DH, not ECDH, and they name a specific group size
+    # that an auditor needs -- the benchmark corpus carries them and we reported nothing at all.
+    dict(id="ECD-SRC-SSH-DH-002", name="DH", primitive="key-agreement", artefact_class="source",
+         uses="tls", key_group=1, evidence="discovered",
+         regex=r"[\"']ffdh(?:2048|3072|4096|6144|8192)(?:-sha(?:1|256|384|512))?[\"']"),
     dict(id="ECD-SRC-PYCA-ED-001", name="Ed25519", primitive="signature", artefact_class="source",
          uses="signing", key_group=None, evidence="discovered",
          regex=r"ed25519\.(Ed25519PrivateKey|Ed25519PublicKey)\b|ed448\.Ed448PrivateKey\b"),
