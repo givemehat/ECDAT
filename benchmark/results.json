@@ -3788,6 +3788,1700 @@
    }
   },
   {
+   "corpus": "xcrypto_ssh_algorithms",
+   "corpus_kind": "external",
+   "corpus_url": "https://github.com/golang/crypto.git",
+   "corpus_pinned_commit": "7a4a4d6beae2222add4437a0910bd48414e19211",
+   "citation": "golang.org/x/crypto -- Go's official cryptography library. https://github.com/golang/crypto",
+   "corpus_notes": "Real production library, not a constructed benchmark. N NARROW scope: three hand-read files from the ssh/ package (the cipher, MAC and ML-KEM algorithm tables). Chosen because they enumerate the algorithm surface, and because they are the only files in the package that have been read in full. The other 28 non-test files in ssh/ are NOT annotated and NOT scanned. This corpus contains REAL post-quantum code: ssh/mlkem.go implements a hybrid ML-KEM-768 + X25519 SSH key exchange (draft-kampanakis-curdle-ssh-pq-ke-05).",
+   "scan_root_relative": "explicit file list: ssh/cipher.go, ssh/mac.go, ssh/mlkem.go",
+   "ground_truth": {
+    "label_file": "benchmark/labels/xcrypto_ssh_algorithms_pq.json",
+    "label_kind": "hand-annotated line-level ground truth (author of this harness)",
+    "labels_verified_against_corpus": 68,
+    "annotation": {
+     "annotated_by": "ECDAT benchmark harness author, by direct reading of every line in scope",
+     "unit": "one (file, 1-based line) location",
+     "files_in_scope": 3,
+     "candidate_lines_swept": 90,
+     "positive_labels_L1": 44,
+     "positive_labels_L2_only": 2,
+     "negative_labels_audited": 22,
+     "method": "A location is POSITIVE in L1 iff it names, or binds a name to, a quantum-vulnerable cryptographic primitive in a position that determines the algorithm: P1 factory call or mode registration, P1b naming a primitive identifier in executable code, P2 a key-spec/hash binding, P3 an import that determines the algorithm downstream, P4 an SSH/OpenSSL algorithm identifier. A line that merely OPERATES on a primitive chosen elsewhere is NEGATIVE in L1 and POSITIVE in L2; the harness reports both.",
+     "deliberate_exclusions": "ML-KEM is labelled NEGATIVE, and this is the most consequential judgement in the set. crypto/mlkem is FIPS 203 -- post-quantum, the REMEDY. The criterion asks for quantum-VULNERABLE primitives, so labelling ML-KEM a vulnerability would invert the meaning of the scan. Poly1305 is negative for the narrower reason that it is in neither declared break model in pqtaxonomy.py.",
+     "scope_caveat": "THREE files, not the package. The other 28 non-test files under ssh/ were swept but NOT annotated and are NOT scanned. Recall here is relative to these three files only and says nothing about the rest of x/crypto. This is a small corpus: denominators are printed beside every ratio, and the figure should be read as a smoke test of the Go pack, not as a characterisation of Go detection."
+    }
+   },
+   "coverage": {
+    "scanners_run": [],
+    "files_seen": 0,
+    "files_scanned": 3,
+    "files_skipped": 0,
+    "ml_reason": "disabled",
+    "ml_window_chars": 4000,
+    "errors": [],
+    "never_in_scope": [
+     "network-negotiated crypto (requires a capture sensor)",
+     "cloud KMS / managed keys (requires provider APIs)",
+     "HSM / TPM internal keys (requires attestation)",
+     "SaaS / third-party boundary crypto (requires attestation)",
+     "silicon-embedded keys (requires attestation)"
+    ],
+    "findings_total": 7,
+    "assurance_histogram": {
+     "observed": 0,
+     "used": 7,
+     "declared": 0,
+     "capability": 0
+    },
+    "proven_use": 7,
+    "unresolved_purpose": 1
+   },
+   "scan_errors": [],
+   "findings_by_rule": {
+    "ECDH | ECD-SRC-ECDH-001": 2,
+    "DES | ECD-GO-CIPHER-001": 1,
+    "RC4 | ECD-GO-CIPHER-002": 1,
+    "ChaCha20 | ECD-SRC-CHACHA-001": 1,
+    "SHA1 | ECD-GO-HASH-002": 1,
+    "ML-KEM-768 | ECD-GO-PQKEM-001": 1
+   },
+   "variants": {
+    "L1": {
+     "counts": {
+      "TP": 5,
+      "FP": 2,
+      "FN": 41,
+      "labelled_positives": 46,
+      "findings_total": 7
+     },
+     "precision": 0.7143,
+     "precision_fraction": "5/7",
+     "recall": 0.1087,
+     "recall_fraction": "5/46",
+     "f1": 0.1887,
+     "f1_note": "F1 is computed from the ROUNDED precision/recall, so it may differ in the 4th decimal from an F1 computed from the raw counts.",
+     "false_positives": [
+      {
+       "file": "ssh/cipher.go",
+       "line": 57,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "RC4"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-GO-CIPHER-002"
+       ],
+       "ecdat_match": [
+        "rc4.NewCipher("
+       ]
+      },
+      {
+       "file": "ssh/mlkem.go",
+       "line": 34,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "ML-KEM-768"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-GO-PQKEM-001"
+       ],
+       "ecdat_match": [
+        "mlkem.NewDecapsulationKey768("
+       ]
+      }
+     ],
+     "false_negatives": [
+      {
+       "file": "ssh/cipher.go",
+       "line": 8,
+       "labelled_primitive": "AES",
+       "labelled_code": "\"crypto/aes\"",
+       "labelled_break_model": "grover",
+       "labelled_reason": "import \"crypto/aes\" -- binds the algorithm for every use below",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 10,
+       "labelled_primitive": "3DES",
+       "labelled_code": "\"crypto/des\"",
+       "labelled_break_model": "grover",
+       "labelled_reason": "import \"crypto/des\" -- DES/3DES, grover-affected",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 12,
+       "labelled_primitive": "RC4",
+       "labelled_code": "\"crypto/rc4\"",
+       "labelled_break_model": "grover",
+       "labelled_reason": "import \"crypto/rc4\" -- RC4, grover-affected",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 21,
+       "labelled_primitive": "ChaCha20",
+       "labelled_code": "\"golang.org/x/crypto/chacha20\"",
+       "labelled_break_model": "grover",
+       "labelled_reason": "x/crypto/chacha20 -- ChaCha20, grover-affected",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 48,
+       "labelled_primitive": "AES",
+       "labelled_code": "func newAESCTR(key, iv []byte) (cipher.Stream, error) {",
+       "labelled_break_model": "grover",
+       "labelled_reason": "newAESCTR names AES in an executable declaration",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 56,
+       "labelled_primitive": "RC4",
+       "labelled_code": "func newRC4(key, iv []byte) (cipher.Stream, error) {",
+       "labelled_break_model": "grover",
+       "labelled_reason": "newRC4 names RC4 in an executable declaration",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 103,
+       "labelled_primitive": "AES",
+       "labelled_code": "cipherModes[CipherAES128CTR] = &cipherMode{16, aes.BlockSize, streamCipherMode(0, newAESCTR)}",
+       "labelled_break_model": "grover",
+       "labelled_reason": "cipherModes[CipherAES128CTR] registers AES-128-CTR",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 104,
+       "labelled_primitive": "AES",
+       "labelled_code": "cipherModes[CipherAES192CTR] = &cipherMode{24, aes.BlockSize, streamCipherMode(0, newAESCTR)}",
+       "labelled_break_model": "grover",
+       "labelled_reason": "cipherModes[CipherAES192CTR] registers AES-192-CTR",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 105,
+       "labelled_primitive": "AES",
+       "labelled_code": "cipherModes[CipherAES256CTR] = &cipherMode{32, aes.BlockSize, streamCipherMode(0, newAESCTR)}",
+       "labelled_break_model": "grover",
+       "labelled_reason": "cipherModes[CipherAES256CTR] registers AES-256-CTR",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 110,
+       "labelled_primitive": "AES",
+       "labelled_code": "cipherModes[CipherAES128GCM] = &cipherMode{16, 12, newGCMCipher}",
+       "labelled_break_model": "grover",
+       "labelled_reason": "cipherModes[CipherAES128GCM] registers AES-128-GCM",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 111,
+       "labelled_primitive": "AES",
+       "labelled_code": "cipherModes[CipherAES256GCM] = &cipherMode{32, 12, newGCMCipher}",
+       "labelled_break_model": "grover",
+       "labelled_reason": "cipherModes[CipherAES256GCM] registers AES-256-GCM",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 123,
+       "labelled_primitive": "RC4",
+       "labelled_code": "cipherModes[InsecureCipherRC4128] = &cipherMode{16, 0, streamCipherMode(1536, newRC4)}",
+       "labelled_break_model": "grover",
+       "labelled_reason": "InsecureCipherRC4128 registers RC4 with a 1536-byte discard",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 124,
+       "labelled_primitive": "RC4",
+       "labelled_code": "cipherModes[InsecureCipherRC4256] = &cipherMode{32, 0, streamCipherMode(1536, newRC4)}",
+       "labelled_break_model": "grover",
+       "labelled_reason": "InsecureCipherRC4256 registers RC4 with a 1536-byte discard",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 125,
+       "labelled_primitive": "RC4",
+       "labelled_code": "cipherModes[InsecureCipherRC4] = &cipherMode{16, 0, streamCipherMode(0, newRC4)}",
+       "labelled_break_model": "grover",
+       "labelled_reason": "InsecureCipherRC4 registers RC4 with no discard",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 131,
+       "labelled_primitive": "AES",
+       "labelled_code": "cipherModes[InsecureCipherAES128CBC] = &cipherMode{16, aes.BlockSize, newAESCBCCipher}",
+       "labelled_break_model": "grover",
+       "labelled_reason": "InsecureCipherAES128CBC registers AES-CBC",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 132,
+       "labelled_primitive": "3DES",
+       "labelled_code": "cipherModes[InsecureCipherTripleDESCBC] = &cipherMode{24, des.BlockSize, newTripleDESCBCCipher}",
+       "labelled_break_model": "grover",
+       "labelled_reason": "InsecureCipherTripleDESCBC registers 3DES-CBC",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 448,
+       "labelled_primitive": "AES",
+       "labelled_code": "func newAESCBCCipher(key, iv, macKey []byte, algs DirectionAlgorithms) (packetCipher, error) {",
+       "labelled_break_model": "grover",
+       "labelled_reason": "newAESCBCCipher names AES in an executable declaration",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 462,
+       "labelled_primitive": "3DES",
+       "labelled_code": "func newTripleDESCBCCipher(key, iv, macKey []byte, algs DirectionAlgorithms) (packetCipher, error) {",
+       "labelled_break_model": "grover",
+       "labelled_reason": "newTripleDESCBCCipher names 3DES in an executable declaration",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 647,
+       "labelled_primitive": "ChaCha20",
+       "labelled_code": "type chacha20Poly1305Cipher struct {",
+       "labelled_break_model": "grover",
+       "labelled_reason": "type chacha20Poly1305Cipher names the primitive",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 653,
+       "labelled_primitive": "ChaCha20",
+       "labelled_code": "func newChaCha20Cipher(key, unusedIV, unusedMACKey []byte, unusedAlgs DirectionAlgorithms) (packetCipher, error) {",
+       "labelled_break_model": "grover",
+       "labelled_reason": "newChaCha20Cipher names the primitive",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 658,
+       "labelled_primitive": "ChaCha20",
+       "labelled_code": "c := &chacha20Poly1305Cipher{",
+       "labelled_break_model": "grover",
+       "labelled_reason": "construction of a chacha20Poly1305Cipher",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 667,
+       "labelled_primitive": "ChaCha20",
+       "labelled_code": "func (c *chacha20Poly1305Cipher) readCipherPacket(seqNum uint32, r io.Reader) ([]byte, error) {",
+       "labelled_break_model": "grover",
+       "labelled_reason": "method on *chacha20Poly1305Cipher",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 710,
+       "labelled_primitive": "Poly1305",
+       "labelled_code": "if !poly1305.Verify(&mac, c.buf[:contentEnd], &polyKey) {",
+       "labelled_break_model": "none",
+       "labelled_reason": "poly1305.Verify operates on a MAC chosen at construction [variant L2]",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 740,
+       "labelled_primitive": "ChaCha20",
+       "labelled_code": "s, err := chacha20.NewUnauthenticatedCipher(c.contentKey[:], nonce)",
+       "labelled_break_model": "grover",
+       "labelled_reason": "chacha20.NewUnauthenticatedCipher selects ChaCha20",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 766,
+       "labelled_primitive": "ChaCha20",
+       "labelled_code": "ls, err := chacha20.NewUnauthenticatedCipher(c.lengthKey[:], nonce)",
+       "labelled_break_model": "grover",
+       "labelled_reason": "chacha20.NewUnauthenticatedCipher selects ChaCha20 for length",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 781,
+       "labelled_primitive": "Poly1305",
+       "labelled_code": "poly1305.Sum(&mac, c.buf[:packetEnd], &polyKey)",
+       "labelled_break_model": "none",
+       "labelled_reason": "poly1305.Sum operates on a MAC chosen at construction [variant L2]",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/mac.go",
+       "line": 11,
+       "labelled_primitive": "HMAC",
+       "labelled_code": "\"crypto/hmac\"",
+       "labelled_break_model": "grover",
+       "labelled_reason": "import \"crypto/hmac\" -- HMAC is grover-affected",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/mac.go",
+       "line": 13,
+       "labelled_primitive": "SHA256",
+       "labelled_code": "\"crypto/sha256\"",
+       "labelled_break_model": "grover",
+       "labelled_reason": "import \"crypto/sha256\" -- SHA-2 is grover-affected",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/mac.go",
+       "line": 14,
+       "labelled_primitive": "SHA512",
+       "labelled_code": "\"crypto/sha512\"",
+       "labelled_break_model": "grover",
+       "labelled_reason": "import \"crypto/sha512\" -- SHA-2 is grover-affected",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/mac.go",
+       "line": 57,
+       "labelled_primitive": "HMAC",
+       "labelled_code": "macModes[HMACSHA512ETM] = &macMode{64, true, func(key []byte) hash.Hash {",
+       "labelled_break_model": "grover",
+       "labelled_reason": "macModes[HMACSHA512ETM] registers HMAC-SHA512-ETM",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/mac.go",
+       "line": 60,
+       "labelled_primitive": "HMAC",
+       "labelled_code": "macModes[HMACSHA256ETM] = &macMode{32, true, func(key []byte) hash.Hash {",
+       "labelled_break_model": "grover",
+       "labelled_reason": "macModes[HMACSHA256ETM] registers HMAC-SHA256-ETM",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/mac.go",
+       "line": 63,
+       "labelled_primitive": "HMAC",
+       "labelled_code": "macModes[HMACSHA512] = &macMode{64, false, func(key []byte) hash.Hash {",
+       "labelled_break_model": "grover",
+       "labelled_reason": "macModes[HMACSHA512] registers HMAC-SHA512",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/mac.go",
+       "line": 66,
+       "labelled_primitive": "HMAC",
+       "labelled_code": "macModes[HMACSHA256] = &macMode{32, false, func(key []byte) hash.Hash {",
+       "labelled_break_model": "grover",
+       "labelled_reason": "macModes[HMACSHA256] registers HMAC-SHA256",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/mac.go",
+       "line": 78,
+       "labelled_primitive": "HMAC",
+       "labelled_code": "macModes[HMACSHA1] = &macMode{20, false, func(key []byte) hash.Hash {",
+       "labelled_break_model": "grover",
+       "labelled_reason": "macModes[HMACSHA1] registers HMAC-SHA1",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/mac.go",
+       "line": 81,
+       "labelled_primitive": "HMAC",
+       "labelled_code": "macModes[InsecureHMACSHA196] = &macMode{20, false, func(key []byte) hash.Hash {",
+       "labelled_break_model": "grover",
+       "labelled_reason": "InsecureHMACSHA196 registers 96-bit truncated HMAC-SHA1",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/mlkem.go",
+       "line": 10,
+       "labelled_primitive": "SHA256",
+       "labelled_code": "\"crypto/sha256\"",
+       "labelled_break_model": "grover",
+       "labelled_reason": "import \"crypto/sha256\" -- SHA-2 is grover-affected",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/mlkem.go",
+       "line": 15,
+       "labelled_primitive": "X25519",
+       "labelled_code": "\"golang.org/x/crypto/curve25519\"",
+       "labelled_break_model": "shor",
+       "labelled_reason": "x/crypto/curve25519 -- X25519 is shor-broken",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/mlkem.go",
+       "line": 24,
+       "labelled_primitive": "X25519",
+       "labelled_code": "var c25519kp curve25519KeyPair",
+       "labelled_break_model": "shor",
+       "labelled_reason": "var c25519kp curve25519KeyPair names X25519 in a type binding",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/mlkem.go",
+       "line": 90,
+       "labelled_primitive": "SHA256",
+       "labelled_code": "Hash:      crypto.SHA256,",
+       "labelled_break_model": "grover",
+       "labelled_reason": "Hash: crypto.SHA256 binds the digest for the KEX",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/mlkem.go",
+       "line": 118,
+       "labelled_primitive": "X25519",
+       "labelled_code": "var c25519kp curve25519KeyPair",
+       "labelled_break_model": "shor",
+       "labelled_reason": "var c25519kp curve25519KeyPair names X25519 in a type binding",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/mlkem.go",
+       "line": 166,
+       "labelled_primitive": "SHA256",
+       "labelled_code": "Hash:      crypto.SHA256,",
+       "labelled_break_model": "grover",
+       "labelled_reason": "Hash: crypto.SHA256 binds the digest for the KEX",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      }
+     ],
+     "file_level": {
+      "counts": {
+       "TP": 3,
+       "FP": 0,
+       "FN": 0,
+       "labelled_positive_files": 3
+      },
+      "precision": 1.0,
+      "precision_fraction": "3/3",
+      "recall": 1.0,
+      "recall_fraction": "3/3",
+      "false_positive_files": [],
+      "false_negative_files": []
+     },
+     "by_primitive": {
+      "3DES (grover)": {
+       "labelled": 4,
+       "detected": 1,
+       "recall": 0.25
+      },
+      "AES (grover)": {
+       "labelled": 9,
+       "detected": 0,
+       "recall": 0.0
+      },
+      "ChaCha20 (grover)": {
+       "labelled": 8,
+       "detected": 1,
+       "recall": 0.125
+      },
+      "HMAC (grover)": {
+       "labelled": 7,
+       "detected": 0,
+       "recall": 0.0
+      },
+      "Poly1305 (none)": {
+       "labelled": 2,
+       "detected": 0,
+       "recall": 0.0
+      },
+      "RC4 (grover)": {
+       "labelled": 5,
+       "detected": 0,
+       "recall": 0.0
+      },
+      "SHA1 (grover)": {
+       "labelled": 1,
+       "detected": 1,
+       "recall": 1.0
+      },
+      "SHA256 (grover)": {
+       "labelled": 4,
+       "detected": 0,
+       "recall": 0.0
+      },
+      "SHA512 (grover)": {
+       "labelled": 1,
+       "detected": 0,
+       "recall": 0.0
+      },
+      "X25519 (shor)": {
+       "labelled": 5,
+       "detected": 2,
+       "recall": 0.4
+      }
+     }
+    },
+    "L2": {
+     "counts": {
+      "TP": 5,
+      "FP": 2,
+      "FN": 41,
+      "labelled_positives": 46,
+      "findings_total": 7
+     },
+     "precision": 0.7143,
+     "precision_fraction": "5/7",
+     "recall": 0.1087,
+     "recall_fraction": "5/46",
+     "f1": 0.1887,
+     "f1_note": "F1 is computed from the ROUNDED precision/recall, so it may differ in the 4th decimal from an F1 computed from the raw counts.",
+     "false_positives": [
+      {
+       "file": "ssh/cipher.go",
+       "line": 57,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "RC4"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-GO-CIPHER-002"
+       ],
+       "ecdat_match": [
+        "rc4.NewCipher("
+       ]
+      },
+      {
+       "file": "ssh/mlkem.go",
+       "line": 34,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "ML-KEM-768"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-GO-PQKEM-001"
+       ],
+       "ecdat_match": [
+        "mlkem.NewDecapsulationKey768("
+       ]
+      }
+     ],
+     "false_negatives": [
+      {
+       "file": "ssh/cipher.go",
+       "line": 8,
+       "labelled_primitive": "AES",
+       "labelled_code": "\"crypto/aes\"",
+       "labelled_break_model": "grover",
+       "labelled_reason": "import \"crypto/aes\" -- binds the algorithm for every use below",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 10,
+       "labelled_primitive": "3DES",
+       "labelled_code": "\"crypto/des\"",
+       "labelled_break_model": "grover",
+       "labelled_reason": "import \"crypto/des\" -- DES/3DES, grover-affected",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 12,
+       "labelled_primitive": "RC4",
+       "labelled_code": "\"crypto/rc4\"",
+       "labelled_break_model": "grover",
+       "labelled_reason": "import \"crypto/rc4\" -- RC4, grover-affected",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 21,
+       "labelled_primitive": "ChaCha20",
+       "labelled_code": "\"golang.org/x/crypto/chacha20\"",
+       "labelled_break_model": "grover",
+       "labelled_reason": "x/crypto/chacha20 -- ChaCha20, grover-affected",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 48,
+       "labelled_primitive": "AES",
+       "labelled_code": "func newAESCTR(key, iv []byte) (cipher.Stream, error) {",
+       "labelled_break_model": "grover",
+       "labelled_reason": "newAESCTR names AES in an executable declaration",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 56,
+       "labelled_primitive": "RC4",
+       "labelled_code": "func newRC4(key, iv []byte) (cipher.Stream, error) {",
+       "labelled_break_model": "grover",
+       "labelled_reason": "newRC4 names RC4 in an executable declaration",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 103,
+       "labelled_primitive": "AES",
+       "labelled_code": "cipherModes[CipherAES128CTR] = &cipherMode{16, aes.BlockSize, streamCipherMode(0, newAESCTR)}",
+       "labelled_break_model": "grover",
+       "labelled_reason": "cipherModes[CipherAES128CTR] registers AES-128-CTR",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 104,
+       "labelled_primitive": "AES",
+       "labelled_code": "cipherModes[CipherAES192CTR] = &cipherMode{24, aes.BlockSize, streamCipherMode(0, newAESCTR)}",
+       "labelled_break_model": "grover",
+       "labelled_reason": "cipherModes[CipherAES192CTR] registers AES-192-CTR",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 105,
+       "labelled_primitive": "AES",
+       "labelled_code": "cipherModes[CipherAES256CTR] = &cipherMode{32, aes.BlockSize, streamCipherMode(0, newAESCTR)}",
+       "labelled_break_model": "grover",
+       "labelled_reason": "cipherModes[CipherAES256CTR] registers AES-256-CTR",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 110,
+       "labelled_primitive": "AES",
+       "labelled_code": "cipherModes[CipherAES128GCM] = &cipherMode{16, 12, newGCMCipher}",
+       "labelled_break_model": "grover",
+       "labelled_reason": "cipherModes[CipherAES128GCM] registers AES-128-GCM",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 111,
+       "labelled_primitive": "AES",
+       "labelled_code": "cipherModes[CipherAES256GCM] = &cipherMode{32, 12, newGCMCipher}",
+       "labelled_break_model": "grover",
+       "labelled_reason": "cipherModes[CipherAES256GCM] registers AES-256-GCM",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 123,
+       "labelled_primitive": "RC4",
+       "labelled_code": "cipherModes[InsecureCipherRC4128] = &cipherMode{16, 0, streamCipherMode(1536, newRC4)}",
+       "labelled_break_model": "grover",
+       "labelled_reason": "InsecureCipherRC4128 registers RC4 with a 1536-byte discard",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 124,
+       "labelled_primitive": "RC4",
+       "labelled_code": "cipherModes[InsecureCipherRC4256] = &cipherMode{32, 0, streamCipherMode(1536, newRC4)}",
+       "labelled_break_model": "grover",
+       "labelled_reason": "InsecureCipherRC4256 registers RC4 with a 1536-byte discard",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 125,
+       "labelled_primitive": "RC4",
+       "labelled_code": "cipherModes[InsecureCipherRC4] = &cipherMode{16, 0, streamCipherMode(0, newRC4)}",
+       "labelled_break_model": "grover",
+       "labelled_reason": "InsecureCipherRC4 registers RC4 with no discard",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 131,
+       "labelled_primitive": "AES",
+       "labelled_code": "cipherModes[InsecureCipherAES128CBC] = &cipherMode{16, aes.BlockSize, newAESCBCCipher}",
+       "labelled_break_model": "grover",
+       "labelled_reason": "InsecureCipherAES128CBC registers AES-CBC",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 132,
+       "labelled_primitive": "3DES",
+       "labelled_code": "cipherModes[InsecureCipherTripleDESCBC] = &cipherMode{24, des.BlockSize, newTripleDESCBCCipher}",
+       "labelled_break_model": "grover",
+       "labelled_reason": "InsecureCipherTripleDESCBC registers 3DES-CBC",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 448,
+       "labelled_primitive": "AES",
+       "labelled_code": "func newAESCBCCipher(key, iv, macKey []byte, algs DirectionAlgorithms) (packetCipher, error) {",
+       "labelled_break_model": "grover",
+       "labelled_reason": "newAESCBCCipher names AES in an executable declaration",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 462,
+       "labelled_primitive": "3DES",
+       "labelled_code": "func newTripleDESCBCCipher(key, iv, macKey []byte, algs DirectionAlgorithms) (packetCipher, error) {",
+       "labelled_break_model": "grover",
+       "labelled_reason": "newTripleDESCBCCipher names 3DES in an executable declaration",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 647,
+       "labelled_primitive": "ChaCha20",
+       "labelled_code": "type chacha20Poly1305Cipher struct {",
+       "labelled_break_model": "grover",
+       "labelled_reason": "type chacha20Poly1305Cipher names the primitive",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 653,
+       "labelled_primitive": "ChaCha20",
+       "labelled_code": "func newChaCha20Cipher(key, unusedIV, unusedMACKey []byte, unusedAlgs DirectionAlgorithms) (packetCipher, error) {",
+       "labelled_break_model": "grover",
+       "labelled_reason": "newChaCha20Cipher names the primitive",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 658,
+       "labelled_primitive": "ChaCha20",
+       "labelled_code": "c := &chacha20Poly1305Cipher{",
+       "labelled_break_model": "grover",
+       "labelled_reason": "construction of a chacha20Poly1305Cipher",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 667,
+       "labelled_primitive": "ChaCha20",
+       "labelled_code": "func (c *chacha20Poly1305Cipher) readCipherPacket(seqNum uint32, r io.Reader) ([]byte, error) {",
+       "labelled_break_model": "grover",
+       "labelled_reason": "method on *chacha20Poly1305Cipher",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 710,
+       "labelled_primitive": "Poly1305",
+       "labelled_code": "if !poly1305.Verify(&mac, c.buf[:contentEnd], &polyKey) {",
+       "labelled_break_model": "none",
+       "labelled_reason": "poly1305.Verify operates on a MAC chosen at construction [variant L2]",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 740,
+       "labelled_primitive": "ChaCha20",
+       "labelled_code": "s, err := chacha20.NewUnauthenticatedCipher(c.contentKey[:], nonce)",
+       "labelled_break_model": "grover",
+       "labelled_reason": "chacha20.NewUnauthenticatedCipher selects ChaCha20",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 766,
+       "labelled_primitive": "ChaCha20",
+       "labelled_code": "ls, err := chacha20.NewUnauthenticatedCipher(c.lengthKey[:], nonce)",
+       "labelled_break_model": "grover",
+       "labelled_reason": "chacha20.NewUnauthenticatedCipher selects ChaCha20 for length",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/cipher.go",
+       "line": 781,
+       "labelled_primitive": "Poly1305",
+       "labelled_code": "poly1305.Sum(&mac, c.buf[:packetEnd], &polyKey)",
+       "labelled_break_model": "none",
+       "labelled_reason": "poly1305.Sum operates on a MAC chosen at construction [variant L2]",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/mac.go",
+       "line": 11,
+       "labelled_primitive": "HMAC",
+       "labelled_code": "\"crypto/hmac\"",
+       "labelled_break_model": "grover",
+       "labelled_reason": "import \"crypto/hmac\" -- HMAC is grover-affected",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/mac.go",
+       "line": 13,
+       "labelled_primitive": "SHA256",
+       "labelled_code": "\"crypto/sha256\"",
+       "labelled_break_model": "grover",
+       "labelled_reason": "import \"crypto/sha256\" -- SHA-2 is grover-affected",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/mac.go",
+       "line": 14,
+       "labelled_primitive": "SHA512",
+       "labelled_code": "\"crypto/sha512\"",
+       "labelled_break_model": "grover",
+       "labelled_reason": "import \"crypto/sha512\" -- SHA-2 is grover-affected",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/mac.go",
+       "line": 57,
+       "labelled_primitive": "HMAC",
+       "labelled_code": "macModes[HMACSHA512ETM] = &macMode{64, true, func(key []byte) hash.Hash {",
+       "labelled_break_model": "grover",
+       "labelled_reason": "macModes[HMACSHA512ETM] registers HMAC-SHA512-ETM",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/mac.go",
+       "line": 60,
+       "labelled_primitive": "HMAC",
+       "labelled_code": "macModes[HMACSHA256ETM] = &macMode{32, true, func(key []byte) hash.Hash {",
+       "labelled_break_model": "grover",
+       "labelled_reason": "macModes[HMACSHA256ETM] registers HMAC-SHA256-ETM",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/mac.go",
+       "line": 63,
+       "labelled_primitive": "HMAC",
+       "labelled_code": "macModes[HMACSHA512] = &macMode{64, false, func(key []byte) hash.Hash {",
+       "labelled_break_model": "grover",
+       "labelled_reason": "macModes[HMACSHA512] registers HMAC-SHA512",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/mac.go",
+       "line": 66,
+       "labelled_primitive": "HMAC",
+       "labelled_code": "macModes[HMACSHA256] = &macMode{32, false, func(key []byte) hash.Hash {",
+       "labelled_break_model": "grover",
+       "labelled_reason": "macModes[HMACSHA256] registers HMAC-SHA256",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/mac.go",
+       "line": 78,
+       "labelled_primitive": "HMAC",
+       "labelled_code": "macModes[HMACSHA1] = &macMode{20, false, func(key []byte) hash.Hash {",
+       "labelled_break_model": "grover",
+       "labelled_reason": "macModes[HMACSHA1] registers HMAC-SHA1",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/mac.go",
+       "line": 81,
+       "labelled_primitive": "HMAC",
+       "labelled_code": "macModes[InsecureHMACSHA196] = &macMode{20, false, func(key []byte) hash.Hash {",
+       "labelled_break_model": "grover",
+       "labelled_reason": "InsecureHMACSHA196 registers 96-bit truncated HMAC-SHA1",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/mlkem.go",
+       "line": 10,
+       "labelled_primitive": "SHA256",
+       "labelled_code": "\"crypto/sha256\"",
+       "labelled_break_model": "grover",
+       "labelled_reason": "import \"crypto/sha256\" -- SHA-2 is grover-affected",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/mlkem.go",
+       "line": 15,
+       "labelled_primitive": "X25519",
+       "labelled_code": "\"golang.org/x/crypto/curve25519\"",
+       "labelled_break_model": "shor",
+       "labelled_reason": "x/crypto/curve25519 -- X25519 is shor-broken",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/mlkem.go",
+       "line": 24,
+       "labelled_primitive": "X25519",
+       "labelled_code": "var c25519kp curve25519KeyPair",
+       "labelled_break_model": "shor",
+       "labelled_reason": "var c25519kp curve25519KeyPair names X25519 in a type binding",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/mlkem.go",
+       "line": 90,
+       "labelled_primitive": "SHA256",
+       "labelled_code": "Hash:      crypto.SHA256,",
+       "labelled_break_model": "grover",
+       "labelled_reason": "Hash: crypto.SHA256 binds the digest for the KEX",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/mlkem.go",
+       "line": 118,
+       "labelled_primitive": "X25519",
+       "labelled_code": "var c25519kp curve25519KeyPair",
+       "labelled_break_model": "shor",
+       "labelled_reason": "var c25519kp curve25519KeyPair names X25519 in a type binding",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "ssh/mlkem.go",
+       "line": 166,
+       "labelled_primitive": "SHA256",
+       "labelled_code": "Hash:      crypto.SHA256,",
+       "labelled_break_model": "grover",
+       "labelled_reason": "Hash: crypto.SHA256 binds the digest for the KEX",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      }
+     ],
+     "file_level": {
+      "counts": {
+       "TP": 3,
+       "FP": 0,
+       "FN": 0,
+       "labelled_positive_files": 3
+      },
+      "precision": 1.0,
+      "precision_fraction": "3/3",
+      "recall": 1.0,
+      "recall_fraction": "3/3",
+      "false_positive_files": [],
+      "false_negative_files": []
+     },
+     "by_primitive": {
+      "3DES (grover)": {
+       "labelled": 4,
+       "detected": 1,
+       "recall": 0.25
+      },
+      "AES (grover)": {
+       "labelled": 9,
+       "detected": 0,
+       "recall": 0.0
+      },
+      "ChaCha20 (grover)": {
+       "labelled": 8,
+       "detected": 1,
+       "recall": 0.125
+      },
+      "HMAC (grover)": {
+       "labelled": 7,
+       "detected": 0,
+       "recall": 0.0
+      },
+      "Poly1305 (none)": {
+       "labelled": 2,
+       "detected": 0,
+       "recall": 0.0
+      },
+      "RC4 (grover)": {
+       "labelled": 5,
+       "detected": 0,
+       "recall": 0.0
+      },
+      "SHA1 (grover)": {
+       "labelled": 1,
+       "detected": 1,
+       "recall": 1.0
+      },
+      "SHA256 (grover)": {
+       "labelled": 4,
+       "detected": 0,
+       "recall": 0.0
+      },
+      "SHA512 (grover)": {
+       "labelled": 1,
+       "detected": 0,
+       "recall": 0.0
+      },
+      "X25519 (shor)": {
+       "labelled": 5,
+       "detected": 2,
+       "recall": 0.4
+      }
+     }
+    }
+   }
+  },
+  {
    "corpus": "paramiko",
    "corpus_kind": "external",
    "corpus_url": "https://github.com/paramiko/paramiko.git",

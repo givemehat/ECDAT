@@ -17,6 +17,7 @@ is repeated in every table below.**
 | corpus | external? | pinned commit | what it is |
 |---|---|---|---|
 | `cryptoapi_bench` | yes (git clone) | `e6b6b50fef69` | 203 Java micro-programmes, published and third-party. Note: these are CONSTRUCTED benchmark cases, not production code. |
+| `xcrypto_ssh_algorithms` | yes (git clone) | `7a4a4d6beae2` | Real production library, not a constructed benchmark. N NARROW scope: three hand-read files from the ssh/ package (the cipher, MAC and ML-KEM algorithm tables). Chosen because they enumerate the algorithm surface, and because they are the only files in the package that have been read in full. The other 28 non-test files in ssh/ are NOT annotated and NOT scanned. This corpus contains REAL post-quantum code: ssh/mlkem.go implements a hybrid ML-KEM-768 + X25519 SSH key exchange (draft-kampanakis-curdle-ssh-pq-ke-05). |
 | `paramiko` | yes (git clone) | `142f593e40ad` | Real production library, not a constructed benchmark. Scoped to the 'paramiko/' package directory; 'tests/' and 'sites/' are excluded, and that exclusion is part of the declared measurement scope. |
 
 ### Why the ground truth had to be hand-made
@@ -67,6 +68,8 @@ counts it came from; no ratio is reported without them.
 |---|---|---|---|---|---|---|---|
 | `cryptoapi_bench` | L1 | 165 | 1 | 45 | 0.994 = 165/166 | 0.7857 = 165/210 | 0.8777 |
 | `cryptoapi_bench` | L2 | 165 | 1 | 158 | 0.994 = 165/166 | 0.5108 = 165/323 | 0.6748 |
+| `xcrypto_ssh_algorithms` | L1 | 5 | 2 | 41 | 0.7143 = 5/7 | 0.1087 = 5/46 | 0.1887 |
+| `xcrypto_ssh_algorithms` | L2 | 5 | 2 | 41 | 0.7143 = 5/7 | 0.1087 = 5/46 | 0.1887 |
 | `paramiko` | L1 | 143 | 17 | 97 | 0.8938 = 143/160 | 0.5958 = 143/240 | 0.715 |
 | `paramiko` | L2 | 143 | 17 | 116 | 0.8938 = 143/160 | 0.5521 = 143/259 | 0.6826 |
 
@@ -76,6 +79,8 @@ counts it came from; no ratio is reported without them.
 |---|---|---|---|---|---|---|
 | `cryptoapi_bench` | L1 | 106 | 1 | 4 | 0.9907 | 0.9636 |
 | `cryptoapi_bench` | L2 | 106 | 1 | 13 | 0.9907 | 0.8908 |
+| `xcrypto_ssh_algorithms` | L1 | 3 | 0 | 0 | 1.0 | 1.0 |
+| `xcrypto_ssh_algorithms` | L2 | 3 | 0 | 0 | 1.0 | 1.0 |
 | `paramiko` | L1 | 16 | 0 | 3 | 1.0 | 0.8421 |
 | `paramiko` | L2 | 16 | 0 | 3 | 1.0 | 0.8421 |
 
@@ -96,6 +101,16 @@ counts it came from; no ratio is reported without them.
 | `cryptoapi_bench` | RSA (shor) | 17 | 17 | 1.0 |
 | `cryptoapi_bench` | SHA-1 (grover) | 10 | 6 | 0.6 |
 | `cryptoapi_bench` | SHA-256 (grover) | 5 | 5 | 1.0 |
+| `xcrypto_ssh_algorithms` | 3DES (grover) | 4 | 1 | 0.25 |
+| `xcrypto_ssh_algorithms` | AES (grover) | 9 | 0 | 0.0 |
+| `xcrypto_ssh_algorithms` | ChaCha20 (grover) | 8 | 1 | 0.125 |
+| `xcrypto_ssh_algorithms` | HMAC (grover) | 7 | 0 | 0.0 |
+| `xcrypto_ssh_algorithms` | Poly1305 (none) | 2 | 0 | 0.0 |
+| `xcrypto_ssh_algorithms` | RC4 (grover) | 5 | 0 | 0.0 |
+| `xcrypto_ssh_algorithms` | SHA1 (grover) | 1 | 1 | 1.0 |
+| `xcrypto_ssh_algorithms` | SHA256 (grover) | 4 | 0 | 0.0 |
+| `xcrypto_ssh_algorithms` | SHA512 (grover) | 1 | 0 | 0.0 |
+| `xcrypto_ssh_algorithms` | X25519 (shor) | 5 | 2 | 0.4 |
 | `paramiko` | 3DES (grover) | 2 | 2 | 1.0 |
 | `paramiko` | AES (grover) | 27 | 27 | 1.0 |
 | `paramiko` | Curve25519 (shor) | 2 | 2 | 1.0 |
@@ -129,6 +144,7 @@ never be confused with "the tool could not look here".
 | corpus | files seen | files scanned | files skipped | scan errors |
 |---|---|---|---|---|
 | `cryptoapi_bench` | 203 | 203 | 0 | 0 |
+| `xcrypto_ssh_algorithms` | 0 | 3 | 0 | 0 |
 | `paramiko` | 42 | 42 | 0 | 0 |
 
 Findings emitted for `cryptoapi_bench`, by rule:
@@ -150,6 +166,16 @@ Findings emitted for `cryptoapi_bench`, by rule:
 | SHA1 | ECD-SRC-SHA1-001 | 2 |
 | MD5 | ECD-SRC-MD5-001 | 2 |
 | PRNG | ECD-SRC-JAVA-WEAKRNG-001 | 1 |
+Findings emitted for `xcrypto_ssh_algorithms`, by rule:
+
+| rule | findings |
+|---|---|
+| ECDH | ECD-SRC-ECDH-001 | 2 |
+| DES | ECD-GO-CIPHER-001 | 1 |
+| RC4 | ECD-GO-CIPHER-002 | 1 |
+| ChaCha20 | ECD-SRC-CHACHA-001 | 1 |
+| SHA1 | ECD-GO-HASH-002 | 1 |
+| ML-KEM-768 | ECD-GO-PQKEM-001 | 1 |
 Findings emitted for `paramiko`, by rule:
 
 | rule | findings |
@@ -199,6 +225,28 @@ from the label file, so each row can be checked against the source.
 | file:line | why the labels exclude it | ECDAT called it | rule |
 |---|---|---|---|
 | `src/main/java/org/cryptoapi/bench/untrustedprng/UntrustedPRNGCase1.java:9` | line was not a labelling candidate | PRNG | ECD-SRC-JAVA-WEAKRNG-001 |
+
+## Explicit false positives -- `xcrypto_ssh_algorithms`, L1 (2)
+
+A false positive is a finding at a `(file, line)` that the labels record as NOT
+a quantum-vulnerable cryptographic use. The exclusion reason is quoted verbatim
+from the label file, so each row can be checked against the source.
+
+| file:line | why the labels exclude it | ECDAT called it | rule |
+|---|---|---|---|
+| `ssh/cipher.go:57` | line was not a labelling candidate | RC4 | ECD-GO-CIPHER-002 |
+| `ssh/mlkem.go:34` | line was not a labelling candidate | ML-KEM-768 | ECD-GO-PQKEM-001 |
+
+## Explicit false positives -- `xcrypto_ssh_algorithms`, L2 (2)
+
+A false positive is a finding at a `(file, line)` that the labels record as NOT
+a quantum-vulnerable cryptographic use. The exclusion reason is quoted verbatim
+from the label file, so each row can be checked against the source.
+
+| file:line | why the labels exclude it | ECDAT called it | rule |
+|---|---|---|---|
+| `ssh/cipher.go:57` | line was not a labelling candidate | RC4 | ECD-GO-CIPHER-002 |
+| `ssh/mlkem.go:34` | line was not a labelling candidate | ML-KEM-768 | ECD-GO-PQKEM-001 |
 
 ## Explicit false positives -- `paramiko`, L1 (17)
 
@@ -468,6 +516,102 @@ A false negative is a labelled quantum-vulnerable location ECDAT did not report.
 | `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorCorrected.java:19` | AES (grover) | `Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");` |
 | `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorCorrected.java:27` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);` |
 | `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorCorrected.java:50` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);` |
+
+## Explicit false negatives -- `xcrypto_ssh_algorithms`, L1 (41)
+
+A false negative is a labelled quantum-vulnerable location ECDAT did not report.
+
+| file:line | primitive (break model) | the quantum-vulnerable code |
+|---|---|---|
+| `ssh/cipher.go:8` | AES (grover) | `"crypto/aes"` |
+| `ssh/cipher.go:10` | 3DES (grover) | `"crypto/des"` |
+| `ssh/cipher.go:12` | RC4 (grover) | `"crypto/rc4"` |
+| `ssh/cipher.go:21` | ChaCha20 (grover) | `"golang.org/x/crypto/chacha20"` |
+| `ssh/cipher.go:48` | AES (grover) | `func newAESCTR(key, iv []byte) (cipher.Stream, error) {` |
+| `ssh/cipher.go:56` | RC4 (grover) | `func newRC4(key, iv []byte) (cipher.Stream, error) {` |
+| `ssh/cipher.go:103` | AES (grover) | `cipherModes[CipherAES128CTR] = &cipherMode{16, aes.BlockSize, streamCipherMode(0, newAESCTR)}` |
+| `ssh/cipher.go:104` | AES (grover) | `cipherModes[CipherAES192CTR] = &cipherMode{24, aes.BlockSize, streamCipherMode(0, newAESCTR)}` |
+| `ssh/cipher.go:105` | AES (grover) | `cipherModes[CipherAES256CTR] = &cipherMode{32, aes.BlockSize, streamCipherMode(0, newAESCTR)}` |
+| `ssh/cipher.go:110` | AES (grover) | `cipherModes[CipherAES128GCM] = &cipherMode{16, 12, newGCMCipher}` |
+| `ssh/cipher.go:111` | AES (grover) | `cipherModes[CipherAES256GCM] = &cipherMode{32, 12, newGCMCipher}` |
+| `ssh/cipher.go:123` | RC4 (grover) | `cipherModes[InsecureCipherRC4128] = &cipherMode{16, 0, streamCipherMode(1536, newRC4)}` |
+| `ssh/cipher.go:124` | RC4 (grover) | `cipherModes[InsecureCipherRC4256] = &cipherMode{32, 0, streamCipherMode(1536, newRC4)}` |
+| `ssh/cipher.go:125` | RC4 (grover) | `cipherModes[InsecureCipherRC4] = &cipherMode{16, 0, streamCipherMode(0, newRC4)}` |
+| `ssh/cipher.go:131` | AES (grover) | `cipherModes[InsecureCipherAES128CBC] = &cipherMode{16, aes.BlockSize, newAESCBCCipher}` |
+| `ssh/cipher.go:132` | 3DES (grover) | `cipherModes[InsecureCipherTripleDESCBC] = &cipherMode{24, des.BlockSize, newTripleDESCBCCipher}` |
+| `ssh/cipher.go:448` | AES (grover) | `func newAESCBCCipher(key, iv, macKey []byte, algs DirectionAlgorithms) (packetCipher, error) {` |
+| `ssh/cipher.go:462` | 3DES (grover) | `func newTripleDESCBCCipher(key, iv, macKey []byte, algs DirectionAlgorithms) (packetCipher, error) {` |
+| `ssh/cipher.go:647` | ChaCha20 (grover) | `type chacha20Poly1305Cipher struct {` |
+| `ssh/cipher.go:653` | ChaCha20 (grover) | `func newChaCha20Cipher(key, unusedIV, unusedMACKey []byte, unusedAlgs DirectionAlgorithms) (packetCipher, error) {` |
+| `ssh/cipher.go:658` | ChaCha20 (grover) | `c := &chacha20Poly1305Cipher{` |
+| `ssh/cipher.go:667` | ChaCha20 (grover) | `func (c *chacha20Poly1305Cipher) readCipherPacket(seqNum uint32, r io.Reader) ([]byte, error) {` |
+| `ssh/cipher.go:710` | Poly1305 (none) | `if !poly1305.Verify(&mac, c.buf[:contentEnd], &polyKey) {` |
+| `ssh/cipher.go:740` | ChaCha20 (grover) | `s, err := chacha20.NewUnauthenticatedCipher(c.contentKey[:], nonce)` |
+| `ssh/cipher.go:766` | ChaCha20 (grover) | `ls, err := chacha20.NewUnauthenticatedCipher(c.lengthKey[:], nonce)` |
+| `ssh/cipher.go:781` | Poly1305 (none) | `poly1305.Sum(&mac, c.buf[:packetEnd], &polyKey)` |
+| `ssh/mac.go:11` | HMAC (grover) | `"crypto/hmac"` |
+| `ssh/mac.go:13` | SHA256 (grover) | `"crypto/sha256"` |
+| `ssh/mac.go:14` | SHA512 (grover) | `"crypto/sha512"` |
+| `ssh/mac.go:57` | HMAC (grover) | `macModes[HMACSHA512ETM] = &macMode{64, true, func(key []byte) hash.Hash {` |
+| `ssh/mac.go:60` | HMAC (grover) | `macModes[HMACSHA256ETM] = &macMode{32, true, func(key []byte) hash.Hash {` |
+| `ssh/mac.go:63` | HMAC (grover) | `macModes[HMACSHA512] = &macMode{64, false, func(key []byte) hash.Hash {` |
+| `ssh/mac.go:66` | HMAC (grover) | `macModes[HMACSHA256] = &macMode{32, false, func(key []byte) hash.Hash {` |
+| `ssh/mac.go:78` | HMAC (grover) | `macModes[HMACSHA1] = &macMode{20, false, func(key []byte) hash.Hash {` |
+| `ssh/mac.go:81` | HMAC (grover) | `macModes[InsecureHMACSHA196] = &macMode{20, false, func(key []byte) hash.Hash {` |
+| `ssh/mlkem.go:10` | SHA256 (grover) | `"crypto/sha256"` |
+| `ssh/mlkem.go:15` | X25519 (shor) | `"golang.org/x/crypto/curve25519"` |
+| `ssh/mlkem.go:24` | X25519 (shor) | `var c25519kp curve25519KeyPair` |
+| `ssh/mlkem.go:90` | SHA256 (grover) | `Hash:      crypto.SHA256,` |
+| `ssh/mlkem.go:118` | X25519 (shor) | `var c25519kp curve25519KeyPair` |
+| `ssh/mlkem.go:166` | SHA256 (grover) | `Hash:      crypto.SHA256,` |
+
+## Explicit false negatives -- `xcrypto_ssh_algorithms`, L2 (41)
+
+A false negative is a labelled quantum-vulnerable location ECDAT did not report.
+
+| file:line | primitive (break model) | the quantum-vulnerable code |
+|---|---|---|
+| `ssh/cipher.go:8` | AES (grover) | `"crypto/aes"` |
+| `ssh/cipher.go:10` | 3DES (grover) | `"crypto/des"` |
+| `ssh/cipher.go:12` | RC4 (grover) | `"crypto/rc4"` |
+| `ssh/cipher.go:21` | ChaCha20 (grover) | `"golang.org/x/crypto/chacha20"` |
+| `ssh/cipher.go:48` | AES (grover) | `func newAESCTR(key, iv []byte) (cipher.Stream, error) {` |
+| `ssh/cipher.go:56` | RC4 (grover) | `func newRC4(key, iv []byte) (cipher.Stream, error) {` |
+| `ssh/cipher.go:103` | AES (grover) | `cipherModes[CipherAES128CTR] = &cipherMode{16, aes.BlockSize, streamCipherMode(0, newAESCTR)}` |
+| `ssh/cipher.go:104` | AES (grover) | `cipherModes[CipherAES192CTR] = &cipherMode{24, aes.BlockSize, streamCipherMode(0, newAESCTR)}` |
+| `ssh/cipher.go:105` | AES (grover) | `cipherModes[CipherAES256CTR] = &cipherMode{32, aes.BlockSize, streamCipherMode(0, newAESCTR)}` |
+| `ssh/cipher.go:110` | AES (grover) | `cipherModes[CipherAES128GCM] = &cipherMode{16, 12, newGCMCipher}` |
+| `ssh/cipher.go:111` | AES (grover) | `cipherModes[CipherAES256GCM] = &cipherMode{32, 12, newGCMCipher}` |
+| `ssh/cipher.go:123` | RC4 (grover) | `cipherModes[InsecureCipherRC4128] = &cipherMode{16, 0, streamCipherMode(1536, newRC4)}` |
+| `ssh/cipher.go:124` | RC4 (grover) | `cipherModes[InsecureCipherRC4256] = &cipherMode{32, 0, streamCipherMode(1536, newRC4)}` |
+| `ssh/cipher.go:125` | RC4 (grover) | `cipherModes[InsecureCipherRC4] = &cipherMode{16, 0, streamCipherMode(0, newRC4)}` |
+| `ssh/cipher.go:131` | AES (grover) | `cipherModes[InsecureCipherAES128CBC] = &cipherMode{16, aes.BlockSize, newAESCBCCipher}` |
+| `ssh/cipher.go:132` | 3DES (grover) | `cipherModes[InsecureCipherTripleDESCBC] = &cipherMode{24, des.BlockSize, newTripleDESCBCCipher}` |
+| `ssh/cipher.go:448` | AES (grover) | `func newAESCBCCipher(key, iv, macKey []byte, algs DirectionAlgorithms) (packetCipher, error) {` |
+| `ssh/cipher.go:462` | 3DES (grover) | `func newTripleDESCBCCipher(key, iv, macKey []byte, algs DirectionAlgorithms) (packetCipher, error) {` |
+| `ssh/cipher.go:647` | ChaCha20 (grover) | `type chacha20Poly1305Cipher struct {` |
+| `ssh/cipher.go:653` | ChaCha20 (grover) | `func newChaCha20Cipher(key, unusedIV, unusedMACKey []byte, unusedAlgs DirectionAlgorithms) (packetCipher, error) {` |
+| `ssh/cipher.go:658` | ChaCha20 (grover) | `c := &chacha20Poly1305Cipher{` |
+| `ssh/cipher.go:667` | ChaCha20 (grover) | `func (c *chacha20Poly1305Cipher) readCipherPacket(seqNum uint32, r io.Reader) ([]byte, error) {` |
+| `ssh/cipher.go:710` | Poly1305 (none) | `if !poly1305.Verify(&mac, c.buf[:contentEnd], &polyKey) {` |
+| `ssh/cipher.go:740` | ChaCha20 (grover) | `s, err := chacha20.NewUnauthenticatedCipher(c.contentKey[:], nonce)` |
+| `ssh/cipher.go:766` | ChaCha20 (grover) | `ls, err := chacha20.NewUnauthenticatedCipher(c.lengthKey[:], nonce)` |
+| `ssh/cipher.go:781` | Poly1305 (none) | `poly1305.Sum(&mac, c.buf[:packetEnd], &polyKey)` |
+| `ssh/mac.go:11` | HMAC (grover) | `"crypto/hmac"` |
+| `ssh/mac.go:13` | SHA256 (grover) | `"crypto/sha256"` |
+| `ssh/mac.go:14` | SHA512 (grover) | `"crypto/sha512"` |
+| `ssh/mac.go:57` | HMAC (grover) | `macModes[HMACSHA512ETM] = &macMode{64, true, func(key []byte) hash.Hash {` |
+| `ssh/mac.go:60` | HMAC (grover) | `macModes[HMACSHA256ETM] = &macMode{32, true, func(key []byte) hash.Hash {` |
+| `ssh/mac.go:63` | HMAC (grover) | `macModes[HMACSHA512] = &macMode{64, false, func(key []byte) hash.Hash {` |
+| `ssh/mac.go:66` | HMAC (grover) | `macModes[HMACSHA256] = &macMode{32, false, func(key []byte) hash.Hash {` |
+| `ssh/mac.go:78` | HMAC (grover) | `macModes[HMACSHA1] = &macMode{20, false, func(key []byte) hash.Hash {` |
+| `ssh/mac.go:81` | HMAC (grover) | `macModes[InsecureHMACSHA196] = &macMode{20, false, func(key []byte) hash.Hash {` |
+| `ssh/mlkem.go:10` | SHA256 (grover) | `"crypto/sha256"` |
+| `ssh/mlkem.go:15` | X25519 (shor) | `"golang.org/x/crypto/curve25519"` |
+| `ssh/mlkem.go:24` | X25519 (shor) | `var c25519kp curve25519KeyPair` |
+| `ssh/mlkem.go:90` | SHA256 (grover) | `Hash:      crypto.SHA256,` |
+| `ssh/mlkem.go:118` | X25519 (shor) | `var c25519kp curve25519KeyPair` |
+| `ssh/mlkem.go:166` | SHA256 (grover) | `Hash:      crypto.SHA256,` |
 
 ## Explicit false negatives -- `paramiko`, L1 (97)
 
