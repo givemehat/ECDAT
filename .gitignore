@@ -27,6 +27,13 @@ _check_*.py
 _raw.py
 _patch_*.py
 
+# Measurement scratch. An ad-hoc audit script and its captured output were committed once,
+# which put throwaway files in the history and makes a reviewer read noise instead of code.
+# One-off probes belong in the commit message or in a real test, never in the tree.
+_*.py
+_*.txt
+!.gitignore
+
 # ---- pyvis writes its CDN assets into ./lib when a graph is rendered ----
 lib/
 

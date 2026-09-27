@@ -16,7 +16,7 @@
 
 | # | Brief requirement | Implementation |
 |---|---|---|
-| 1 | **Discovery & cataloguing** of algorithms, keys, protocols, libraries | `engine/scanner.py` — 16-rule detection table across Python/Java/C/C++/Go/C#/JS/TS, plus config files, binaries and **container images** |
+| 1 | **Discovery & cataloguing** of algorithms, keys, protocols, libraries | `engine/scanner.py` — **67-rule** detection table covering Python, Java (JCA), C/C++, C#, Go, Rust, JS/TS, **PHP** and **Ruby**, plus config files, binaries and **container images** |
 | 2 | **Quantum risk assessment**, flagging risks to sensitive data | `engine/mosca.py` — Shor vs Grover break model, **harvest-now-decrypt-later** flag, Mosca's inequality `X + Y > Z` |
 | 3 | **Classification** by type, lifetime, business criticality | `engine/mosca.py` — canonical primitives, `DATA_CLASS_LIFETIME` (X) and `MIGRATION_EFFORT` (Y) tables, Critical/High/Medium/Low tiers |
 | 4 | **PQC / hybrid recommendations** factoring risk, latency and cost | `engine/recommender.py` — FIPS 203/204/205 targets, explicit *Hybrid AND/OR* semantics, size/CPU/cost breakdown, rule trace |
@@ -56,6 +56,31 @@ streamlit run app.py                                   # interactive dashboard
 `cnsa_2_0` (exclusive NSS use 2033).
 **Z presets** — 5y (plan-as-if-early), 10y (GRI 2026 consensus midpoint, default), 15y (upper bound).
 Z is a *cryptanalytic estimate*; compliance deadlines are reported separately and never conflated.
+
+## Measured accuracy
+
+Precision and recall are measured against **external, pinned public corpora** — not fixtures we
+wrote ourselves. Reproduce with `python benchmark/run_benchmark.py`.
+
+| Corpus | What it is | Precision | Recall | F1 |
+|---|---|---|---|---|
+| [CryptoAPI-Bench](https://github.com/CryptoAPI-Bench/CryptoAPI-Bench) | Java JCE, 203 files, hand-labelled | **0.994** (165/166) | **0.786** (165/210) | 0.878 |
+| [paramiko](https://github.com/paramiko/paramiko) | Real production SSH library, Python | **0.894** (143/160) | **0.596** (143/240) | 0.715 |
+
+Two things this table is meant to make obvious:
+
+* **Recall is not uniform, and we say so.** 0.786 on Java and 0.596 on Python are both honest
+  measurements, and both are lower than a finished product should ship. `benchmark/RESULTS.md`
+  breaks every miss down by algorithm family so the gap is specific rather than a round number.
+* **The corpora are not committed.** They are cloned at a pinned commit by the harness, so the
+  measurement is reproducible without shipping someone else's code in our repository. See
+  [`PROVENANCE.md`](PROVENANCE.md).
+
+The corpus supplies *locations*; the labels come from `benchmark/annotate.py`, which opens each
+file at the labelled line and classifies it by a stated rule. That separation is deliberate: a
+corpus that graded our own output would be measuring nothing.
+
+---
 
 ## Test
 

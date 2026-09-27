@@ -1,8 +1,0 @@
-F                                                                        [100%]
-================================== FAILURES ===================================
-E   AssertionError: rules defined but never fire: ['ECD-RB-SIG-001']
-    assert not ['ECD-RB-SIG-001']
-C:\Users\Public\Downloads\chrome downloads\post quantom sih\ECDAT\tests\test_scanner.py:131: AssertionError: rules defined but never fire: ['ECD-RB-SIG-001']
-=========================== short test summary info ===========================
-FAILED tests/test_scanner.py::test_every_rule_is_actually_executed - Assertio...
-1 failed in 0.86s
