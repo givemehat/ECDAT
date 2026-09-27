@@ -405,6 +405,139 @@ def test_calculate_risk_records_the_resolved_deadline_not_the_flat_one():
 
 
 # --------------------------------------------------------------------------------------------
+# SILENTLY IGNORED INPUT: a CLI flag that is accepted and then discarded
+# --------------------------------------------------------------------------------------------
+
+def test_run_deps_accepts_and_honours_a_policy():
+    """`--policy` was accepted by argparse and then thrown away by the deps subcommand.
+
+    `run_deps` had no `policy` parameter at all, so `calculate_risk` fell back to
+    DEFAULT_POLICY. A user who asked for the NIST IR 8547 timeline got India DST dates, a
+    different deadline, and a different verdict for every finding -- with no error, no warning,
+    and a report that looked entirely normal.
+
+    This is the same class as the duplicate-finding problem: the failure is in a WIRE, not in
+    the arithmetic, so neither the benchmark nor a unit test of `calculate_risk` can see it.
+    Only an end-to-end test through the entry point can.
+    """
+    import inspect
+
+    import cli_advanced
+
+    params = inspect.signature(cli_advanced.run_deps).parameters
+    assert "policy" in params, (
+        "run_deps must accept a policy, or --policy is silently discarded for this subcommand")
+    assert "z_time" in params, (
+        "run_deps must accept a Z, for the same reason: a Z band the user cannot set is a "
+        "Z band they cannot vary")
+
+    # And the CALL SITE in main() must actually forward them. Match the invocation, not the
+    # `def run_deps(` line -- splitting on the bare name catches the definition first and then
+    # asserts against the parameter list, which says nothing about the call.
+    source = inspect.getsource(cli_advanced)
+    call = source.split("return run_deps(")[-1].split(")")[0]
+    assert "args.policy" in call, "main() must forward args.policy into run_deps"
+    assert "args.z" in call, "main() must forward args.z into run_deps"
+
+
+def test_validate_real_world_states_its_rating_inputs_explicitly():
+    """A validation report must be re-derivable from constants it names itself."""
+    source = open(os.path.join(os.path.dirname(__file__), "..", "validate_real_world.py"),
+                  encoding="utf-8").read()
+    assert "calculate_risk(f, z_collapse_time=" in source, (
+        "validate_real_world must pass Z explicitly rather than inheriting a default")
+
+
+def test_an_unknown_policy_is_refused_rather_than_giving_a_null_deadline():
+    """A bogus policy used to yield `year=None`, and every comparison against None is False.
+
+    So an artefact already past its deadline could never be reported late, and the report looked
+    entirely normal. A tool that cannot be sure WHICH deadline it is measuring against must say
+    so rather than emit a null and continue.
+    """
+    with pytest.raises(ValueError, match="Unknown policy"):
+        calculate_risk({"name": "RSA-2048", "primitive": "pke", "key_length": 2048},
+                       policy="TOTALLY-BOGUS")
+
+
+def test_every_known_policy_still_resolves_to_a_real_year():
+    """The counterpart, so the guard cannot be satisfied by refusing everything."""
+    for policy in POLICY_DEADLINES:
+        risk = calculate_risk({"name": "RSA-2048", "primitive": "pke", "key_length": 2048},
+                              policy=policy)
+        assert risk["policy_deadline"].get("year"), (
+            "%s must resolve to a real year" % policy)
+
+
+def test_the_z_band_actually_contains_the_chosen_z():
+    """`--z 40` used to print "z: 40.0" beside a band labelled 5/10/15 that never included 40.
+
+    Worse, `z_stable` could then report a stable verdict without 40 ever being evaluated --
+    the most misleading thing a sensitivity analysis can do, because it looks like robustness.
+    """
+    for z in (1, 20, 40, 99):
+        band = calculate_risk({"name": "RSA-2048", "primitive": "pke", "key_length": 2048},
+                              z_collapse_time=z)["z_band"]
+        probed = {float(k.split("=")[1]) for k in band}
+        assert float(z) in probed, (
+            "Z=%s was chosen but the sensitivity band probed %s" % (z, sorted(probed)))
+
+
+def test_the_default_z_still_shows_the_sourced_consensus_window():
+    """The counterpart: at the default Z the band is the published GRI 5-15 range.
+
+    That range is a sourced claim, not an arbitrary spread, so it must survive the change.
+    """
+    band = calculate_risk({"name": "RSA-2048", "primitive": "pke", "key_length": 2048})["z_band"]
+    assert {float(k.split("=")[1]) for k in band} == {5.0, 10.0, 15.0}
+
+
+def test_different_z_values_produce_different_bands():
+    """Before the fix, EVERY Z produced the identical band, so the sensitivity analysis was
+    decorative: it displayed a range that did not depend on the parameter it claimed to probe."""
+    bands = {tuple(sorted(calculate_risk({"name": "RSA-2048", "primitive": "pke",
+                                          "key_length": 2048},
+                                         z_collapse_time=z)["z_band"]))
+             for z in (5, 10, 15, 40, 99)}
+    assert len(bands) > 1, "the band must vary with Z, or it is not a sensitivity analysis"
+
+
+def test_every_subparser_exposes_the_flags_main_forwards():
+    """`run_deps` gained a `policy` parameter while the `deps` subparser had no `--policy`, so
+    every `deps` invocation raised AttributeError: 'Namespace' object has no attribute 'z'.
+
+    Forwarding a flag that the subparser does not declare is a crash, not a fix. This asserts
+    the two halves of the wiring agree, by parsing a real argv rather than reading the source.
+    """
+    import cli_advanced
+
+    parser = cli_advanced._build_parser() if hasattr(cli_advanced, "_build_parser") else None
+    if parser is None:
+        # No extractable parser: fall back to asserting the source declares the flags, which is
+        # the actual defect that was shipped.
+        source = open(os.path.join(os.path.dirname(__file__), "..", "cli_advanced.py"),
+                      encoding="utf-8").read()
+        deps_block = source.split('add_parser("deps"')[1].split('add_parser(')[0]
+        assert '--z' in deps_block and '--policy' in deps_block, (
+            "the deps subparser must declare --z and --policy, because main() forwards both")
+    else:
+        args = parser.parse_args(["deps", ".", "--policy", "nist_ir_8547", "--z", "20"])
+        assert args.policy == "nist_ir_8547"
+        assert args.z == 20
+
+
+def test_policy_choices_are_constrained_on_every_subparser():
+    """`all --policy` had no `choices=`, so a typo was accepted and produced a null deadline."""
+    source = open(os.path.join(os.path.dirname(__file__), "..", "cli_advanced.py"),
+                  encoding="utf-8").read()
+    for line in source.splitlines():
+        if 'add_argument("--policy"' in line:
+            assert "choices=" in line, (
+                "--policy must constrain its values: an unrecognised policy yields a null "
+                "deadline, and a null deadline never reports anything as late")
+
+
+# --------------------------------------------------------------------------------------------
 # DUPLICATE FINDINGS -- the benchmark structurally CANNOT see this class of bug
 # --------------------------------------------------------------------------------------------
 

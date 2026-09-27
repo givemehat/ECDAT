@@ -26,7 +26,7 @@ import sys
 
 from engine.cbom import generate_cbom
 from engine.dependencies import DependencyScanner
-from engine.mosca import DEFAULT_Z, calculate_risk
+from engine.mosca import DEFAULT_POLICY, DEFAULT_Z, POLICY_DEADLINES, calculate_risk
 from engine.recommender import get_pqc_recommendation
 from engine.scanner import ECDATScanner
 from engine.verify_migration import PQC_ALGORITHMS, MigrationVerifier
@@ -38,14 +38,19 @@ from engine.verify_migration import (EXIT_INCONCLUSIVE, EXIT_NOT_VERIFIED,  # no
 SEVERITY_ORDER = ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
 
 
-def run_deps(target, output_format="text", fail_on="CRITICAL", ecosystems=None, out_dir="."):
+def run_deps(target, output_format="text", fail_on="CRITICAL", ecosystems=None, out_dir=".",
+             z_time=DEFAULT_Z, policy=DEFAULT_POLICY):
     """Dependency-manifest scan. Emits capability-tier findings, never breach language."""
     scanner = DependencyScanner(ecosystems=ecosystems)
     findings = scanner.scan(target)
     coverage = scanner.coverage_manifest(findings)
 
     for finding in findings:
-        finding["risk"] = calculate_risk(finding)
+        # `z_time` and `policy` are passed, not defaulted. This subcommand had no policy
+        # parameter at all, so `--policy` was accepted by argparse and then DISCARDED: a user
+        # asking for the NIST IR 8547 timeline silently got India DST instead, with a different
+        # deadline and a different verdict for every finding.
+        finding["risk"] = calculate_risk(finding, z_collapse_time=z_time, policy=policy)
         finding["recommendation"] = get_pqc_recommendation(finding)
 
     print(f"[*] Dependency manifests seen: {coverage['manifests_seen']}  "
@@ -227,6 +232,14 @@ def main(argv=None):
     deps.add_argument("--ecosystem", action="append", default=None,
                       help="Restrict to one ecosystem (repeatable): pip, pyproject, npm, gomod, "
                            "maven, cargo, gem, composer, dotnet")
+    # --z and --policy MUST be declared here, not only on `all`. They were absent while
+    # main() forwarded args.z/args.policy into run_deps, so every `deps` invocation raised
+    # AttributeError: 'Namespace' object has no attribute 'z'. A subcommand that crashes on
+    # every call is worse than one that silently ignored the flag.
+    deps.add_argument("--z", type=float, default=DEFAULT_Z,
+                      help="CRQC planning horizon in years (default %s)" % DEFAULT_Z)
+    deps.add_argument("--policy", default=DEFAULT_POLICY, choices=sorted(POLICY_DEADLINES),
+                      help="Which published deadline the verdicts are measured against")
     deps.add_argument("--out", default=".")
 
     verify = sub.add_parser("verify-migration",
@@ -238,7 +251,8 @@ def main(argv=None):
     combined = sub.add_parser("all", help="Source + dependency scan, then migration verification")
     combined.add_argument("target")
     combined.add_argument("--z", type=float, default=DEFAULT_Z)
-    combined.add_argument("--policy", default="india_dst_nqm")
+    combined.add_argument("--policy", default=DEFAULT_POLICY, choices=sorted(POLICY_DEADLINES),
+                          help="Which published deadline the verdicts are measured against")
     combined.add_argument("--fail-on", default="CRITICAL", choices=SEVERITY_ORDER)
     combined.add_argument("--no-ml", action="store_true")
     combined.add_argument("--out", default=".")
@@ -248,7 +262,8 @@ def main(argv=None):
         print(f"[!] Target not found: {args.target}")
         return 2
     if args.command == "deps":
-        return run_deps(args.target, args.format, args.fail_on, args.ecosystem, args.out)
+        return run_deps(args.target, args.format, args.fail_on, args.ecosystem, args.out,
+                        args.z, args.policy)
     if args.command == "verify-migration":
         return run_verify_migration(args.target, args.format, args.out)
     return run_all(args.target, args.z, args.policy, not args.no_ml, args.fail_on, args.out)

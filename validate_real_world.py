@@ -30,7 +30,7 @@ import time
 import jsonschema
 
 from engine.cbom import generate_cbom
-from engine.mosca import calculate_risk
+from engine.mosca import DEFAULT_POLICY, DEFAULT_Z, calculate_risk
 from engine.recommender import get_pqc_recommendation
 from engine.scanner import ECDATScanner
 
@@ -92,7 +92,11 @@ def run(check_only=False):
               f"{len(findings)} findings")
 
         for f in findings:
-            f["risk"] = calculate_risk(f)
+            # Z and policy are passed EXPLICITLY rather than relying on the defaults, so that
+            # this report's numbers are reproducible from the constants named here instead of
+            # from whatever the defaults happen to be. A validation report that silently
+            # inherits a default is a report nobody can re-derive.
+            f["risk"] = calculate_risk(f, z_collapse_time=DEFAULT_Z, policy=DEFAULT_POLICY)
             f["recommendation"] = get_pqc_recommendation(f)
         document = json.loads(generate_cbom(
             findings, enriched=True, subject_name="tink-java",

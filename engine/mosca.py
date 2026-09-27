@@ -121,6 +121,25 @@ PUBLIC_KEY_PRIMITIVES = frozenset({
 })
 
 
+def _z_band_points(z_years):
+    """The Z values the sensitivity band should probe, given the caller's chosen Z.
+
+    The point of a sensitivity band is to show how the verdict MOVES as Z moves. Iterating a
+    fixed (5, 10, 15) tuple while the caller had chosen, say, Z=40 answered a question nobody
+    asked: the report said "z: 40.0" and then showed a band that never included 40, and
+    `z_stable` could report a stable verdict without 40 ever being evaluated.
+
+    So the band is built around the chosen Z. When Z sits at or near the default, the published
+    GRI consensus window (5-15) is still preferred, because that range is itself a sourced claim
+    and a reader expects to see it.
+    """
+    lo, hi = Z_SENSITIVITY_YEARS[0], Z_SENSITIVITY_YEARS[-1]
+    if lo <= z_years <= hi:
+        return sorted({float(v) for v in Z_SENSITIVITY_YEARS})
+    step = max(1.0, abs(hi - lo) / 2.0)
+    return sorted({max(0.0, z_years - step), float(z_years), z_years + step})
+
+
 def resolve_policy_deadline(finding, policy):
     """The deadline that actually applies to THIS artefact, and whether it is a ban or a nudge.
 
@@ -397,7 +416,17 @@ def calculate_risk(finding, user_x=None, user_y=None, z_collapse_time=None,
     z_years = float(DEFAULT_Z if z_collapse_time is None else z_collapse_time)
     if z_years < 0:
         raise ValueError("Z (years to CRQC) cannot be negative.")
-    policy = policy or DEFAULT_POLICY
+    if not policy:
+        policy = DEFAULT_POLICY
+    elif policy not in POLICY_DEADLINES:
+        # An unrecognised policy used to fall through to an EMPTY deadline: year=None,
+        # status="target". A null year is silently dangerous, because every comparison against
+        # it is False -- so an artefact already past its deadline could never be reported late,
+        # and the report looked entirely normal. Refuse instead.
+        raise ValueError(
+            "Unknown policy %r. Known policies: %s. Pass one of these, or None for the default."
+            % (policy, ", ".join(sorted(POLICY_DEADLINES))))
+
 
     name = str(finding.get("name", ""))
     primitive = str(finding.get("primitive", ""))
@@ -433,13 +462,20 @@ def calculate_risk(finding, user_x=None, user_y=None, z_collapse_time=None,
 
     # Z-sensitivity: the verdict must be shown as a band, not a single number, because Z is
     # an estimate. If the tier flips inside the band, say so rather than asserting one answer.
+    #
+    # The band is CENTRED ON THE CHOSEN Z, not the fixed tuple (5,10,15). Iterating the constant
+    # meant `--z 40` printed "z: 40.0" beside a band labelled 5/10/15, and reported a verdict as
+    # "stable" without 40 ever being probed -- the single most misleading thing a sensitivity
+    # analysis can do. The published consensus window is retained as the band whenever the
+    # caller's Z is near it, so the default still shows the documented 5-15 range.
     z_band = {}
     if include_z_band:
-        for z in Z_SENSITIVITY_YEARS:
+        band_points = _z_band_points(z_years)
+        for z in band_points:
             m = round(total - z, 2)
             vuln = bool(subject and total > z)
-            hndl = bool(subject and horizon == HORIZON_CONFIDENTIALITY and x_years > z)
-            z_band[f"Z={z}"] = _tier(break_model, subject, vuln, hndl, m, effective_bits)
+            hndl = bool(horizon == HORIZON_CONFIDENTIALITY and x_cmp > z)
+            z_band["Z=%g" % z] = _tier(break_model, subject, vuln, hndl, m, effective_bits)
     stable = len(set(z_band.values())) <= 1 if z_band else True
 
     if break_model == "broken-by-Shor":
