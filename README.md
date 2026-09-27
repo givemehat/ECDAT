@@ -107,6 +107,11 @@ Stated plainly, because a discovery tool that overstates its coverage is worse t
   be described as deprecated Go APIs â€” only as broken primitives. Their APIs are also absent in
   Node (`createCipher` was removed, DEP0106 End-of-Life) and in `ring` (`verify_unsafe` does not
   exist), so no rule claims to match them.
+- **Go has a corpus but no published number yet.** `golang.org/x/crypto` is cloned and scanned at a
+  pinned commit (16 packages, 99 non-test files) as part of this loop, and it found three real
+  defects that reading the rules did not — see `PROVENANCE.md`. The label set is **not complete**,
+  so **no precision or recall figure is published for Go yet**. An incomplete label set measured
+  anyway would produce a number that looks like evidence and is not.
 - **Small DH group sizes are not detected.** A rule for Node's sub-2048-bit `modp1|modp2|modp5`
   groups was written and removed. Bare, the group names matched `String g = "modp5"` in a Java
   file; anchored to a `createDiffieHellman` call, every call it can match is already matched by

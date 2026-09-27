@@ -192,8 +192,12 @@ RULES = [
     # recommendation is "replace the generator", not "migrate this cipher".
     dict(id="ECD-PHP-WEAKRNG-001", name="PRNG", primitive="other", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
-         regex=r"(?<![A-Za-z0-9_$>])(?:mt_rand|uniqid|str_shuffle)\s*\(\s*\)"
-                r"|(?<![A-Za-z0-9_$>])rand\s*\(\s*\)"),
+         # The lookbehind is IDENTICAL to ECD-RB-WEAKRNG-001's and must stay so. It previously
+         # omitted `.`, so the PHP rule matched Go's `c.rand()` -- a crypto/rand wrapper -- five
+         # times in the x/crypto corpus while the Ruby rule correctly did not. Two rules with the
+         # same idea and different guards is how one of them ends up wrong.
+         regex=r"(?<![A-Za-z0-9_.:@$>])(?:mt_rand|uniqid|str_shuffle)\s*\(\s*\)"
+                r"|(?<![A-Za-z0-9_.:@$])rand\s*\(\s*\)"),
     # ---- Go (stdlib crypto/*) --------------------------------------------------------------------
     # Names verified against pkg.go.dev rather than recalled.
     #
@@ -232,9 +236,33 @@ RULES = [
     dict(id="ECD-GO-SIG-004", name="Ed25519", primitive="signature", artefact_class="source",
          uses="signing", key_group=None, evidence="discovered",
          regex=r"\bed25519\.(?:NewKeyFromSeed|GenerateKey)\s*\("),
+    # `crypto/mlkem` (Go 1.24, FIPS 203) is a NIST-standardised ALGORITHM, not a weak one, so
+    # it is its own rule rather than a finding under the weak-ECDH rule. It was found in the
+    # x/crypto corpus -- `ssh/mlkem.go` implements a HYBRID ML-KEM-768 + X25519 KEX -- and was
+    # entirely invisible, which is the worst kind of gap: real post-quantum code scoring zero
+    # findings. The level is carried in the rule name because FIPS 203 defines three parameter
+    # sets at different security categories and ECDAT's classifier keys off the name.
+    dict(id="ECD-GO-PQKEM-001", name="ML-KEM-768", primitive="kem", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"\bmlkem\.NewDecapsulationKey768\s*\(|\bmlkem\.GenerateKey768\s*\("),
+    dict(id="ECD-GO-PQKEM-002", name="ML-KEM-1024", primitive="kem", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"\bmlkem\.NewDecapsulationKey1024\s*\(|\bmlkem\.GenerateKey1024\s*\("),
+    dict(id="ECD-GO-PQKEM-003", name="ML-KEM-512", primitive="kem", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"\bmlkem\.NewDecapsulationKey512\s*\(|\bmlkem\.GenerateKey512\s*\("),
     dict(id="ECD-GO-KEX-001", name="ECDH", primitive="kem", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
-         regex=r"\becies\.GenerateKey\s*\(|\becdh\.\w+\s*\("),
+         # `ecdh.` alone matched a STRUCT FIELD of the same name: the x/crypto OpenPGP code has
+         # `pk.ecdh.parse(r)`, `pk.ecdh.serialize(w)` and `pk.ecdh.byteLen()` on a
+         # `PublicKey.ecdh` field. Those are packet-serialisation calls, not the crypto/ecdh
+         # package. The package is only ever imported under its own name, so the alternatives
+         # are anchored to constructs that name a package or a curve, never a bare field.
+         #
+         # `ecdh.X25519()` is DELIBERATELY ABSENT. ECD-SRC-ECDH-001 already matches the bare
+         # token `X25519`, so including it put two ECDH components on one line. Running the
+         # corpus is what caught that; reading the rules was not enough.
+         regex=r"\becies\.GenerateKey\s*\(|\becdh\.P\d+\s*\("),
     dict(id="ECD-GO-RNG-001", name="PRNG", primitive="other", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          # `math/rand` is the non-cryptographic generator. Matched only as an explicit package
@@ -389,6 +417,12 @@ RULES = [
     # make the finding meaningless.
     dict(id="ECD-RB-WEAKRNG-001", name="PRNG", primitive="other", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
+         # `\\b` was NOT enough. The Go corpus produced `c.rand()` five times, where `rand` is a
+         # method on a struct that returns a crypto/rand io.Reader -- a CSPRNG, not a weak
+         # generator. The lookbehind excludes a preceding `.`, so a qualified call cannot match.
+         # The remaining exposure is a method DECLARATION (`func (c *C) rand() io.Reader`), which
+         # is bounded by a space and cannot be excluded by a one-character lookbehind without
+         # breaking `Kernel.rand(`. Recorded as a known limitation rather than papered over.
          regex=r"(?<![A-Za-z0-9_.:@$])Kernel\.rand\s*\(|(?<![A-Za-z0-9_.:@$])rand\s*\(\s*\)"),
     # ---- ECC ---------------------------------------------------------------------------------
     # Key AGREEMENT only. `ec.generate_private_key(ec.SECP256R1())` is a generic key-pair

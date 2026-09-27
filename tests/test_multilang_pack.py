@@ -59,6 +59,11 @@ POSITIVES = [
     ("js rsa verify", "a.js", "crypto.createVerify('RSA')", ["ECD-JS-SIG-001"]),
     ("js rsa-pss", "a.js", "s = crypto.constants.RSA_PKCS1_PSS_PADDING;", ["ECD-JS-SIG-002"]),
     ("js ecdsa", "a.js", "crypto.createSign('ecdsa-with-SHA256')", ["ECD-JS-SIG-003"]),
+    # Go 1.24 crypto/mlkem, FIPS 203. The x/crypto corpus carries a real hybrid ML-KEM-768 +
+    # X25519 SSH key exchange in ssh/mlkem.go, and before these rules it scored ZERO findings.
+    ("go mlkem768", "a.go", "dk, err := mlkem.NewDecapsulationKey768(seed)", ["ECD-GO-PQKEM-001"]),
+    ("go mlkem1024", "a.go", "dk, err := mlkem.NewDecapsulationKey1024(seed)", ["ECD-GO-PQKEM-002"]),
+    ("go mlkem512", "a.go", "dk, err := mlkem.NewDecapsulationKey512(seed)", ["ECD-GO-PQKEM-003"]),
 ]
 
 # The same failure mode as the bare `\bMD5\b` bug, generalised.
@@ -107,6 +112,38 @@ DECOYS = [
     ("go brand is not rand", "a.go", "brand := computeBrand();", ()),
     # A WebCrypto digest is a real detection, but it must not be reported as a signature.
     ("js digest is not a signature", "a.js", "crypto.subtle.digest('SHA-256', buf)", ()),
+]
+
+# Three defects found by running the tool over golang.org/x/crypto, NOT by reading the rules.
+# All three are the same shape as the leak class above -- a token that is right in one language
+# and wrong in another -- but each was found by real production code rather than by inspection,
+# which is the argument for keeping a corpus at all.
+#
+# Line 1 is the decisive one: `c.rand()` is a method on an OTR Conversation that returns a
+# crypto/rand io.Reader. It is a CSPRNG wrapper, and the PHP and Ruby PRNG rules were both
+# reporting it as a WEAK generator. ECD-PHP-WEAKRNG-001's lookbehind omitted `.` while
+# ECD-RB-WEAKRNG-001's had it -- two rules with one idea and two different guards.
+CORPUS_FOUND = [
+    ("go c.rand() is a CSPRNG wrapper", "otr.go",
+     "_, err := io.ReadFull(c.rand(), buf)", ()),
+    ("go method decl is not a weak PRNG", "otr.go",
+     "func (c *Conversation) rand() io.Reader {", ("ECD-PHP-WEAKRNG-001", "ECD-RB-WEAKRNG-001")),
+    # `pk.ecdh` is a PublicKey STRUCT FIELD in the OpenPGP code. `pk.ecdh.parse(r)` and
+    # `pk.ecdh.serialize(w)` are packet serialisation, not the crypto/ecdh package. The Go pack's
+    # `\becdh\.\w+\(` matched all three, so the corpus reported ECDH where there is none.
+    ("go ecdh struct field is not the package", "x.go",
+     "if err = pk.ecdh.parse(r); err != nil {", ()),
+    ("go ecdh serialize is not the package", "x.go",
+     "return pk.ecdh.serialize(w)", ()),
+    # X25519 is owned by ECD-SRC-ECDH-001. The Go pack briefly also matched `ecdh.X25519()`,
+    # which put two ECDH components on one line -- the same duplicate class as loop 4's TLS.
+    ("go ecdh.X25519 not duplicated", "x.go",
+     "curve := ecdh.X25519()", ("ECD-SRC-ECDH-001",)),
+    # ML-KEM is the positive case: FIPS 203, NIST category 3, and entirely invisible before.
+    ("go mlkem768 detected", "x.go",
+     "dk, err := mlkem.NewDecapsulationKey768(seed)", ("ECD-GO-PQKEM-001",)),
+    ("go mlkem1024 detected", "x.go",
+     "dk, err := mlkem.NewDecapsulationKey1024(seed)", ("ECD-GO-PQKEM-002",)),
 ]
 
 
@@ -160,6 +197,40 @@ def test_multilang_no_cross_language_leak(scanner, tmp_path, label, filename, co
         label, content, filename, sorted(new_fired))
     assert fired == set(allowed), "%s: expected exactly %s, got %s" % (
         label, sorted(allowed), sorted(fired))
+
+
+@pytest.mark.parametrize("label,filename,content,allowed", CORPUS_FOUND,
+                         ids=[c[0] for c in CORPUS_FOUND])
+def test_defects_found_by_the_go_corpus(scanner, tmp_path, label, filename, content, allowed):
+    """Regression guard for defects that only real production code exposed.
+
+    Each row is a line copied from golang.org/x/crypto at the pinned commit. They are kept
+    verbatim rather than paraphrased so a future change that re-breaks one of them fails here
+    instead of surviving until the next corpus run.
+    """
+    path = tmp_path / filename
+    path.write_text(content + "\n", encoding="utf-8")
+    fired = {f["rule_id"] for f in scanner._match_rules(str(path), content)} & _ALL_IDS
+    assert fired == set(allowed), "%s: expected exactly %s, got %s" % (
+        label, sorted(allowed), sorted(fired))
+
+
+def test_mlkem_is_a_standardised_algorithm_not_a_weak_primitive():
+    """ML-KEM must be reported as ML-KEM, never collapsed into a weak-ECDH finding.
+
+    ECDAT already classifies ML-KEM-768 at NIST category 3 in engine/cbom.py. A Go estate using
+    `crypto/mlkem` therefore has a POST-QUANTUM key exchange in production, and reporting it as
+    generic ECDH -- or as nothing at all -- is the difference between "already migrated" and
+    "needs migration".
+    """
+    sc = ECDATScanner(enable_ml=False)
+    for level, rule in (("512", "ECD-GO-PQKEM-003"), ("768", "ECD-GO-PQKEM-001"),
+                        ("1024", "ECD-GO-PQKEM-002")):
+        content = "dk, err := mlkem.NewDecapsulationKey%s(seed)" % level
+        found = {f["name"] for f in sc._match_rules("x.go", content)}
+        assert "ML-KEM-%s" % level in found, "ML-KEM-%s not named correctly: %s" % (level, found)
+        assert "ECDH" not in found, "ML-KEM-%s must not be reported as ECDH" % level
+        assert rule in {f["rule_id"] for f in sc._match_rules("x.go", content)}
 
 
 def test_no_duplicate_rule_for_existing_primitives():

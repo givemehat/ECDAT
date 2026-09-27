@@ -57,3 +57,6 @@ benchmark/corpora/
 *.tmpout
 # mutation_test.py / run_benchmark.py scratch output (buffered, written at exit)
 m*.txt
+
+# Third-party corpora cloned by the benchmark harness (pinned, not committed)
+benchmark/corpora/
