@@ -121,7 +121,40 @@ COMPLEXITY_AST_DEPTH_REFERENCE = 30.0
 
 SHOR_VULNERABLE = ("RSA", "ECC", "ECDSA", "ECDH", "DSA", "DH", "DIFFIE", "ELGAMAL",
                    "X25519", "ED25519", "CURVE25519")
-GROVER_WEAKENED = ("AES", "SHA", "MD5", "3DES", "DES", "BLOWFISH", "CHACHA", "RC4")
+
+# The token list above is a floor, not a definition, and treating it as the whole vocabulary
+# produced FALSE QUANTUM-SAFETY ASSURANCES -- the most damaging class of error this tool can
+# make. Measured before this change: X448, Ed448, secp256k1, P-384, prime256v1,
+# brainpoolP256r1, EC and SM2 all returned "not-affected" while `cbom.py` simultaneously
+# emitted `nistQuantumSecurityLevel: 0` ("a CRQC breaks this") for the very same finding.
+# One CBOM component asserted "not vulnerable, tier LOW" and "broken by a CRQC" together.
+#
+# The cause is naming, not cryptography. `X25519` is a token but `X448` is not; `ED25519` is
+# a token but `Ed448` is not; and the standard EC names are `prime256v1`, `secp384r1`,
+# `secp256k1`, `brainpoolP256r1`, none of which contain "EC" or "DH" as substrings. Matching
+# on a short token list cannot survive the naming diversity of real deployed curves.
+#
+# So asymmetric key establishment and signature algorithms are identified by STRUCTURE --
+# is this thing a public-key primitive? -- with the token list demoted to a fast path. A
+# generic EC/curve/KEM name is Shor-broken unless a PQC screen has already exempted it.
+SHOR_VULNERABLE_ASYMMETRIC = (
+    "RSA", "DSA", "DH", "DIFFIE", "ELGAMAL", "ECDH", "ECDSA", "EDDSA", "EC",
+    "X25519", "X448", "ED25519", "ED448", "CURVE25519", "MONTGOMERY",
+    # Standard named-curve spellings. These are the ones that broke false assurance.
+    "SECP", "PRIME256", "PRIME192", "BRAINPOOL", "SECT", "P-192", "P-224", "P-256",
+    "P-384", "P-521", "P256", "P384", "P521", "K-163", "K-233", "K-283", "K-409",
+    # Chinese and Korean national standards, deployed in 5G and payment networks.
+    "SM2", "SM9", "SM3-SIG",
+    # Lattice/ECC-based PQ candidates that are NOT the NIST standard, plus KEM aliases.
+    "KYBER", "BIKE", "FRODO", "NTRU", "FALCON", "DILITHIUM",
+)
+
+# Symmetric primitives weakened by Grover but NOT broken by Shor, and NOT retroactive.
+# Matched as whole words, not substrings: "AES" inside "frodoKEM640-AES" must not make a KEM
+# Grover-weakened, and "SHA" inside "SHA3" needs its own entry.
+GROVER_WEAKENED = ("AES", "SHA", "SHA2", "SHA3", "SHAKE", "MD5", "3DES", "DES",
+                   "BLOWFISH", "CHACHA", "RC4", "SERPENT", "CAMELLIA", "ARIA",
+                   "TWOFISH", "CAST", "IDEA", "SALSA", "POLY1305")
 
 # Reused rather than re-declared: the family vocabulary is the thing most likely to drift, and
 # two copies is how `X25519MLKEM768` ends up Shor-broken in one module and PQC in another.
@@ -144,7 +177,7 @@ def quantum_break_model(name, primitive=""):
     if is_pqc(name):
         return "not-affected"
     haystack = f"{name} {primitive}".upper()
-    for token in SHOR_VULNERABLE:
+    for token in SHOR_VULNERABLE_ASYMMETRIC:
         if token in haystack:
             return "broken-by-Shor"
     for token in GROVER_WEAKENED:

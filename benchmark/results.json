@@ -7954,29 +7954,29 @@
      "SaaS / third-party boundary crypto (requires attestation)",
      "silicon-embedded keys (requires attestation)"
     ],
-    "findings_total": 177,
+    "findings_total": 180,
     "assurance_histogram": {
      "observed": 0,
-     "used": 177,
+     "used": 180,
      "declared": 0,
      "capability": 0
     },
-    "proven_use": 177,
+    "proven_use": 180,
     "unresolved_purpose": 72
    },
    "scan_errors": [],
    "findings_by_rule": {
     "ECDSA | ECD-SRC-SSH-SIG-001": 30,
-    "ECDH | ECD-SRC-ECDH-001": 19,
+    "ECDH | ECD-SRC-ECDH-001": 22,
     "AES | ECD-SRC-SSH-CIPHER-001": 16,
     "RSA | ECD-SRC-PYCA-RSA-001": 13,
-    "ECDSA | ECD-SRC-PYCA-EC-002": 12,
+    "ECC | ECD-SRC-PYCA-EC-002": 12,
     "ECDH | ECD-SRC-SSH-KEX-001": 11,
     "DH | ECD-SRC-SSH-DH-001": 10,
     "AES | ECD-SRC-PYCA-AES-001": 9,
     "HMAC | ECD-SRC-SSH-MAC-001": 8,
     "SHA | ECD-SRC-PYCA-HASH-001": 7,
-    "ECDSA | ECD-SRC-PYCA-EC-001": 7,
+    "ECC | ECD-SRC-PYCA-EC-001": 7,
     "SHA1 | ECD-SRC-HASHLIB-001": 5,
     "Ed25519 | ECD-SRC-SSH-ED-001": 4,
     "AES | ECD-SRC-SSH-CIPHER-002": 4,
@@ -7997,16 +7997,16 @@
     "L1": {
      "counts": {
       "TP": 145,
-      "FP": 16,
+      "FP": 18,
       "FN": 95,
       "labelled_positives": 240,
-      "findings_total": 177
+      "findings_total": 180
      },
-     "precision": 0.9006,
-     "precision_fraction": "145/161",
+     "precision": 0.8896,
+     "precision_fraction": "145/163",
      "recall": 0.6042,
      "recall_fraction": "145/240",
-     "f1": 0.7232,
+     "f1": 0.7196,
      "f1_note": "F1 is computed from the ROUNDED precision/recall, so it may differ in the 4th decimal from an F1 computed from the raw counts.",
      "false_positives": [
       {
@@ -8017,7 +8017,7 @@
        "labelled_break_model": null,
        "labelled_reason": null,
        "ecdat_names": [
-        "ECDSA"
+        "ECC"
        ],
        "ecdat_rule_ids": [
         "ECD-SRC-PYCA-EC-002"
@@ -8037,10 +8037,29 @@
         "ECDH"
        ],
        "ecdat_rule_ids": [
+        "ECD-SRC-ECDH-001",
         "ECD-SRC-PYCA-ECDH-001"
        ],
        "ecdat_match": [
+        "derive_private_key(",
         "derive_private_key("
+       ]
+      },
+      {
+       "file": "paramiko/kex_curve25519.py",
+       "line": 37,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "ECDH"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-ECDH-001"
+       ],
+       "ecdat_match": [
+        ".exchange(peer_key)"
        ]
       },
       {
@@ -8051,7 +8070,7 @@
        "labelled_break_model": null,
        "labelled_reason": null,
        "ecdat_names": [
-        "ECDSA"
+        "ECC"
        ],
        "ecdat_rule_ids": [
         "ECD-SRC-PYCA-EC-002"
@@ -8068,7 +8087,7 @@
        "labelled_break_model": null,
        "labelled_reason": null,
        "ecdat_names": [
-        "ECDSA"
+        "ECC"
        ],
        "ecdat_rule_ids": [
         "ECD-SRC-PYCA-EC-002"
@@ -8177,6 +8196,23 @@
        ],
        "ecdat_match": [
         "X25519"
+       ]
+      },
+      {
+       "file": "paramiko/kex_mlkem.py",
+       "line": 112,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "ECDH"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-ECDH-001"
+       ],
+       "ecdat_match": [
+        ".exchange(peer)"
        ]
       },
       {
@@ -10043,16 +10079,16 @@
     "L2": {
      "counts": {
       "TP": 145,
-      "FP": 16,
+      "FP": 18,
       "FN": 114,
       "labelled_positives": 259,
-      "findings_total": 177
+      "findings_total": 180
      },
-     "precision": 0.9006,
-     "precision_fraction": "145/161",
+     "precision": 0.8896,
+     "precision_fraction": "145/163",
      "recall": 0.5598,
      "recall_fraction": "145/259",
-     "f1": 0.6904,
+     "f1": 0.6872,
      "f1_note": "F1 is computed from the ROUNDED precision/recall, so it may differ in the 4th decimal from an F1 computed from the raw counts.",
      "false_positives": [
       {
@@ -10063,7 +10099,7 @@
        "labelled_break_model": null,
        "labelled_reason": null,
        "ecdat_names": [
-        "ECDSA"
+        "ECC"
        ],
        "ecdat_rule_ids": [
         "ECD-SRC-PYCA-EC-002"
@@ -10083,10 +10119,29 @@
         "ECDH"
        ],
        "ecdat_rule_ids": [
+        "ECD-SRC-ECDH-001",
         "ECD-SRC-PYCA-ECDH-001"
        ],
        "ecdat_match": [
+        "derive_private_key(",
         "derive_private_key("
+       ]
+      },
+      {
+       "file": "paramiko/kex_curve25519.py",
+       "line": 37,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "ECDH"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-ECDH-001"
+       ],
+       "ecdat_match": [
+        ".exchange(peer_key)"
        ]
       },
       {
@@ -10097,7 +10152,7 @@
        "labelled_break_model": null,
        "labelled_reason": null,
        "ecdat_names": [
-        "ECDSA"
+        "ECC"
        ],
        "ecdat_rule_ids": [
         "ECD-SRC-PYCA-EC-002"
@@ -10114,7 +10169,7 @@
        "labelled_break_model": null,
        "labelled_reason": null,
        "ecdat_names": [
-        "ECDSA"
+        "ECC"
        ],
        "ecdat_rule_ids": [
         "ECD-SRC-PYCA-EC-002"
@@ -10223,6 +10278,23 @@
        ],
        "ecdat_match": [
         "X25519"
+       ]
+      },
+      {
+       "file": "paramiko/kex_mlkem.py",
+       "line": 112,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "ECDH"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-ECDH-001"
+       ],
+       "ecdat_match": [
+        ".exchange(peer)"
        ]
       },
       {

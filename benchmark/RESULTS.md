@@ -67,8 +67,8 @@ counts it came from; no ratio is reported without them.
 |---|---|---|---|---|---|---|---|
 | `cryptoapi_bench` | L1 | 46 | 0 | 164 | 1.0 = 46/46 | 0.219 = 46/210 | 0.3593 |
 | `cryptoapi_bench` | L2 | 46 | 0 | 277 | 1.0 = 46/46 | 0.1424 = 46/323 | 0.2493 |
-| `paramiko` | L1 | 145 | 16 | 95 | 0.9006 = 145/161 | 0.6042 = 145/240 | 0.7232 |
-| `paramiko` | L2 | 145 | 16 | 114 | 0.9006 = 145/161 | 0.5598 = 145/259 | 0.6904 |
+| `paramiko` | L1 | 145 | 18 | 95 | 0.8896 = 145/163 | 0.6042 = 145/240 | 0.7196 |
+| `paramiko` | L2 | 145 | 18 | 114 | 0.8896 = 145/163 | 0.5598 = 145/259 | 0.6872 |
 
 ### File-level view (secondary)
 
@@ -146,16 +146,16 @@ Findings emitted for `paramiko`, by rule:
 | rule | findings |
 |---|---|
 | ECDSA | ECD-SRC-SSH-SIG-001 | 30 |
-| ECDH | ECD-SRC-ECDH-001 | 19 |
+| ECDH | ECD-SRC-ECDH-001 | 22 |
 | AES | ECD-SRC-SSH-CIPHER-001 | 16 |
 | RSA | ECD-SRC-PYCA-RSA-001 | 13 |
-| ECDSA | ECD-SRC-PYCA-EC-002 | 12 |
+| ECC | ECD-SRC-PYCA-EC-002 | 12 |
 | ECDH | ECD-SRC-SSH-KEX-001 | 11 |
 | DH | ECD-SRC-SSH-DH-001 | 10 |
 | AES | ECD-SRC-PYCA-AES-001 | 9 |
 | HMAC | ECD-SRC-SSH-MAC-001 | 8 |
 | SHA | ECD-SRC-PYCA-HASH-001 | 7 |
-| ECDSA | ECD-SRC-PYCA-EC-001 | 7 |
+| ECC | ECD-SRC-PYCA-EC-001 | 7 |
 | SHA1 | ECD-SRC-HASHLIB-001 | 5 |
 | Ed25519 | ECD-SRC-SSH-ED-001 | 4 |
 | AES | ECD-SRC-SSH-CIPHER-002 | 4 |
@@ -187,7 +187,7 @@ from the label file, so each row can be checked against the source.
 
 None.
 
-## Explicit false positives -- `paramiko`, L1 (16)
+## Explicit false positives -- `paramiko`, L1 (18)
 
 A false positive is a finding at a `(file, line)` that the labels record as NOT
 a quantum-vulnerable cryptographic use. The exclusion reason is quoted verbatim
@@ -195,16 +195,18 @@ from the label file, so each row can be checked against the source.
 
 | file:line | why the labels exclude it | ECDAT called it | rule |
 |---|---|---|---|
-| `paramiko/ecdsakey.py:167` | line was not a labelling candidate | ECDSA | ECD-SRC-PYCA-EC-002 |
-| `paramiko/ecdsakey.py:305` | line was not a labelling candidate | ECDH | ECD-SRC-PYCA-ECDH-001 |
-| `paramiko/kex_ecdh_nist.py:67` | line was not a labelling candidate | ECDSA | ECD-SRC-PYCA-EC-002 |
-| `paramiko/kex_ecdh_nist.py:113` | line was not a labelling candidate | ECDSA | ECD-SRC-PYCA-EC-002 |
+| `paramiko/ecdsakey.py:167` | line was not a labelling candidate | ECC | ECD-SRC-PYCA-EC-002 |
+| `paramiko/ecdsakey.py:305` | line was not a labelling candidate | ECDH | ECD-SRC-ECDH-001, ECD-SRC-PYCA-ECDH-001 |
+| `paramiko/kex_curve25519.py:37` | line was not a labelling candidate | ECDH | ECD-SRC-ECDH-001 |
+| `paramiko/kex_ecdh_nist.py:67` | line was not a labelling candidate | ECC | ECD-SRC-PYCA-EC-002 |
+| `paramiko/kex_ecdh_nist.py:113` | line was not a labelling candidate | ECC | ECD-SRC-PYCA-EC-002 |
 | `paramiko/kex_group14.py:45` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
 | `paramiko/kex_group16.py:30` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
 | `paramiko/kex_group16.py:35` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
 | `paramiko/kex_mlkem.py:59` | byte-length constant naming a component size, not a primitive | ECDH | ECD-SRC-ECDH-001 |
 | `paramiko/kex_mlkem.py:60` | byte-length constant naming a component size, not a primitive | ECDH | ECD-SRC-ECDH-001 |
 | `paramiko/kex_mlkem.py:61` | byte-length constant naming a component size, not a primitive | ECDH | ECD-SRC-ECDH-001 |
+| `paramiko/kex_mlkem.py:112` | line was not a labelling candidate | ECDH | ECD-SRC-ECDH-001 |
 | `paramiko/rsakey.py:139` | line was not a labelling candidate | RSA | ECD-SRC-PYCA-RSA-001 |
 | `paramiko/rsakey.py:167` | line was not a labelling candidate | RSA | ECD-SRC-PYCA-RSA-001 |
 | `paramiko/transport.py:219` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
@@ -212,7 +214,7 @@ from the label file, so each row can be checked against the source.
 | `paramiko/transport.py:328` | no quantum-vulnerable primitive is named on this line | DH | ECD-SRC-SSH-DH-001 |
 | `paramiko/transport.py:329` | no quantum-vulnerable primitive is named on this line | DH | ECD-SRC-SSH-DH-001 |
 
-## Explicit false positives -- `paramiko`, L2 (16)
+## Explicit false positives -- `paramiko`, L2 (18)
 
 A false positive is a finding at a `(file, line)` that the labels record as NOT
 a quantum-vulnerable cryptographic use. The exclusion reason is quoted verbatim
@@ -220,16 +222,18 @@ from the label file, so each row can be checked against the source.
 
 | file:line | why the labels exclude it | ECDAT called it | rule |
 |---|---|---|---|
-| `paramiko/ecdsakey.py:167` | line was not a labelling candidate | ECDSA | ECD-SRC-PYCA-EC-002 |
-| `paramiko/ecdsakey.py:305` | line was not a labelling candidate | ECDH | ECD-SRC-PYCA-ECDH-001 |
-| `paramiko/kex_ecdh_nist.py:67` | line was not a labelling candidate | ECDSA | ECD-SRC-PYCA-EC-002 |
-| `paramiko/kex_ecdh_nist.py:113` | line was not a labelling candidate | ECDSA | ECD-SRC-PYCA-EC-002 |
+| `paramiko/ecdsakey.py:167` | line was not a labelling candidate | ECC | ECD-SRC-PYCA-EC-002 |
+| `paramiko/ecdsakey.py:305` | line was not a labelling candidate | ECDH | ECD-SRC-ECDH-001, ECD-SRC-PYCA-ECDH-001 |
+| `paramiko/kex_curve25519.py:37` | line was not a labelling candidate | ECDH | ECD-SRC-ECDH-001 |
+| `paramiko/kex_ecdh_nist.py:67` | line was not a labelling candidate | ECC | ECD-SRC-PYCA-EC-002 |
+| `paramiko/kex_ecdh_nist.py:113` | line was not a labelling candidate | ECC | ECD-SRC-PYCA-EC-002 |
 | `paramiko/kex_group14.py:45` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
 | `paramiko/kex_group16.py:30` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
 | `paramiko/kex_group16.py:35` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
 | `paramiko/kex_mlkem.py:59` | byte-length constant naming a component size, not a primitive | ECDH | ECD-SRC-ECDH-001 |
 | `paramiko/kex_mlkem.py:60` | byte-length constant naming a component size, not a primitive | ECDH | ECD-SRC-ECDH-001 |
 | `paramiko/kex_mlkem.py:61` | byte-length constant naming a component size, not a primitive | ECDH | ECD-SRC-ECDH-001 |
+| `paramiko/kex_mlkem.py:112` | line was not a labelling candidate | ECDH | ECD-SRC-ECDH-001 |
 | `paramiko/rsakey.py:139` | line was not a labelling candidate | RSA | ECD-SRC-PYCA-RSA-001 |
 | `paramiko/rsakey.py:167` | line was not a labelling candidate | RSA | ECD-SRC-PYCA-RSA-001 |
 | `paramiko/transport.py:219` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |

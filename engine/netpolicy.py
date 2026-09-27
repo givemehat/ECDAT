@@ -438,6 +438,20 @@ class NetPolicy(object):
         blocking = [(addr, v) for addr, v in verdicts if v[0] != VERDICT_PUBLIC]
         lab_derived = False
         if blocking:
+            # EVERY blocking answer is judged, not just the first. A name answering
+            # [10.1.2.3, 169.254.169.254] was previously decided by blocking[0] alone, so the
+            # ordering decided whether the cloud-metadata endpoint was refused: private-first
+            # passed the metadata address through to a real socket, metadata-first refused.
+            # An unconditional refusal must not depend on DNS answer order.
+            metadata_hits = [a for a, v in blocking if v[0] == VERDICT_METADATA]
+            if metadata_hits:
+                # Unconditional. Not reachable by ECDAT_ALLOW_PRIVATE_TARGETS; see the docstring.
+                return Refusal(spec, VERDICT_METADATA,
+                               "%s resolves to the cloud instance-metadata endpoint %s, which "
+                               "hands out temporary credentials. Refused unconditionally, "
+                               "whatever else the name resolves to; ECDAT_ALLOW_PRIVATE_TARGETS "
+                               "does not enable it."
+                               % (host, ", ".join(str(a) for a in metadata_hits)))
             addr, (verdict, reason) = blocking[0]
             publics = [a for a, v in verdicts if v[0] == VERDICT_PUBLIC]
             # Split horizon: a MIX of public and internal is the DNS rebinding shape exactly. It
@@ -450,9 +464,6 @@ class NetPolicy(object):
                                "internal address in its answer is the DNS rebinding shape, so it "
                                "is refused ENTIRELY rather than probed at the public address."
                                % (host, ", ".join(str(a) for a in publics), reason))
-            if verdict == VERDICT_METADATA:
-                # Unconditional. Not reachable by ECDAT_ALLOW_PRIVATE_TARGETS; see the docstring.
-                return Refusal(spec, VERDICT_METADATA, reason)
             if verdict == VERDICT_PRIVATE:
                 if not self.allow_private:
                     return Refusal(spec, VERDICT_PRIVATE,

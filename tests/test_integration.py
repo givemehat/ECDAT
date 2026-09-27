@@ -11,7 +11,15 @@ from engine.recommender import get_pqc_recommendation
 from engine.cbom import generate_cbom, SPEC_VERSION
 
 RSA_SNIPPET = "from cryptography.hazmat.primitives.asymmetric import rsa\nkey = rsa.generate_private_key(65537, 2048)\n"
-ECDH_SNIPPET = "from cryptography.hazmat.primitives.asymmetric import ec\npriv = ec.generate_private_key(ec.SECP256R1())\n"
+# A real key-agreement call site, not a bare key-pair generator. `ec.generate_private_key()`
+# alone establishes neither a signature nor key agreement, and typing it as ECDH made this same
+# snippet report as ECDH AND ECDSA -- two mutually exclusive primitives, two different migration
+# targets, for one statement. The `.exchange()` is what makes the primitive ECDH.
+ECDH_SNIPPET = (
+    "from cryptography.hazmat.primitives.asymmetric import ec\n"
+    "priv = ec.generate_private_key(ec.SECP256R1())\n"
+    "shared = priv.exchange(peer_public_key)\n"
+)
 
 
 def _pipeline(target, z=10, policy="india_dst_nqm"):

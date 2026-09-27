@@ -45,10 +45,38 @@ RULES = [
          uses="tls", key_group=None, evidence="discovered",
          regex=r"KeyPairGenerator\.getInstance\(\s*[\"']RSA[\"']\s*\)|EVP_PKEY_RSA|RSA_generate_key_ex"),
     # ---- ECC ---------------------------------------------------------------------------------
+    # Key AGREEMENT only. `ec.generate_private_key(ec.SECP256R1())` is a generic key-pair
+    # generator and was previously matched here as ECDH AND by ECD-SRC-PYCA-EC-001/002 as
+    # ECDSA, so one statement produced three findings with two mutually exclusive primitives
+    # (key-agreement AND signature) and the recommender offered both ML-KEM and ML-DSA for the
+    # same line. A bare key-pair generator does not say which operation follows, so that form is
+    # excluded here and the curve object is typed by the PYCA rules instead. Every OTHER
+    # spelling below is an unambiguous key-agreement signal and is kept: removing `X25519` and
+    # `EVP_PKEY_EC` with it cost real detections, which the differential tests caught.
     dict(id="ECD-SRC-ECDH-001", name="ECDH", primitive="key-agreement", artefact_class="source",
          uses="tls", key_group=1, evidence="discovered",
-         regex=r"ec\.generate_private_key\(\s*ec\.(SECP\d+R1)\(\)|ECDH_compute_key|X25519|"
-               r"KeyAgreement\.getInstance\(\s*[\"']ECDH|EVP_PKEY_EC\b"),
+         # A plain alternation with no wrapping group. An earlier version wrapped this in `(?:...)`
+         # and the group was never closed, which `re` accepted but which made the pattern match
+         # almost nothing -- the reachability test caught it immediately.
+         #
+         # The last alternative is a key-pair GENERATOR with a captured curve, so `key_length`
+         # resolves to 256/384/521. It is a genuine key-agreement signal and was briefly removed,
+         # which cost measured recall on paramiko; the duplicate it caused is fixed downstream,
+         # where a curve with no use context is no longer renamed to ECDSA/signature.
+         regex=r"ECDH_compute_key|KeyAgreement\.getInstance\(\s*[\"']ECDH|"
+                r"exchanges\.ECDH\b|derive_private_key\(|"
+                r"EllipticCurvePublicNumbers\b|ECDHPrivateKey\b|"
+                # `X25519` must NOT have a trailing word boundary. The real code is
+                # `X25519PrivateKey` / `x25519.X25519PublicKey`, and because `P` is a word
+                # character, `\bX25519\b` matches none of it -- the corpus measured 2/22 hits with
+                # the boundary and 22/22 without it.
+                r"DiffieHellman|X25519|EVP_PKEY_EC\b|"
+                # `.exchange(peer_public_key)` is the actual ECDH operation in the
+                # `cryptography` library, matched only where the argument name says so -- a bare
+                # `.exchange()` is far too common in ordinary Python to key off.
+                r"[Ee][Cc][Dd][Hh]\w*\s*\.\s*exchange\(|"
+                r"\.exchange\(\s*(?:peer|remote|their|public|dh)[\w_]*\s*\)|"
+                r"generate_private_key\(\s*ec\.(SECP\d+R1)\(\)"),
     dict(id="ECD-SRC-ECDSA-001", name="ECDSA", primitive="signature", artefact_class="source",
          uses="signing", key_group=None, evidence="discovered",
          regex=r"ec\.ECDSA\(|ECDSA_sign|Signature\.getInstance\(\s*[\"'](SHA\d+withECDSA|ECDSA)|"
@@ -96,10 +124,14 @@ RULES = [
     dict(id="ECD-SRC-PYCA-ED-001", name="Ed25519", primitive="signature", artefact_class="source",
          uses="signing", key_group=None, evidence="discovered",
          regex=r"ed25519\.(Ed25519PrivateKey|Ed25519PublicKey)\b|ed448\.Ed448PrivateKey\b"),
+    # ENCRYPTION only. `padding.PSS` is a SIGNATURE padding scheme (it is what RSASSA-PSS uses),
+    # and listing it here made one identifier report as both `pke` and `signature` for the same
+    # line, so the recommender offered a decrypt target and a signing target for one statement.
+    # PSS is matched by ECD-SRC-RSA-002, which is where it belongs.
     dict(id="ECD-SRC-PYCA-RSA-001", name="RSA", primitive="pke", artefact_class="source",
          uses="at-rest", key_group=1, evidence="discovered",
          regex=r"rsa\.(RSAPrivateNumbers|RSAPublicNumbers|RSAPrivateKey|RSAKey)\b|"
-                r"padding\.(OAEP|PKCS1v15|PSS)\b|asymmetric\.rsa\b"),
+                r"padding\.(OAEP|PKCS1v15)\b|asymmetric\.rsa\b"),
     # ---- hashlib direct imports ----------------------------------------------------------------
     # `from hashlib import sha1, md5` names the algorithm as a bound name. `hashlib.sha256(...)`
     # is already covered elsewhere; the import form was not.
@@ -435,21 +467,28 @@ class ECDATScanner:
                 if is_config and rule["evidence"] == "discovered":
                     evidence_class = "configured"
                 uses = _refine_uses(rule, content[max(0, match.start() - 400): match.end() + 400])
-                # A bare "ECC" hit carries no use context: ECDH implies key agreement, ECDSA a
-                # signature. Resolve the name AND its primitive together so the recommender
-                # cannot offer ML-DSA for a key-exchange artefact (or ML-KEM for a signature).
+                # A curve OBJECT is not an operation. `ec.SECP256R1()` names the algorithm but
+                # not whether it will be used to agree a key or to sign, and guessing makes the
+                # tool assert one of the two from nothing.
+                #
+                # The old code inferred the name AND the primitive from nearby prose: a bare ECC
+                # hit with no TLS context was renamed "ECDSA / signature". That is a coin-flip
+                # presented as a finding, and it is what let one line be reported as both ECDH
+                # and ECDSA. The curve size is still resolved; the OPERATION is left unstated, and
+                # `engine/purpose.py` reports the purpose as unresolved so a human decides.
                 if name in ("ECC", "ECDH"):
                     for grp in match.groups() or ():
                         if grp and grp.lower() in CURVE_KEY_SIZES_LOWER:
                             key_length = CURVE_KEY_SIZES_LOWER[grp.lower()]
-                # A bare "ECC" hit carries no use context: ECDH implies key agreement, ECDSA a
-                # signature. Resolve the name AND its primitive together so the recommender
-                # cannot offer ML-DSA for a key-exchange artefact (or ML-KEM for a signature).
                 if name == "ECC":
+                    # Only TLS context establishes key agreement. Otherwise the operation is
+                    # left UNSTATED rather than defaulted to "signature", which asserts an intent
+                    # the evidence does not contain. The name stays "ECC" -- the algorithm family
+                    # the code actually names -- and the break model still resolves from it.
                     if uses == "tls":
                         name, primitive = "ECDH", "key-agreement"
                     else:
-                        name, primitive = "ECDSA", "signature"
+                        name, primitive = "ECC", "unknown"
                 finding = {
                     "file": file_path,
                     "line": line,

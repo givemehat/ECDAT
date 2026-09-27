@@ -393,12 +393,52 @@ def test_a_name_resolving_to_public_and_private_is_refused_entirely():
 
 
 def test_a_name_resolving_to_public_and_metadata_is_refused():
-    """Metadata in the answer is worse than a private address, and is refused the same way."""
+    """Metadata in the answer is refused, and named as metadata rather than as rebinding.
+
+    The verdict is now `cloud-metadata` rather than `split-horizon`. Both refuse the endpoint, but
+    the metadata verdict is the one that must not depend on DNS answer ORDER: the check used to
+    read only the first blocking answer, so `[169.254.169.254, 10.1.2.3]` refused as
+    cloud-metadata while `[10.1.2.3, 169.254.169.254]` did not refuse the metadata address at
+    all. An unconditional refusal cannot be a function of which answer the resolver listed first.
+    """
     p = policy(allowed_hosts=["rebind.example"],
                resolver=fake_resolver({"rebind.example": [PUBLIC_IP, "169.254.169.254"]}))
     result = p.vet_endpoint("rebind.example:443")
     assert isinstance(result, Refusal)
-    assert result.verdict == VERDICT_SPLIT_HORIZON
+    assert result.verdict == VERDICT_METADATA
+    assert "169.254.169.254" in result.reason, \
+        "the refusal must name the metadata address it refused on"
+
+
+def test_metadata_refusal_does_not_depend_on_dns_answer_order():
+    """The same two answers, reversed, must produce the same refusal.
+
+    This is the regression the ordering bug hid behind: with a private address listed FIRST, the
+    metadata address was never examined, so a lab-permitted private answer masked it.
+    """
+    for order in ([PUBLIC_IP, "169.254.169.254"], ["169.254.169.254", PUBLIC_IP]):
+        p = policy(allowed_hosts=["rebind.example"],
+                   resolver=fake_resolver({"rebind.example": order}))
+        result = p.vet_endpoint("rebind.example:443")
+        assert isinstance(result, Refusal), \
+            "order %r must still refuse" % (order,)
+        assert result.verdict == VERDICT_METADATA, \
+            "order %r must refuse as metadata" % (order,)
+
+
+def test_a_lab_permitted_private_answer_cannot_mask_a_metadata_answer():
+    """Allowing private targets must not enable a metadata endpoint.
+
+    With `ALLOW_PRIVATE_TARGETS` on, a private answer is permitted. That permission previously
+    short-circuited the metadata check whenever the private address was listed first, so the
+    metadata address was vetted and connected to. The docstring calls the metadata refusal
+    unconditional; this is the test that makes it so.
+    """
+    p = policy(allowed_hosts=["lab.example"], allow_private=True,
+               resolver=fake_resolver({"lab.example": ["10.1.2.3", "169.254.169.254"]}))
+    result = p.vet_endpoint("lab.example:443")
+    assert isinstance(result, Refusal), "a lab permission must not permit a metadata endpoint"
+    assert result.verdict == VERDICT_METADATA
 
 
 def test_a_name_resolving_to_several_public_addresses_is_fine():

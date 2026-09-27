@@ -74,6 +74,13 @@ def test_all_emitted_primitives_are_in_the_cyclonedx_vocabulary():
 
 
 def test_nist_quantum_security_level_is_zero_for_shor_broken():
+    """0 means "a CRQC breaks this", and is emitted ONLY where that is true.
+
+    This test previously asserted 0 for every component in the CBOM without checking what the
+    components were, which is how `nistQuantumSecurityLevel: 0` came to mean both "RSA is
+    quantum-broken" and "we have no idea what category this symmetric cipher is". The value is
+    load-bearing, so the test now names the algorithms it is asserting about.
+    """
     findings = [
         dict(name="RSA", primitive="pke", key_length=2048, file="a.py", line=1),
         dict(name="ECDH", primitive="key-agreement", file="a.py", line=2),
@@ -81,7 +88,44 @@ def test_nist_quantum_security_level_is_zero_for_shor_broken():
     cbom = json.loads(generate_cbom(findings))
     for comp in cbom["components"]:
         ap = comp["cryptoProperties"]["algorithmProperties"]
-        assert ap["nistQuantumSecurityLevel"] == 0
+        assert ap["nistQuantumSecurityLevel"] == 0, (
+            "a Shor-broken asymmetric primitive must be 0")
+
+
+def test_nist_quantum_security_level_is_not_zero_for_symmetric():
+    """The counterpart: a symmetric primitive a CRQC does NOT break must not be published as 0.
+
+    AES-256, SHA-3 and every MAC and KDF were all emitted as `nistQuantumSecurityLevel: 0` --
+    the same value as RSA -- which told a consumer the tool believed a CRQC breaks them. It
+    does not: Grover halves the exponent, and the result is not retroactive.
+    """
+    findings = [
+        dict(name="AES", primitive="ae", key_length=256, mode="GCM", file="a.py", line=1),
+        dict(name="SHA-256", primitive="hash", file="a.py", line=2),
+    ]
+    cbom = json.loads(generate_cbom(findings))
+    for comp in cbom["components"]:
+        ap = comp["cryptoProperties"]["algorithmProperties"]
+        assert ap.get("nistQuantumSecurityLevel") != 0, (
+            "%s is not broken by a CRQC and must not carry the Shor-broken value"
+            % comp.get("name"))
+
+
+def test_an_unknown_nist_category_is_omitted_not_asserted_as_zero():
+    """Where the category is genuinely unknown the property is absent, and the gap is stated.
+
+    The schema has no "unknown" member and sets `additionalProperties: false`, so the honest
+    answer is to omit the field and say why in an `ecd:`-namespaced property -- not to publish
+    a 0 that means the opposite of what the reader will take it to mean.
+    """
+    findings = [dict(name="ChaCha20", primitive="stream-cipher", file="a.py", line=1)]
+    cbom = json.loads(generate_cbom(findings))
+    comp = cbom["components"][0]
+    ap = comp["cryptoProperties"]["algorithmProperties"]
+    assert "nistQuantumSecurityLevel" not in ap
+    gaps = [p for p in comp.get("properties", [])
+            if p.get("name") == "ecd:nist_level_gap"]
+    assert gaps, "an absent field must be explained, or it reads as 'no category exists'"
 
 
 def test_key_size_and_mode_use_standard_algorithm_properties():

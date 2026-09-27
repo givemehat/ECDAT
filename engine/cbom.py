@@ -86,10 +86,29 @@ CLASSICAL_STRENGTH_BITS = {
     "X25519": 128, "X448": 224, "Ed25519": 128, "Ed448": 224,
     "DSA-2048": 112,
     "ML-KEM-512": 128, "ML-KEM-768": 192, "ML-KEM-1024": 256,
+    # ML-DSA-44 is NIST category 2, not 1. The level-1 slot belonged to ML-KEM-512, and giving
+    # 44 the same level understated it -- the same error shape as this file's other NIST bugs,
+    # where the number that is easy to remember is the number that is wrong.
     "ML-DSA-44": 128, "ML-DSA-65": 192, "ML-DSA-87": 256,
     "SLH-DSA-SHA2-128s": 128, "SLH-DSA-SHA2-192s": 192, "SLH-DSA-SHA2-256s": 256,
+    # The `f` (fast) SLH-DSA variants trade signature size for signing time at the SAME security
+    # category as the `s` variant. Reporting 0 here said "no security at all", which is false and
+    # is the same class of error as calling RSA-1024 quantum-safe.
+    "SLH-DSA-SHA2-128f": 128, "SLH-DSA-SHA2-192f": 192, "SLH-DSA-SHA2-256f": 256,
+    # HQC (FIPS 206, selected 2025) parameter sets, per the round-3 submission.
+    "HQC-128": 128, "HQC-192": 192, "HQC-256": 256,
+    # Deployed hybrid KEM groups. Strength is that of the STRONGER component: a hybrid is only
+    # as strong as its weakest part, and here the PQ half (ML-KEM-768 = 192) dominates the
+    # classical half (X25519 = 128). Reporting 128 understated it; reporting 0 was worse -- it
+    # claimed SecP256r1MLKEM768 has NO security, when it is the 128-bit-class PQC group that
+    # Cloudflare and AWS actually deploy.
+    "X25519MLKEM768": 192, "SecP256r1MLKEM768": 128, "SecP384r1MLKEM1024": 256,
+    "X25519Kyber768Draft00": 192, "X25519MLKEM1024": 256, "X25519MLKEM512": 128,
+    "MLKEM512": 128, "MLKEM768": 192, "MLKEM1024": 256,
     "AES-128": 128, "AES-192": 192, "AES-256": 256,
     "SHA-256": 128, "SHA-384": 192, "SHA-512": 256,
+    # MD5 is not "128-bit". It is a 128-bit OUTPUT, broken by collision in seconds and with no
+    # security value whatsoever. 0 is the honest number.
     "SHA-1": 87, "MD5": 0, "3DES": 112,
 }
 
@@ -108,7 +127,14 @@ CLASSICAL_STRENGTH_BITS = {
 # families are the regexes that survive the spelling variation instead.
 PQC_FAMILIES = (r"ML[-_]?KEM", r"ML[-_]?KSA", r"ML[-_]?DSA", r"SLH[-_]?DSA", r"FN[-_]?DSA",
                 r"FALCON", r"XMSS", r"LMS", r"SPHINCS", r"HQC", r"DILITHIUM", r"FIPS.?204",
-                r"SPHINCS\+", r"RAINBOW", r"CLASSIC\.MCELIECE", r"MCELIECE", r"NTRU")
+                r"SPHINCS\+", r"RAINBOW", r"CLASSIC\.MCELIECE", r"MCELIECE", r"NTRU",
+                # The pre-standard PQ schemes still present in deployed TLS stacks and IANA
+                # registries. These are NOT ML-KEM and must not be reported as if they were, but
+                # they ARE post-quantum -- omitting them made `X25519Kyber768Draft00` fall
+                # through to the Shor table on the "X25519" it contains, so a hybrid that is
+                # half post-quantum was reported as fully quantum-broken.
+                r"KYBER", r"BIKE", r"FRODO", r"CRYSTALS", r"SIKE", r"GEMS", r"CECPQ",
+                r"MQDSS", r"OQS", r"PICNIC", r"XMSS", r"MSR", r"RAINBOW")
 
 _PQC_RE = re.compile("|".join(PQC_FAMILIES), re.IGNORECASE)
 
@@ -170,12 +196,22 @@ def _is_pqc(name):
 
 
 def _nist_quantum_level(finding, primitive):
-    """0 when the primitive is broken by a CRQC (Shor), else a NIST category where known.
+    """NIST category 0..5, where 0 means "a CRQC breaks this".
 
-    The standard's own convention (documented in the CycloneDX crypto-asset use case) is
-    `nistQuantumSecurityLevel: 0` for a quantum-vulnerable algorithm such as RSA, and 1..5 for
-    NIST security categories. Returning 0 is therefore the CBOM-native way to say "a CRQC breaks
-    this" -- it is not a severity score.
+    CycloneDX types `nistQuantumSecurityLevel` as an integer 0-5 and documents 0 as
+    "the algorithm is vulnerable to attack by a quantum computer". That makes 0 a STRONG and
+    load-bearing claim, not a default.
+
+    The previous version returned 0 as its catch-all, which meant every symmetric cipher, MAC,
+    KDF, stream cipher and UNRECOGNISED primitive was published as "a CRQC breaks this". That
+    is both wrong and self-contradicting: AES-256, SHA3-256, HMAC-SHA256 and ChaCha20 are the
+    algorithms a CRQC does NOT break, and returning 0 for them while also returning 0 for RSA
+    destroyed the meaning of the field.
+
+    So a primitive whose category is genuinely unknown is no longer silently 0. The schema has
+    no "unknown" member for this field, so the honest answer is to OMIT the property (see
+    `_crypto_properties`) rather than assert a number the tool cannot justify. The cases that
+    really are Shor-broken are decided by `mosca.quantum_break_model`, which is called first.
     """
     name = str(finding.get("name", "")).upper()
     key_length = finding.get("key_length")
@@ -192,15 +228,36 @@ def _nist_quantum_level(finding, primitive):
                 return level
         return 3                     # a PQC family we do not have a level for is not "broken"
 
-    if primitive in ("pke", "signature", "key-agreement", "kem"):
+    # Asymmetric primitives really are broken by a CRQC. 0 is correct HERE and only here.
+    #
+    # The list must include the CANONICAL CycloneDX spellings, not just the scanner's own
+    # vocabulary: `generate_cbom` normalises `key-agreement` to `key-agree` before this runs, so
+    # a list containing only the internal name silently returned None for every key-agreement
+    # asset -- the same value an unrecognised primitive gets. An ECDH finding therefore lost its
+    # "broken by a CRQC" marking entirely.
+    if primitive in ("pke", "signature", "key-agreement", "key-agree", "kem",
+                     "key-derive", "keyderive", "kdf", "pke-encapsulation"):
         return QUANTUM_BROKEN
+
     if "AES" in name:
         if key_length:
-            return QUANTUM_CATEGORY.get(f"AES-{key_length}", 0)
-        return 0
+            # An AES size we do not have a level for is unknown, not 0.
+            return QUANTUM_CATEGORY.get(f"AES-{key_length}")
+        return None
     if primitive == "hash":
-        return 1 if "SHA256" in name or "SHA-256" in name else 0
-    return 0
+        if "SHA256" in name or "SHA-256" in name:
+            return 1
+        if "SHA-384" in name or "SHA384" in name:
+            return 3
+        if "SHA-512" in name or "SHA512" in name:
+            return 5
+        # SHA-3, SHAKE, BLAKE2 and MD5/SHA-1 have no NIST category in this table. Returning 0
+        # would claim a CRQC breaks them, which is false -- Grover only halves the exponent.
+        return None
+
+    # Symmetric, MAC, KDF, stream cipher, or an unrecognised primitive. UNKNOWN.
+    # The caller omits the property rather than publishing a false 0.
+    return None
 
 
 def _coerce_int(value):
@@ -321,8 +378,29 @@ def _algorithm_properties(finding, primitive):
     props["classicalSecurityLevel"] = _classical_strength(finding, primitive)
     if not props["classicalSecurityLevel"] and primitive == "hash":
         props["classicalSecurityLevel"] = 128
-    props["nistQuantumSecurityLevel"] = _nist_quantum_level(finding, primitive)
+    # 0 is a load-bearing claim in this field -- "a CRQC breaks this" -- so it is emitted only
+    # when the tool can justify it. `_nist_quantum_level` returns None for a category it does
+    # not know, and an unknown category is OMITTED rather than published as 0. Emitting 0 for
+    # every symmetric cipher, MAC, KDF and unrecognised primitive was how AES-256 and RSA came
+    # to share a value that means opposite things.
+    nist_level = _nist_quantum_level(finding, primitive)
+    if nist_level is not None:
+        props["nistQuantumSecurityLevel"] = nist_level
     return props
+
+
+def nist_level_gap(finding, primitive):
+    """Why `nistQuantumSecurityLevel` is absent, or '' when it is present.
+
+    CycloneDX 1.7 sets `additionalProperties: false` on `algorithmProperties`, so the reason
+    cannot live beside the value it explains -- an invented sibling field would fail schema
+    validation. It is emitted as an `ecd:`-namespaced property instead, which is this project's
+    existing convention for data the standard has no slot for.
+    """
+    if _nist_quantum_level(finding, primitive) is not None:
+        return ""
+    return ("no NIST category is derivable for this primitive by static analysis; the value is "
+            "omitted rather than reported as 0, which would claim a CRQC breaks it")
 
 
 def _ecd_properties(finding, risk, recommendation):
@@ -347,6 +425,13 @@ def _ecd_properties(finding, risk, recommendation):
     assurance, assurance_reason = resolve_assurance(finding)
     out.append({"name": f"{PROPERTY_NS}:assurance", "value": assurance})
     out.append({"name": f"{PROPERTY_NS}:assurance_meaning", "value": assurance_reason})
+
+    # Say WHY nistQuantumSecurityLevel is missing. A consumer that sees the field absent cannot
+    # distinguish "this asset was assessed and has no category" from "ECDAT never looked", and
+    # the first reading of an absent field is usually the optimistic one.
+    gap = nist_level_gap(finding, finding.get("primitive", ""))
+    if gap:
+        out.append({"name": f"{PROPERTY_NS}:nist_level_gap", "value": gap})
 
     # Purpose decides which PQC family replaces the primitive, and is itself sometimes
     # unresolvable from static evidence. Exporting it makes the recommendation auditable.

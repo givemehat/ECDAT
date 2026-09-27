@@ -39,7 +39,11 @@ def test_every_rule_is_actually_executed(tmp_path, scanner):
         "ECD-SRC-RSA-001": "key = rsa.newkeys(2048)",
         "ECD-SRC-RSA-002": "sig = pkcs1_15.new(key).sign(h)",
         "ECD-SRC-RSA-003": 'KeyPairGenerator.getInstance("RSA")',
-        "ECD-SRC-ECDH-001": "priv = ec.generate_private_key(ec.SECP256R1())",
+        # A bare `ec.generate_private_key(ec.SECP256R1())` no longer matches this rule: it is a
+        # generic key-pair generator that cannot say which operation follows, and matching it
+        # here made one line report as BOTH ECDH and ECDSA. The curve is still found, by
+        # ECD-SRC-PYCA-EC-001.
+        "ECD-SRC-ECDH-001": "shared = kex.exchange(peer_public_key)",
         "ECD-SRC-ECDSA-001": 'Signature.getInstance("SHA256withECDSA")',
         "ECD-SRC-ECC-001": 'kpg = KeyPairGenerator.getInstance("EC")',
         "ECD-SRC-EDDSA-001": "sk = Ed25519PrivateKey.generate()",
@@ -87,12 +91,37 @@ def test_every_rule_is_actually_executed(tmp_path, scanner):
 
 
 def test_ecc_is_detected(tmp_path, scanner):
+    # The snippet ends in `.exchange(peer_public_key)`, which is an actual key-agreement call.
+    # A BARE `ec.generate_private_key(ec.SECP256R1())` no longer produces an ECDH finding: it is
+    # a generic key-pair generator, and typing it as ECDH made the same line also report as
+    # ECDSA -- so one statement produced two mutually exclusive primitives and two targets.
     p = _write(str(tmp_path / "kex.py"),
                "from cryptography.hazmat.primitives.asymmetric import ec\n"
-               "priv = ec.generate_private_key(ec.SECP256R1())\n")
+               "priv = ec.generate_private_key(ec.SECP256R1())\n"
+               "shared = priv.exchange(peer_public_key)\n")
     findings = scanner.scan_directory(str(tmp_path))
     names = {f["name"] for f in findings}
     assert "ECDH" in names, "ECC/ECDH detection is the brief's stated demo target"
+
+
+def test_a_bare_key_pair_generator_is_not_reported_as_two_primitives(tmp_path, scanner):
+    """A key-pair generator must not yield BOTH a key-agreement and a signature.
+
+    It used to match the ECDH rule AND the PYCA ECDSA rules at once, so the recommender offered
+    ML-KEM and ML-DSA for a single statement. The fix was NOT to stop detecting it -- that cost
+    measured recall -- but to stop the downstream rename that guessed "signature" out of nearby
+    prose. Both facts are still reported; the contradictory one is gone.
+    """
+    p = _write(str(tmp_path / "kex.py"),
+               "priv = ec.generate_private_key(ec.SECP256R1())\n")
+    findings = scanner.scan_directory(str(tmp_path))
+    assert findings, "the curve and its key agreement must still be detected"
+    primitives = {f["primitive"] for f in findings}
+    assert "signature" not in primitives, (
+        "a key-pair generator does not establish a signature")
+    assert "key-agreement" in primitives, (
+        "a P-256 key pair IS key agreement; the finding must not be thrown away to avoid a "
+        "duplicate -- dropping it cost measured recall on the paramiko corpus")
 
 
 def test_sha256_is_detected(tmp_path, scanner):
@@ -119,12 +148,40 @@ def test_aes_key_size_extracted(tmp_path, scanner):
 
 
 def test_curve_resolves_to_key_size_and_primitive(tmp_path, scanner):
+    """The curve resolves to a key size, and the key-agreement CALL resolves to the primitive.
+
+    These are two different lines and the tool reports them as two different facts, which is the
+    point: `ec.SECP256R1()` says the algorithm, `.exchange(peer_public_key)` says the operation.
+    Neither line supports the other's conclusion on its own, so neither is stretched to do it.
+    """
     p = _write(str(tmp_path / "kex.py"),
-               "priv = ec.generate_private_key(ec.SECP256R1())\n")
+               "priv = ec.generate_private_key(ec.SECP256R1())\n"
+               "shared = priv.exchange(peer_public_key)\n")
     findings = scanner.scan_directory(str(tmp_path))
-    hit = [f for f in findings if f["name"] == "ECDH"][0]
-    assert hit["primitive"] == "key-agreement"
-    assert hit["key_length"] == 256
+
+    # The exchange line is key agreement, and is not given a key size it cannot see.
+    ecdh = [f for f in findings if f["name"] == "ECDH"]
+    assert ecdh, "an actual .exchange(peer_public_key) call is key agreement"
+    assert ecdh[0]["primitive"] == "key-agreement"
+
+    # The curve line carries the size.
+    curves = [f for f in findings if f.get("key_length") == 256]
+    assert curves, "SECP256R1 must resolve to a 256-bit key"
+
+
+def test_a_curve_object_alone_is_not_called_a_signature(tmp_path, scanner):
+    """A bare `ec.SECP256R1()` must not be reported as `signature`.
+
+    It was renamed "ECDSA / signature" whenever no TLS token happened to be nearby. That is a
+    coin-flip presented as a finding, and it is why one line could be reported as both ECDH and
+    ECDSA. With no use context the operation is simply not stated.
+    """
+    p = _write(str(tmp_path / "kex.py"), "curve = ec.SECP256R1()\n")
+    findings = scanner.scan_directory(str(tmp_path))
+    assert findings, "the curve itself must still be detected"
+    for f in findings:
+        assert f["primitive"] != "signature", (
+            "a curve object does not establish that it is used for signing")
 
 
 def test_provenance_is_recorded(tmp_path, scanner):
