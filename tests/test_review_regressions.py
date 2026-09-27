@@ -28,7 +28,8 @@ from engine.cbom import is_pqc
 from engine.gui_helpers import (DEADLINE_NO_POLICY, DEADLINE_OVERRUN, DEADLINE_UNRATED,
                                 DEADLINE_WITHIN, deadline_countdown, deadline_verdict,
                                 late_records, queue_rows, unrated_records)
-from engine.mosca import quantum_break_model
+from engine.mosca import (POLICY_DEADLINES, calculate_risk, quantum_break_model,
+                          resolve_policy_deadline)
 from engine.recommender import get_pqc_recommendation
 from engine.scanner import RULES
 
@@ -224,6 +225,183 @@ def test_a_genuine_named_target_is_still_labelled_named():
     row = queue_rows([record], deadline_year=2035)[0]
     assert "target named" in row["Status"]
 
+
+
+# --------------------------------------------------------------------------------------------
+# FALSE COMPLIANCE CLAIM: NIST IR 8547 is strength-dependent, not a flat year
+# --------------------------------------------------------------------------------------------
+
+def test_symmetric_primitives_are_OUT_OF_SCOPE_for_an_ir_8547_verdict():
+    """AES-256 must never be reported as "disallowed by NIST IR 8547".
+
+    IR 8547's transition tables govern quantum-vulnerable PUBLIC-KEY algorithms. A symmetric
+    cipher is not in them, and Grover only halves the exponent rather than breaking the
+    primitive. Deriving the status from key strength alone put AES-256, SHA-512, ChaCha20 and
+    every HMAC into the "disallowed" bucket -- a false compliance claim of the worst kind,
+    because it names a NIST standard and gets it wrong.
+    """
+    for name, primitive, key_length in [
+        ("AES-256", "block-cipher", 256),
+        ("AES-256-GCM", "ae", 256),
+        ("ChaCha20", "stream-cipher", 256),
+        ("SHA-512", "hash", None),
+        ("HMAC-SHA256", "mac", None),
+        ("HKDF", "kdf", None),
+    ]:
+        resolved = resolve_policy_deadline(
+            {"name": name, "primitive": primitive, "key_length": key_length}, "nist_ir_8547")
+        assert resolved["status"] == "not-in-scope", (
+            "%s is not in the IR 8547 transition table and must not receive a verdict "
+            "from it (got %r)" % (name, resolved["status"]))
+        assert resolved["strength_tier"] is None
+
+
+def test_post_quantum_algorithms_are_NOT_APPLICABLE_not_disallowed():
+    """ML-KEM is the replacement IR 8547 mandates, so it cannot be deprecated by it.
+
+    Without the is_pqc() gate, ML-KEM-768, ML-DSA-65 and our own recommended hybrid
+    X25519MLKEM768 were all reported "disallowed" under the policy that recommends them.
+    """
+    for name in ["ML-KEM-768", "ML-KEM-1024", "ML-DSA-65", "X25519MLKEM768", "SLH-DSA-SHA2-128s"]:
+        resolved = resolve_policy_deadline(
+            {"name": name, "primitive": "kem", "key_length": 256}, "nist_ir_8547")
+        assert resolved["status"] == "not-applicable", (
+            "%s is post-quantum; IR 8547 retires what it replaces, not the replacement "
+            "(got %r)" % (name, resolved["status"]))
+
+
+def test_an_unmeasurable_algorithm_is_UNRATED_not_silently_deprecated():
+    """A strength of 0 or None is an absence, not the 112-bit tier.
+
+    The first implementation folded 0 into `lt_128`, so an unrecognised algorithm and a bare
+    `libcrypto.so` were both quietly reported "deprecated" -- a sentinel becoming a verdict,
+    and the safe direction being the wrong one.
+    """
+    # All of these are PUBLIC-KEY primitives, so they pass the scope gate and reach the
+    # strength test. A non-public-key primitive never gets this far -- it is `not-in-scope`
+    # (see the scope test above), and a post-quantum one is caught even earlier as
+    # `not-applicable` (see the PQ test above). Both of those are more informative answers,
+    # which is why only genuinely unmeasurable-but-valid cases belong in this list.
+    for name, primitive, key_length in [
+        ("RSA", "pke", None),                 # bare family name, size unknown
+        ("ECDH", "key-agreement", None),      # no size in the name or the field
+        ("ECDSA", "signature", None),
+    ]:
+        resolved = resolve_policy_deadline(
+            {"name": name, "primitive": primitive, "key_length": key_length}, "nist_ir_8547")
+        assert resolved["status"] == "unrated", (
+            "%r must be UNRATED, not assigned a tier from a missing value (got %r)"
+            % (name, resolved["status"]))
+        assert resolved["strength_tier"] is None
+
+
+def test_a_size_embedded_in_the_name_still_resolves_the_tier():
+    """The counterpart, so `unrated` cannot be reached by deleting a field.
+
+    `RSA-2048` carries 112 bits in its own NAME, so it resolves to the deprecated tier even
+    with `key_length` absent or zero. That is the right answer -- the evidence is in the
+    identifier -- and the reason the `unrated` path must be tested with names that genuinely
+    say nothing.
+    """
+    for key_length in (None, 0):
+        resolved = resolve_policy_deadline(
+            {"name": "RSA-2048", "primitive": "pke", "key_length": key_length}, "nist_ir_8547")
+        assert resolved["status"] == "deprecated"
+        assert resolved["security_strength_bits"] == 112
+
+
+def test_the_112_bit_tier_carries_the_DEPRECATION_year_not_the_disallowance_year():
+    """2030 is the actionable date for the 112-bit tier.
+
+    Reporting 2035 there would hand a 112-bit operator five years they do not have, and
+    five years of a silent vulnerability window they were told they had.
+    """
+    resolved = resolve_policy_deadline(
+        {"name": "RSA-2048", "primitive": "pke", "key_length": 2048}, "nist_ir_8547")
+    assert resolved["year"] == 2030
+    assert resolved["status"] == "deprecated"
+
+
+def test_resolved_deadline_never_leaks_the_raw_tier_table():
+    """`tiers` is an internal detail. If it reaches the CBOM it bloats the document and hands
+    a consumer a table to interpret themselves."""
+    resolved = resolve_policy_deadline(
+        {"name": "RSA-2048", "primitive": "pke", "key_length": 2048}, "nist_ir_8547")
+    assert "tiers" not in resolved
+
+
+def test_policies_without_tiers_say_target_not_disallowed():
+    """India DST and CNSA 2.0 are procurement targets, not algorithm-status tables.
+
+    Calling them "disallowed" attributes a legal determination to a published date.
+    """
+    for policy in ("india_dst_nqm", "cnsa_2_0"):
+        resolved = resolve_policy_deadline(
+            {"name": "RSA-2048", "primitive": "pke", "key_length": 2048}, policy)
+        assert resolved["status"] == "target"
+        assert resolved["strength_tier"] is None
+
+
+def test_112_bit_algorithm_is_DEPRECATED_not_DISALLOWED_under_ir_8547():
+    """The 112-bit tier is deprecated and stays usable during migration.
+
+    NIST IR 8547 ipd: "NIST intends to instead deprecate rather than fully disallow classical
+    key-establishment schemes at the 112-bit security level. Organizations may continue using
+    these algorithms and parameter sets as they migrate." A flat `year: 2035` labelled
+    "disallowed" told an operator their 112-bit RSA was banned. The standard says the opposite.
+    """
+    resolved = resolve_policy_deadline(
+        {"name": "RSA-2048", "primitive": "pke", "key_length": 2048}, "nist_ir_8547")
+    assert resolved["status"] == "deprecated", (
+        "the 112-bit tier is deprecated, not disallowed")
+    assert resolved["strength_tier"] == "lt_128"
+    assert resolved["security_strength_bits"] == 112
+
+
+def test_128_bit_algorithm_IS_disallowed_under_ir_8547():
+    """The counterpart. The >= 128-bit tier genuinely is disallowed after 2035."""
+    resolved = resolve_policy_deadline(
+        {"name": "EC-P-256", "primitive": "signature", "key_length": 256}, "nist_ir_8547")
+    assert resolved["status"] == "disallowed"
+    assert resolved["strength_tier"] == "gte_128"
+
+
+def test_two_strengths_under_the_same_policy_do_not_share_a_verdict():
+    """RSA-2048 and RSA-3072 were both "RSA, 2035" in the old table, and they are not the same
+    regulatory position. That is the entire defect."""
+    weak = resolve_policy_deadline(
+        {"name": "RSA-2048", "primitive": "pke", "key_length": 2048}, "nist_ir_8547")
+    strong = resolve_policy_deadline(
+        {"name": "RSA-3072", "primitive": "pke", "key_length": 3072}, "nist_ir_8547")
+    assert weak["status"] != strong["status"]
+
+
+def test_ir_8547_is_marked_as_a_draft_wherever_it_is_shown():
+    """IR 8547 is an Initial Public Draft. A compliance tool that presents it as a final
+    standard is making a claim NIST has not made."""
+    resolved = resolve_policy_deadline(
+        {"name": "RSA-2048", "primitive": "pke", "key_length": 2048}, "nist_ir_8547")
+    assert resolved["draft"] is True
+    assert "DRAFT" in POLICY_DEADLINES["nist_ir_8547"]["label"].upper()
+
+
+def test_policies_without_tiers_are_unaffected():
+    """India DST and CNSA 2.0 have no strength-dependent table, so they keep a flat year."""
+    for policy in ("india_dst_nqm", "cnsa_2_0"):
+        resolved = resolve_policy_deadline(
+            {"name": "RSA-2048", "primitive": "pke", "key_length": 2048}, policy)
+        assert resolved["strength_tier"] is None
+        assert resolved["year"] == POLICY_DEADLINES[policy]["year"]
+
+
+def test_calculate_risk_records_the_resolved_deadline_not_the_flat_one():
+    """The audit trail must carry the nuance, or the console has nothing to show."""
+    risk = calculate_risk({"name": "RSA-2048", "primitive": "pke", "key_length": 2048,
+                           "uses": "signing"},
+                          user_x=10, user_y=3, z_collapse_time=10, policy="nist_ir_8547")
+    assert risk["policy_deadline"]["status"] == "deprecated"
+    assert any("deprecated" in a for a in risk["assumptions"]), (
+        "the assumption trail must state the status, not only the year")
 
 
 # --------------------------------------------------------------------------------------------

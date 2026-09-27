@@ -551,9 +551,27 @@ def view_auditor(records):
             horizon = ("subject to the inequality" if risk.get("subject_to_inequality")
                        else "inequality does not apply to this primitive")
             st.markdown(f'- **Horizon:** {escape(str(risk.get("horizon_type")))} - {horizon}')
-            deadline = (risk.get("policy_deadline") or {}).get("year")
+            pd = (risk.get("policy_deadline") or {})
+            deadline = pd.get("year")
             st.markdown(f'- **Latest safe migration start:** {risk.get("latest_safe_migration_start")}'
                         f' (active policy deadline: {escape(str(deadline))})')
+            # Show WHAT the deadline means for THIS artefact. A bare year hid the fact that
+            # NIST IR 8547 only DISALLOWS the >= 128-bit tier, while 112-bit is merely
+            # deprecated and stays usable during migration. A reader who saw only "2035" would
+            # read it as a ban in both cases.
+            if pd.get("strength_tier"):
+                bits = pd.get("security_strength_bits") or "unrated"
+                st.markdown(f'- **Policy verdict for this artefact:** '
+                            f'{escape(str(pd.get("status", "unknown")).upper())} '
+                            f'&mdash; {escape(str(bits))}-bit tier under '
+                            f'{escape(str(pd.get("label", "")))}')
+                if pd.get("note"):
+                    st.markdown(f'  <div style="font-size:0.9em;opacity:0.85;margin-left:1.2em">'
+                                f'{escape(str(pd["note"]))}</div>', unsafe_allow_html=True)
+                if pd.get("draft"):
+                    st.markdown(f'  <div style="font-size:0.9em;opacity:0.85;margin-left:1.2em">'
+                                f'Source document is an <b>Initial Public Draft</b>, not a final '
+                                f'standard.</div>', unsafe_allow_html=True)
             st.markdown(f'- **Evidence class:** {escape(str(record.get("evidence_class")))}'
                         f' &middot; detector confidence {record.get("dl_confidence")}'
                         f' &middot; AST depth {record.get("ast_depth")}')

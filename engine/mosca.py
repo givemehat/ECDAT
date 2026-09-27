@@ -75,10 +75,121 @@ Z_SENSITIVITY_YEARS = (5, 10, 15)   # band reported alongside every verdict
 
 POLICY_DEADLINES = {
     "india_dst_nqm": {"label": "India DST / National Quantum Mission (CII migration)", "year": 2029},
-    "nist_ir_8547":  {"label": "NIST IR 8547 -- quantum-vulnerable PKC disallowed",    "year": 2035},
+    # STRENGTH-DEPENDENT, per the verified IR 8547 transition tables (research/sources/04).
+    # Quoting the draft: NIST "intends to instead deprecate rather than fully disallow classical
+    # key-establishment schemes at the 112-bit security level. Organizations may continue using
+    # these algorithms and parameter sets as they migrate." The 2035 DISALLOWANCE attaches to
+    # the >= 128-bit tier; the 112-bit tier is merely DEPRECATED (after 2030).
+    #
+    # A single flat 2035 "disallowed" for every artefact overstated the 112-bit case -- a
+    # compliance tool must not claim an algorithm is banned when the standard says it is
+    # usable during migration. `year` is kept as the DISALLOW year (the operative date for the
+    # >= 128-bit tier) so existing consumers keep working, and `tiers` carries the nuance.
+    "nist_ir_8547":  {"label": "NIST IR 8547 ipd -- quantum-vulnerable PKC (DRAFT)",
+                      "year": 2035,
+                      "draft": True,
+                      "tiers": {
+                          # 112-bit: DEPRECATED after 2030. The year is 2030, not 2035, because
+                          # the deprecation is the actionable date for this tier and there is no
+                          # disallowance attached to it. Reporting 2035 here would tell a 112-bit
+                          # operator they have five extra years they do not have.
+                          "lt_128": {"year": 2030, "status": "deprecated",
+                                     "note": "Deprecated after 2030. NIST intends to allow "
+                                             "continued use during migration rather than "
+                                             "disallow. Not a hard ban."},
+                          # >= 128-bit: disallowed after 2035. This is the hard date.
+                          "gte_128": {"year": 2035, "status": "disallowed",
+                                      "note": "Disallowed after 2035."},
+                      }},
     "cnsa_2_0":      {"label": "CNSA 2.0 -- exclusive use across NSS",                  "year": 2033},
 }
 DEFAULT_POLICY = "india_dst_nqm"
+
+# The strength (in equivalent security bits) at or above which a policy is a hard disallowance
+# rather than a deprecation. NIST SP 800-57 equivalence puts RSA-2048, ECDSA-P-224, 3DES and
+# 2-key triple-DES at the 112-bit boundary, so 112 is genuinely a distinct regulatory tier.
+DISALLOW_TIER_BITS = 128
+
+# The primitives NIST IR 8547's transition tables actually govern: quantum-vulnerable PUBLIC-KEY
+# algorithms. Everything else -- symmetric ciphers, hashes, MACs, KDFs, DRBGs, protocols, and
+# bare libraries -- is out of scope, because the tables say nothing about them. Membership here
+# is what gates a policy verdict; deriving one from key strength alone is the category error that
+# reported AES-256 as "disallowed by NIST".
+PUBLIC_KEY_PRIMITIVES = frozenset({
+    "pke", "signature", "key-agreement", "key-agree", "kem",
+    "key-derive", "keyderive", "key-wrap", "key-establishment", "pke-encapsulation",
+})
+
+
+def resolve_policy_deadline(finding, policy):
+    """The deadline that actually applies to THIS artefact, and whether it is a ban or a nudge.
+
+    A flat year per policy was wrong for NIST IR 8547, whose transition tables are keyed on
+    security strength: the >= 128-bit tier is *disallowed* after 2035, but for the 112-bit tier
+    NIST states it "intends to instead deprecate rather than fully disallow [...] Organizations
+    may continue using these algorithms and parameter sets as they migrate." Reporting both as
+    "disallowed 2035" told an operator their 112-bit RSA was banned when the standard says the
+    opposite.
+
+    THE FOUR GATES BELOW ARE THE WHOLE POINT, and each fixes a false compliance claim:
+
+      1. NOT IN SCOPE. IR 8547's tables cover quantum-vulnerable PUBLIC-KEY algorithms. A
+         symmetric cipher, hash, MAC or KDF is not in them. Deriving a status from key strength
+         alone put AES-256, SHA-512 and ChaCha20 in the "disallowed" bucket -- the tool asserting
+         that NIST bans AES-256. A category error like that discredits the whole report.
+      2. NOT QUANTUM-VULNERABLE. A post-quantum algorithm is not deprecated by IR 8547 at all;
+         it IS the replacement. ML-KEM-768 and X25519MLKEM768 -- our own recommended targets --
+         were being reported "disallowed".
+      3. UNRATED. A strength of 0 or None means we could not measure it, which is not the same
+         as 112-bit. A sentinel must never become a verdict: folding 0 into the "deprecated"
+         tier quietly downgraded every unrecognised algorithm.
+      4. NO LEAK. `tiers` is popped so the raw table never reaches the CBOM or the console.
+
+    Returns `year`, `status`, `note`, `draft`, `strength_tier` and `security_strength_bits`, so a
+    consumer can render "deprecated, still usable while migrating" instead of a bare year.
+    """
+    entry = dict(POLICY_DEADLINES.get(policy) or {})
+    tiers = entry.pop("tiers", None)
+    base = {"label": entry.get("label", policy), "draft": bool(entry.get("draft")),
+            "security_strength_bits": None, "strength_tier": None}
+
+    def _out(status, note, year=None, bits=None, tier=None):
+        result = dict(base)
+        result.update({"year": year if year is not None else entry.get("year"),
+                       "status": status, "note": note,
+                       "security_strength_bits": bits, "strength_tier": tier})
+        return result
+
+    if not tiers:
+        # No strength-dependent table. India DST and CNSA 2.0 are procurement targets, not
+        # algorithm-status tables, so "target" is the honest word -- not "disallowed".
+        return _out("target", "", year=entry.get("year"))
+
+    primitive = str(finding.get("primitive", "") or "").lower()
+
+    if primitive not in PUBLIC_KEY_PRIMITIVES:
+        return _out("not-in-scope",
+                    "NIST IR 8547 governs quantum-vulnerable public-key algorithms. This is a "
+                    "%s primitive and is not in the transition table."
+                    % (primitive or "unknown"))
+
+    from engine.cbom import is_pqc, _classical_strength   # cbom does not import mosca
+
+    if is_pqc(finding.get("name", "")):
+        return _out("not-applicable",
+                    "This is a post-quantum algorithm. IR 8547 retires the algorithms it "
+                    "replaces, not the replacements themselves.")
+
+    strength = _classical_strength(finding, primitive)
+    if not strength:
+        return _out("unrated",
+                    "No SP 800-57 equivalent security strength could be determined, so no tier "
+                    "could be selected. NOT counted as compliant and NOT deprecated.")
+
+    tier_key = "gte_128" if strength >= DISALLOW_TIER_BITS else "lt_128"
+    tier = tiers.get(tier_key) or {}
+    return _out(tier.get("status", "disallowed"), tier.get("note", ""),
+                year=tier.get("year", entry.get("year")), bits=strength, tier=tier_key)
 
 # ---------------------------------------------------------------------------------------------
 # X -- required protection lifetime, in years, by data class. Overridable per artefact or scan.
@@ -338,6 +449,10 @@ def calculate_risk(finding, user_x=None, user_y=None, z_collapse_time=None,
     else:
         threat = "No quantum break model applies"
 
+    # Resolved BEFORE the return so the audit trail records the deadline that actually applies
+    # to this artefact, including whether it is a hard disallowance or a deprecation.
+    resolved_deadline = resolve_policy_deadline(finding, policy)
+
     return {
         # --- Mosca inputs, each with the reason it holds that value ---
         "x": round(x_years, 2),
@@ -361,14 +476,21 @@ def calculate_risk(finding, user_x=None, user_y=None, z_collapse_time=None,
         "z_stable": stable,
         # --- audit trail ---
         "policy": policy,
-        "policy_deadline": POLICY_DEADLINES.get(policy, {}),
+        # Resolved per-artefact, not a flat per-policy year. For NIST IR 8547 the transition
+        # tables are keyed on security strength, so a 112-bit RSA and a 256-bit RSA do NOT share
+        # a verdict: the first is only deprecated, the second is disallowed. See
+        # resolve_policy_deadline and research/sources/04.
+        "policy_deadline": resolved_deadline,
         "x_reason": x_reason,
         "y_reason": y_reason,
         "assumptions": [
             f"X={round(x_years, 2)}y from {x_reason}",
             f"Y={round(y_years, 2)}y from {y_reason}",
             f"Z={z_years}y is a CRQC estimate, not a compliance deadline "
-            f"(policy deadline: {POLICY_DEADLINES.get(policy, {}).get('year', 'n/a')})",
+            f"(policy deadline: {resolved_deadline.get('year', 'n/a')}"
+            + (f", {resolved_deadline['status']} for the "
+               f"{resolved_deadline.get('security_strength_bits') or 'unrated'}-bit tier"
+               if resolved_deadline.get("strength_tier") else "") + ")",
         ],
         # --- retained ML diagnostics (reported, never used to derive X) ---
         "dl_confidence": round(max(0.0, min(1.0, float(finding.get("dl_confidence", 0.5) or 0.5))), 4),

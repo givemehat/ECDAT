@@ -462,6 +462,21 @@ def _ecd_properties(finding, risk, recommendation):
         if risk.get("policy_deadline", {}).get("year"):
             out.append({"name": f"{PROPERTY_NS}:mosca.policy_deadline",
                         "value": str(risk["policy_deadline"]["year"])})
+        # The YEAR alone is not the verdict. A downstream consumer reading only
+        # `policy_deadline = 2030` cannot tell a 112-bit algorithm that is merely deprecated
+        # (and stays usable while migrating) from a >= 128-bit one that is disallowed. The
+        # status and the source document's draft state travel with it, or the export is the
+        # place where the nuance is lost.
+        pd = risk.get("policy_deadline") or {}
+        if pd.get("status"):
+            out.append({"name": f"{PROPERTY_NS}:mosca.policy_status",
+                        "value": str(pd["status"])})
+        if pd.get("note"):
+            out.append({"name": f"{PROPERTY_NS}:mosca.policy_note",
+                        "value": str(pd["note"])[:240]})
+        if pd.get("draft"):
+            out.append({"name": f"{PROPERTY_NS}:mosca.policy_source_is_draft",
+                        "value": "true"})
         if risk.get("z_band"):
             out.append({"name": f"{PROPERTY_NS}:mosca.z_band", "value": json.dumps(risk["z_band"])})
     if recommendation:

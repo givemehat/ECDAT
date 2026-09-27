@@ -92,7 +92,13 @@ def test_z_is_tunable_end_to_end(tmp_path):
     assert "ecd:mosca.z" in mosca_props
     assert mosca_props["ecd:mosca.z"] == "15.0"
     assert mosca_props["ecd:mosca.policy"] == "nist_ir_8547"
-    assert mosca_props["ecd:mosca.policy_deadline"] == "2035"
+    # RSA is a 112-bit primitive, so IR 8547 puts it in the DEPRECATED tier with a 2030 date,
+    # not the 2035 disallowance that applies to the >= 128-bit tier. Assert the status as well
+    # as the year: a bare year cannot distinguish a deprecation from a ban, and that
+    # distinction is the whole reason `resolve_policy_deadline` exists.
+    assert mosca_props["ecd:mosca.policy_deadline"] == "2030"
+    assert mosca_props["ecd:mosca.policy_status"] == "deprecated"
+    assert mosca_props["ecd:mosca.policy_source_is_draft"] == "true"
 
 
 # ===========================================================================================
