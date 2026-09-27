@@ -1,13 +1,13 @@
-# ECDAT — Enterprise Cryptographic Discovery & Analysis Tool
+﻿# ECDAT â€” Enterprise Cryptographic Discovery & Analysis Tool
 
 [![Tests](https://github.com/givemehat/ECDAT/actions/workflows/tests.yml/badge.svg)](https://github.com/givemehat/ECDAT/actions/workflows/tests.yml)
 [![Quantum Risk Scan](https://github.com/givemehat/ECDAT/actions/workflows/ecdat_scan.yml/badge.svg)](https://github.com/givemehat/ECDAT/actions/workflows/ecdat_scan.yml)
 
-**Smart India Hackathon 2026 · Problem Statement SIH26164** · National Technical Research Organisation (NTRO) · Blockchain & Cybersecurity
+**Smart India Hackathon 2026 Â· Problem Statement SIH26164** Â· National Technical Research Organisation (NTRO) Â· Blockchain & Cybersecurity
 
 > *You cannot migrate what you cannot see.* ECDAT discovers an enterprise's cryptographic
 > inventory, judges each artefact's exposure to a future quantum attacker using **Mosca's
-> inequality**, and recommends a **standard-derived, cost-quantified** post-quantum replacement —
+> inequality**, and recommends a **standard-derived, cost-quantified** post-quantum replacement â€”
 > emitting a **schema-validated CycloneDX v1.7 CBOM** and stating exactly what it could not see.
 
 ---
@@ -16,12 +16,12 @@
 
 | # | Brief requirement | Implementation |
 |---|---|---|
-| 1 | **Discovery & cataloguing** of algorithms, keys, protocols, libraries | `engine/scanner.py` — **67-rule** detection table covering **Python, Java (JCA), C/C++ (OpenSSL), PHP and Ruby**, plus SSH/TLS wire identifiers, config files, binaries, certificates, dependency manifests, container images and a live network probe. **Go, Rust, JavaScript and TypeScript have no rules yet** — see *What this cannot see* |
-| 2 | **Quantum risk assessment**, flagging risks to sensitive data | `engine/mosca.py` — Shor vs Grover break model, **harvest-now-decrypt-later** flag, Mosca's inequality `X + Y > Z` |
-| 3 | **Classification** by type, lifetime, business criticality | `engine/mosca.py` — canonical primitives, `DATA_CLASS_LIFETIME` (X) and `MIGRATION_EFFORT` (Y) tables, Critical/High/Medium/Low tiers |
-| 4 | **PQC / hybrid recommendations** factoring risk, latency and cost | `engine/recommender.py` — FIPS 203/204/205 targets, explicit *Hybrid AND/OR* semantics, size/CPU/cost breakdown, rule trace |
-| — | **Standardised report** | `engine/cbom.py` — CycloneDX **1.7** CBOM, validated against the published JSON Schema |
-| — | **Interactive console** | `app.py` — Streamlit, four role-based views (Evidence & Honesty, Auditor, Migration Planner, Standards & Compliance). Shows `findings_total` **next to** `proven_use`, publishes unresolved-purpose findings with the evidence that would resolve them, and withholds the CBOM download unless it validates against the 1.7 schema |
+| 1 | **Discovery & cataloguing** of algorithms, keys, protocols, libraries | `engine/scanner.py` â€” **99-rule** detection table covering **Python, Java (JCA), C/C++ (OpenSSL), PHP, Ruby, Go, Rust, JavaScript and TypeScript**, plus SSH/TLS wire identifiers, config files, binaries, certificates, dependency manifests, container images and a live network probe. The Go/Rust/JS-TS packs are **new and unmeasured** â€” see *What this cannot see* |
+| 2 | **Quantum risk assessment**, flagging risks to sensitive data | `engine/mosca.py` â€” Shor vs Grover break model, **harvest-now-decrypt-later** flag, Mosca's inequality `X + Y > Z` |
+| 3 | **Classification** by type, lifetime, business criticality | `engine/mosca.py` â€” canonical primitives, `DATA_CLASS_LIFETIME` (X) and `MIGRATION_EFFORT` (Y) tables, Critical/High/Medium/Low tiers |
+| 4 | **PQC / hybrid recommendations** factoring risk, latency and cost | `engine/recommender.py` â€” FIPS 203/204/205 targets, explicit *Hybrid AND/OR* semantics, size/CPU/cost breakdown, rule trace |
+| â€” | **Standardised report** | `engine/cbom.py` â€” CycloneDX **1.7** CBOM, validated against the published JSON Schema |
+| â€” | **Interactive console** | `app.py` â€” Streamlit, four role-based views (Evidence & Honesty, Auditor, Migration Planner, Standards & Compliance). Shows `findings_total` **next to** `proven_use`, publishes unresolved-purpose findings with the evidence that would resolve them, and withholds the CBOM download unless it validates against the 1.7 schema |
 
 ---
 
@@ -52,14 +52,14 @@ python cli.py ./image.tar                              # container image
 streamlit run app.py                                   # interactive dashboard
 ```
 
-**Policy packs** — `india_dst_nqm` (default; CII migration by 2029), `nist_ir_8547` (disallow 2035),
+**Policy packs** â€” `india_dst_nqm` (default; CII migration by 2029), `nist_ir_8547` (disallow 2035),
 `cnsa_2_0` (exclusive NSS use 2033).
-**Z presets** — 5y (plan-as-if-early), 10y (GRI 2026 consensus midpoint, default), 15y (upper bound).
+**Z presets** â€” 5y (plan-as-if-early), 10y (GRI 2026 consensus midpoint, default), 15y (upper bound).
 Z is a *cryptanalytic estimate*; compliance deadlines are reported separately and never conflated.
 
 ## Measured accuracy
 
-Precision and recall are measured against **external, pinned public corpora** — not fixtures we
+Precision and recall are measured against **external, pinned public corpora** â€” not fixtures we
 wrote ourselves. Reproduce with `python benchmark/run_benchmark.py`.
 
 | Corpus | What it is | Precision | Recall | F1 |
@@ -98,9 +98,21 @@ Stated plainly, because a discovery tool that overstates its coverage is worse t
   the lower one.
 
 **Not implemented**
-- **Go, Rust, JavaScript and TypeScript have no rules.** The table covers Python, Java, C/C++,
-  PHP and Ruby. An estate whose crypto lives in a Go service is currently invisible to the source
-  scanner.
+- **Go, Rust, JavaScript and TypeScript rules are new and UNMEASURED.** The packs exist and are
+  verified against real API call sites and adversarial decoys (`tests/test_multilang_pack.py`),
+  but no labelled corpus covers these four languages, so **no precision or recall figure is
+  claimed for them**. Two things are deliberately *absent* from them and the absence is
+  recorded, not forgotten: `crypto/chacha20`, which is not in the Go standard library at all, and
+  `crypto/des`/`crypto/rc4`, which carry **no** `Deprecated:` marker in Go and so cannot honestly
+  be described as deprecated Go APIs â€” only as broken primitives. Their APIs are also absent in
+  Node (`createCipher` was removed, DEP0106 End-of-Life) and in `ring` (`verify_unsafe` does not
+  exist), so no rule claims to match them.
+- **Small DH group sizes are not detected.** A rule for Node's sub-2048-bit `modp1|modp2|modp5`
+  groups was written and removed. Bare, the group names matched `String g = "modp5"` in a Java
+  file; anchored to a `createDiffieHellman` call, every call it can match is already matched by
+  `ECD-SRC-ECDH-001` on the same line. Two components at one `(file, line)` cannot be collapsed
+  downstream, so the weaker rule would have been pure duplication. A DH group's *size* is a real
+  gap and is left as one.
 - No interprocedural data-flow. A helper that forwards an algorithm name to a real call is not
   connected to it; rules match text, and the miss is reported rather than guessed.
 - Obfuscated or runtime-assembled cipher names (`"AE"+"S"`) produce no finding.
@@ -108,14 +120,14 @@ Stated plainly, because a discovery tool that overstates its coverage is worse t
   **declaration**, not linked to the call site.
 
 **Not independently reviewed**
-- The classifications follow **NIST IR 8547** (an *Initial Public Draft* — not a final standard)
+- The classifications follow **NIST IR 8547** (an *Initial Public Draft* â€” not a final standard)
   and the **CycloneDX 1.7** specification as we read them. They **have not been reviewed by an
   external cryptographer.**
 - Byte sizes for ML-KEM and ML-DSA parameter sets are consistent with the round-3 submissions but
   are **not yet traced to the FIPS PDFs**; both standards carry errata notices dated after
   publication. See [`research/sources/INDEX.md`](research/sources/INDEX.md).
 - NIST IR 8547's transition table is *strength-dependent*: 112-bit classical public-key is
-  **deprecated** rather than disallowed, while ≥ 128-bit is disallowed after 2035. We currently
+  **deprecated** rather than disallowed, while â‰¥ 128-bit is disallowed after 2035. We currently
   apply one flat year. This is a known simplification, recorded rather than hidden.
 
 ---
@@ -140,11 +152,11 @@ python -m pytest tests/ -v
 
 ## How the risk model works
 
-**Mosca's inequality:** `X + Y > Z` ⇒ migration should already have started, where
+**Mosca's inequality:** `X + Y > Z` â‡’ migration should already have started, where
 
-- **X** = years the data (or signed artefact) must remain protected — a *business* property
-- **Y** = years to migrate — an *engineering* property
-- **Z** = years until a cryptographically relevant quantum computer — an *estimate*
+- **X** = years the data (or signed artefact) must remain protected â€” a *business* property
+- **Y** = years to migrate â€” an *engineering* property
+- **Z** = years until a cryptographically relevant quantum computer â€” an *estimate*
 
 Three properties make the output defensible rather than decorative:
 
@@ -154,7 +166,7 @@ Three properties make the output defensible rather than decorative:
    so ECDAT excludes it and reports `weakened-by-Grover` instead.
 2. **The same algorithm can get different tiers.** A 30-year statutory archive protected by an RSA
    key-wrapping key is Critical; the same RSA in a config file for a 5-year internal credential is
-   Medium. X drives the tier — not the algorithm name, and not the detector's confidence.
+   Medium. X drives the tier â€” not the algorithm name, and not the detector's confidence.
 3. **Z is a band, not a point.** Every verdict is reported at Z = 5 / 10 / 15 with a `z_stable`
    flag. If the tier flips inside the expert-consensus window, the tool says so instead of
    asserting one answer.
@@ -163,12 +175,12 @@ Three properties make the output defensible rather than decorative:
 
 Stated up front, because a security reviewer will ask:
 
-- It does **not** see crypto negotiated on the wire — that needs a PCAP/trace sensor.
-- It does **not** see keys inside HSMs, TPMs or silicon — that needs attestation.
+- It does **not** see crypto negotiated on the wire â€” that needs a PCAP/trace sensor.
+- It does **not** see keys inside HSMs, TPMs or silicon â€” that needs attestation.
 - It does **not** see cryptography at a SaaS/third-party boundary.
 - It does **not** do interprocedural data-flow: a helper that forwards an algorithm name is not
   resolved to its caller.
-- Binary detection identifies *providers* (libcrypto, BoringSSL, libsodium…), not the algorithms
+- Binary detection identifies *providers* (libcrypto, BoringSSL, libsodiumâ€¦), not the algorithms
   inside a stripped binary.
 - The ML transformer sees only the first 4,000 characters of a file (configurable, reported).
 
@@ -194,9 +206,9 @@ docs/CODE_REVIEW.md    review of the previous revision + what changed
 
 ## Documentation
 
-- [`docs/CODE_REVIEW.md`](docs/CODE_REVIEW.md) — 21 defects found in the previous revision and how
+- [`docs/CODE_REVIEW.md`](docs/CODE_REVIEW.md) â€” 21 defects found in the previous revision and how
   each was fixed, with the honest limitations that remain.
-- [`examples/README.md`](examples/README.md) — real-world scan notes.
+- [`examples/README.md`](examples/README.md) â€” real-world scan notes.
 
 ## Licence
 

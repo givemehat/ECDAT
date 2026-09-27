@@ -194,6 +194,148 @@ RULES = [
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"(?<![A-Za-z0-9_$>])(?:mt_rand|uniqid|str_shuffle)\s*\(\s*\)"
                 r"|(?<![A-Za-z0-9_$>])rand\s*\(\s*\)"),
+    # ---- Go (stdlib crypto/*) --------------------------------------------------------------------
+    # Names verified against pkg.go.dev rather than recalled.
+    #
+    # Deliberately ABSENT: `crypto/des` and `crypto/rc4` carry NO `Deprecated:` marker in Go --
+    # only a prose "cryptographically broken" warning. Reporting them as deprecated Go APIs would
+    # misstate the source, so they are matched as broken primitives instead. Also absent:
+    # `crypto/chacha20`, which is not in the stdlib at all; it lives in x/crypto, matched below.
+    dict(id="ECD-GO-CIPHER-001", name="DES", primitive="block-cipher", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"\bdes\.NewCipher\s*\(|\bdes\.NewTripleDESCipher\s*\("),
+    dict(id="ECD-GO-CIPHER-002", name="RC4", primitive="stream-cipher", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"\brc4\.NewCipher\s*\("),
+    dict(id="ECD-GO-CIPHER-003", name="ChaCha20", primitive="stream-cipher", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"\bchacha20(?:poly1305)?\.New\s*\(|\bchacha20poly1305\.NewX\s*\("),
+    dict(id="ECD-GO-HASH-001", name="MD5", primitive="hash", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"\bmd5\.(?:New|Sum)\s*\(|\bcrypto/md5\b|\bgolang\.org/x/crypto/md5\b"),
+    dict(id="ECD-GO-HASH-002", name="SHA1", primitive="hash", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"\bsha1\.(?:New|Sum)\s*\(|\bcrypto/sha1\b|\bgolang\.org/x/crypto/sha1\b"),
+    dict(id="ECD-GO-SIG-001", name="ECDSA", primitive="signature", artefact_class="source",
+         uses="signing", key_group=None, evidence="discovered",
+         regex=r"\becdsa\.(?:SignASN1|VerifyASN1|Sign|Verify)\s*\("),
+    dict(id="ECD-GO-SIG-002", name="RSA", primitive="signature", artefact_class="source",
+         uses="signing", key_group=None, evidence="discovered",
+         # PKCS#1 v1.5 is split from PSS so that "move to PSS" advice is never attached to a
+         # signature that is already PSS, nor withheld from one that is v1.5.
+         regex=r"\brsa\.(?:SignPKCS1v15|VerifyPKCS1v15)\s*\("),
+    dict(id="ECD-GO-SIG-003", name="RSA-PSS", primitive="signature", artefact_class="source",
+         uses="signing", key_group=None, evidence="discovered",
+         # The type is `rsa.PSSOptions` (all caps), not `PssOptions`. An earlier version of this
+         # rule used the camel-case spelling and matched nothing.
+         regex=r"\brsa\.(?:SignPSS|VerifyPSS)\s*\(|\brsa\.PSSOptions\s*\{"),
+    dict(id="ECD-GO-SIG-004", name="Ed25519", primitive="signature", artefact_class="source",
+         uses="signing", key_group=None, evidence="discovered",
+         regex=r"\bed25519\.(?:NewKeyFromSeed|GenerateKey)\s*\("),
+    dict(id="ECD-GO-KEX-001", name="ECDH", primitive="kem", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"\becies\.GenerateKey\s*\(|\becdh\.\w+\s*\("),
+    dict(id="ECD-GO-RNG-001", name="PRNG", primitive="other", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         # `math/rand` is the non-cryptographic generator. Matched only as an explicit package
+         # qualifier or a qualified call, so a local variable named `rand` cannot trigger it.
+         regex=r"\bmath/rand\b|\brand\.(?:Intn|Int31|Int63|Float64|Seed)\s*\("),
+
+
+    # ---- Rust (`ring` / rustcrypto) -------------------------------------------------------------
+    # `ring` deliberately names its constant-time verification entry points individually, so the
+    # verification calls are matched by name rather than by a generic `verify(`.
+    # NOTE ON APPARENT GAPS IN THIS PACK. Five primitives that a Go/Rust/JS pack would normally
+    # own are deliberately absent because an EXISTING rule already reports them, and a second
+    # rule matching the same line produces two components that _finalise cannot collapse (the
+    # key includes rule_id). These are covered by:
+    #   ChaCha20-Poly1305  -> ECD-SRC-CHACHA-001     (matches `ChaCha20Poly1305`)
+    #   X25519 / X448      -> ECD-SRC-ECDH-001       (matches `X25519`)
+    #   Diffie-Hellman     -> ECD-SRC-ECDH-001       (matches `DiffieHellman`)
+    #   Math.random()      -> ECD-SRC-JAVA-WEAKRNG-001 (matches `Math.random()`)
+    #   minVersion: TLSv1  -> ECD-CFG-TLS-001        (matches `TLSv1(\.[0-3])?`)
+    # Adding language-specific aliases for these would inflate the rule count while producing
+    # duplicate findings at identical (file, line) locations.
+    dict(id="ECD-RUST-CIPHER-002", name="AES", primitive="ae", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"\baes_gcm::\w+|\bAesGcm::new_sensitive\s*\(|\bAes256Gcm::new\s*\("),
+    dict(id="ECD-RUST-HASH-001", name="MD5", primitive="hash", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         # Every alternative is Rust-qualified. A bare `\bMD5\b` was tried first and is WRONG:
+         # rules are not filtered by language, so it matched `MessageDigest.getInstance("MD5")`
+         # in a .java file and put a second MD5 finding on a line that already had one. The two
+         # could not collapse, because the dedup key includes rule_id.
+         regex=r"\bmd5::Md5\b|\bMd5::new\s*\(|\brustc_hash::md5\b|\bmd-5\b"),
+    dict(id="ECD-RUST-HASH-002", name="SHA1", primitive="hash", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"\bsha1::Sha1\b|\bSha1::new\s*\(|\bSHA1_FOR_LEGACY_USE_ONLY\b"),
+    dict(id="ECD-RUST-SIG-001", name="ECDSA", primitive="signature", artefact_class="source",
+         uses="signing", key_group=None, evidence="discovered",
+         regex=r"\becdsa::SigningKey\b|\becdsa::VerifyingKey\b|\bECDSA_P256_SHA256_ASN1_SIGNING\b"),
+    dict(id="ECD-RUST-SIG-002", name="Ed25519", primitive="signature", artefact_class="source",
+         uses="signing", key_group=None, evidence="discovered",
+         regex=r"\bed25519::\w+|\bEd25519KeyPair::generate\s*\("),
+    dict(id="ECD-RUST-SIG-003", name="RSA", primitive="signature", artefact_class="source",
+         uses="signing", key_group=None, evidence="discovered",
+         regex=r"\brsa::(?:RsaPrivateKey|RsaPublicKey|pkcs1v15\w*|Pkcs1v15Sign)\b"),
+    # ECDH and X25519 are already owned by ECD-SRC-ECDH-001; see the note above.
+    dict(id="ECD-RUST-RNG-001", name="PRNG", primitive="other", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         # `thread_rng` is ChaCha-seeded but is not a CSPRNG suitable for key material, and
+         # `SmallRng` is xoshiro. Both belong in a key-derivation path as a defect.
+         regex=r"\bthread_rng\s*\(|\bSmallRng\b|\brand::rngs::\w+"),
+
+    # ---- JavaScript / TypeScript (Node `crypto`, WebCrypto `crypto.subtle`) ----------------------
+    # `createCipher`/`createDecipher` are intentionally NOT matched as legacy-weak: Node removed
+    # them (DEP0106, End-of-Life), so the call cannot appear in running code. A rule that only ever
+    # fires on a removed API is dead weight in a rule pack.
+    dict(id="ECD-JS-CIPHER-001", name="DES", primitive="block-cipher", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         # `des-ede3-cbc` must be present AND must precede the bare `des` alternative: the shorter
+         # name matched first and left the trailing quote unmatched, so 3DES -- the one that
+         # actually matters here -- was the single case that failed to fire.
+         regex=r"create(?:Cipheriv|Decipheriv)\s*\(\s*[\"'`]"
+                r"(?:des-ede3-cbc|des-ede3|des-ede-cbc|des-cbc|des)[\"'`]"),
+    dict(id="ECD-JS-CIPHER-002", name="RC4", primitive="stream-cipher", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"create(?:Cipheriv|Decipheriv)\s*\(\s*[\"'`]rc4[\"'`]"),
+    dict(id="ECD-JS-HASH-001", name="MD5", primitive="hash", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"create(?:Hash|Hmac)\s*\(\s*[\"']md5[\"']|digest\s*\(\s*[\"']MD5[\"']"),
+    dict(id="ECD-JS-HASH-002", name="SHA1", primitive="hash", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"create(?:Hash|Hmac)\s*\(\s*[\"'`]sha1[\"'`]|digest\s*\(\s*[\"']SHA-1[\"']"),
+    dict(id="ECD-JS-SIG-001", name="RSA", primitive="signature", artefact_class="source",
+         uses="signing", key_group=None, evidence="discovered",
+         # Context-anchored throughout. A bare `RSA-SHA1` token was tried first and leaked:
+         # it matched `alg = "RSA-SHA1"` in a .py file. `RSA-SHA1` is Node's and OpenSSL's
+         # spelling of the pairing, so the rule must be anchored to a call site that actually
+         # makes one -- `createSign('RSA-SHA1')` still matches, because the anchor stops at
+         # `RSA` and does not require a closing quote.
+         regex=r"create(?:Sign|Verify)\s*\(\s*[\"'`]RSA|"
+                r"(?:^|[^\w.])RSA_PKCS1_PADDING\b|crypto\.constants\.RSA_PKCS1_PADDING\b"),
+    dict(id="ECD-JS-SIG-002", name="RSA-PSS", primitive="signature", artefact_class="source",
+         uses="signing", key_group=None, evidence="discovered",
+         regex=r"RSA-PSS|RSA_PKCS1_PSS_PADDING|crypto\.constants\.RSA_PSS"),
+    dict(id="ECD-JS-SIG-003", name="ECDSA", primitive="signature", artefact_class="source",
+         uses="signing", key_group=None, evidence="discovered",
+         # `'ECDSA'` is retained (Node and WebCrypto both accept it) but the bare word is not:
+         # a Java `KeyPairGenerator.getInstance("ECDSA")` would otherwise gain a duplicate here.
+         regex=r"[\"'`]ecdsa-with-SHA\d+[\"'`]|createSign\s*\(\s*[\"'`]EC(?:DSA)?[\"'`]"),
+    # Diffie-Hellman, Math.random() and minVersion:TLSv1 are already owned by ECD-SRC-ECDH-001,
+    # ECD-SRC-JAVA-WEAKRNG-001 and ECD-CFG-TLS-001 respectively; see the note above. Duplicating
+    # them would emit two components at one location.
+    # `modp1|modp2|modp5` are NOT duplicated: ECD-CFG-TLS-001 knows nothing of DH group sizes,
+    # and Node documents these three as sub-2048-bit. They are reported as their own rule
+    # because the finding is "this group is too small", not "this is Diffie-Hellman".
+    # A "small DH group" rule was written and REMOVED. It has to be anchored to a
+    # `createDiffieHellman` call to avoid matching `String g = "modp5"` in a .java file -- and
+    # every call it can be anchored to is already matched by ECD-SRC-ECDH-001, which fires on
+    # the same line. The finding "this group is too small" is a refinement of that finding, not
+    # a separate component, and two components at one (file, line) cannot be collapsed. The gap
+    # is recorded in the README rather than papered over with a duplicate.
+    # Node documents `minVersion` below TLSv1.2 as discouraged, but the generic config rule
+    # already reports the presence of the directive, so this pack adds no TLS rule.
     # ---- Ruby (OpenSSL::, Digest::, SecureRandom) -------------------------------------------------
     # Ruby exposes OpenSSL as namespaced classes, and `OpenSSL::Cipher.new('aes-256-gcm')` is
     # the single most common symmetric call in the ecosystem. There was no rule for it and `.rb`

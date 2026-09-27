@@ -133,6 +133,35 @@ def test_every_rule_is_actually_executed(tmp_path, scanner):
         "ECD-CLOUD-AZURE-001": "azure.keyvault",
         "ECD-CLOUD-GCP-001": "google-cloud-kms",
         "ECD-HARDWARE-PKCS11-001": "SunPKCS11",
+        # --- Go. Every alternative is package-qualified: an unqualified token would match the
+        # same text in any language, since rules are not filtered by file extension.
+        "ECD-GO-CIPHER-001": "b, _ := des.NewCipher(key)",
+        "ECD-GO-CIPHER-002": "c, _ := rc4.NewCipher(key)",
+        "ECD-GO-CIPHER-003": "aead, _ := chacha20poly1305.New(key)",
+        "ECD-GO-HASH-001": "h := md5.New()",
+        "ECD-GO-HASH-002": 'import "crypto/sha1"',
+        "ECD-GO-SIG-001": "r, s, _ := ecdsa.Sign(rnd, priv, digest)",
+        "ECD-GO-SIG-002": "err := rsa.SignPKCS1v15(rnd, priv, crypto.SHA256, d)",
+        "ECD-GO-SIG-003": "o := &rsa.PSSOptions{}",
+        "ECD-GO-SIG-004": "pub, _, _ := ed25519.GenerateKey(rnd)",
+        "ECD-GO-KEX-001": "k, _ := ecdh.P256().GenerateKey(rnd)",
+        "ECD-GO-RNG-001": "n := rand.Intn(100)",
+        # --- Rust. `md5::Md5` rather than bare `MD5`; see the note on ECD-RUST-HASH-001.
+        "ECD-RUST-CIPHER-002": "use aes_gcm::Aes256Gcm;",
+        "ECD-RUST-HASH-001": "let h = md5::Md5::new();",
+        "ECD-RUST-HASH-002": "let h = sha1::Sha1::new();",
+        "ECD-RUST-SIG-001": "let k = ecdsa::SigningKey::from_bytes(&b)?;",
+        "ECD-RUST-SIG-002": "let kp = Ed25519KeyPair::generate();",
+        "ECD-RUST-SIG-003": "let k = rsa::RsaPrivateKey::new(n, e);",
+        "ECD-RUST-RNG-001": "let mut r = thread_rng();",
+        # --- JavaScript / TypeScript.
+        "ECD-JS-CIPHER-001": "createCipheriv('des-ede3-cbc', k, iv)",
+        "ECD-JS-CIPHER-002": "crypto.createCipheriv('rc4', key, iv)",
+        "ECD-JS-HASH-001": "crypto.createHash('md5')",
+        "ECD-JS-HASH-002": "crypto.createHmac('sha1', key)",
+        "ECD-JS-SIG-001": "crypto.createSign('RSA-SHA1')",
+        "ECD-JS-SIG-002": "s = crypto.constants.RSA_PKCS1_PSS_PADDING;",
+        "ECD-JS-SIG-003": "crypto.createSign('ecdsa-with-SHA256')",
     }
     assert set(samples) == {r["id"] for r in RULES}, "a rule has no positive test"
     # A rule declared `artefact_class="config"` only fires for a file the scanner recognises as
