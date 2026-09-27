@@ -257,6 +257,47 @@ def is_unresolved(record) -> bool:
     return bool(record.get("unresolved"))
 
 
+# The three outcomes a finding can have against a policy deadline. UNRATED is a real third state,
+# not a formatting detail: a finding with no risk result is one ECDAT could not assess, and
+# counting it as compliant asserts a safety claim the scan never made.
+DEADLINE_WITHIN = "within window"
+DEADLINE_OVERRUN = "OVERRUN"
+DEADLINE_UNRATED = "UNRATED"
+DEADLINE_NO_POLICY = "no active policy"
+
+
+def deadline_verdict(record, deadline_year) -> str:
+    """Classify one finding against the active policy deadline, in three honest states.
+
+    The bug this replaces: `(risk.get("latest_safe_migration_start") or 0) > deadline`. A finding
+    whose risk result is absent collapsed to `0`, which is never greater than any real deadline, so
+    the UNRATED finding fell through to "within window" and was tallied as compliant. An
+    unassessed artefact silently became a pass -- the exact kind of false assurance this tool
+    exists to avoid.
+
+    `None` is returned for the start year when risk could not be computed, and that is now
+    distinguishable from a start year of 0, which is itself meaningless.
+    """
+    if not deadline_year:
+        return DEADLINE_NO_POLICY
+    start = (record.get("risk") or {}).get("latest_safe_migration_start")
+    if start is None:
+        return DEADLINE_UNRATED
+    return DEADLINE_OVERRUN if start > deadline_year else DEADLINE_WITHIN
+
+
+def late_records(records, deadline_year) -> list:
+    """Records that are known to OVERRUN the deadline. UNRATED ones are excluded, not assumed."""
+    return [r for r in records if deadline_verdict(r, deadline_year) == DEADLINE_OVERRUN]
+
+
+def unrated_records(records, deadline_year) -> list:
+    """Records that could not be assessed against the deadline -- reported, never hidden."""
+    if not deadline_year:
+        return []
+    return [r for r in records if deadline_verdict(r, deadline_year) == DEADLINE_UNRATED]
+
+
 def unresolved_split(records):
     """Unresolved-purpose findings, split by what the recommender did with them.
 
@@ -443,6 +484,11 @@ def queue_rows(records, deadline_year=None) -> list:
                       else "starts before the deadline")
         if record.get("target_declined"):
             status = "TARGET DECLINED - human review"
+        elif str(rec.get("algorithm") or "").startswith("unresolved"):
+            # Checked BEFORE the `unresolved` flag, because the flag is the weaker signal: a
+            # crashed or unresolvable recommender still returns the sentinel string, and routing
+            # that to the "target named" bucket asserted a target exists when none was chosen.
+            status = "TARGET DECLINED - human review"
         elif record.get("unresolved"):
             status = "target named, purpose unresolved - review"
         else:
@@ -500,6 +546,24 @@ def recommendations_payload(records, *, target, policy, z_years) -> list:
     } for record in records]
 
 
+def deadline_countdown(year, current_year) -> str:
+    """A deadline's distance from today, as a word rather than a signed integer.
+
+    A bare `year - current_year` renders a lapsed deadline as "-3 year(s) from 2026". The number is
+    arithmetically right and rhetorically useless: a reader skims "from 2026", sees a small
+    magnitude, and misses that the date has already passed. Saying PASSED is the whole point of
+    the field.
+    """
+    if not year:
+        return "n/a"
+    remaining = year - current_year
+    if remaining < 0:
+        return f"PASSED {abs(remaining)} year(s) ago"
+    if remaining == 0:
+        return "this year"
+    return f"{remaining} year(s) from {current_year}"
+
+
 def policy_deadline_row(policy, current_year) -> dict:
     """One policy deadline, with what it requires and where in this repo that claim comes from."""
     entry = POLICY_DEADLINES.get(policy, {})
@@ -508,7 +572,7 @@ def policy_deadline_row(policy, current_year) -> dict:
     return {
         "Policy": entry.get("label", policy),
         "Deadline": year,
-        "Years from now": (year - current_year) if year else None,
+        "Years from now": deadline_countdown(year, current_year),
         "What it requires": notes.get("requirement", "n/a"),
         "Source in this repo": notes.get("source", "engine/mosca.py POLICY_DEADLINES"),
     }

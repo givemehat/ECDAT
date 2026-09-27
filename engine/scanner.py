@@ -128,10 +128,14 @@ RULES = [
                 r"umac-64@openssh\.com|umac-128@openssh\.com)[\"']"),
     # `diffie-hellman-group-exchange-sha256` is finite-field DH, NOT ECDH. The KEX rule above
     # deliberately lists only the elliptic names; this is the missing DH half.
+    #
+    # The alternation is not symmetric, and getting it wrong fails silently. Fixed groups are
+    # `group14-sha256` -- digits run straight into "-sha", no separator. But the exchange group
+    # is `group-exchange-sha256`, WITH a hyphen. Writing `group(?:1|14|16|18|exchange)` therefore
+    # spells "groupexchange-sha256" and never matches the single name the rule was added for.
     dict(id="ECD-SRC-SSH-DH-001", name="DH", primitive="key-agreement", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
-         regex=r"[\"']diffie-hellman-group(?:1|14|16|18|exchange)-sha(?:1|256|384|512)[\"']|"
-                r"[\"']diffie-hellman-group-exchange-sha256[\"']"),
+         regex=r"[\"']diffie-hellman-group(?:1|14|16|18|-exchange)-sha(?:1|256|384|512)[\"']"),
     # EC key classes referenced as a type: `ec.EllipticCurvePrivateKey`. A curve OBJECT is the
     # algorithm choice; the private-key wrapper is a type annotation naming the same family.
     dict(id="ECD-SRC-PYCA-EC-002", name="ECC", primitive="signature", artefact_class="source",
@@ -149,8 +153,10 @@ RULES = [
     # primitive, and conflating them is the error Phase-1 gap H6 warns about.
     dict(id="ECD-SRC-SSH-KEX-001", name="ECDH", primitive="key-agreement", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
+         # ELLIPTIC names only. `diffie-hellman-group*` is finite-field DH and belongs to
+         # ECD-SRC-SSH-DH-001; listing it here too made one identifier report as BOTH ECDH and
+         # DH, which is a wrong algorithm name in the CBOM and an inflated finding count.
          regex=r"[\"'](?:ecdh-sha2-nistp(?:256|384|521)|"
-                r"diffie-hellman-group(?:1|14|16|18)-sha(?:1|256|384|512)|"
                 r"curve25519-sha256(?:@libssh\.org)?|"
                 r"ecdh-sha2-nistp256k)[\"']"),
     dict(id="ECD-SRC-SSH-SIG-001", name="ECDSA", primitive="signature", artefact_class="source",

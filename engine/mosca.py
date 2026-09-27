@@ -123,6 +123,10 @@ SHOR_VULNERABLE = ("RSA", "ECC", "ECDSA", "ECDH", "DSA", "DH", "DIFFIE", "ELGAMA
                    "X25519", "ED25519", "CURVE25519")
 GROVER_WEAKENED = ("AES", "SHA", "MD5", "3DES", "DES", "BLOWFISH", "CHACHA", "RC4")
 
+# Reused rather than re-declared: the family vocabulary is the thing most likely to drift, and
+# two copies is how `X25519MLKEM768` ends up Shor-broken in one module and PQC in another.
+from .cbom import is_pqc  # noqa: E402  (circular-import guard; cbom imports nothing from mosca)
+
 
 def quantum_break_model(name, primitive=""):
     """Return 'broken-by-Shor' | 'weakened-by-Grover' | 'not-affected'.
@@ -133,6 +137,12 @@ def quantum_break_model(name, primitive=""):
               Mosca inequality must not be applied to symmetric primitives -- doing so is a
               category error that would flag every AES-256 user as exposed.
     """
+    # A post-quantum algorithm is checked FIRST, and that ordering is load-bearing. `X25519MLKEM768`
+    # is a hybrid: it contains "X25519", which is in the Shor table, so a token scan that reaches
+    # the table before the PQC screen calls our own top migration recommendation Shor-broken.
+    # The same inversion mislabelled `ML-DSA-65`, because "DSA" is a substring of "ML-DSA".
+    if is_pqc(name):
+        return "not-affected"
     haystack = f"{name} {primitive}".upper()
     for token in SHOR_VULNERABLE:
         if token in haystack:

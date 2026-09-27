@@ -122,8 +122,14 @@ def test_kills_MOSCA04_primitive_containing_sign_is_verifiability():
     """A primitive whose name contains 'sign' resolves to the VERIFIABILITY horizon.
 
     HNDL does not apply to signatures -- a CRQC cannot un-sign an artefact released today.
+
+    The name here is ECDSA, not ML-DSA. It was ML-DSA, which made this a false test: ML-DSA is
+    post-quantum, so once the PQC pre-screen was fixed it correctly reports no horizon at all,
+    and the assertion below could not be reached. The defect this mutant targets -- a signature
+    being handed the CONFIDENTIALITY horizon and falsely flagged harvest-now-decrypt-later --
+    can only be observed on a primitive that is actually Shor-broken.
     """
-    f = dict(name="ML-DSA", primitive="digital-signature")
+    f = dict(name="ECDSA", primitive="digital-signature")
     assert _horizon_type(f, "broken-by-Shor") == "verifiability"
     r = calculate_risk(f, user_x=20, user_y=3, z_collapse_time=10)
     assert r["horizon_type"] == "verifiability"

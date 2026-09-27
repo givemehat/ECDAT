@@ -56,10 +56,11 @@ except ImportError as exc:                                   # pragma: no cover 
 
 from engine.gui_helpers import (SEVERITY_ORDER, TIER_COLOURS, assurance_chart_svg,
                                 assurance_counts, auditor_rows, chip, coverage_verdict,
-                                enrich_findings, escape, evidence_needed, hndl_records,
-                                location, policy_deadline_row, proven_use, queue_rows,
+                                deadline_countdown, deadline_verdict, enrich_findings, escape,
+                                evidence_needed, hndl_records, late_records, location,
+                                policy_deadline_row, proven_use, queue_rows,
                                 recommendations_payload, short_path, tier_chart_svg, tier_counts,
-                                unresolved_split, validate_cbom_document, z_basis)
+                                unresolved_split, unrated_records, validate_cbom_document, z_basis)
 from engine.mosca import POLICY_DEADLINES
 from engine.purpose import ASSURANCE_MEANING
 
@@ -199,10 +200,46 @@ def _memoised(max_entries: int):
     return decorate
 
 
+def _target_fingerprint(target: str) -> str:
+    """A cheap, stable digest of WHAT IS ON DISK right now.
+
+    `run_scan` is memoised, and the memo key was `(target, enable_ml)`. That makes the cache
+    blind to the one thing that matters: the target's contents. Edit a file, press Rescan, and the
+    user got the previous findings together with the previous `scanned_at` -- so the console
+    presented stale evidence under a claim of freshness, which for an audit tool is the worst
+    possible failure mode. Including a content digest in the memo key makes the cache invalidate
+    itself instead.
+
+    Path + size + mtime for each file, not content hashing: a full read of every file would cost
+    as much as the scan itself, defeating the cache. Size and mtime change on any ordinary edit,
+    and a deliberately unchanged mtime with changed content is not a threat model this tool has.
+    """
+    import hashlib
+
+    digest = hashlib.sha256()
+    try:
+        for root, dirs, files in os.walk(target):
+            dirs.sort()  # walk order is not stable across platforms/filesystems
+            for name in sorted(files):
+                path = os.path.join(root, name)
+                try:
+                    stat = os.stat(path)
+                except OSError:
+                    continue
+                digest.update(("%s|%d|%d\n" % (path, stat.st_size, stat.st_mtime_ns)).encode())
+    except OSError:
+        return "unreadable"
+    return digest.hexdigest()
+
+
 @_memoised(8)
-def run_scan(target: str, enable_ml: bool) -> dict:
+def run_scan(target: str, enable_ml: bool, fingerprint: str = "") -> dict:
     """Scan a target and return findings plus the coverage manifest. Exceptions propagate to
-    the caller, which renders an explanation -- never a traceback."""
+    the caller, which renders an explanation -- never a traceback.
+
+    `fingerprint` is NOT used for anything except cache invalidation (see `_target_fingerprint`).
+    It is a parameter solely so it participates in the memo key.
+    """
     from engine.scanner import ECDATScanner
 
     scanner = ECDATScanner(enable_ml=enable_ml)
@@ -459,8 +496,10 @@ def view_auditor(records):
     if needle:
         low = needle.lower()
         rows = [row for row in rows if any(low in str(value).lower() for value in row.values())]
-    if tiers:
-        rows = [row for row in rows if row["Tier"] in tiers]
+    # An EMPTY selection means "no tiers match", not "no filter". Testing the truthiness of the
+    # multiselect returned every row whenever the user cleared the control, so the table silently
+    # went from filtered to unfiltered -- the opposite of what clearing a filter should do.
+    rows = [row for row in rows if row["Tier"] in tiers]
     if only_hndl:
         rows = [row for row in rows if row["HNDL now"] == "YES"]
     st.caption(f"{len(rows)} of {len(records)} finding(s) shown after filtering.")
@@ -538,9 +577,8 @@ def view_planner(scan, records, policy, z_years):
     declined, named = unresolved_split(records)
     starts = [(r.get("risk") or {}).get("latest_safe_migration_start") for r in records]
     starts = [year for year in starts if year]
-    late = [r for r in records
-            if deadline
-            and ((r.get("risk") or {}).get("latest_safe_migration_start") or 0) > deadline]
+    late = late_records(records, deadline)
+    unrated = unrated_records(records, deadline)
 
     st.subheader("The actionable queue")
     st.markdown("Ordered by what needs a decision first. Each row carries the target, the cost, "
@@ -554,6 +592,9 @@ def view_planner(scan, records, policy, z_years):
          "The first latest-safe-start year across the queue. Anything earlier is already late."),
         ("Start after the deadline", len(late),
          f"Artefacts whose migration window closes after {deadline}, the active policy deadline."),
+        ("Could not be rated", len(unrated),
+         "No risk verdict -- X, Y or Z was unavailable. NOT counted as compliant; resolve the "
+         "inputs to assess these."),
         ("HNDL exposed", len(hndl_records(records)),
          "No start date helps these: the data becomes readable once a CRQC exists."),
     ])
@@ -664,9 +705,8 @@ def view_compliance(scan, records, policy, z_years):
     this_year = datetime.date.today().year
     active = POLICY_DEADLINES.get(policy, {})
     deadline = active.get("year")
-    late = [r for r in records
-            if deadline
-            and ((r.get("risk") or {}).get("latest_safe_migration_start") or 0) > deadline]
+    late = late_records(records, deadline)
+    unrated = unrated_records(records, deadline)
     hndl = hndl_records(records)
 
     st.subheader("Quantum-readiness against the active policy")
@@ -676,11 +716,14 @@ def view_compliance(scan, records, policy, z_years):
     metric_row([
         ("Active policy", str(policy), str(active.get("label", ""))),
         ("Deadline", deadline if deadline else "n/a",
-         f'{deadline - this_year} year(s) from {this_year}.' if deadline else ""),
+         deadline_countdown(deadline, this_year)),
         ("Z (estimate)", f"{z_years} years", z_basis(z_years)),
         ("Artefacts starting too late", len(late),
          "Latest safe migration start falls after the active deadline: start now, or record a "
          "formal exception."),
+        ("Could not be rated", len(unrated),
+         "No risk verdict available. These are NOT compliant and NOT late -- they are unassessed, "
+         "and are shown as UNRATED so the gap stays visible rather than reading as a pass."),
         ("HNDL exposed now", len(hndl),
          "Already decryptable-on-existence. No migration date changes the exposure window."),
     ])
@@ -709,8 +752,7 @@ def view_compliance(scan, records, policy, z_years):
             "Margin": (r.get("risk") or {}).get("margin"),
             "Latest safe start": (r.get("risk") or {}).get("latest_safe_migration_start"),
             "Deadline": deadline,
-            "Verdict": "OVERRUN" if deadline and ((r.get("risk") or {}).get(
-                "latest_safe_migration_start") or 0) > deadline else "within window",
+            "Verdict": deadline_verdict(r, deadline),
         } for r in records])
 
 
@@ -898,7 +940,11 @@ def execute_scan(config):
         return
     try:
         with st.spinner(f"Scanning {short_path(target)} ..."):
-            st.session_state["last_scan"] = run_scan(target, config["enable_ml"])
+            # The fingerprint is what makes this memoised call correct rather than merely fast:
+            # without it, re-scanning an edited target returns the previous findings and the
+            # previous `scanned_at`, i.e. stale evidence presented as a fresh scan.
+            st.session_state["last_scan"] = run_scan(target, config["enable_ml"],
+                                                    _target_fingerprint(target))
         st.session_state.pop("scan_error", None)
     except Exception as exc:                                    # noqa: BLE001
         st.session_state.pop("last_scan", None)

@@ -7954,24 +7954,24 @@
      "SaaS / third-party boundary crypto (requires attestation)",
      "silicon-embedded keys (requires attestation)"
     ],
-    "findings_total": 184,
+    "findings_total": 177,
     "assurance_histogram": {
      "observed": 0,
-     "used": 184,
+     "used": 177,
      "declared": 0,
      "capability": 0
     },
-    "proven_use": 184,
+    "proven_use": 177,
     "unresolved_purpose": 72
    },
    "scan_errors": [],
    "findings_by_rule": {
     "ECDSA | ECD-SRC-SSH-SIG-001": 30,
     "ECDH | ECD-SRC-ECDH-001": 19,
-    "ECDH | ECD-SRC-SSH-KEX-001": 18,
     "AES | ECD-SRC-SSH-CIPHER-001": 16,
     "RSA | ECD-SRC-PYCA-RSA-001": 13,
     "ECDSA | ECD-SRC-PYCA-EC-002": 12,
+    "ECDH | ECD-SRC-SSH-KEX-001": 11,
     "DH | ECD-SRC-SSH-DH-001": 10,
     "AES | ECD-SRC-PYCA-AES-001": 9,
     "HMAC | ECD-SRC-SSH-MAC-001": 8,
@@ -8000,7 +8000,7 @@
       "FP": 16,
       "FN": 95,
       "labelled_positives": 240,
-      "findings_total": 184
+      "findings_total": 177
      },
      "precision": 0.9006,
      "precision_fraction": "145/161",
@@ -8085,15 +8085,12 @@
        "labelled_break_model": null,
        "labelled_reason": null,
        "ecdat_names": [
-        "DH",
-        "ECDH"
+        "DH"
        ],
        "ecdat_rule_ids": [
-        "ECD-SRC-SSH-DH-001",
-        "ECD-SRC-SSH-KEX-001"
+        "ECD-SRC-SSH-DH-001"
        ],
        "ecdat_match": [
-        "\"diffie-hellman-group14-sha256\"",
         "\"diffie-hellman-group14-sha256\""
        ]
       },
@@ -8105,15 +8102,12 @@
        "labelled_break_model": null,
        "labelled_reason": null,
        "ecdat_names": [
-        "DH",
-        "ECDH"
+        "DH"
        ],
        "ecdat_rule_ids": [
-        "ECD-SRC-SSH-DH-001",
-        "ECD-SRC-SSH-KEX-001"
+        "ECD-SRC-SSH-DH-001"
        ],
        "ecdat_match": [
-        "\"diffie-hellman-group16-sha512\"",
         "\"diffie-hellman-group16-sha512\""
        ]
       },
@@ -8125,15 +8119,12 @@
        "labelled_break_model": null,
        "labelled_reason": null,
        "ecdat_names": [
-        "DH",
-        "ECDH"
+        "DH"
        ],
        "ecdat_rule_ids": [
-        "ECD-SRC-SSH-DH-001",
-        "ECD-SRC-SSH-KEX-001"
+        "ECD-SRC-SSH-DH-001"
        ],
        "ecdat_match": [
-        "\"diffie-hellman-group16-sha512\"",
         "\"diffie-hellman-group16-sha512\""
        ]
       },
@@ -8230,15 +8221,12 @@
        "labelled_break_model": null,
        "labelled_reason": null,
        "ecdat_names": [
-        "DH",
-        "ECDH"
+        "DH"
        ],
        "ecdat_rule_ids": [
-        "ECD-SRC-SSH-DH-001",
-        "ECD-SRC-SSH-KEX-001"
+        "ECD-SRC-SSH-DH-001"
        ],
        "ecdat_match": [
-        "\"diffie-hellman-group16-sha512\"",
         "\"diffie-hellman-group16-sha512\""
        ]
       },
@@ -8250,15 +8238,12 @@
        "labelled_break_model": null,
        "labelled_reason": null,
        "ecdat_names": [
-        "DH",
-        "ECDH"
+        "DH"
        ],
        "ecdat_rule_ids": [
-        "ECD-SRC-SSH-DH-001",
-        "ECD-SRC-SSH-KEX-001"
+        "ECD-SRC-SSH-DH-001"
        ],
        "ecdat_match": [
-        "\"diffie-hellman-group14-sha256\"",
         "\"diffie-hellman-group14-sha256\""
        ]
       },
@@ -8270,15 +8255,12 @@
        "labelled_break_model": "not-affected",
        "labelled_reason": "no quantum-vulnerable primitive is named on this line",
        "ecdat_names": [
-        "DH",
-        "ECDH"
+        "DH"
        ],
        "ecdat_rule_ids": [
-        "ECD-SRC-SSH-DH-001",
-        "ECD-SRC-SSH-KEX-001"
+        "ECD-SRC-SSH-DH-001"
        ],
        "ecdat_match": [
-        "\"diffie-hellman-group14-sha256\"",
         "\"diffie-hellman-group14-sha256\""
        ]
       },
@@ -8290,15 +8272,12 @@
        "labelled_break_model": "not-affected",
        "labelled_reason": "no quantum-vulnerable primitive is named on this line",
        "ecdat_names": [
-        "DH",
-        "ECDH"
+        "DH"
        ],
        "ecdat_rule_ids": [
-        "ECD-SRC-SSH-DH-001",
-        "ECD-SRC-SSH-KEX-001"
+        "ECD-SRC-SSH-DH-001"
        ],
        "ecdat_match": [
-        "\"diffie-hellman-group16-sha512\"",
         "\"diffie-hellman-group16-sha512\""
        ]
       }
@@ -10067,7 +10046,7 @@
       "FP": 16,
       "FN": 114,
       "labelled_positives": 259,
-      "findings_total": 184
+      "findings_total": 177
      },
      "precision": 0.9006,
      "precision_fraction": "145/161",
@@ -10152,15 +10131,12 @@
        "labelled_break_model": null,
        "labelled_reason": null,
        "ecdat_names": [
-        "DH",
-        "ECDH"
+        "DH"
        ],
        "ecdat_rule_ids": [
-        "ECD-SRC-SSH-DH-001",
-        "ECD-SRC-SSH-KEX-001"
+        "ECD-SRC-SSH-DH-001"
        ],
        "ecdat_match": [
-        "\"diffie-hellman-group14-sha256\"",
         "\"diffie-hellman-group14-sha256\""
        ]
       },
@@ -10172,15 +10148,12 @@
        "labelled_break_model": null,
        "labelled_reason": null,
        "ecdat_names": [
-        "DH",
-        "ECDH"
+        "DH"
        ],
        "ecdat_rule_ids": [
-        "ECD-SRC-SSH-DH-001",
-        "ECD-SRC-SSH-KEX-001"
+        "ECD-SRC-SSH-DH-001"
        ],
        "ecdat_match": [
-        "\"diffie-hellman-group16-sha512\"",
         "\"diffie-hellman-group16-sha512\""
        ]
       },
@@ -10192,15 +10165,12 @@
        "labelled_break_model": null,
        "labelled_reason": null,
        "ecdat_names": [
-        "DH",
-        "ECDH"
+        "DH"
        ],
        "ecdat_rule_ids": [
-        "ECD-SRC-SSH-DH-001",
-        "ECD-SRC-SSH-KEX-001"
+        "ECD-SRC-SSH-DH-001"
        ],
        "ecdat_match": [
-        "\"diffie-hellman-group16-sha512\"",
         "\"diffie-hellman-group16-sha512\""
        ]
       },
@@ -10297,15 +10267,12 @@
        "labelled_break_model": null,
        "labelled_reason": null,
        "ecdat_names": [
-        "DH",
-        "ECDH"
+        "DH"
        ],
        "ecdat_rule_ids": [
-        "ECD-SRC-SSH-DH-001",
-        "ECD-SRC-SSH-KEX-001"
+        "ECD-SRC-SSH-DH-001"
        ],
        "ecdat_match": [
-        "\"diffie-hellman-group16-sha512\"",
         "\"diffie-hellman-group16-sha512\""
        ]
       },
@@ -10317,15 +10284,12 @@
        "labelled_break_model": null,
        "labelled_reason": null,
        "ecdat_names": [
-        "DH",
-        "ECDH"
+        "DH"
        ],
        "ecdat_rule_ids": [
-        "ECD-SRC-SSH-DH-001",
-        "ECD-SRC-SSH-KEX-001"
+        "ECD-SRC-SSH-DH-001"
        ],
        "ecdat_match": [
-        "\"diffie-hellman-group14-sha256\"",
         "\"diffie-hellman-group14-sha256\""
        ]
       },
@@ -10337,15 +10301,12 @@
        "labelled_break_model": "not-affected",
        "labelled_reason": "no quantum-vulnerable primitive is named on this line",
        "ecdat_names": [
-        "DH",
-        "ECDH"
+        "DH"
        ],
        "ecdat_rule_ids": [
-        "ECD-SRC-SSH-DH-001",
-        "ECD-SRC-SSH-KEX-001"
+        "ECD-SRC-SSH-DH-001"
        ],
        "ecdat_match": [
-        "\"diffie-hellman-group14-sha256\"",
         "\"diffie-hellman-group14-sha256\""
        ]
       },
@@ -10357,15 +10318,12 @@
        "labelled_break_model": "not-affected",
        "labelled_reason": "no quantum-vulnerable primitive is named on this line",
        "ecdat_names": [
-        "DH",
-        "ECDH"
+        "DH"
        ],
        "ecdat_rule_ids": [
-        "ECD-SRC-SSH-DH-001",
-        "ECD-SRC-SSH-KEX-001"
+        "ECD-SRC-SSH-DH-001"
        ],
        "ecdat_match": [
-        "\"diffie-hellman-group16-sha512\"",
         "\"diffie-hellman-group16-sha512\""
        ]
       }

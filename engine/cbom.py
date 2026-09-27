@@ -98,7 +98,30 @@ CLASSICAL_STRENGTH_BITS = {
 # they must never inherit the "broken by Shor" verdict that applies to the primitives they
 # replace. Getting this backwards is the most damaging possible error in this file -- the tool
 # would label its own migration recommendation as quantum-vulnerable.
-PQC_FAMILIES = ("ML-KEM", "ML-KSA", "ML-DSA", "SLH-DSA", "FN-DSA", "FALCON", "XMMS")
+#
+# Spelling variants are NORMALISED before matching rather than listed one by one. Real
+# deployments use every spelling at once: IANA/TLS codepoints write `X25519MLKEM768`, the
+# `cryptography` library writes `MLKEM1024`, the SSH draft writes `mlkem768x25519-sha256`, and
+# the NIST names are hyphenated (`ML-KEM-768`). Matching only the hyphenated forms meant the
+# single most important name in the file -- our own recommended hybrid `X25519MLKEM768` -- was
+# classified as NOT post-quantum. A tuple of literal strings could never stay current, so the
+# families are the regexes that survive the spelling variation instead.
+PQC_FAMILIES = (r"ML[-_]?KEM", r"ML[-_]?KSA", r"ML[-_]?DSA", r"SLH[-_]?DSA", r"FN[-_]?DSA",
+                r"FALCON", r"XMSS", r"LMS", r"SPHINCS", r"HQC", r"DILITHIUM", r"FIPS.?204",
+                r"SPHINCS\+", r"RAINBOW", r"CLASSIC\.MCELIECE", r"MCELIECE", r"NTRU")
+
+_PQC_RE = re.compile("|".join(PQC_FAMILIES), re.IGNORECASE)
+
+
+def is_pqc(name):
+    """True if `name` denotes a post-quantum (or hybrid) algorithm.
+
+    Deliberately a substring test on a normalised haystack rather than a word-boundary match:
+    hybrid names concatenate a classical and a PQ component (`X25519MLKEM768`,
+    `SecP384r1MLKEM1024`, `p256_mlkem768`) with no separator, and a `\b` boundary would split
+    `MLKEM768` off from its prefix and miss it.
+    """
+    return bool(_PQC_RE.search(str(name or "")))
 
 # Cryptographic function, inferred from purpose. CycloneDX types `cryptoFunctions` as a list
 # from a closed vocabulary, and hardcoding "keygen" for a signing-only artefact is simply wrong.
@@ -139,9 +162,11 @@ def _is_pqc(name):
     primitive `signature` -- the same primitive values as RSA and ECDSA. Ordering the primitive
     check first made every PQC algorithm inherit the "broken by Shor" verdict, so the tool
     labelled its own migration recommendation `nistQuantumSecurityLevel: 0`.
+
+    Delegates to `is_pqc`, which normalises spelling variants rather than matching only the
+    hyphenated NIST forms.
     """
-    upper = str(name or "").upper()
-    return any(f in upper for f in PQC_FAMILIES)
+    return is_pqc(name)
 
 
 def _nist_quantum_level(finding, primitive):

@@ -96,6 +96,11 @@ PERF_NOTES = {
 from engine.purpose import (PURPOSE_SIGNATURE, PURPOSE_KEY_ESTABLISHMENT, PURPOSE_CONFIDENTIALITY,
                             PURPOSE_UNRESOLVED, PURPOSE_TO_PRIMITIVE, resolve_purpose,
                             resolve_assurance)
+# `_coerce_int` rather than a bare `int()`: `key_length` comes from regex capture groups and
+# third-party inputs, so it can be any string. `int('unknown')` raised ValueError and aborted the
+# entire report, turning one malformed field into a total scan failure. An unreadable key size is
+# a reportable condition, not a fatal one -- the caller gets the "confirm key size" recommendation.
+from engine.cbom import _coerce_int
 
 
 def _rec(algorithm, action, justification, size, latency, rule_trace,
@@ -290,7 +295,7 @@ def get_pqc_recommendation(finding):
 
     # ------------------------------------------------------------- symmetric ciphers (no Shor exposure)
     if primitive in ("ae", "block-cipher", "mac") or "AES" in name or "CHACHA" in name:
-        key_len = finding.get("key_length") or finding.get("key_size")
+        key_len = _coerce_int(finding.get("key_length") or finding.get("key_size"))
         if key_len is None:
             return _rec(
                 "Confirm key size, then decide",
