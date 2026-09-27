@@ -111,7 +111,9 @@ def test_every_rule_is_actually_executed(tmp_path, scanner):
         "ECD-RB-AES-002": "c = OpenSSL::Cipher.new('chacha20')",
         "ECD-RB-LEGACY-001": "c = OpenSSL::Cipher.new('bf-cbc')",
         "ECD-RB-RSA-001": "k = OpenSSL::PKey::RSA.new(2048)",
-        "ECD-RB-SIG-001": "sig = key.sign_pss('SHA256', digest)",
+        # A real call site. The pattern needs the receiver named (`OpenSSL::PKey::X.sign(...)
+        # ), which is why the sample must be a call and not a bare class reference.
+        "ECD-RB-SIG-001": "sig = OpenSSL::PKey::RSA.new.sign(digest, priv)",
         "ECD-RB-EC-001": "k = OpenSSL::PKey::EC.generate('prime256v1')",
         "ECD-RB-DH-001": "dh = OpenSSL::PKey::DH.new(2048)",
         "ECD-RB-MAC-001": "h = OpenSSL::HMAC.digest('SHA256', key, data)",
@@ -302,6 +304,24 @@ def test_secure_random_is_not_flagged_as_a_weak_generator(tmp_path, scanner):
     findings = scanner.scan_directory(str(tmp_path))
     assert not [f for f in findings if f["name"] == "PRNG"], (
         "SecureRandom must never be reported as a non-cryptographic generator")
+
+
+def test_a_python_sign_call_is_not_a_ruby_signature_finding(tmp_path, scanner):
+    """A language pack must not fire on ANOTHER language.
+
+    `ECD-RB-SIG-001` originally matched a bare `.sign(`/`.verify(`, which fired on paramiko's
+    `self.key.sign(...)` -- an SSH host-key operation in Python, reported as an RSA signature.
+    That was 6 false positives on the Python corpus, and the benchmark caught them. The rule now
+    requires an explicit `OpenSSL::PKey::` receiver, which is what makes it a Ruby signal.
+    """
+    _write(str(tmp_path / "auth.py"),
+           "sig = self.key.sign(data)\n"
+           "ok = self.key.verify(sig, data)\n"
+           "key.sign_pss('SHA256', digest)\n")
+    findings = scanner.scan_directory(str(tmp_path))
+    assert findings == [], (
+        "a Python .sign()/.verify() call must not be reported by the Ruby pack: %r"
+        % [(f["rule_id"], f["name"]) for f in findings])
 
 
 def test_provenance_is_recorded(tmp_path, scanner):

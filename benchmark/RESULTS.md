@@ -67,8 +67,8 @@ counts it came from; no ratio is reported without them.
 |---|---|---|---|---|---|---|---|
 | `cryptoapi_bench` | L1 | 165 | 1 | 45 | 0.994 = 165/166 | 0.7857 = 165/210 | 0.8777 |
 | `cryptoapi_bench` | L2 | 165 | 1 | 158 | 0.994 = 165/166 | 0.5108 = 165/323 | 0.6748 |
-| `paramiko` | L1 | 143 | 19 | 97 | 0.8827 = 143/162 | 0.5958 = 143/240 | 0.7114 |
-| `paramiko` | L2 | 143 | 19 | 116 | 0.8827 = 143/162 | 0.5521 = 143/259 | 0.6793 |
+| `paramiko` | L1 | 143 | 17 | 97 | 0.8938 = 143/160 | 0.5958 = 143/240 | 0.715 |
+| `paramiko` | L2 | 143 | 17 | 116 | 0.8938 = 143/160 | 0.5521 = 143/259 | 0.6826 |
 
 ### File-level view (secondary)
 
@@ -174,7 +174,6 @@ Findings emitted for `paramiko`, by rule:
 | SHA | ECD-SRC-HASHLIB-002 | 2 |
 | X25519 | ECD-SRC-PYCA-X-001 | 2 |
 | AES | ECD-SRC-JAVA-CONST-001 | 2 |
-| RSA | ECD-RB-SIG-001 | 2 |
 | 3DES | ECD-SRC-SSH-LEGACY-001 | 2 |
 | ECDH | ECD-SRC-PYCA-ECDH-001 | 1 |
 | Ed25519 | ECD-SRC-PYCA-ED-001 | 1 |
@@ -201,7 +200,7 @@ from the label file, so each row can be checked against the source.
 |---|---|---|---|
 | `src/main/java/org/cryptoapi/bench/untrustedprng/UntrustedPRNGCase1.java:9` | line was not a labelling candidate | PRNG | ECD-SRC-JAVA-WEAKRNG-001 |
 
-## Explicit false positives -- `paramiko`, L1 (19)
+## Explicit false positives -- `paramiko`, L1 (17)
 
 A false positive is a finding at a `(file, line)` that the labels record as NOT
 a quantum-vulnerable cryptographic use. The exclusion reason is quoted verbatim
@@ -220,16 +219,14 @@ from the label file, so each row can be checked against the source.
 | `paramiko/kex_mlkem.py:112` | line was not a labelling candidate | ECDH | ECD-SRC-ECDH-001 |
 | `paramiko/pkey.py:128` | no quantum-vulnerable primitive is named on this line | AES | ECD-SRC-JAVA-CONST-001 |
 | `paramiko/pkey.py:134` | no quantum-vulnerable primitive is named on this line | AES | ECD-SRC-JAVA-CONST-001 |
-| `paramiko/rsakey.py:137` | no quantum-vulnerable primitive is named on this line | RSA | ECD-RB-SIG-001 |
 | `paramiko/rsakey.py:139` | line was not a labelling candidate | RSA | ECD-SRC-PYCA-RSA-001 |
-| `paramiko/rsakey.py:166` | no quantum-vulnerable primitive is named on this line | RSA | ECD-RB-SIG-001 |
 | `paramiko/rsakey.py:167` | line was not a labelling candidate | RSA | ECD-SRC-PYCA-RSA-001 |
 | `paramiko/transport.py:219` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
 | `paramiko/transport.py:221` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
 | `paramiko/transport.py:328` | no quantum-vulnerable primitive is named on this line | DH | ECD-SRC-SSH-DH-001 |
 | `paramiko/transport.py:329` | no quantum-vulnerable primitive is named on this line | DH | ECD-SRC-SSH-DH-001 |
 
-## Explicit false positives -- `paramiko`, L2 (19)
+## Explicit false positives -- `paramiko`, L2 (17)
 
 A false positive is a finding at a `(file, line)` that the labels record as NOT
 a quantum-vulnerable cryptographic use. The exclusion reason is quoted verbatim
@@ -248,9 +245,7 @@ from the label file, so each row can be checked against the source.
 | `paramiko/kex_mlkem.py:112` | line was not a labelling candidate | ECDH | ECD-SRC-ECDH-001 |
 | `paramiko/pkey.py:128` | no quantum-vulnerable primitive is named on this line | AES | ECD-SRC-JAVA-CONST-001 |
 | `paramiko/pkey.py:134` | no quantum-vulnerable primitive is named on this line | AES | ECD-SRC-JAVA-CONST-001 |
-| `paramiko/rsakey.py:137` | no quantum-vulnerable primitive is named on this line | RSA | ECD-RB-SIG-001 |
 | `paramiko/rsakey.py:139` | line was not a labelling candidate | RSA | ECD-SRC-PYCA-RSA-001 |
-| `paramiko/rsakey.py:166` | no quantum-vulnerable primitive is named on this line | RSA | ECD-RB-SIG-001 |
 | `paramiko/rsakey.py:167` | line was not a labelling candidate | RSA | ECD-SRC-PYCA-RSA-001 |
 | `paramiko/transport.py:219` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
 | `paramiko/transport.py:221` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |

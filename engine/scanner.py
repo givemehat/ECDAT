@@ -215,14 +215,14 @@ RULES = [
     dict(id="ECD-RB-RSA-001", name="RSA", primitive="pke", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"OpenSSL::PKey::RSA\.new\s*\(|OpenSSL::PKey\.read\s*\("),
-    # Scoped to an explicit `OpenSSL::PKey::...` receiver ONLY. An earlier version also allowed a
+    # Scoped to an explicit `OpenSSL::PKey::` receiver ONLY. An earlier version also allowed a
     # bare `key.sign(`, which matched paramiko's `self.key.sign(` in Python -- an SSH host-key
-    # verification call, not an RSA signature -- and cost 6 false positives on the Python corpus.
-    # The namespace is what makes this a Ruby signal rather than a generic method call.
+    # operation, not an RSA signature -- and cost 6 false positives on the Python corpus.
+    # The optional `.new` matters: `OpenSSL::PKey::RSA.new.sign_pss(...)` is the idiomatic
+    # one-liner, so a pattern without it would miss the most common Ruby shape there is.
     dict(id="ECD-RB-SIG-001", name="RSA", primitive="signature", artefact_class="source",
          uses="signing", key_group=None, evidence="discovered",
-         regex=r"OpenSSL::PKey::\w+\.sign(?:_pss)?\s*\(|"
-                r"OpenSSL::PKey::\w+\.verify(?:_pss)?\s*\("),
+         regex=r"OpenSSL::PKey::\w+(?:\.new)?\.(?:sign|verify)(?:_pss)?\s*\("),
     dict(id="ECD-RB-EC-001", name="ECC", primitive="signature", artefact_class="source",
          uses="signing", key_group=None, evidence="discovered",
          regex=r"OpenSSL::PKey::EC\.new\s*\(|OpenSSL::PKey::EC\.generate\s*\("),

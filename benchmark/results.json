@@ -3827,15 +3827,15 @@
      "SaaS / third-party boundary crypto (requires attestation)",
      "silicon-embedded keys (requires attestation)"
     ],
-    "findings_total": 172,
+    "findings_total": 170,
     "assurance_histogram": {
      "observed": 0,
-     "used": 172,
+     "used": 170,
      "declared": 0,
      "capability": 0
     },
-    "proven_use": 172,
-    "unresolved_purpose": 61
+    "proven_use": 170,
+    "unresolved_purpose": 60
    },
    "scan_errors": [],
    "findings_by_rule": {
@@ -3859,7 +3859,6 @@
     "SHA | ECD-SRC-HASHLIB-002": 2,
     "X25519 | ECD-SRC-PYCA-X-001": 2,
     "AES | ECD-SRC-JAVA-CONST-001": 2,
-    "RSA | ECD-RB-SIG-001": 2,
     "3DES | ECD-SRC-SSH-LEGACY-001": 2,
     "ECDH | ECD-SRC-PYCA-ECDH-001": 1,
     "Ed25519 | ECD-SRC-PYCA-ED-001": 1,
@@ -3871,16 +3870,16 @@
     "L1": {
      "counts": {
       "TP": 143,
-      "FP": 19,
+      "FP": 17,
       "FN": 97,
       "labelled_positives": 240,
-      "findings_total": 172
+      "findings_total": 170
      },
-     "precision": 0.8827,
-     "precision_fraction": "143/162",
+     "precision": 0.8938,
+     "precision_fraction": "143/160",
      "recall": 0.5958,
      "recall_fraction": "143/240",
-     "f1": 0.7114,
+     "f1": 0.715,
      "f1_note": "F1 is computed from the ROUNDED precision/recall, so it may differ in the 4th decimal from an F1 computed from the raw counts.",
      "false_positives": [
       {
@@ -4074,23 +4073,6 @@
       },
       {
        "file": "paramiko/rsakey.py",
-       "line": 137,
-       "labelled_primitive": null,
-       "labelled_code": "sig = self.key.sign(",
-       "labelled_break_model": "not-affected",
-       "labelled_reason": "no quantum-vulnerable primitive is named on this line",
-       "ecdat_names": [
-        "RSA"
-       ],
-       "ecdat_rule_ids": [
-        "ECD-RB-SIG-001"
-       ],
-       "ecdat_match": [
-        "key.sign("
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
        "line": 139,
        "labelled_primitive": null,
        "labelled_code": null,
@@ -4104,23 +4086,6 @@
        ],
        "ecdat_match": [
         "padding.PKCS1v15"
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
-       "line": 166,
-       "labelled_primitive": null,
-       "labelled_code": "key.verify(",
-       "labelled_break_model": "not-affected",
-       "labelled_reason": "no quantum-vulnerable primitive is named on this line",
-       "ecdat_names": [
-        "RSA"
-       ],
-       "ecdat_rule_ids": [
-        "ECD-RB-SIG-001"
-       ],
-       "ecdat_match": [
-        "key.verify("
        ]
       },
       {
@@ -6004,16 +5969,16 @@
     "L2": {
      "counts": {
       "TP": 143,
-      "FP": 19,
+      "FP": 17,
       "FN": 116,
       "labelled_positives": 259,
-      "findings_total": 172
+      "findings_total": 170
      },
-     "precision": 0.8827,
-     "precision_fraction": "143/162",
+     "precision": 0.8938,
+     "precision_fraction": "143/160",
      "recall": 0.5521,
      "recall_fraction": "143/259",
-     "f1": 0.6793,
+     "f1": 0.6826,
      "f1_note": "F1 is computed from the ROUNDED precision/recall, so it may differ in the 4th decimal from an F1 computed from the raw counts.",
      "false_positives": [
       {
@@ -6207,23 +6172,6 @@
       },
       {
        "file": "paramiko/rsakey.py",
-       "line": 137,
-       "labelled_primitive": null,
-       "labelled_code": "sig = self.key.sign(",
-       "labelled_break_model": "not-affected",
-       "labelled_reason": "no quantum-vulnerable primitive is named on this line",
-       "ecdat_names": [
-        "RSA"
-       ],
-       "ecdat_rule_ids": [
-        "ECD-RB-SIG-001"
-       ],
-       "ecdat_match": [
-        "key.sign("
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
        "line": 139,
        "labelled_primitive": null,
        "labelled_code": null,
@@ -6237,23 +6185,6 @@
        ],
        "ecdat_match": [
         "padding.PKCS1v15"
-       ]
-      },
-      {
-       "file": "paramiko/rsakey.py",
-       "line": 166,
-       "labelled_primitive": null,
-       "labelled_code": "key.verify(",
-       "labelled_break_model": "not-affected",
-       "labelled_reason": "no quantum-vulnerable primitive is named on this line",
-       "ecdat_names": [
-        "RSA"
-       ],
-       "ecdat_rule_ids": [
-        "ECD-RB-SIG-001"
-       ],
-       "ecdat_match": [
-        "key.verify("
        ]
       },
       {
