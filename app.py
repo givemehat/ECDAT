@@ -69,6 +69,7 @@ ROLES = [
     "Auditor",
     "Migration Planner",
     "Standards & Compliance",
+    "Topology Visualization",
 ]
 
 CSS = """
@@ -970,6 +971,23 @@ def execute_scan(config):
                                           "message": f"{type(exc).__name__}: {exc}"}
 
 
+
+def view_topology(records):
+    """Render the PyVis interactive graph of the scan."""
+    import streamlit.components.v1 as components
+    from engine.graph import generate_crypto_graph
+    
+    st.markdown("### Cryptographic Topology Map")
+    st.write("Visualizing the application's dependencies and cryptographic calls as a force-directed graph. Drag nodes to interact.")
+    
+    if not records:
+        st.warning("No cryptographic assets discovered to visualize.")
+        return
+        
+    with st.spinner("Generating topology graph..."):
+        html_str = generate_crypto_graph(records)
+        components.html(html_str, height=650, scrolling=True)
+
 def main():
     """The whole console. Runs only under `__main__`, which is exactly what `streamlit run` does.
 
@@ -1031,6 +1049,8 @@ def main():
         view_auditor(records)
     elif role == "Migration Planner":
         view_planner(scan, records, config["policy"], config["z"])
+    elif role == "Topology Visualization":
+        view_topology(records)
     else:
         view_compliance(scan, records, config["policy"], config["z"])
 
