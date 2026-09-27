@@ -122,6 +122,13 @@ def test_every_rule_is_actually_executed(tmp_path, scanner):
         # `SecureRandom.hex` deliberately does NOT match this rule -- a rule that fired on the
         # secure generator too would make the finding meaningless.
         "ECD-RB-WEAKRNG-001": "token = Kernel.rand(16)",
+            "ECD-KEY-PEM-001": "-----BEGIN RSA PRIVATE KEY-----",
+            "ECD-KEY-PGP-001": "-----BEGIN PGP PRIVATE KEY BLOCK-----",
+            "ECD-PROTO-TLS-001": "ssl_protocols TLSv1.2",
+            "ECD-CLOUD-KMS-001": "boto3.client('kms')",
+            "ECD-CLOUD-AZURE-001": "azure.keyvault",
+            "ECD-CLOUD-GCP-001": "google-cloud-kms",
+            "ECD-HARDWARE-PKCS11-001": "SunPKCS11",
     }
     assert set(samples) == {r["id"] for r in RULES}, "a rule has no positive test"
     unreachable = []

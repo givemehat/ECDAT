@@ -439,6 +439,33 @@ RULES = [
     dict(id="ECD-CFG-LEGACY-001", name="LEGACY-CIPHER", primitive="protocol",
          artefact_class="config", uses="tls", key_group=None, evidence="configured",
          regex=r"\b(3DES|DES-CBC3|RC4|NULL-SHA|EXPORT)\b"),
+
+    # ---- Hardcoded Keys ----
+    dict(id="ECD-KEY-PEM-001", name="Private Key (PEM)", primitive="key", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"-----BEGIN (?:RSA |EC |DSA )?PRIVATE KEY-----"),
+    dict(id="ECD-KEY-PGP-001", name="Private Key (PGP)", primitive="key", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"-----BEGIN PGP PRIVATE KEY BLOCK-----"),
+         
+    # ---- Protocols ----
+    dict(id="ECD-PROTO-TLS-001", name="TLS Configuration", primitive="protocol", artefact_class="config",
+         uses="tls", key_group=None, evidence="configured",
+         regex=r"ssl_protocols\s+TLSv[0-1]\.[0-3]|SSLProtocol\s+(?:All|-SSLv[2-3]|[-+]?TLSv[1-3]\.[0-3]?)"),
+         
+    # ---- Cloud Services / Hardware Modules ----
+    dict(id="ECD-CLOUD-KMS-001", name="AWS KMS", primitive="cloud-service", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"boto3\.client\(\s*['\"]kms['\"]\s*\)|aws_kms_key|kms\.Decrypt|kms\.Encrypt"),
+    dict(id="ECD-CLOUD-AZURE-001", name="Azure Key Vault", primitive="cloud-service", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"SecretClient\(|azure\.keyvault|KeyVaultClient"),
+    dict(id="ECD-CLOUD-GCP-001", name="Google Cloud KMS", primitive="cloud-service", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"google-cloud-kms|KeyManagementServiceClient"),
+    dict(id="ECD-HARDWARE-PKCS11-001", name="PKCS#11 HSM", primitive="hardware-module", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"SunPKCS11|PKCS11|pkcs11\.get_token"),
 ]
 
 # Binary/firmware evidence: symbol or string fragments identifying a crypto library or algorithm.
