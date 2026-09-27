@@ -1,0 +1,8 @@
+cryptoapi_bench  L1  TP=165  FP=1    FN=45    precision=0.994  (165/166)  recall=0.7857 (165/210)  F1=0.8777
+cryptoapi_bench  L2  TP=165  FP=1    FN=158   precision=0.994  (165/166)  recall=0.5108 (165/323)  F1=0.6748
+cryptoapi_bench  coverage: files_seen=203 files_scanned=203 files_skipped=0 errors=0
+paramiko         L1  TP=143  FP=19   FN=97    precision=0.8827 (143/162)  recall=0.5958 (143/240)  F1=0.7114
+paramiko         L2  TP=143  FP=19   FN=116   precision=0.8827 (143/162)  recall=0.5521 (143/259)  F1=0.6793
+paramiko         coverage: files_seen=42 files_scanned=42 files_skipped=0 errors=0
+
+wrote C:\Users\Public\Downloads\chrome downloads\post quantom sih\ECDAT\benchmark\results.json and C:\Users\Public\Downloads\chrome downloads\post quantom sih\ECDAT\benchmark\RESULTS.md

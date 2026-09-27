@@ -223,3 +223,73 @@ def test_a_genuine_named_target_is_still_labelled_named():
               "recommendation": {"algorithm": "ML-DSA-65"}}
     row = queue_rows([record], deadline_year=2035)[0]
     assert "target named" in row["Status"]
+
+
+
+# --------------------------------------------------------------------------------------------
+# DUPLICATE FINDINGS -- the benchmark structurally CANNOT see this class of bug
+# --------------------------------------------------------------------------------------------
+
+# `benchmark/run_benchmark.py` scores DISTINCT (file, line) locations: "a second finding on an
+# already-matched positive line is neither a TP nor an FP". So a rule pair that both match one
+# line is invisible to the benchmark AND invisible to a recall/precision comparison. It only
+# shows up as an inflated findings_total in the CBOM and a doubled component in the report.
+# This is the same failure shape as the SSH DH/ECDH double-report, found again in new code.
+
+DUPLICATE_SAMPLES = [
+    'Cipher.getInstance("AES/GCM/NoPadding");',
+    'KeyGenerator.getInstance("AES");',
+    'new SecretKeySpec(keyBytes, "AES");',
+    'MessageDigest.getInstance("SHA-256");',
+    'MessageDigest.getInstance("MD5");',
+    'Mac.getInstance("HmacSHA256");',
+    'Signature.getInstance("SHA256withRSA");',
+    'KeyPairGenerator.getInstance("RSA");',
+    'k = "ecdh-sha2-nistp256"',
+    'k = "diffie-hellman-group14-sha256"',
+    'ciphers = RC4-SHA:DES-CBC3-SHA',
+]
+
+# Lines that legitimately name MORE THAN ONE algorithm, and so must keep producing more than
+# one finding. `padding.PSS(mgf=padding.MGF1(hashes.SHA256()))` is an RSA signature using a
+# SHA-256 digest: RSA, SHA-256 and PSS are three real assets, and collapsing them to one would
+# LOSE an inventory item. The test below asserts the count is exactly the number of distinct
+# algorithms, so "collapse everything to one" cannot be a passing strategy.
+LEGITIMATE_MULTI_ALGORITHM = {
+    'p = padding.PSS(mgf=padding.MGF1(hashes.SHA256()));': 3,
+    'priv = ec.generate_private_key(ec.SECP256R1());': 2,
+}
+
+
+@pytest.mark.parametrize("line", DUPLICATE_SAMPLES)
+def test_one_line_of_real_code_never_fires_two_rules(line):
+    """A single source line must not produce two findings naming the SAME algorithm.
+
+    The dedup in `_finalise` is keyed on `(file, name, rule_id, line)`, so two rules with
+    different ids NEVER collapse -- the same line is reported twice and the CBOM carries two
+    components for one statement. `ECD-SRC-JAVA-DIGEST-002` did exactly this to
+    `MessageDigest.getInstance("SHA-256")`, and the benchmark scored it as neither better nor
+    worse because it counts locations, not findings.
+    """
+    hits = [r for r in RULES
+            if r["artefact_class"] == "source" and re.search(r["regex"], line)]
+    names = [r["name"] for r in hits]
+    duplicates = [n for n in set(names) if names.count(n) > 1]
+    assert not duplicates, (
+        "one line produced the same algorithm %d times (%s via %s). Two rules reporting the "
+        "SAME name cannot collapse, because the dedup key includes rule_id."
+        % (len(duplicates), duplicates, [r["id"] for r in hits]))
+
+
+@pytest.mark.parametrize("line,expected", sorted(LEGITIMATE_MULTI_ALGORITHM.items()))
+def test_lines_naming_several_real_algorithms_keep_every_one(line, expected):
+    """The counterpart guard, so the test above cannot be satisfied by collapsing everything.
+
+    These lines name distinct algorithms and every one of them belongs in the inventory. The
+    defect being guarded against is a DUPLICATE, not a count above one.
+    """
+    hits = [r for r in RULES
+            if r["artefact_class"] == "source" and re.search(r["regex"], line)]
+    assert len(hits) == expected, (
+        "expected %d distinct algorithms on %r, got %d via %s"
+        % (expected, line, len(hits), [r["id"] for r in hits]))

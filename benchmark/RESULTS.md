@@ -65,17 +65,17 @@ counts it came from; no ratio is reported without them.
 
 | corpus | labels | TP | FP | FN | precision | recall | F1 |
 |---|---|---|---|---|---|---|---|
-| `cryptoapi_bench` | L1 | 46 | 0 | 164 | 1.0 = 46/46 | 0.219 = 46/210 | 0.3593 |
-| `cryptoapi_bench` | L2 | 46 | 0 | 277 | 1.0 = 46/46 | 0.1424 = 46/323 | 0.2493 |
-| `paramiko` | L1 | 145 | 18 | 95 | 0.8896 = 145/163 | 0.6042 = 145/240 | 0.7196 |
-| `paramiko` | L2 | 145 | 18 | 114 | 0.8896 = 145/163 | 0.5598 = 145/259 | 0.6872 |
+| `cryptoapi_bench` | L1 | 165 | 1 | 45 | 0.994 = 165/166 | 0.7857 = 165/210 | 0.8777 |
+| `cryptoapi_bench` | L2 | 165 | 1 | 158 | 0.994 = 165/166 | 0.5108 = 165/323 | 0.6748 |
+| `paramiko` | L1 | 143 | 19 | 97 | 0.8827 = 143/162 | 0.5958 = 143/240 | 0.7114 |
+| `paramiko` | L2 | 143 | 19 | 116 | 0.8827 = 143/162 | 0.5521 = 143/259 | 0.6793 |
 
 ### File-level view (secondary)
 
 | corpus | labels | TP | FP | FN | precision | recall |
 |---|---|---|---|---|---|---|
-| `cryptoapi_bench` | L1 | 41 | 0 | 69 | 1.0 | 0.3727 |
-| `cryptoapi_bench` | L2 | 41 | 0 | 78 | 1.0 | 0.3445 |
+| `cryptoapi_bench` | L1 | 106 | 1 | 4 | 0.9907 | 0.9636 |
+| `cryptoapi_bench` | L2 | 106 | 1 | 13 | 0.9907 | 0.8908 |
 | `paramiko` | L1 | 16 | 0 | 3 | 1.0 | 0.8421 |
 | `paramiko` | L2 | 16 | 0 | 3 | 1.0 | 0.8421 |
 
@@ -83,18 +83,18 @@ counts it came from; no ratio is reported without them.
 
 | corpus | primitive (break model) | labelled | detected | recall |
 |---|---|---|---|---|
-| `cryptoapi_bench` | AES (grover) | 82 | 23 | 0.2805 |
-| `cryptoapi_bench` | Blowfish (grover) | 12 | 0 | 0.0 |
-| `cryptoapi_bench` | DES (grover) | 15 | 0 | 0.0 |
-| `cryptoapi_bench` | HMAC (grover) | 3 | 0 | 0.0 |
-| `cryptoapi_bench` | IDEA (grover) | 12 | 0 | 0.0 |
-| `cryptoapi_bench` | MD2 (grover) | 10 | 0 | 0.0 |
-| `cryptoapi_bench` | MD4 (grover) | 10 | 0 | 0.0 |
-| `cryptoapi_bench` | MD5 (grover) | 10 | 2 | 0.2 |
-| `cryptoapi_bench` | RC2 (grover) | 12 | 0 | 0.0 |
+| `cryptoapi_bench` | AES (grover) | 82 | 72 | 0.878 |
+| `cryptoapi_bench` | Blowfish (grover) | 12 | 8 | 0.6667 |
+| `cryptoapi_bench` | DES (grover) | 15 | 12 | 0.8 |
+| `cryptoapi_bench` | HMAC (grover) | 3 | 3 | 1.0 |
+| `cryptoapi_bench` | IDEA (grover) | 12 | 8 | 0.6667 |
+| `cryptoapi_bench` | MD2 (grover) | 10 | 6 | 0.6 |
+| `cryptoapi_bench` | MD4 (grover) | 10 | 6 | 0.6 |
+| `cryptoapi_bench` | MD5 (grover) | 10 | 6 | 0.6 |
+| `cryptoapi_bench` | RC2 (grover) | 12 | 8 | 0.6667 |
 | `cryptoapi_bench` | RC4 (grover) | 12 | 8 | 0.6667 |
-| `cryptoapi_bench` | RSA (shor) | 17 | 6 | 0.3529 |
-| `cryptoapi_bench` | SHA-1 (grover) | 10 | 2 | 0.2 |
+| `cryptoapi_bench` | RSA (shor) | 17 | 17 | 1.0 |
+| `cryptoapi_bench` | SHA-1 (grover) | 10 | 6 | 0.6 |
 | `cryptoapi_bench` | SHA-256 (grover) | 5 | 5 | 1.0 |
 | `paramiko` | 3DES (grover) | 2 | 2 | 1.0 |
 | `paramiko` | AES (grover) | 27 | 27 | 1.0 |
@@ -105,7 +105,7 @@ counts it came from; no ratio is reported without them.
 | `paramiko` | ECDSA (shor) | 42 | 11 | 0.2619 |
 | `paramiko` | ED25519 (shor) | 1 | 1 | 1.0 |
 | `paramiko` | Ed25519 (shor) | 19 | 5 | 0.2632 |
-| `paramiko` | EllipticCurvePrivateKey (shor) | 3 | 2 | 0.6667 |
+| `paramiko` | EllipticCurvePrivateKey (shor) | 3 | 0 | 0.0 |
 | `paramiko` | HMAC (grover) | 16 | 8 | 0.5 |
 | `paramiko` | MD5 (grover) | 5 | 4 | 0.8 |
 | `paramiko` | RSA (shor) | 37 | 31 | 0.8378 |
@@ -135,12 +135,21 @@ Findings emitted for `cryptoapi_bench`, by rule:
 
 | rule | findings |
 |---|---|
+| DES | ECD-SRC-JAVA-LEGACY-001 | 44 |
+| AES | ECD-SRC-JAVA-KEYGEN-001 | 31 |
 | AES | ECD-SRC-AES-001 | 23 |
+| AES | ECD-SRC-JAVA-CIPHER-001 | 21 |
+| SHA | ECD-SRC-JAVA-CONST-004 | 16 |
+| AES | ECD-SRC-JAVA-SECRETKEY-001 | 15 |
 | LEGACY-CIPHER | ECD-CFG-LEGACY-001 | 8 |
+| AES | ECD-SRC-JAVA-CONST-001 | 7 |
 | RSA | ECD-SRC-RSA-003 | 6 |
 | SHA256 | ECD-SRC-SHA2-001 | 5 |
+| MD5 | ECD-SRC-JAVA-DIGEST-001 | 4 |
+| HMAC | ECD-SRC-JAVA-MAC-001 | 3 |
 | SHA1 | ECD-SRC-SHA1-001 | 2 |
 | MD5 | ECD-SRC-MD5-001 | 2 |
+| PRNG | ECD-SRC-JAVA-WEAKRNG-001 | 1 |
 Findings emitted for `paramiko`, by rule:
 
 | rule | findings |
@@ -149,7 +158,6 @@ Findings emitted for `paramiko`, by rule:
 | ECDH | ECD-SRC-ECDH-001 | 22 |
 | AES | ECD-SRC-SSH-CIPHER-001 | 16 |
 | RSA | ECD-SRC-PYCA-RSA-001 | 13 |
-| ECC | ECD-SRC-PYCA-EC-002 | 12 |
 | ECDH | ECD-SRC-SSH-KEX-001 | 11 |
 | DH | ECD-SRC-SSH-DH-001 | 10 |
 | AES | ECD-SRC-PYCA-AES-001 | 9 |
@@ -165,29 +173,15 @@ Findings emitted for `paramiko`, by rule:
 | ECDSA | ECD-SRC-ECDSA-001 | 2 |
 | SHA | ECD-SRC-HASHLIB-002 | 2 |
 | X25519 | ECD-SRC-PYCA-X-001 | 2 |
+| AES | ECD-SRC-JAVA-CONST-001 | 2 |
+| RSA | ECD-RB-SIG-001 | 2 |
 | 3DES | ECD-SRC-SSH-LEGACY-001 | 2 |
 | ECDH | ECD-SRC-PYCA-ECDH-001 | 1 |
 | Ed25519 | ECD-SRC-PYCA-ED-001 | 1 |
 | AES | ECD-SRC-AES-001 | 1 |
 | SHA256 | ECD-SRC-SHA2-001 | 1 |
 | MD5 | ECD-SRC-MD5-001 | 1 |
-## Explicit false positives -- `cryptoapi_bench`, L1 (0)
-
-A false positive is a finding at a `(file, line)` that the labels record as NOT
-a quantum-vulnerable cryptographic use. The exclusion reason is quoted verbatim
-from the label file, so each row can be checked against the source.
-
-None.
-
-## Explicit false positives -- `cryptoapi_bench`, L2 (0)
-
-A false positive is a finding at a `(file, line)` that the labels record as NOT
-a quantum-vulnerable cryptographic use. The exclusion reason is quoted verbatim
-from the label file, so each row can be checked against the source.
-
-None.
-
-## Explicit false positives -- `paramiko`, L1 (18)
+## Explicit false positives -- `cryptoapi_bench`, L1 (1)
 
 A false positive is a finding at a `(file, line)` that the labels record as NOT
 a quantum-vulnerable cryptographic use. The exclusion reason is quoted verbatim
@@ -195,26 +189,9 @@ from the label file, so each row can be checked against the source.
 
 | file:line | why the labels exclude it | ECDAT called it | rule |
 |---|---|---|---|
-| `paramiko/ecdsakey.py:167` | line was not a labelling candidate | ECC | ECD-SRC-PYCA-EC-002 |
-| `paramiko/ecdsakey.py:305` | line was not a labelling candidate | ECDH | ECD-SRC-ECDH-001, ECD-SRC-PYCA-ECDH-001 |
-| `paramiko/kex_curve25519.py:37` | line was not a labelling candidate | ECDH | ECD-SRC-ECDH-001 |
-| `paramiko/kex_ecdh_nist.py:67` | line was not a labelling candidate | ECC | ECD-SRC-PYCA-EC-002 |
-| `paramiko/kex_ecdh_nist.py:113` | line was not a labelling candidate | ECC | ECD-SRC-PYCA-EC-002 |
-| `paramiko/kex_group14.py:45` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
-| `paramiko/kex_group16.py:30` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
-| `paramiko/kex_group16.py:35` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
-| `paramiko/kex_mlkem.py:59` | byte-length constant naming a component size, not a primitive | ECDH | ECD-SRC-ECDH-001 |
-| `paramiko/kex_mlkem.py:60` | byte-length constant naming a component size, not a primitive | ECDH | ECD-SRC-ECDH-001 |
-| `paramiko/kex_mlkem.py:61` | byte-length constant naming a component size, not a primitive | ECDH | ECD-SRC-ECDH-001 |
-| `paramiko/kex_mlkem.py:112` | line was not a labelling candidate | ECDH | ECD-SRC-ECDH-001 |
-| `paramiko/rsakey.py:139` | line was not a labelling candidate | RSA | ECD-SRC-PYCA-RSA-001 |
-| `paramiko/rsakey.py:167` | line was not a labelling candidate | RSA | ECD-SRC-PYCA-RSA-001 |
-| `paramiko/transport.py:219` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
-| `paramiko/transport.py:221` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
-| `paramiko/transport.py:328` | no quantum-vulnerable primitive is named on this line | DH | ECD-SRC-SSH-DH-001 |
-| `paramiko/transport.py:329` | no quantum-vulnerable primitive is named on this line | DH | ECD-SRC-SSH-DH-001 |
+| `src/main/java/org/cryptoapi/bench/untrustedprng/UntrustedPRNGCase1.java:9` | line was not a labelling candidate | PRNG | ECD-SRC-JAVA-WEAKRNG-001 |
 
-## Explicit false positives -- `paramiko`, L2 (18)
+## Explicit false positives -- `cryptoapi_bench`, L2 (1)
 
 A false positive is a finding at a `(file, line)` that the labels record as NOT
 a quantum-vulnerable cryptographic use. The exclusion reason is quoted verbatim
@@ -222,11 +199,18 @@ from the label file, so each row can be checked against the source.
 
 | file:line | why the labels exclude it | ECDAT called it | rule |
 |---|---|---|---|
-| `paramiko/ecdsakey.py:167` | line was not a labelling candidate | ECC | ECD-SRC-PYCA-EC-002 |
+| `src/main/java/org/cryptoapi/bench/untrustedprng/UntrustedPRNGCase1.java:9` | line was not a labelling candidate | PRNG | ECD-SRC-JAVA-WEAKRNG-001 |
+
+## Explicit false positives -- `paramiko`, L1 (19)
+
+A false positive is a finding at a `(file, line)` that the labels record as NOT
+a quantum-vulnerable cryptographic use. The exclusion reason is quoted verbatim
+from the label file, so each row can be checked against the source.
+
+| file:line | why the labels exclude it | ECDAT called it | rule |
+|---|---|---|---|
 | `paramiko/ecdsakey.py:305` | line was not a labelling candidate | ECDH | ECD-SRC-ECDH-001, ECD-SRC-PYCA-ECDH-001 |
 | `paramiko/kex_curve25519.py:37` | line was not a labelling candidate | ECDH | ECD-SRC-ECDH-001 |
-| `paramiko/kex_ecdh_nist.py:67` | line was not a labelling candidate | ECC | ECD-SRC-PYCA-EC-002 |
-| `paramiko/kex_ecdh_nist.py:113` | line was not a labelling candidate | ECC | ECD-SRC-PYCA-EC-002 |
 | `paramiko/kex_group14.py:45` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
 | `paramiko/kex_group16.py:30` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
 | `paramiko/kex_group16.py:35` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
@@ -234,14 +218,46 @@ from the label file, so each row can be checked against the source.
 | `paramiko/kex_mlkem.py:60` | byte-length constant naming a component size, not a primitive | ECDH | ECD-SRC-ECDH-001 |
 | `paramiko/kex_mlkem.py:61` | byte-length constant naming a component size, not a primitive | ECDH | ECD-SRC-ECDH-001 |
 | `paramiko/kex_mlkem.py:112` | line was not a labelling candidate | ECDH | ECD-SRC-ECDH-001 |
+| `paramiko/pkey.py:128` | no quantum-vulnerable primitive is named on this line | AES | ECD-SRC-JAVA-CONST-001 |
+| `paramiko/pkey.py:134` | no quantum-vulnerable primitive is named on this line | AES | ECD-SRC-JAVA-CONST-001 |
+| `paramiko/rsakey.py:137` | no quantum-vulnerable primitive is named on this line | RSA | ECD-RB-SIG-001 |
 | `paramiko/rsakey.py:139` | line was not a labelling candidate | RSA | ECD-SRC-PYCA-RSA-001 |
+| `paramiko/rsakey.py:166` | no quantum-vulnerable primitive is named on this line | RSA | ECD-RB-SIG-001 |
 | `paramiko/rsakey.py:167` | line was not a labelling candidate | RSA | ECD-SRC-PYCA-RSA-001 |
 | `paramiko/transport.py:219` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
 | `paramiko/transport.py:221` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
 | `paramiko/transport.py:328` | no quantum-vulnerable primitive is named on this line | DH | ECD-SRC-SSH-DH-001 |
 | `paramiko/transport.py:329` | no quantum-vulnerable primitive is named on this line | DH | ECD-SRC-SSH-DH-001 |
 
-## Explicit false negatives -- `cryptoapi_bench`, L1 (164)
+## Explicit false positives -- `paramiko`, L2 (19)
+
+A false positive is a finding at a `(file, line)` that the labels record as NOT
+a quantum-vulnerable cryptographic use. The exclusion reason is quoted verbatim
+from the label file, so each row can be checked against the source.
+
+| file:line | why the labels exclude it | ECDAT called it | rule |
+|---|---|---|---|
+| `paramiko/ecdsakey.py:305` | line was not a labelling candidate | ECDH | ECD-SRC-ECDH-001, ECD-SRC-PYCA-ECDH-001 |
+| `paramiko/kex_curve25519.py:37` | line was not a labelling candidate | ECDH | ECD-SRC-ECDH-001 |
+| `paramiko/kex_group14.py:45` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
+| `paramiko/kex_group16.py:30` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
+| `paramiko/kex_group16.py:35` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
+| `paramiko/kex_mlkem.py:59` | byte-length constant naming a component size, not a primitive | ECDH | ECD-SRC-ECDH-001 |
+| `paramiko/kex_mlkem.py:60` | byte-length constant naming a component size, not a primitive | ECDH | ECD-SRC-ECDH-001 |
+| `paramiko/kex_mlkem.py:61` | byte-length constant naming a component size, not a primitive | ECDH | ECD-SRC-ECDH-001 |
+| `paramiko/kex_mlkem.py:112` | line was not a labelling candidate | ECDH | ECD-SRC-ECDH-001 |
+| `paramiko/pkey.py:128` | no quantum-vulnerable primitive is named on this line | AES | ECD-SRC-JAVA-CONST-001 |
+| `paramiko/pkey.py:134` | no quantum-vulnerable primitive is named on this line | AES | ECD-SRC-JAVA-CONST-001 |
+| `paramiko/rsakey.py:137` | no quantum-vulnerable primitive is named on this line | RSA | ECD-RB-SIG-001 |
+| `paramiko/rsakey.py:139` | line was not a labelling candidate | RSA | ECD-SRC-PYCA-RSA-001 |
+| `paramiko/rsakey.py:166` | no quantum-vulnerable primitive is named on this line | RSA | ECD-RB-SIG-001 |
+| `paramiko/rsakey.py:167` | line was not a labelling candidate | RSA | ECD-SRC-PYCA-RSA-001 |
+| `paramiko/transport.py:219` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
+| `paramiko/transport.py:221` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
+| `paramiko/transport.py:328` | no quantum-vulnerable primitive is named on this line | DH | ECD-SRC-SSH-DH-001 |
+| `paramiko/transport.py:329` | no quantum-vulnerable primitive is named on this line | DH | ECD-SRC-SSH-DH-001 |
+
+## Explicit false negatives -- `cryptoapi_bench`, L1 (45)
 
 A false negative is a labelled quantum-vulnerable location ECDAT did not report.
 
@@ -249,91 +265,31 @@ A false negative is a labelled quantum-vulnerable location ECDAT did not report.
 |---|---|---|
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase1.java:12` | DES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance(keyAlgo);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase1.java:14` | DES (grover) | `Cipher cipher = Cipher.getInstance(crypto);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase1.java:20` | DES (grover) | `String crypto = "DES/ECB/PKCS5Padding";` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase1.java:21` | DES (grover) | `String keyAlgo = "DES";` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase10.java:11` | IDEA (grover) | `public static final String DEFAULT_CRYPTO = "IDEA";` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase11.java:18` | DES (grover) | `Cipher cipher = Cipher.getInstance(crypto);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase11.java:23` | DES (grover) | `String key = "DES";` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase11.java:24` | DES (grover) | `String crypto = "DES/ECB/PKCS5Padding";` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase12.java:15` | Blowfish (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase12.java:17` | Blowfish (grover) | `Cipher cipher = Cipher.getInstance(crypto);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase12.java:23` | Blowfish (grover) | `String crypto = "Blowfish";` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase13.java:17` | RC4 (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase13.java:19` | RC4 (grover) | `Cipher cipher = Cipher.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase14.java:16` | RC2 (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase14.java:18` | RC2 (grover) | `Cipher cipher = Cipher.getInstance(crypto);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase14.java:24` | RC2 (grover) | `String crypto = "RC2";` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase15.java:16` | IDEA (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase15.java:18` | IDEA (grover) | `Cipher cipher = Cipher.getInstance(crypto);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase15.java:24` | IDEA (grover) | `String crypto = "IDEA";` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase2.java:12` | Blowfish (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase2.java:14` | Blowfish (grover) | `Cipher cipher = Cipher.getInstance(crypto);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase2.java:20` | Blowfish (grover) | `String crypto = "Blowfish";` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase3.java:12` | RC4 (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase3.java:14` | RC4 (grover) | `Cipher cipher = Cipher.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase4.java:12` | RC2 (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase4.java:14` | RC2 (grover) | `Cipher cipher = Cipher.getInstance(crypto);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase4.java:20` | RC2 (grover) | `String crypto = "RC2";` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase5.java:11` | DES (grover) | `public static final String DEFAULT_CRYPTO = "DES/ECB/PKCS5Padding";` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase5.java:15` | DES (grover) | `public static final String DEFAULT_CRYPTO_ALGO = "DES";` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase6.java:11` | Blowfish (grover) | `public static final String DEFAULT_CRYPTO = "Blowfish";` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase8.java:11` | RC2 (grover) | `public static final String DEFAULT_CRYPTO = "RC2";` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase9.java:12` | IDEA (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase9.java:14` | IDEA (grover) | `Cipher cipher = Cipher.getInstance(crypto);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase9.java:20` | IDEA (grover) | `String crypto = "IDEA";` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase1.java:10` | DES (grover) | `String crypto = "DES/ECB/PKCS5Padding";` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase1.java:11` | DES (grover) | `String cryptokey = "DES";` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase2.java:10` | Blowfish (grover) | `String crypto = "Blowfish";` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase4.java:10` | RC2 (grover) | `String crypto = "RC2";` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase5.java:10` | IDEA (grover) | `String crypto = "IDEA";` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase1.java:12` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase1.java:14` | DES (grover) | `Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase2.java:11` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase2.java:13` | Blowfish (grover) | `Cipher cipher = Cipher.getInstance("Blowfish");` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase3.java:12` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase4.java:12` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase4.java:14` | RC2 (grover) | `Cipher cipher = Cipher.getInstance("RC2");` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase5.java:11` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase5.java:13` | IDEA (grover) | `Cipher cipher = Cipher.getInstance("IDEA");` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase1.java:11` | DES (grover) | `crypto = new Crypto2("DES/ECB/PKCS5Padding");` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase2.java:11` | Blowfish (grover) | `crypto = new Crypto3("Blowfish");` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase4.java:11` | RC2 (grover) | `crypto = new Crypto5("RC2");` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase5.java:11` | IDEA (grover) | `crypto = new Crypto6("IDEA");` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase1.java:13` | DES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("DES");` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase1.java:15` | DES (grover) | `Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase2.java:12` | Blowfish (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("Blowfish");` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase2.java:14` | Blowfish (grover) | `Cipher cipher = Cipher.getInstance("Blowfish");` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase4.java:12` | RC2 (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("RC2");` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase4.java:14` | RC2 (grover) | `Cipher cipher = Cipher.getInstance("RC2");` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase5.java:12` | IDEA (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("IDEA");` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase5.java:14` | IDEA (grover) | `Cipher cipher = Cipher.getInstance("IDEA");` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoCorrected.java:12` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase1.java:9` | SHA-1 (grover) | `String crypto = "SHA1";` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase1.java:13` | SHA-1 (grover) | `MessageDigest md = MessageDigest.getInstance(crypto);` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase10.java:9` | MD5 (grover) | `String crypto = "MD5";` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase10.java:18` | MD5 (grover) | `MessageDigest md = MessageDigest.getInstance(crypto);` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase11.java:9` | MD4 (grover) | `String crypto = "MD4";` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase11.java:18` | MD4 (grover) | `MessageDigest md = MessageDigest.getInstance(crypto);` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase12.java:9` | MD2 (grover) | `String crypto = "MD2";` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase12.java:18` | MD2 (grover) | `MessageDigest md = MessageDigest.getInstance(crypto);` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase2.java:9` | MD5 (grover) | `String crypto = "MD5";` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase2.java:13` | MD5 (grover) | `MessageDigest md = MessageDigest.getInstance(crypto);` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase3.java:9` | MD4 (grover) | `String crypto = "MD4";` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase3.java:13` | MD4 (grover) | `MessageDigest md = MessageDigest.getInstance(crypto);` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase4.java:9` | MD2 (grover) | `String crypto = "MD2";` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase4.java:13` | MD2 (grover) | `MessageDigest md = MessageDigest.getInstance(crypto);` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase5.java:7` | SHA-1 (grover) | `public static final String DEFAULT_CRYPTO = "SHA1";` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase6.java:7` | MD5 (grover) | `public static final String DEFAULT_CRYPTO = "MD5";` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase7.java:7` | MD4 (grover) | `public static final String DEFAULT_CRYPTO = "MD4";` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase8.java:7` | MD2 (grover) | `public static final String DEFAULT_CRYPTO = "MD2";` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase9.java:9` | SHA-1 (grover) | `String crypto = "SHA1";` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase9.java:18` | SHA-1 (grover) | `MessageDigest md = MessageDigest.getInstance(crypto);` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMCCase1.java:9` | SHA-1 (grover) | `String crypto = "SHA1";` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMCCase2.java:9` | MD5 (grover) | `String crypto = "MD5";` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMCCase3.java:9` | MD4 (grover) | `String crypto = "MD4";` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMCCase4.java:9` | MD2 (grover) | `String crypto = "MD2";` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABPSCase3.java:9` | MD4 (grover) | `MessageDigest md = MessageDigest.getInstance("MD4");` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABPSCase4.java:9` | MD2 (grover) | `MessageDigest md = MessageDigest.getInstance("MD2");` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase1.java:12` | SHA-1 (grover) | `crypto = new CryptoHash1("SHA1");` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase1.java:29` | SHA-1 (grover) | `MessageDigest md = MessageDigest.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase2.java:14` | MD5 (grover) | `crypto = new CryptoHash2("MD5");` |
@@ -342,77 +298,18 @@ A false negative is a labelled quantum-vulnerable location ECDAT did not report.
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase3.java:31` | MD4 (grover) | `MessageDigest md = MessageDigest.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase4.java:14` | MD2 (grover) | `crypto = new CryptoHash4("MD2");` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase4.java:31` | MD2 (grover) | `MessageDigest md = MessageDigest.getInstance(crypto);` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashBBCase3.java:9` | MD4 (grover) | `MessageDigest md = MessageDigest.getInstance("MD4");` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashBBCase4.java:9` | MD2 (grover) | `MessageDigest md = MessageDigest.getInstance("MD2");` |
-| `src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase1.java:10` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
-| `src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase1.java:16` | HMAC (grover) | `Mac mac = Mac.getInstance("HmacMD5");` |
-| `src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase2.java:10` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
-| `src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase2.java:16` | HMAC (grover) | `Mac mac = Mac.getInstance("HmacSHA1");` |
-| `src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacCorrected.java:10` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
-| `src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacCorrected.java:16` | HMAC (grover) | `Mac mac = Mac.getInstance("HmacSHA256");` |
-| `src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABHCase1.java:15` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");` |
-| `src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABICase1.java:18` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");` |
-| `src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABICase2.java:27` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");` |
-| `src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABICase3.java:22` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");` |
-| `src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABMC1.java:10` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");` |
-| `src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABSCase1.java:39` | AES (grover) | `String algoSpec = "AES/CBC/PKCS5Padding";` |
 | `src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABSCase1.java:40` | AES (grover) | `String algo = "AES";` |
 | `src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABSCase1.java:43` | AES (grover) | `cipher = Cipher.getInstance(algoSpec);` |
 | `src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABSCase1.java:55` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes,algo);` |
-| `src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringBBCase1.java:18` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");` |
-| `src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringCorrected.java:17` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");` |
-| `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase1.java:12` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
 | `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase1.java:14` | AES (grover) | `Cipher cipher = Cipher.getInstance(crypto);` |
-| `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase1.java:20` | AES (grover) | `String crypto = "AES/ECB/PKCS5Padding";` |
-| `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase2.java:11` | AES (grover) | `public static final String DEFAULT_CRYPTO = "AES/ECB/PKCS5Padding";` |
-| `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase2.java:15` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
-| `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase3.java:16` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
 | `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase3.java:18` | AES (grover) | `Cipher cipher = Cipher.getInstance(crypto);` |
-| `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase3.java:23` | AES (grover) | `String crypto = "AES/ECB/PKCS5Padding";` |
-| `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABMC1.java:13` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
-| `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABMCCase1.java:10` | AES (grover) | `String crypto = "AES/ECB/PKCS5Padding";` |
-| `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABPSCase1.java:11` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
-| `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABSCase1.java:13` | AES (grover) | `String cryptoAlgo = "AES/ECB/PKCS5Padding";` |
-| `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABSCase1.java:32` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
-| `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoBBCase1.java:12` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
-| `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoCorrected.java:12` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
-| `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase1.java:16` | RSA (shor) | `Cipher cipher = Cipher.getInstance("RSA");` |
-| `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase1.java:24` | RSA (shor) | `Cipher dec = Cipher.getInstance("RSA");` |
-| `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase2.java:16` | RSA (shor) | `Cipher cipher = Cipher.getInstance("RSA");` |
-| `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase2.java:24` | RSA (shor) | `Cipher dec = Cipher.getInstance("RSA");` |
-| `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase3.java:23` | RSA (shor) | `Cipher cipher = Cipher.getInstance("RSA");` |
-| `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase3.java:31` | RSA (shor) | `Cipher dec = Cipher.getInstance("RSA");` |
-| `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABMC1.java:16` | RSA (shor) | `Cipher cipher = Cipher.getInstance("RSA");` |
-| `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABMC1.java:17` | RSA (shor) | `Cipher dec = Cipher.getInstance("RSA");` |
-| `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABPSCase1.java:20` | RSA (shor) | `Cipher cipher = Cipher.getInstance("RSA");` |
-| `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherBBCase1.java:15` | RSA (shor) | `Cipher cipher = Cipher.getInstance("RSA");` |
-| `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherBBCase1.java:23` | RSA (shor) | `Cipher dec = Cipher.getInstance("RSA");` |
-| `src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABHCase2.java:33` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");` |
-| `src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABICase1.java:16` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");` |
-| `src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABICase2.java:27` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");` |
-| `src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABICase3.java:18` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");` |
-| `src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABMC1.java:11` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");` |
-| `src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABPSCase1.java:17` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");` |
-| `src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABSCase1.java:39` | AES (grover) | `String algoSpec = "AES/CBC/PKCS5Padding";` |
 | `src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABSCase1.java:40` | AES (grover) | `String algo = "AES";` |
 | `src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABSCase1.java:43` | AES (grover) | `cipher = Cipher.getInstance(algoSpec);` |
 | `src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABSCase1.java:55` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes,algo);` |
-| `src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyBBCase1.java:11` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");` |
-| `src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyCorrected.java:17` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");` |
-| `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABHCase1.java:15` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
-| `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABHCase2.java:16` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
-| `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABICase1.java:13` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
-| `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABICase2.java:18` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
-| `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABICase3.java:13` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
-| `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABMC1.java:15` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
-| `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABPSCase1.java:12` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
-| `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABSCase1.java:33` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
-| `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorBBCase1.java:12` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
 | `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorCorrected.java:17` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
 | `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorCorrected.java:19` | AES (grover) | `Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");` |
-| `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorCorrected.java:39` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
 
-## Explicit false negatives -- `cryptoapi_bench`, L2 (277)
+## Explicit false negatives -- `cryptoapi_bench`, L2 (158)
 
 A false negative is a labelled quantum-vulnerable location ECDAT did not report.
 
@@ -421,150 +318,90 @@ A false negative is a labelled quantum-vulnerable location ECDAT did not report.
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase1.java:12` | DES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance(keyAlgo);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase1.java:14` | DES (grover) | `Cipher cipher = Cipher.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase1.java:15` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase1.java:20` | DES (grover) | `String crypto = "DES/ECB/PKCS5Padding";` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase1.java:21` | DES (grover) | `String keyAlgo = "DES";` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase10.java:11` | IDEA (grover) | `public static final String DEFAULT_CRYPTO = "IDEA";` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase10.java:18` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase11.java:18` | DES (grover) | `Cipher cipher = Cipher.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase11.java:19` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase11.java:23` | DES (grover) | `String key = "DES";` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase11.java:24` | DES (grover) | `String crypto = "DES/ECB/PKCS5Padding";` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase12.java:15` | Blowfish (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase12.java:17` | Blowfish (grover) | `Cipher cipher = Cipher.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase12.java:18` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase12.java:23` | Blowfish (grover) | `String crypto = "Blowfish";` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase13.java:17` | RC4 (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase13.java:19` | RC4 (grover) | `Cipher cipher = Cipher.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase13.java:20` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase14.java:16` | RC2 (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase14.java:18` | RC2 (grover) | `Cipher cipher = Cipher.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase14.java:19` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase14.java:24` | RC2 (grover) | `String crypto = "RC2";` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase15.java:16` | IDEA (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase15.java:18` | IDEA (grover) | `Cipher cipher = Cipher.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase15.java:19` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase15.java:24` | IDEA (grover) | `String crypto = "IDEA";` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase2.java:12` | Blowfish (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase2.java:14` | Blowfish (grover) | `Cipher cipher = Cipher.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase2.java:15` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase2.java:20` | Blowfish (grover) | `String crypto = "Blowfish";` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase3.java:12` | RC4 (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase3.java:14` | RC4 (grover) | `Cipher cipher = Cipher.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase3.java:15` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase4.java:12` | RC2 (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase4.java:14` | RC2 (grover) | `Cipher cipher = Cipher.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase4.java:15` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase4.java:20` | RC2 (grover) | `String crypto = "RC2";` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase5.java:11` | DES (grover) | `public static final String DEFAULT_CRYPTO = "DES/ECB/PKCS5Padding";` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase5.java:15` | DES (grover) | `public static final String DEFAULT_CRYPTO_ALGO = "DES";` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase5.java:23` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase6.java:11` | Blowfish (grover) | `public static final String DEFAULT_CRYPTO = "Blowfish";` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase6.java:18` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase7.java:18` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase8.java:11` | RC2 (grover) | `public static final String DEFAULT_CRYPTO = "RC2";` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase8.java:18` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase9.java:12` | IDEA (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase9.java:14` | IDEA (grover) | `Cipher cipher = Cipher.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase9.java:15` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase9.java:20` | IDEA (grover) | `String crypto = "IDEA";` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMC1.java:15` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMC2.java:15` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMC3.java:15` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMC4.java:15` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMC5.java:15` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase1.java:10` | DES (grover) | `String crypto = "DES/ECB/PKCS5Padding";` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase1.java:11` | DES (grover) | `String cryptokey = "DES";` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase2.java:10` | Blowfish (grover) | `String crypto = "Blowfish";` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase4.java:10` | RC2 (grover) | `String crypto = "RC2";` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase5.java:10` | IDEA (grover) | `String crypto = "IDEA";` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase1.java:12` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase1.java:14` | DES (grover) | `Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase1.java:18` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase2.java:11` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase2.java:13` | Blowfish (grover) | `Cipher cipher = Cipher.getInstance("Blowfish");` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase2.java:17` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase3.java:12` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase3.java:18` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase4.java:12` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase4.java:14` | RC2 (grover) | `Cipher cipher = Cipher.getInstance("RC2");` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase4.java:18` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase5.java:11` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase5.java:13` | IDEA (grover) | `Cipher cipher = Cipher.getInstance("IDEA");` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase5.java:17` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase1.java:11` | DES (grover) | `crypto = new Crypto2("DES/ECB/PKCS5Padding");` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase1.java:31` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase1.java:34` | None (not-affected) | `return cipher.doFinal(txtBytes);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase2.java:11` | Blowfish (grover) | `crypto = new Crypto3("Blowfish");` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase2.java:31` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase2.java:34` | None (not-affected) | `return cipher.doFinal(txtBytes);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase3.java:31` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase3.java:34` | None (not-affected) | `return cipher.doFinal(txtBytes);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase4.java:11` | RC2 (grover) | `crypto = new Crypto5("RC2");` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase4.java:32` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase4.java:35` | None (not-affected) | `return cipher.doFinal(txtBytes);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase5.java:11` | IDEA (grover) | `crypto = new Crypto6("IDEA");` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase5.java:32` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase5.java:35` | None (not-affected) | `return cipher.doFinal(txtBytes);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase1.java:13` | DES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("DES");` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase1.java:15` | DES (grover) | `Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase1.java:16` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase2.java:12` | Blowfish (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("Blowfish");` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase2.java:14` | Blowfish (grover) | `Cipher cipher = Cipher.getInstance("Blowfish");` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase2.java:15` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase3.java:15` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase4.java:12` | RC2 (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("RC2");` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase4.java:14` | RC2 (grover) | `Cipher cipher = Cipher.getInstance("RC2");` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase4.java:15` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase5.java:12` | IDEA (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("IDEA");` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase5.java:14` | IDEA (grover) | `Cipher cipher = Cipher.getInstance("IDEA");` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase5.java:15` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
-| `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoCorrected.java:12` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
 | `src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoCorrected.java:15` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase1.java:9` | SHA-1 (grover) | `String crypto = "SHA1";` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase1.java:13` | SHA-1 (grover) | `MessageDigest md = MessageDigest.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase1.java:14` | None (not-affected) | `md.update(str.getBytes());` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase10.java:9` | MD5 (grover) | `String crypto = "MD5";` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase10.java:18` | MD5 (grover) | `MessageDigest md = MessageDigest.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase10.java:19` | None (not-affected) | `md.update(str.getBytes());` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase11.java:9` | MD4 (grover) | `String crypto = "MD4";` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase11.java:18` | MD4 (grover) | `MessageDigest md = MessageDigest.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase11.java:19` | None (not-affected) | `md.update(str.getBytes());` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase12.java:9` | MD2 (grover) | `String crypto = "MD2";` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase12.java:18` | MD2 (grover) | `MessageDigest md = MessageDigest.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase12.java:19` | None (not-affected) | `md.update(str.getBytes());` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase2.java:9` | MD5 (grover) | `String crypto = "MD5";` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase2.java:13` | MD5 (grover) | `MessageDigest md = MessageDigest.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase2.java:14` | None (not-affected) | `md.update(str.getBytes());` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase3.java:9` | MD4 (grover) | `String crypto = "MD4";` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase3.java:13` | MD4 (grover) | `MessageDigest md = MessageDigest.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase3.java:14` | None (not-affected) | `md.update(str.getBytes());` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase4.java:9` | MD2 (grover) | `String crypto = "MD2";` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase4.java:13` | MD2 (grover) | `MessageDigest md = MessageDigest.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase4.java:14` | None (not-affected) | `md.update(str.getBytes());` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase5.java:7` | SHA-1 (grover) | `public static final String DEFAULT_CRYPTO = "SHA1";` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase5.java:26` | None (not-affected) | `md.update(str.getBytes());` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase6.java:7` | MD5 (grover) | `public static final String DEFAULT_CRYPTO = "MD5";` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase6.java:26` | None (not-affected) | `md.update(str.getBytes());` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase7.java:7` | MD4 (grover) | `public static final String DEFAULT_CRYPTO = "MD4";` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase7.java:26` | None (not-affected) | `md.update(str.getBytes());` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase8.java:7` | MD2 (grover) | `public static final String DEFAULT_CRYPTO = "MD2";` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase8.java:26` | None (not-affected) | `md.update(str.getBytes());` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase9.java:9` | SHA-1 (grover) | `String crypto = "SHA1";` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase9.java:18` | SHA-1 (grover) | `MessageDigest md = MessageDigest.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase9.java:19` | None (not-affected) | `md.update(str.getBytes());` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMC1.java:9` | None (not-affected) | `md.update(str.getBytes());` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMC2.java:9` | None (not-affected) | `md.update(str.getBytes());` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMC3.java:9` | None (not-affected) | `md.update(str.getBytes());` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMC4.java:9` | None (not-affected) | `md.update(str.getBytes());` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMCCase1.java:9` | SHA-1 (grover) | `String crypto = "SHA1";` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMCCase2.java:9` | MD5 (grover) | `String crypto = "MD5";` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMCCase3.java:9` | MD4 (grover) | `String crypto = "MD4";` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMCCase4.java:9` | MD2 (grover) | `String crypto = "MD2";` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABPSCase1.java:12` | None (not-affected) | `md.update(name.getBytes());` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABPSCase2.java:12` | None (not-affected) | `md.update(name.getBytes());` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABPSCase3.java:9` | MD4 (grover) | `MessageDigest md = MessageDigest.getInstance("MD4");` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABPSCase3.java:12` | None (not-affected) | `md.update(name.getBytes());` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABPSCase4.java:9` | MD2 (grover) | `MessageDigest md = MessageDigest.getInstance("MD2");` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABPSCase4.java:12` | None (not-affected) | `md.update(name.getBytes());` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase1.java:12` | SHA-1 (grover) | `crypto = new CryptoHash1("SHA1");` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase1.java:29` | SHA-1 (grover) | `MessageDigest md = MessageDigest.getInstance(crypto);` |
@@ -580,123 +417,64 @@ A false negative is a labelled quantum-vulnerable location ECDAT did not report.
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase4.java:32` | None (not-affected) | `md.update(str.getBytes());` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashBBCase1.java:10` | None (not-affected) | `md.update(name.getBytes());` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashBBCase2.java:10` | None (not-affected) | `md.update(name.getBytes());` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashBBCase3.java:9` | MD4 (grover) | `MessageDigest md = MessageDigest.getInstance("MD4");` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashBBCase3.java:10` | None (not-affected) | `md.update(name.getBytes());` |
-| `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashBBCase4.java:9` | MD2 (grover) | `MessageDigest md = MessageDigest.getInstance("MD2");` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashBBCase4.java:10` | None (not-affected) | `md.update(name.getBytes());` |
 | `src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashCorrected.java:11` | None (not-affected) | `md.update(name.getBytes());` |
-| `src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase1.java:10` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
 | `src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase1.java:12` | None (not-affected) | `keyGen.init(secRandom);` |
-| `src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase1.java:16` | HMAC (grover) | `Mac mac = Mac.getInstance("HmacMD5");` |
 | `src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase1.java:17` | None (not-affected) | `mac.init(key);` |
-| `src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase2.java:10` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
 | `src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase2.java:12` | None (not-affected) | `keyGen.init(secRandom);` |
-| `src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase2.java:16` | HMAC (grover) | `Mac mac = Mac.getInstance("HmacSHA1");` |
 | `src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase2.java:17` | None (not-affected) | `mac.init(key);` |
-| `src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacCorrected.java:10` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
 | `src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacCorrected.java:12` | None (not-affected) | `keyGen.init(secRandom);` |
-| `src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacCorrected.java:16` | HMAC (grover) | `Mac mac = Mac.getInstance("HmacSHA256");` |
 | `src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacCorrected.java:17` | None (not-affected) | `mac.init(key);` |
-| `src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABHCase1.java:15` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");` |
-| `src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABICase1.java:18` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");` |
-| `src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABICase2.java:27` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");` |
-| `src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABICase3.java:22` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");` |
-| `src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABMC1.java:10` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");` |
-| `src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABSCase1.java:39` | AES (grover) | `String algoSpec = "AES/CBC/PKCS5Padding";` |
 | `src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABSCase1.java:40` | AES (grover) | `String algo = "AES";` |
 | `src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABSCase1.java:43` | AES (grover) | `cipher = Cipher.getInstance(algoSpec);` |
 | `src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABSCase1.java:55` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes,algo);` |
 | `src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABSCase1.java:56` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE,keySpec);` |
 | `src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABSCase1.java:57` | None (not-affected) | `return cipher.doFinal(txtBytes);` |
-| `src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringBBCase1.java:18` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");` |
 | `src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringBBCase1.java:23` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, keySpec);` |
-| `src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringCorrected.java:17` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");` |
 | `src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringCorrected.java:22` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, keySpec);` |
-| `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase1.java:12` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
 | `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase1.java:14` | AES (grover) | `Cipher cipher = Cipher.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase1.java:15` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
-| `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase1.java:20` | AES (grover) | `String crypto = "AES/ECB/PKCS5Padding";` |
-| `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase2.java:11` | AES (grover) | `public static final String DEFAULT_CRYPTO = "AES/ECB/PKCS5Padding";` |
-| `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase2.java:15` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
 | `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase2.java:18` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
-| `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase3.java:16` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
 | `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase3.java:18` | AES (grover) | `Cipher cipher = Cipher.getInstance(crypto);` |
 | `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase3.java:19` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
-| `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase3.java:23` | AES (grover) | `String crypto = "AES/ECB/PKCS5Padding";` |
-| `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABMC1.java:13` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
 | `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABMC1.java:16` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
-| `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABMCCase1.java:10` | AES (grover) | `String crypto = "AES/ECB/PKCS5Padding";` |
-| `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABPSCase1.java:11` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
 | `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABPSCase1.java:16` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
-| `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABSCase1.java:13` | AES (grover) | `String cryptoAlgo = "AES/ECB/PKCS5Padding";` |
-| `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABSCase1.java:32` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
 | `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABSCase1.java:35` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
-| `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoBBCase1.java:12` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
 | `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoBBCase1.java:15` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
-| `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoCorrected.java:12` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
 | `src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoCorrected.java:15` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, key);` |
-| `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase1.java:16` | RSA (shor) | `Cipher cipher = Cipher.getInstance("RSA");` |
 | `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase1.java:17` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, kp.getPublic());` |
-| `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase1.java:24` | RSA (shor) | `Cipher dec = Cipher.getInstance("RSA");` |
 | `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase1.java:25` | None (not-affected) | `dec.init(Cipher.DECRYPT_MODE, kp.getPrivate());` |
-| `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase2.java:16` | RSA (shor) | `Cipher cipher = Cipher.getInstance("RSA");` |
 | `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase2.java:17` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, kp.getPublic());` |
-| `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase2.java:24` | RSA (shor) | `Cipher dec = Cipher.getInstance("RSA");` |
 | `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase2.java:25` | None (not-affected) | `dec.init(Cipher.DECRYPT_MODE, kp.getPrivate());` |
-| `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase3.java:23` | RSA (shor) | `Cipher cipher = Cipher.getInstance("RSA");` |
 | `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase3.java:24` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, kp.getPublic());` |
-| `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase3.java:31` | RSA (shor) | `Cipher dec = Cipher.getInstance("RSA");` |
 | `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase3.java:32` | None (not-affected) | `dec.init(Cipher.DECRYPT_MODE, kp.getPrivate());` |
-| `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABMC1.java:16` | RSA (shor) | `Cipher cipher = Cipher.getInstance("RSA");` |
-| `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABMC1.java:17` | RSA (shor) | `Cipher dec = Cipher.getInstance("RSA");` |
 | `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABMC1.java:19` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, kp.getPublic());` |
 | `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABMC1.java:26` | None (not-affected) | `dec.init(Cipher.DECRYPT_MODE, kp.getPrivate());` |
-| `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABPSCase1.java:20` | RSA (shor) | `Cipher cipher = Cipher.getInstance("RSA");` |
 | `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABPSCase1.java:21` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, kp.getPublic());` |
-| `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherBBCase1.java:15` | RSA (shor) | `Cipher cipher = Cipher.getInstance("RSA");` |
 | `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherBBCase1.java:16` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, kp.getPublic());` |
-| `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherBBCase1.java:23` | RSA (shor) | `Cipher dec = Cipher.getInstance("RSA");` |
 | `src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherBBCase1.java:24` | None (not-affected) | `dec.init(Cipher.DECRYPT_MODE, kp.getPrivate());` |
-| `src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABHCase2.java:33` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");` |
-| `src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABICase1.java:16` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");` |
-| `src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABICase2.java:27` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");` |
-| `src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABICase3.java:18` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");` |
-| `src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABMC1.java:11` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");` |
-| `src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABPSCase1.java:17` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");` |
-| `src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABSCase1.java:39` | AES (grover) | `String algoSpec = "AES/CBC/PKCS5Padding";` |
 | `src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABSCase1.java:40` | AES (grover) | `String algo = "AES";` |
 | `src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABSCase1.java:43` | AES (grover) | `cipher = Cipher.getInstance(algoSpec);` |
 | `src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABSCase1.java:55` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes,algo);` |
 | `src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABSCase1.java:56` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE,keySpec);` |
 | `src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABSCase1.java:57` | None (not-affected) | `return cipher.doFinal(txtBytes);` |
-| `src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyBBCase1.java:11` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");` |
-| `src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyCorrected.java:17` | AES (grover) | `SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");` |
 | `src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyCorrected.java:22` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE, keySpec);` |
-| `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABHCase1.java:15` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
 | `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABHCase1.java:23` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);` |
-| `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABHCase2.java:16` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
 | `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABHCase2.java:33` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);` |
-| `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABICase1.java:13` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
 | `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABICase1.java:17` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);` |
-| `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABICase2.java:18` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
 | `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABICase2.java:22` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);` |
-| `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABICase3.java:13` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
 | `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABICase3.java:17` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);` |
-| `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABMC1.java:15` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
 | `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABMC1.java:19` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);` |
-| `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABPSCase1.java:12` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
 | `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABPSCase1.java:26` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);` |
-| `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABSCase1.java:33` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
 | `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABSCase1.java:36` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);` |
-| `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorBBCase1.java:12` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
 | `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorBBCase1.java:20` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);` |
 | `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorCorrected.java:17` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
 | `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorCorrected.java:19` | AES (grover) | `Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");` |
 | `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorCorrected.java:27` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);` |
-| `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorCorrected.java:39` | AES (grover) | `KeyGenerator keyGen = KeyGenerator.getInstance("AES");` |
 | `src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorCorrected.java:50` | None (not-affected) | `cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);` |
 
-## Explicit false negatives -- `paramiko`, L1 (95)
+## Explicit false negatives -- `paramiko`, L1 (97)
 
 A false negative is a labelled quantum-vulnerable location ECDAT did not report.
 
@@ -723,6 +501,7 @@ A false negative is a labelled quantum-vulnerable location ECDAT did not report.
 | `paramiko/ecdsakey.py:149` | ECDSA (shor) | `self.ecdsa_curve = self._ECDSA_CURVES.get_by_key_format_identifier(` |
 | `paramiko/ecdsakey.py:152` | ECDSA (shor) | `key_types = self._ECDSA_CURVES.get_key_format_identifier_list()` |
 | `paramiko/ecdsakey.py:176` | ECDSA (shor) | `return cls._ECDSA_CURVES.get_key_format_identifier_list()` |
+| `paramiko/ecdsakey.py:250` | EllipticCurvePrivateKey (shor) | `def private_key(self) -> Optional[ec.EllipticCurvePrivateKey]:` |
 | `paramiko/ecdsakey.py:256` | ECDSA (shor) | `Generate a new private ECDSA key.  This factory function can be used to` |
 | `paramiko/ecdsakey.py:260` | ECDSA (shor) | `:returns: A new private key (`.ECDSAKey`) object` |
 | `paramiko/ecdsakey.py:263` | ECDSA (shor) | `curve = cls._ECDSA_CURVES.get_by_key_length(bits)` |
@@ -765,6 +544,7 @@ A false negative is a labelled quantum-vulnerable location ECDAT did not report.
 | `paramiko/pkey.py:38` | EllipticCurvePrivateKey (shor) | `EllipticCurvePrivateKey,` |
 | `paramiko/pkey.py:173` | ECDSA (shor) | `from paramiko import ECDSAKey, Ed25519Key, RSAKey` |
 | `paramiko/pkey.py:215` | Ed25519 (shor) | `key_class = Ed25519Key` |
+| `paramiko/pkey.py:216` | EllipticCurvePrivateKey (shor) | `elif isinstance(loaded, asymmetric.ec.EllipticCurvePrivateKey):` |
 | `paramiko/pkey.py:217` | ECDSA (shor) | `key_class = ECDSAKey` |
 | `paramiko/pkey.py:234` | Ed25519 (shor) | `For example, ``PKey.from_type_string("ssh-ed25519", <public bytes>)``` |
 | `paramiko/pkey.py:235` | Ed25519 (shor) | `will (if successful) return a new `.Ed25519Key`.` |
@@ -798,7 +578,7 @@ A false negative is a labelled quantum-vulnerable location ECDAT did not report.
 | `paramiko/transport.py:323` | Ed25519 (shor) | `"ssh-ed25519-cert-v01@openssh.com": Ed25519Key,` |
 | `paramiko/util.py:149` | SHA256 (grover) | `as ``hashlib.sha256``.` |
 
-## Explicit false negatives -- `paramiko`, L2 (114)
+## Explicit false negatives -- `paramiko`, L2 (116)
 
 A false negative is a labelled quantum-vulnerable location ECDAT did not report.
 
@@ -825,6 +605,7 @@ A false negative is a labelled quantum-vulnerable location ECDAT did not report.
 | `paramiko/ecdsakey.py:149` | ECDSA (shor) | `self.ecdsa_curve = self._ECDSA_CURVES.get_by_key_format_identifier(` |
 | `paramiko/ecdsakey.py:152` | ECDSA (shor) | `key_types = self._ECDSA_CURVES.get_key_format_identifier_list()` |
 | `paramiko/ecdsakey.py:176` | ECDSA (shor) | `return cls._ECDSA_CURVES.get_key_format_identifier_list()` |
+| `paramiko/ecdsakey.py:250` | EllipticCurvePrivateKey (shor) | `def private_key(self) -> Optional[ec.EllipticCurvePrivateKey]:` |
 | `paramiko/ecdsakey.py:256` | ECDSA (shor) | `Generate a new private ECDSA key.  This factory function can be used to` |
 | `paramiko/ecdsakey.py:260` | ECDSA (shor) | `:returns: A new private key (`.ECDSAKey`) object` |
 | `paramiko/ecdsakey.py:263` | ECDSA (shor) | `curve = cls._ECDSA_CURVES.get_by_key_length(bits)` |
@@ -879,6 +660,7 @@ A false negative is a labelled quantum-vulnerable location ECDAT did not report.
 | `paramiko/pkey.py:38` | EllipticCurvePrivateKey (shor) | `EllipticCurvePrivateKey,` |
 | `paramiko/pkey.py:173` | ECDSA (shor) | `from paramiko import ECDSAKey, Ed25519Key, RSAKey` |
 | `paramiko/pkey.py:215` | Ed25519 (shor) | `key_class = Ed25519Key` |
+| `paramiko/pkey.py:216` | EllipticCurvePrivateKey (shor) | `elif isinstance(loaded, asymmetric.ec.EllipticCurvePrivateKey):` |
 | `paramiko/pkey.py:217` | ECDSA (shor) | `key_class = ECDSAKey` |
 | `paramiko/pkey.py:234` | Ed25519 (shor) | `For example, ``PKey.from_type_string("ssh-ed25519", <public bytes>)``` |
 | `paramiko/pkey.py:235` | Ed25519 (shor) | `will (if successful) return a new `.Ed25519Key`.` |

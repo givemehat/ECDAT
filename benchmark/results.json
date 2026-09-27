@@ -43,41 +43,68 @@
      "SaaS / third-party boundary crypto (requires attestation)",
      "silicon-embedded keys (requires attestation)"
     ],
-    "findings_total": 46,
+    "findings_total": 188,
     "assurance_histogram": {
      "observed": 0,
-     "used": 38,
+     "used": 180,
      "declared": 8,
      "capability": 0
     },
-    "proven_use": 38,
+    "proven_use": 180,
     "unresolved_purpose": 6
    },
    "scan_errors": [],
    "findings_by_rule": {
+    "DES | ECD-SRC-JAVA-LEGACY-001": 44,
+    "AES | ECD-SRC-JAVA-KEYGEN-001": 31,
     "AES | ECD-SRC-AES-001": 23,
+    "AES | ECD-SRC-JAVA-CIPHER-001": 21,
+    "SHA | ECD-SRC-JAVA-CONST-004": 16,
+    "AES | ECD-SRC-JAVA-SECRETKEY-001": 15,
     "LEGACY-CIPHER | ECD-CFG-LEGACY-001": 8,
+    "AES | ECD-SRC-JAVA-CONST-001": 7,
     "RSA | ECD-SRC-RSA-003": 6,
     "SHA256 | ECD-SRC-SHA2-001": 5,
+    "MD5 | ECD-SRC-JAVA-DIGEST-001": 4,
+    "HMAC | ECD-SRC-JAVA-MAC-001": 3,
     "SHA1 | ECD-SRC-SHA1-001": 2,
-    "MD5 | ECD-SRC-MD5-001": 2
+    "MD5 | ECD-SRC-MD5-001": 2,
+    "PRNG | ECD-SRC-JAVA-WEAKRNG-001": 1
    },
    "variants": {
     "L1": {
      "counts": {
-      "TP": 46,
-      "FP": 0,
-      "FN": 164,
+      "TP": 165,
+      "FP": 1,
+      "FN": 45,
       "labelled_positives": 210,
-      "findings_total": 46
+      "findings_total": 188
      },
-     "precision": 1.0,
-     "precision_fraction": "46/46",
-     "recall": 0.219,
-     "recall_fraction": "46/210",
-     "f1": 0.3593,
+     "precision": 0.994,
+     "precision_fraction": "165/166",
+     "recall": 0.7857,
+     "recall_fraction": "165/210",
+     "f1": 0.8777,
      "f1_note": "F1 is computed from the ROUNDED precision/recall, so it may differ in the 4th decimal from an F1 computed from the raw counts.",
-     "false_positives": [],
+     "false_positives": [
+      {
+       "file": "src/main/java/org/cryptoapi/bench/untrustedprng/UntrustedPRNGCase1.java",
+       "line": 9,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "PRNG"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-JAVA-WEAKRNG-001"
+       ],
+       "ecdat_match": [
+        "new Random("
+       ]
+      }
+     ],
      "false_negatives": [
       {
        "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase1.java",
@@ -114,97 +141,12 @@
        ]
       },
       {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase1.java",
-       "line": 20,
-       "labelled_primitive": "DES",
-       "labelled_code": "String crypto = \"DES/ECB/PKCS5Padding\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='DES/ECB/PKCS5Padding', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase1.java",
-       "line": 21,
-       "labelled_primitive": "DES",
-       "labelled_code": "String keyAlgo = \"DES\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'keyAlgo'='DES', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase10.java",
-       "line": 11,
-       "labelled_primitive": "IDEA",
-       "labelled_code": "public static final String DEFAULT_CRYPTO = \"IDEA\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'DEFAULT_CRYPTO'='IDEA', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
        "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase11.java",
        "line": 18,
        "labelled_primitive": "DES",
        "labelled_code": "Cipher cipher = Cipher.getInstance(crypto);",
        "labelled_break_model": "grover",
        "labelled_reason": "P1: Cipher.getInstance is given 'crypto', which holds algorithm 'DES/ECB/PKCS5Padding'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase11.java",
-       "line": 23,
-       "labelled_primitive": "DES",
-       "labelled_code": "String key = \"DES\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'key'='DES', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase11.java",
-       "line": 24,
-       "labelled_primitive": "DES",
-       "labelled_code": "String crypto = \"DES/ECB/PKCS5Padding\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='DES/ECB/PKCS5Padding', which selects the cryptographic algorithm downstream",
        "ecdat_names": [
         "None"
        ],
@@ -239,23 +181,6 @@
        "labelled_code": "Cipher cipher = Cipher.getInstance(crypto);",
        "labelled_break_model": "grover",
        "labelled_reason": "P1: Cipher.getInstance is given 'crypto', which holds algorithm 'Blowfish'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase12.java",
-       "line": 23,
-       "labelled_primitive": "Blowfish",
-       "labelled_code": "String crypto = \"Blowfish\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='Blowfish', which selects the cryptographic algorithm downstream",
        "ecdat_names": [
         "None"
        ],
@@ -335,23 +260,6 @@
        ]
       },
       {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase14.java",
-       "line": 24,
-       "labelled_primitive": "RC2",
-       "labelled_code": "String crypto = \"RC2\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='RC2', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
        "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase15.java",
        "line": 16,
        "labelled_primitive": "IDEA",
@@ -386,23 +294,6 @@
        ]
       },
       {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase15.java",
-       "line": 24,
-       "labelled_primitive": "IDEA",
-       "labelled_code": "String crypto = \"IDEA\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='IDEA', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
        "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase2.java",
        "line": 12,
        "labelled_primitive": "Blowfish",
@@ -426,23 +317,6 @@
        "labelled_code": "Cipher cipher = Cipher.getInstance(crypto);",
        "labelled_break_model": "grover",
        "labelled_reason": "P1: Cipher.getInstance is given 'crypto', which holds algorithm 'Blowfish'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase2.java",
-       "line": 20,
-       "labelled_primitive": "Blowfish",
-       "labelled_code": "String crypto = \"Blowfish\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='Blowfish', which selects the cryptographic algorithm downstream",
        "ecdat_names": [
         "None"
        ],
@@ -522,91 +396,6 @@
        ]
       },
       {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase4.java",
-       "line": 20,
-       "labelled_primitive": "RC2",
-       "labelled_code": "String crypto = \"RC2\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='RC2', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase5.java",
-       "line": 11,
-       "labelled_primitive": "DES",
-       "labelled_code": "public static final String DEFAULT_CRYPTO = \"DES/ECB/PKCS5Padding\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'DEFAULT_CRYPTO'='DES/ECB/PKCS5Padding', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase5.java",
-       "line": 15,
-       "labelled_primitive": "DES",
-       "labelled_code": "public static final String DEFAULT_CRYPTO_ALGO = \"DES\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'DEFAULT_CRYPTO_ALGO'='DES', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase6.java",
-       "line": 11,
-       "labelled_primitive": "Blowfish",
-       "labelled_code": "public static final String DEFAULT_CRYPTO = \"Blowfish\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'DEFAULT_CRYPTO'='Blowfish', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase8.java",
-       "line": 11,
-       "labelled_primitive": "RC2",
-       "labelled_code": "public static final String DEFAULT_CRYPTO = \"RC2\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'DEFAULT_CRYPTO'='RC2', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
        "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase9.java",
        "line": 12,
        "labelled_primitive": "IDEA",
@@ -641,522 +430,12 @@
        ]
       },
       {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase9.java",
-       "line": 20,
-       "labelled_primitive": "IDEA",
-       "labelled_code": "String crypto = \"IDEA\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='IDEA', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase1.java",
-       "line": 10,
-       "labelled_primitive": "DES",
-       "labelled_code": "String crypto = \"DES/ECB/PKCS5Padding\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='DES/ECB/PKCS5Padding', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase1.java",
-       "line": 11,
-       "labelled_primitive": "DES",
-       "labelled_code": "String cryptokey = \"DES\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'cryptokey'='DES', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase2.java",
-       "line": 10,
-       "labelled_primitive": "Blowfish",
-       "labelled_code": "String crypto = \"Blowfish\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='Blowfish', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase4.java",
-       "line": 10,
-       "labelled_primitive": "RC2",
-       "labelled_code": "String crypto = \"RC2\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='RC2', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase5.java",
-       "line": 10,
-       "labelled_primitive": "IDEA",
-       "labelled_code": "String crypto = \"IDEA\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='IDEA', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase1.java",
-       "line": 12,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase1.java",
-       "line": 14,
-       "labelled_primitive": "DES",
-       "labelled_code": "Cipher cipher = Cipher.getInstance(\"DES/ECB/PKCS5Padding\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'DES/ECB/PKCS5Padding'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase2.java",
-       "line": 11,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase2.java",
-       "line": 13,
-       "labelled_primitive": "Blowfish",
-       "labelled_code": "Cipher cipher = Cipher.getInstance(\"Blowfish\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'Blowfish'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase3.java",
-       "line": 12,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase4.java",
-       "line": 12,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase4.java",
-       "line": 14,
-       "labelled_primitive": "RC2",
-       "labelled_code": "Cipher cipher = Cipher.getInstance(\"RC2\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'RC2'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase5.java",
-       "line": 11,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase5.java",
-       "line": 13,
-       "labelled_primitive": "IDEA",
-       "labelled_code": "Cipher cipher = Cipher.getInstance(\"IDEA\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'IDEA'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase1.java",
-       "line": 11,
-       "labelled_primitive": "DES",
-       "labelled_code": "crypto = new Crypto2(\"DES/ECB/PKCS5Padding\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='DES/ECB/PKCS5Padding', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase2.java",
-       "line": 11,
-       "labelled_primitive": "Blowfish",
-       "labelled_code": "crypto = new Crypto3(\"Blowfish\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='Blowfish', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase4.java",
-       "line": 11,
-       "labelled_primitive": "RC2",
-       "labelled_code": "crypto = new Crypto5(\"RC2\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='RC2', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase5.java",
-       "line": 11,
-       "labelled_primitive": "IDEA",
-       "labelled_code": "crypto = new Crypto6(\"IDEA\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='IDEA', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase1.java",
-       "line": 13,
-       "labelled_primitive": "DES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"DES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'DES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase1.java",
-       "line": 15,
-       "labelled_primitive": "DES",
-       "labelled_code": "Cipher cipher = Cipher.getInstance(\"DES/ECB/PKCS5Padding\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'DES/ECB/PKCS5Padding'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase2.java",
-       "line": 12,
-       "labelled_primitive": "Blowfish",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"Blowfish\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'Blowfish'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase2.java",
-       "line": 14,
-       "labelled_primitive": "Blowfish",
-       "labelled_code": "Cipher cipher = Cipher.getInstance(\"Blowfish\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'Blowfish'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase4.java",
-       "line": 12,
-       "labelled_primitive": "RC2",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"RC2\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'RC2'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase4.java",
-       "line": 14,
-       "labelled_primitive": "RC2",
-       "labelled_code": "Cipher cipher = Cipher.getInstance(\"RC2\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'RC2'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase5.java",
-       "line": 12,
-       "labelled_primitive": "IDEA",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"IDEA\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'IDEA'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase5.java",
-       "line": 14,
-       "labelled_primitive": "IDEA",
-       "labelled_code": "Cipher cipher = Cipher.getInstance(\"IDEA\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'IDEA'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoCorrected.java",
-       "line": 12,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase1.java",
-       "line": 9,
-       "labelled_primitive": "SHA-1",
-       "labelled_code": "String crypto = \"SHA1\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='SHA1', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
        "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase1.java",
        "line": 13,
        "labelled_primitive": "SHA-1",
        "labelled_code": "MessageDigest md = MessageDigest.getInstance(crypto);",
        "labelled_break_model": "grover",
        "labelled_reason": "P1: MessageDigest.getInstance is given 'crypto', which holds algorithm 'SHA1'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase10.java",
-       "line": 9,
-       "labelled_primitive": "MD5",
-       "labelled_code": "String crypto = \"MD5\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='MD5', which selects the cryptographic algorithm downstream",
        "ecdat_names": [
         "None"
        ],
@@ -1186,23 +465,6 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase11.java",
-       "line": 9,
-       "labelled_primitive": "MD4",
-       "labelled_code": "String crypto = \"MD4\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='MD4', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase11.java",
        "line": 18,
        "labelled_primitive": "MD4",
        "labelled_code": "MessageDigest md = MessageDigest.getInstance(crypto);",
@@ -1220,45 +482,11 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase12.java",
-       "line": 9,
-       "labelled_primitive": "MD2",
-       "labelled_code": "String crypto = \"MD2\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='MD2', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase12.java",
        "line": 18,
        "labelled_primitive": "MD2",
        "labelled_code": "MessageDigest md = MessageDigest.getInstance(crypto);",
        "labelled_break_model": "grover",
        "labelled_reason": "P1: MessageDigest.getInstance is given 'crypto', which holds algorithm 'MD2'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase2.java",
-       "line": 9,
-       "labelled_primitive": "MD5",
-       "labelled_code": "String crypto = \"MD5\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='MD5', which selects the cryptographic algorithm downstream",
        "ecdat_names": [
         "None"
        ],
@@ -1288,45 +516,11 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase3.java",
-       "line": 9,
-       "labelled_primitive": "MD4",
-       "labelled_code": "String crypto = \"MD4\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='MD4', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase3.java",
        "line": 13,
        "labelled_primitive": "MD4",
        "labelled_code": "MessageDigest md = MessageDigest.getInstance(crypto);",
        "labelled_break_model": "grover",
        "labelled_reason": "P1: MessageDigest.getInstance is given 'crypto', which holds algorithm 'MD4'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase4.java",
-       "line": 9,
-       "labelled_primitive": "MD2",
-       "labelled_code": "String crypto = \"MD2\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='MD2', which selects the cryptographic algorithm downstream",
        "ecdat_names": [
         "None"
        ],
@@ -1355,199 +549,12 @@
        ]
       },
       {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase5.java",
-       "line": 7,
-       "labelled_primitive": "SHA-1",
-       "labelled_code": "public static final String DEFAULT_CRYPTO = \"SHA1\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'DEFAULT_CRYPTO'='SHA1', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase6.java",
-       "line": 7,
-       "labelled_primitive": "MD5",
-       "labelled_code": "public static final String DEFAULT_CRYPTO = \"MD5\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'DEFAULT_CRYPTO'='MD5', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase7.java",
-       "line": 7,
-       "labelled_primitive": "MD4",
-       "labelled_code": "public static final String DEFAULT_CRYPTO = \"MD4\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'DEFAULT_CRYPTO'='MD4', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase8.java",
-       "line": 7,
-       "labelled_primitive": "MD2",
-       "labelled_code": "public static final String DEFAULT_CRYPTO = \"MD2\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'DEFAULT_CRYPTO'='MD2', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase9.java",
-       "line": 9,
-       "labelled_primitive": "SHA-1",
-       "labelled_code": "String crypto = \"SHA1\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='SHA1', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
        "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase9.java",
        "line": 18,
        "labelled_primitive": "SHA-1",
        "labelled_code": "MessageDigest md = MessageDigest.getInstance(crypto);",
        "labelled_break_model": "grover",
        "labelled_reason": "P1: MessageDigest.getInstance is given 'crypto', which holds algorithm 'SHA1'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMCCase1.java",
-       "line": 9,
-       "labelled_primitive": "SHA-1",
-       "labelled_code": "String crypto = \"SHA1\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='SHA1', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMCCase2.java",
-       "line": 9,
-       "labelled_primitive": "MD5",
-       "labelled_code": "String crypto = \"MD5\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='MD5', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMCCase3.java",
-       "line": 9,
-       "labelled_primitive": "MD4",
-       "labelled_code": "String crypto = \"MD4\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='MD4', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMCCase4.java",
-       "line": 9,
-       "labelled_primitive": "MD2",
-       "labelled_code": "String crypto = \"MD2\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='MD2', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABPSCase3.java",
-       "line": 9,
-       "labelled_primitive": "MD4",
-       "labelled_code": "MessageDigest md = MessageDigest.getInstance(\"MD4\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: MessageDigest.getInstance selects algorithm 'MD4'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABPSCase4.java",
-       "line": 9,
-       "labelled_primitive": "MD2",
-       "labelled_code": "MessageDigest md = MessageDigest.getInstance(\"MD2\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: MessageDigest.getInstance selects algorithm 'MD2'",
        "ecdat_names": [
         "None"
        ],
@@ -1695,244 +702,6 @@
        ]
       },
       {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashBBCase3.java",
-       "line": 9,
-       "labelled_primitive": "MD4",
-       "labelled_code": "MessageDigest md = MessageDigest.getInstance(\"MD4\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: MessageDigest.getInstance selects algorithm 'MD4'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashBBCase4.java",
-       "line": 9,
-       "labelled_primitive": "MD2",
-       "labelled_code": "MessageDigest md = MessageDigest.getInstance(\"MD2\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: MessageDigest.getInstance selects algorithm 'MD2'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase1.java",
-       "line": 10,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase1.java",
-       "line": 16,
-       "labelled_primitive": "HMAC",
-       "labelled_code": "Mac mac = Mac.getInstance(\"HmacMD5\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: Mac.getInstance selects algorithm 'HmacMD5'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase2.java",
-       "line": 10,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase2.java",
-       "line": 16,
-       "labelled_primitive": "HMAC",
-       "labelled_code": "Mac mac = Mac.getInstance(\"HmacSHA1\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: Mac.getInstance selects algorithm 'HmacSHA1'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacCorrected.java",
-       "line": 10,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacCorrected.java",
-       "line": 16,
-       "labelled_primitive": "HMAC",
-       "labelled_code": "Mac mac = Mac.getInstance(\"HmacSHA256\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: Mac.getInstance selects algorithm 'HmacSHA256'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABHCase1.java",
-       "line": 15,
-       "labelled_primitive": "AES",
-       "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: SecretKeySpec names algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABICase1.java",
-       "line": 18,
-       "labelled_primitive": "AES",
-       "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: SecretKeySpec names algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABICase2.java",
-       "line": 27,
-       "labelled_primitive": "AES",
-       "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: SecretKeySpec names algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABICase3.java",
-       "line": 22,
-       "labelled_primitive": "AES",
-       "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: SecretKeySpec names algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABMC1.java",
-       "line": 10,
-       "labelled_primitive": "AES",
-       "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: SecretKeySpec names algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABSCase1.java",
-       "line": 39,
-       "labelled_primitive": "AES",
-       "labelled_code": "String algoSpec = \"AES/CBC/PKCS5Padding\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'algoSpec'='AES/CBC/PKCS5Padding', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
        "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABSCase1.java",
        "line": 40,
        "labelled_primitive": "AES",
@@ -1973,57 +742,6 @@
        "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes,algo);",
        "labelled_break_model": "grover",
        "labelled_reason": "P2: SecretKeySpec algorithm argument 'algo' holds 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringBBCase1.java",
-       "line": 18,
-       "labelled_primitive": "AES",
-       "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: SecretKeySpec names algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringCorrected.java",
-       "line": 17,
-       "labelled_primitive": "AES",
-       "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: SecretKeySpec names algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase1.java",
-       "line": 12,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
        "ecdat_names": [
         "None"
        ],
@@ -2052,522 +770,12 @@
        ]
       },
       {
-       "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase1.java",
-       "line": 20,
-       "labelled_primitive": "AES",
-       "labelled_code": "String crypto = \"AES/ECB/PKCS5Padding\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='AES/ECB/PKCS5Padding', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase2.java",
-       "line": 11,
-       "labelled_primitive": "AES",
-       "labelled_code": "public static final String DEFAULT_CRYPTO = \"AES/ECB/PKCS5Padding\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'DEFAULT_CRYPTO'='AES/ECB/PKCS5Padding', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase2.java",
-       "line": 15,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase3.java",
-       "line": 16,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
        "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase3.java",
        "line": 18,
        "labelled_primitive": "AES",
        "labelled_code": "Cipher cipher = Cipher.getInstance(crypto);",
        "labelled_break_model": "grover",
        "labelled_reason": "P1: Cipher.getInstance is given 'crypto', which holds algorithm 'AES/ECB/PKCS5Padding'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase3.java",
-       "line": 23,
-       "labelled_primitive": "AES",
-       "labelled_code": "String crypto = \"AES/ECB/PKCS5Padding\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='AES/ECB/PKCS5Padding', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABMC1.java",
-       "line": 13,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABMCCase1.java",
-       "line": 10,
-       "labelled_primitive": "AES",
-       "labelled_code": "String crypto = \"AES/ECB/PKCS5Padding\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='AES/ECB/PKCS5Padding', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABPSCase1.java",
-       "line": 11,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABSCase1.java",
-       "line": 13,
-       "labelled_primitive": "AES",
-       "labelled_code": "String cryptoAlgo = \"AES/ECB/PKCS5Padding\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'cryptoAlgo'='AES/ECB/PKCS5Padding', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABSCase1.java",
-       "line": 32,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoBBCase1.java",
-       "line": 12,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoCorrected.java",
-       "line": 12,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase1.java",
-       "line": 16,
-       "labelled_primitive": "RSA",
-       "labelled_code": "Cipher cipher = Cipher.getInstance(\"RSA\");",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase1.java",
-       "line": 24,
-       "labelled_primitive": "RSA",
-       "labelled_code": "Cipher dec = Cipher.getInstance(\"RSA\");",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase2.java",
-       "line": 16,
-       "labelled_primitive": "RSA",
-       "labelled_code": "Cipher cipher = Cipher.getInstance(\"RSA\");",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase2.java",
-       "line": 24,
-       "labelled_primitive": "RSA",
-       "labelled_code": "Cipher dec = Cipher.getInstance(\"RSA\");",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase3.java",
-       "line": 23,
-       "labelled_primitive": "RSA",
-       "labelled_code": "Cipher cipher = Cipher.getInstance(\"RSA\");",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase3.java",
-       "line": 31,
-       "labelled_primitive": "RSA",
-       "labelled_code": "Cipher dec = Cipher.getInstance(\"RSA\");",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABMC1.java",
-       "line": 16,
-       "labelled_primitive": "RSA",
-       "labelled_code": "Cipher cipher = Cipher.getInstance(\"RSA\");",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABMC1.java",
-       "line": 17,
-       "labelled_primitive": "RSA",
-       "labelled_code": "Cipher dec = Cipher.getInstance(\"RSA\");",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABPSCase1.java",
-       "line": 20,
-       "labelled_primitive": "RSA",
-       "labelled_code": "Cipher cipher = Cipher.getInstance(\"RSA\");",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherBBCase1.java",
-       "line": 15,
-       "labelled_primitive": "RSA",
-       "labelled_code": "Cipher cipher = Cipher.getInstance(\"RSA\");",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherBBCase1.java",
-       "line": 23,
-       "labelled_primitive": "RSA",
-       "labelled_code": "Cipher dec = Cipher.getInstance(\"RSA\");",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABHCase2.java",
-       "line": 33,
-       "labelled_primitive": "AES",
-       "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: SecretKeySpec names algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABICase1.java",
-       "line": 16,
-       "labelled_primitive": "AES",
-       "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: SecretKeySpec names algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABICase2.java",
-       "line": 27,
-       "labelled_primitive": "AES",
-       "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: SecretKeySpec names algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABICase3.java",
-       "line": 18,
-       "labelled_primitive": "AES",
-       "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: SecretKeySpec names algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABMC1.java",
-       "line": 11,
-       "labelled_primitive": "AES",
-       "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: SecretKeySpec names algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABPSCase1.java",
-       "line": 17,
-       "labelled_primitive": "AES",
-       "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: SecretKeySpec names algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABSCase1.java",
-       "line": 39,
-       "labelled_primitive": "AES",
-       "labelled_code": "String algoSpec = \"AES/CBC/PKCS5Padding\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'algoSpec'='AES/CBC/PKCS5Padding', which selects the cryptographic algorithm downstream",
        "ecdat_names": [
         "None"
        ],
@@ -2619,193 +827,6 @@
        "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes,algo);",
        "labelled_break_model": "grover",
        "labelled_reason": "P2: SecretKeySpec algorithm argument 'algo' holds 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyBBCase1.java",
-       "line": 11,
-       "labelled_primitive": "AES",
-       "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: SecretKeySpec names algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyCorrected.java",
-       "line": 17,
-       "labelled_primitive": "AES",
-       "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: SecretKeySpec names algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABHCase1.java",
-       "line": 15,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABHCase2.java",
-       "line": 16,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABICase1.java",
-       "line": 13,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABICase2.java",
-       "line": 18,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABICase3.java",
-       "line": 13,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABMC1.java",
-       "line": 15,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABPSCase1.java",
-       "line": 12,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABSCase1.java",
-       "line": 33,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorBBCase1.java",
-       "line": 12,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
        "ecdat_names": [
         "None"
        ],
@@ -2849,154 +870,74 @@
        "ecdat_match": [
         null
        ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorCorrected.java",
-       "line": 39,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
       }
      ],
      "file_level": {
       "counts": {
-       "TP": 41,
-       "FP": 0,
-       "FN": 69,
+       "TP": 106,
+       "FP": 1,
+       "FN": 4,
        "labelled_positive_files": 110
       },
-      "precision": 1.0,
-      "precision_fraction": "41/41",
-      "recall": 0.3727,
-      "recall_fraction": "41/110",
-      "false_positive_files": [],
+      "precision": 0.9907,
+      "precision_fraction": "106/107",
+      "recall": 0.9636,
+      "recall_fraction": "106/110",
+      "false_positive_files": [
+       "src/main/java/org/cryptoapi/bench/untrustedprng/UntrustedPRNGCase1.java"
+      ],
       "false_negative_files": [
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase1.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase10.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase11.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase12.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase14.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase15.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase2.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase4.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase5.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase6.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase8.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase9.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase1.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase2.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase4.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase5.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase1.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase2.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase4.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase5.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase1.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase2.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase4.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase5.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase1.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase10.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase11.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase12.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase2.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase3.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase4.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase5.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase6.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase7.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase8.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase9.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMCCase1.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMCCase2.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMCCase3.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMCCase4.java",
        "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase1.java",
        "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase2.java",
        "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase3.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase4.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashBBCase3.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashBBCase4.java",
-       "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase1.java",
-       "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase2.java",
-       "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacCorrected.java",
-       "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABHCase1.java",
-       "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABICase1.java",
-       "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABICase2.java",
-       "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABICase3.java",
-       "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABMC1.java",
-       "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABSCase1.java",
-       "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase1.java",
-       "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase2.java",
-       "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase3.java",
-       "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABMC1.java",
-       "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABMCCase1.java",
-       "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABSCase1.java",
-       "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABHCase2.java",
-       "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABICase1.java",
-       "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABICase2.java",
-       "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABICase3.java",
-       "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABMC1.java",
-       "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABPSCase1.java",
-       "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABSCase1.java",
-       "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyBBCase1.java"
+       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase4.java"
       ]
      },
      "by_primitive": {
       "AES (grover)": {
        "labelled": 82,
-       "detected": 23,
-       "recall": 0.2805
+       "detected": 72,
+       "recall": 0.878
       },
       "Blowfish (grover)": {
        "labelled": 12,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 8,
+       "recall": 0.6667
       },
       "DES (grover)": {
        "labelled": 15,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 12,
+       "recall": 0.8
       },
       "HMAC (grover)": {
        "labelled": 3,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 3,
+       "recall": 1.0
       },
       "IDEA (grover)": {
        "labelled": 12,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 8,
+       "recall": 0.6667
       },
       "MD2 (grover)": {
        "labelled": 10,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 6,
+       "recall": 0.6
       },
       "MD4 (grover)": {
        "labelled": 10,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 6,
+       "recall": 0.6
       },
       "MD5 (grover)": {
        "labelled": 10,
-       "detected": 2,
-       "recall": 0.2
+       "detected": 6,
+       "recall": 0.6
       },
       "RC2 (grover)": {
        "labelled": 12,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 8,
+       "recall": 0.6667
       },
       "RC4 (grover)": {
        "labelled": 12,
@@ -3005,13 +946,13 @@
       },
       "RSA (shor)": {
        "labelled": 17,
-       "detected": 6,
-       "recall": 0.3529
+       "detected": 17,
+       "recall": 1.0
       },
       "SHA-1 (grover)": {
        "labelled": 10,
-       "detected": 2,
-       "recall": 0.2
+       "detected": 6,
+       "recall": 0.6
       },
       "SHA-256 (grover)": {
        "labelled": 5,
@@ -3022,19 +963,37 @@
     },
     "L2": {
      "counts": {
-      "TP": 46,
-      "FP": 0,
-      "FN": 277,
+      "TP": 165,
+      "FP": 1,
+      "FN": 158,
       "labelled_positives": 323,
-      "findings_total": 46
+      "findings_total": 188
      },
-     "precision": 1.0,
-     "precision_fraction": "46/46",
-     "recall": 0.1424,
-     "recall_fraction": "46/323",
-     "f1": 0.2493,
+     "precision": 0.994,
+     "precision_fraction": "165/166",
+     "recall": 0.5108,
+     "recall_fraction": "165/323",
+     "f1": 0.6748,
      "f1_note": "F1 is computed from the ROUNDED precision/recall, so it may differ in the 4th decimal from an F1 computed from the raw counts.",
-     "false_positives": [],
+     "false_positives": [
+      {
+       "file": "src/main/java/org/cryptoapi/bench/untrustedprng/UntrustedPRNGCase1.java",
+       "line": 9,
+       "labelled_primitive": null,
+       "labelled_code": null,
+       "labelled_break_model": null,
+       "labelled_reason": null,
+       "ecdat_names": [
+        "PRNG"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-JAVA-WEAKRNG-001"
+       ],
+       "ecdat_match": [
+        "new Random("
+       ]
+      }
+     ],
      "false_negatives": [
       {
        "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase1.java",
@@ -3088,57 +1047,6 @@
        ]
       },
       {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase1.java",
-       "line": 20,
-       "labelled_primitive": "DES",
-       "labelled_code": "String crypto = \"DES/ECB/PKCS5Padding\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='DES/ECB/PKCS5Padding', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase1.java",
-       "line": 21,
-       "labelled_primitive": "DES",
-       "labelled_code": "String keyAlgo = \"DES\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'keyAlgo'='DES', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase10.java",
-       "line": 11,
-       "labelled_primitive": "IDEA",
-       "labelled_code": "public static final String DEFAULT_CRYPTO = \"IDEA\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'DEFAULT_CRYPTO'='IDEA', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
        "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase10.java",
        "line": 18,
        "labelled_primitive": null,
@@ -3190,40 +1098,6 @@
        ]
       },
       {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase11.java",
-       "line": 23,
-       "labelled_primitive": "DES",
-       "labelled_code": "String key = \"DES\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'key'='DES', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase11.java",
-       "line": 24,
-       "labelled_primitive": "DES",
-       "labelled_code": "String crypto = \"DES/ECB/PKCS5Padding\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='DES/ECB/PKCS5Padding', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
        "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase12.java",
        "line": 15,
        "labelled_primitive": "Blowfish",
@@ -3264,23 +1138,6 @@
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE, key);",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase12.java",
-       "line": 23,
-       "labelled_primitive": "Blowfish",
-       "labelled_code": "String crypto = \"Blowfish\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='Blowfish', which selects the cryptographic algorithm downstream",
        "ecdat_names": [
         "None"
        ],
@@ -3383,23 +1240,6 @@
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE, key);",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase14.java",
-       "line": 24,
-       "labelled_primitive": "RC2",
-       "labelled_code": "String crypto = \"RC2\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='RC2', which selects the cryptographic algorithm downstream",
        "ecdat_names": [
         "None"
        ],
@@ -3462,23 +1302,6 @@
        ]
       },
       {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase15.java",
-       "line": 24,
-       "labelled_primitive": "IDEA",
-       "labelled_code": "String crypto = \"IDEA\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='IDEA', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
        "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase2.java",
        "line": 12,
        "labelled_primitive": "Blowfish",
@@ -3519,23 +1342,6 @@
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE, key);",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase2.java",
-       "line": 20,
-       "labelled_primitive": "Blowfish",
-       "labelled_code": "String crypto = \"Blowfish\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='Blowfish', which selects the cryptographic algorithm downstream",
        "ecdat_names": [
         "None"
        ],
@@ -3649,80 +1455,12 @@
        ]
       },
       {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase4.java",
-       "line": 20,
-       "labelled_primitive": "RC2",
-       "labelled_code": "String crypto = \"RC2\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='RC2', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase5.java",
-       "line": 11,
-       "labelled_primitive": "DES",
-       "labelled_code": "public static final String DEFAULT_CRYPTO = \"DES/ECB/PKCS5Padding\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'DEFAULT_CRYPTO'='DES/ECB/PKCS5Padding', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase5.java",
-       "line": 15,
-       "labelled_primitive": "DES",
-       "labelled_code": "public static final String DEFAULT_CRYPTO_ALGO = \"DES\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'DEFAULT_CRYPTO_ALGO'='DES', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
        "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase5.java",
        "line": 23,
        "labelled_primitive": null,
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE, key);",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase6.java",
-       "line": 11,
-       "labelled_primitive": "Blowfish",
-       "labelled_code": "public static final String DEFAULT_CRYPTO = \"Blowfish\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'DEFAULT_CRYPTO'='Blowfish', which selects the cryptographic algorithm downstream",
        "ecdat_names": [
         "None"
        ],
@@ -3769,23 +1507,6 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase8.java",
-       "line": 11,
-       "labelled_primitive": "RC2",
-       "labelled_code": "public static final String DEFAULT_CRYPTO = \"RC2\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'DEFAULT_CRYPTO'='RC2', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase8.java",
        "line": 18,
        "labelled_primitive": null,
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE, key);",
@@ -3842,23 +1563,6 @@
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE, key);",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase9.java",
-       "line": 20,
-       "labelled_primitive": "IDEA",
-       "labelled_code": "String crypto = \"IDEA\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='IDEA', which selects the cryptographic algorithm downstream",
        "ecdat_names": [
         "None"
        ],
@@ -3955,165 +1659,12 @@
        ]
       },
       {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase1.java",
-       "line": 10,
-       "labelled_primitive": "DES",
-       "labelled_code": "String crypto = \"DES/ECB/PKCS5Padding\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='DES/ECB/PKCS5Padding', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase1.java",
-       "line": 11,
-       "labelled_primitive": "DES",
-       "labelled_code": "String cryptokey = \"DES\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'cryptokey'='DES', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase2.java",
-       "line": 10,
-       "labelled_primitive": "Blowfish",
-       "labelled_code": "String crypto = \"Blowfish\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='Blowfish', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase4.java",
-       "line": 10,
-       "labelled_primitive": "RC2",
-       "labelled_code": "String crypto = \"RC2\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='RC2', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase5.java",
-       "line": 10,
-       "labelled_primitive": "IDEA",
-       "labelled_code": "String crypto = \"IDEA\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='IDEA', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase1.java",
-       "line": 12,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase1.java",
-       "line": 14,
-       "labelled_primitive": "DES",
-       "labelled_code": "Cipher cipher = Cipher.getInstance(\"DES/ECB/PKCS5Padding\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'DES/ECB/PKCS5Padding'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
        "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase1.java",
        "line": 18,
        "labelled_primitive": null,
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE, key);",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase2.java",
-       "line": 11,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase2.java",
-       "line": 13,
-       "labelled_primitive": "Blowfish",
-       "labelled_code": "Cipher cipher = Cipher.getInstance(\"Blowfish\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'Blowfish'",
        "ecdat_names": [
         "None"
        ],
@@ -4143,23 +1694,6 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase3.java",
-       "line": 12,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase3.java",
        "line": 18,
        "labelled_primitive": null,
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE, key);",
@@ -4177,79 +1711,11 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase4.java",
-       "line": 12,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase4.java",
-       "line": 14,
-       "labelled_primitive": "RC2",
-       "labelled_code": "Cipher cipher = Cipher.getInstance(\"RC2\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'RC2'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase4.java",
        "line": 18,
        "labelled_primitive": null,
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE, key);",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase5.java",
-       "line": 11,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABPSCase5.java",
-       "line": 13,
-       "labelled_primitive": "IDEA",
-       "labelled_code": "Cipher cipher = Cipher.getInstance(\"IDEA\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'IDEA'",
        "ecdat_names": [
         "None"
        ],
@@ -4267,23 +1733,6 @@
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE, key);",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase1.java",
-       "line": 11,
-       "labelled_primitive": "DES",
-       "labelled_code": "crypto = new Crypto2(\"DES/ECB/PKCS5Padding\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='DES/ECB/PKCS5Padding', which selects the cryptographic algorithm downstream",
        "ecdat_names": [
         "None"
        ],
@@ -4318,23 +1767,6 @@
        "labelled_code": "return cipher.doFinal(txtBytes);",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase2.java",
-       "line": 11,
-       "labelled_primitive": "Blowfish",
-       "labelled_code": "crypto = new Crypto3(\"Blowfish\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='Blowfish', which selects the cryptographic algorithm downstream",
        "ecdat_names": [
         "None"
        ],
@@ -4415,23 +1847,6 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase4.java",
-       "line": 11,
-       "labelled_primitive": "RC2",
-       "labelled_code": "crypto = new Crypto5(\"RC2\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='RC2', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase4.java",
        "line": 32,
        "labelled_primitive": null,
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE, key);",
@@ -4466,23 +1881,6 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase5.java",
-       "line": 11,
-       "labelled_primitive": "IDEA",
-       "labelled_code": "crypto = new Crypto6(\"IDEA\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='IDEA', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase5.java",
        "line": 32,
        "labelled_primitive": null,
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE, key);",
@@ -4505,40 +1903,6 @@
        "labelled_code": "return cipher.doFinal(txtBytes);",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase1.java",
-       "line": 13,
-       "labelled_primitive": "DES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"DES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'DES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase1.java",
-       "line": 15,
-       "labelled_primitive": "DES",
-       "labelled_code": "Cipher cipher = Cipher.getInstance(\"DES/ECB/PKCS5Padding\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'DES/ECB/PKCS5Padding'",
        "ecdat_names": [
         "None"
        ],
@@ -4556,40 +1920,6 @@
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE, key);",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase2.java",
-       "line": 12,
-       "labelled_primitive": "Blowfish",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"Blowfish\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'Blowfish'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase2.java",
-       "line": 14,
-       "labelled_primitive": "Blowfish",
-       "labelled_code": "Cipher cipher = Cipher.getInstance(\"Blowfish\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'Blowfish'",
        "ecdat_names": [
         "None"
        ],
@@ -4636,79 +1966,11 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase4.java",
-       "line": 12,
-       "labelled_primitive": "RC2",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"RC2\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'RC2'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase4.java",
-       "line": 14,
-       "labelled_primitive": "RC2",
-       "labelled_code": "Cipher cipher = Cipher.getInstance(\"RC2\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'RC2'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase4.java",
        "line": 15,
        "labelled_primitive": null,
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE, key);",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase5.java",
-       "line": 12,
-       "labelled_primitive": "IDEA",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"IDEA\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'IDEA'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase5.java",
-       "line": 14,
-       "labelled_primitive": "IDEA",
-       "labelled_code": "Cipher cipher = Cipher.getInstance(\"IDEA\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'IDEA'",
        "ecdat_names": [
         "None"
        ],
@@ -4738,45 +2000,11 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoCorrected.java",
-       "line": 12,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoCorrected.java",
        "line": 15,
        "labelled_primitive": null,
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE, key);",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase1.java",
-       "line": 9,
-       "labelled_primitive": "SHA-1",
-       "labelled_code": "String crypto = \"SHA1\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='SHA1', which selects the cryptographic algorithm downstream",
        "ecdat_names": [
         "None"
        ],
@@ -4823,23 +2051,6 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase10.java",
-       "line": 9,
-       "labelled_primitive": "MD5",
-       "labelled_code": "String crypto = \"MD5\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='MD5', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase10.java",
        "line": 18,
        "labelled_primitive": "MD5",
        "labelled_code": "MessageDigest md = MessageDigest.getInstance(crypto);",
@@ -4862,23 +2073,6 @@
        "labelled_code": "md.update(str.getBytes());",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase11.java",
-       "line": 9,
-       "labelled_primitive": "MD4",
-       "labelled_code": "String crypto = \"MD4\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='MD4', which selects the cryptographic algorithm downstream",
        "ecdat_names": [
         "None"
        ],
@@ -4925,23 +2119,6 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase12.java",
-       "line": 9,
-       "labelled_primitive": "MD2",
-       "labelled_code": "String crypto = \"MD2\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='MD2', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase12.java",
        "line": 18,
        "labelled_primitive": "MD2",
        "labelled_code": "MessageDigest md = MessageDigest.getInstance(crypto);",
@@ -4964,23 +2141,6 @@
        "labelled_code": "md.update(str.getBytes());",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase2.java",
-       "line": 9,
-       "labelled_primitive": "MD5",
-       "labelled_code": "String crypto = \"MD5\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='MD5', which selects the cryptographic algorithm downstream",
        "ecdat_names": [
         "None"
        ],
@@ -5027,23 +2187,6 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase3.java",
-       "line": 9,
-       "labelled_primitive": "MD4",
-       "labelled_code": "String crypto = \"MD4\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='MD4', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase3.java",
        "line": 13,
        "labelled_primitive": "MD4",
        "labelled_code": "MessageDigest md = MessageDigest.getInstance(crypto);",
@@ -5066,23 +2209,6 @@
        "labelled_code": "md.update(str.getBytes());",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase4.java",
-       "line": 9,
-       "labelled_primitive": "MD2",
-       "labelled_code": "String crypto = \"MD2\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='MD2', which selects the cryptographic algorithm downstream",
        "ecdat_names": [
         "None"
        ],
@@ -5129,45 +2255,11 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase5.java",
-       "line": 7,
-       "labelled_primitive": "SHA-1",
-       "labelled_code": "public static final String DEFAULT_CRYPTO = \"SHA1\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'DEFAULT_CRYPTO'='SHA1', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase5.java",
        "line": 26,
        "labelled_primitive": null,
        "labelled_code": "md.update(str.getBytes());",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase6.java",
-       "line": 7,
-       "labelled_primitive": "MD5",
-       "labelled_code": "public static final String DEFAULT_CRYPTO = \"MD5\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'DEFAULT_CRYPTO'='MD5', which selects the cryptographic algorithm downstream",
        "ecdat_names": [
         "None"
        ],
@@ -5197,23 +2289,6 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase7.java",
-       "line": 7,
-       "labelled_primitive": "MD4",
-       "labelled_code": "public static final String DEFAULT_CRYPTO = \"MD4\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'DEFAULT_CRYPTO'='MD4', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase7.java",
        "line": 26,
        "labelled_primitive": null,
        "labelled_code": "md.update(str.getBytes());",
@@ -5231,45 +2306,11 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase8.java",
-       "line": 7,
-       "labelled_primitive": "MD2",
-       "labelled_code": "public static final String DEFAULT_CRYPTO = \"MD2\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'DEFAULT_CRYPTO'='MD2', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase8.java",
        "line": 26,
        "labelled_primitive": null,
        "labelled_code": "md.update(str.getBytes());",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase9.java",
-       "line": 9,
-       "labelled_primitive": "SHA-1",
-       "labelled_code": "String crypto = \"SHA1\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='SHA1', which selects the cryptographic algorithm downstream",
        "ecdat_names": [
         "None"
        ],
@@ -5383,74 +2424,6 @@
        ]
       },
       {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMCCase1.java",
-       "line": 9,
-       "labelled_primitive": "SHA-1",
-       "labelled_code": "String crypto = \"SHA1\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='SHA1', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMCCase2.java",
-       "line": 9,
-       "labelled_primitive": "MD5",
-       "labelled_code": "String crypto = \"MD5\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='MD5', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMCCase3.java",
-       "line": 9,
-       "labelled_primitive": "MD4",
-       "labelled_code": "String crypto = \"MD4\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='MD4', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMCCase4.java",
-       "line": 9,
-       "labelled_primitive": "MD2",
-       "labelled_code": "String crypto = \"MD2\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='MD2', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
        "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABPSCase1.java",
        "line": 12,
        "labelled_primitive": null,
@@ -5486,45 +2459,11 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABPSCase3.java",
-       "line": 9,
-       "labelled_primitive": "MD4",
-       "labelled_code": "MessageDigest md = MessageDigest.getInstance(\"MD4\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: MessageDigest.getInstance selects algorithm 'MD4'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABPSCase3.java",
        "line": 12,
        "labelled_primitive": null,
        "labelled_code": "md.update(name.getBytes());",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABPSCase4.java",
-       "line": 9,
-       "labelled_primitive": "MD2",
-       "labelled_code": "MessageDigest md = MessageDigest.getInstance(\"MD2\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: MessageDigest.getInstance selects algorithm 'MD2'",
        "ecdat_names": [
         "None"
        ],
@@ -5792,45 +2731,11 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashBBCase3.java",
-       "line": 9,
-       "labelled_primitive": "MD4",
-       "labelled_code": "MessageDigest md = MessageDigest.getInstance(\"MD4\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: MessageDigest.getInstance selects algorithm 'MD4'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashBBCase3.java",
        "line": 10,
        "labelled_primitive": null,
        "labelled_code": "md.update(name.getBytes());",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashBBCase4.java",
-       "line": 9,
-       "labelled_primitive": "MD2",
-       "labelled_code": "MessageDigest md = MessageDigest.getInstance(\"MD2\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: MessageDigest.getInstance selects algorithm 'MD2'",
        "ecdat_names": [
         "None"
        ],
@@ -5877,45 +2782,11 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase1.java",
-       "line": 10,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase1.java",
        "line": 12,
        "labelled_primitive": null,
        "labelled_code": "keyGen.init(secRandom);",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase1.java",
-       "line": 16,
-       "labelled_primitive": "HMAC",
-       "labelled_code": "Mac mac = Mac.getInstance(\"HmacMD5\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: Mac.getInstance selects algorithm 'HmacMD5'",
        "ecdat_names": [
         "None"
        ],
@@ -5945,45 +2816,11 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase2.java",
-       "line": 10,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase2.java",
        "line": 12,
        "labelled_primitive": null,
        "labelled_code": "keyGen.init(secRandom);",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase2.java",
-       "line": 16,
-       "labelled_primitive": "HMAC",
-       "labelled_code": "Mac mac = Mac.getInstance(\"HmacSHA1\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: Mac.getInstance selects algorithm 'HmacSHA1'",
        "ecdat_names": [
         "None"
        ],
@@ -6013,23 +2850,6 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacCorrected.java",
-       "line": 10,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacCorrected.java",
        "line": 12,
        "labelled_primitive": null,
        "labelled_code": "keyGen.init(secRandom);",
@@ -6047,130 +2867,11 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacCorrected.java",
-       "line": 16,
-       "labelled_primitive": "HMAC",
-       "labelled_code": "Mac mac = Mac.getInstance(\"HmacSHA256\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: Mac.getInstance selects algorithm 'HmacSHA256'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacCorrected.java",
        "line": 17,
        "labelled_primitive": null,
        "labelled_code": "mac.init(key);",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABHCase1.java",
-       "line": 15,
-       "labelled_primitive": "AES",
-       "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: SecretKeySpec names algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABICase1.java",
-       "line": 18,
-       "labelled_primitive": "AES",
-       "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: SecretKeySpec names algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABICase2.java",
-       "line": 27,
-       "labelled_primitive": "AES",
-       "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: SecretKeySpec names algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABICase3.java",
-       "line": 22,
-       "labelled_primitive": "AES",
-       "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: SecretKeySpec names algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABMC1.java",
-       "line": 10,
-       "labelled_primitive": "AES",
-       "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: SecretKeySpec names algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABSCase1.java",
-       "line": 39,
-       "labelled_primitive": "AES",
-       "labelled_code": "String algoSpec = \"AES/CBC/PKCS5Padding\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'algoSpec'='AES/CBC/PKCS5Padding', which selects the cryptographic algorithm downstream",
        "ecdat_names": [
         "None"
        ],
@@ -6268,23 +2969,6 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringBBCase1.java",
-       "line": 18,
-       "labelled_primitive": "AES",
-       "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: SecretKeySpec names algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringBBCase1.java",
        "line": 23,
        "labelled_primitive": null,
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE, keySpec);",
@@ -6302,45 +2986,11 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringCorrected.java",
-       "line": 17,
-       "labelled_primitive": "AES",
-       "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: SecretKeySpec names algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringCorrected.java",
        "line": 22,
        "labelled_primitive": null,
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE, keySpec);",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase1.java",
-       "line": 12,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
        "ecdat_names": [
         "None"
        ],
@@ -6386,80 +3036,12 @@
        ]
       },
       {
-       "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase1.java",
-       "line": 20,
-       "labelled_primitive": "AES",
-       "labelled_code": "String crypto = \"AES/ECB/PKCS5Padding\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='AES/ECB/PKCS5Padding', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase2.java",
-       "line": 11,
-       "labelled_primitive": "AES",
-       "labelled_code": "public static final String DEFAULT_CRYPTO = \"AES/ECB/PKCS5Padding\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'DEFAULT_CRYPTO'='AES/ECB/PKCS5Padding', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase2.java",
-       "line": 15,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
        "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase2.java",
        "line": 18,
        "labelled_primitive": null,
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE, key);",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase3.java",
-       "line": 16,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
        "ecdat_names": [
         "None"
        ],
@@ -6505,40 +3087,6 @@
        ]
       },
       {
-       "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase3.java",
-       "line": 23,
-       "labelled_primitive": "AES",
-       "labelled_code": "String crypto = \"AES/ECB/PKCS5Padding\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='AES/ECB/PKCS5Padding', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABMC1.java",
-       "line": 13,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
        "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABMC1.java",
        "line": 16,
        "labelled_primitive": null,
@@ -6556,80 +3104,12 @@
        ]
       },
       {
-       "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABMCCase1.java",
-       "line": 10,
-       "labelled_primitive": "AES",
-       "labelled_code": "String crypto = \"AES/ECB/PKCS5Padding\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'crypto'='AES/ECB/PKCS5Padding', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABPSCase1.java",
-       "line": 11,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
        "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABPSCase1.java",
        "line": 16,
        "labelled_primitive": null,
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE, key);",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABSCase1.java",
-       "line": 13,
-       "labelled_primitive": "AES",
-       "labelled_code": "String cryptoAlgo = \"AES/ECB/PKCS5Padding\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'cryptoAlgo'='AES/ECB/PKCS5Padding', which selects the cryptographic algorithm downstream",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABSCase1.java",
-       "line": 32,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
        "ecdat_names": [
         "None"
        ],
@@ -6659,45 +3139,11 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoBBCase1.java",
-       "line": 12,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoBBCase1.java",
        "line": 15,
        "labelled_primitive": null,
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE, key);",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoCorrected.java",
-       "line": 12,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
        "ecdat_names": [
         "None"
        ],
@@ -6727,45 +3173,11 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase1.java",
-       "line": 16,
-       "labelled_primitive": "RSA",
-       "labelled_code": "Cipher cipher = Cipher.getInstance(\"RSA\");",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase1.java",
        "line": 17,
        "labelled_primitive": null,
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE, kp.getPublic());",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase1.java",
-       "line": 24,
-       "labelled_primitive": "RSA",
-       "labelled_code": "Cipher dec = Cipher.getInstance(\"RSA\");",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
        "ecdat_names": [
         "None"
        ],
@@ -6795,45 +3207,11 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase2.java",
-       "line": 16,
-       "labelled_primitive": "RSA",
-       "labelled_code": "Cipher cipher = Cipher.getInstance(\"RSA\");",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase2.java",
        "line": 17,
        "labelled_primitive": null,
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE, kp.getPublic());",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase2.java",
-       "line": 24,
-       "labelled_primitive": "RSA",
-       "labelled_code": "Cipher dec = Cipher.getInstance(\"RSA\");",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
        "ecdat_names": [
         "None"
        ],
@@ -6863,45 +3241,11 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase3.java",
-       "line": 23,
-       "labelled_primitive": "RSA",
-       "labelled_code": "Cipher cipher = Cipher.getInstance(\"RSA\");",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase3.java",
        "line": 24,
        "labelled_primitive": null,
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE, kp.getPublic());",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase3.java",
-       "line": 31,
-       "labelled_primitive": "RSA",
-       "labelled_code": "Cipher dec = Cipher.getInstance(\"RSA\");",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
        "ecdat_names": [
         "None"
        ],
@@ -6919,40 +3263,6 @@
        "labelled_code": "dec.init(Cipher.DECRYPT_MODE, kp.getPrivate());",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABMC1.java",
-       "line": 16,
-       "labelled_primitive": "RSA",
-       "labelled_code": "Cipher cipher = Cipher.getInstance(\"RSA\");",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABMC1.java",
-       "line": 17,
-       "labelled_primitive": "RSA",
-       "labelled_code": "Cipher dec = Cipher.getInstance(\"RSA\");",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
        "ecdat_names": [
         "None"
        ],
@@ -6999,23 +3309,6 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABPSCase1.java",
-       "line": 20,
-       "labelled_primitive": "RSA",
-       "labelled_code": "Cipher cipher = Cipher.getInstance(\"RSA\");",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABPSCase1.java",
        "line": 21,
        "labelled_primitive": null,
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE, kp.getPublic());",
@@ -7033,23 +3326,6 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherBBCase1.java",
-       "line": 15,
-       "labelled_primitive": "RSA",
-       "labelled_code": "Cipher cipher = Cipher.getInstance(\"RSA\");",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherBBCase1.java",
        "line": 16,
        "labelled_primitive": null,
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE, kp.getPublic());",
@@ -7067,147 +3343,11 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherBBCase1.java",
-       "line": 23,
-       "labelled_primitive": "RSA",
-       "labelled_code": "Cipher dec = Cipher.getInstance(\"RSA\");",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: Cipher.getInstance selects algorithm 'RSA'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherBBCase1.java",
        "line": 24,
        "labelled_primitive": null,
        "labelled_code": "dec.init(Cipher.DECRYPT_MODE, kp.getPrivate());",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABHCase2.java",
-       "line": 33,
-       "labelled_primitive": "AES",
-       "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: SecretKeySpec names algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABICase1.java",
-       "line": 16,
-       "labelled_primitive": "AES",
-       "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: SecretKeySpec names algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABICase2.java",
-       "line": 27,
-       "labelled_primitive": "AES",
-       "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: SecretKeySpec names algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABICase3.java",
-       "line": 18,
-       "labelled_primitive": "AES",
-       "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: SecretKeySpec names algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABMC1.java",
-       "line": 11,
-       "labelled_primitive": "AES",
-       "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: SecretKeySpec names algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABPSCase1.java",
-       "line": 17,
-       "labelled_primitive": "AES",
-       "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: SecretKeySpec names algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABSCase1.java",
-       "line": 39,
-       "labelled_primitive": "AES",
-       "labelled_code": "String algoSpec = \"AES/CBC/PKCS5Padding\";",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: taint source -- binds 'algoSpec'='AES/CBC/PKCS5Padding', which selects the cryptographic algorithm downstream",
        "ecdat_names": [
         "None"
        ],
@@ -7304,63 +3444,12 @@
        ]
       },
       {
-       "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyBBCase1.java",
-       "line": 11,
-       "labelled_primitive": "AES",
-       "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: SecretKeySpec names algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyCorrected.java",
-       "line": 17,
-       "labelled_primitive": "AES",
-       "labelled_code": "SecretKeySpec keySpec = new SecretKeySpec(keyBytes, \"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P2: SecretKeySpec names algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
        "file": "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyCorrected.java",
        "line": 22,
        "labelled_primitive": null,
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE, keySpec);",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABHCase1.java",
-       "line": 15,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
        "ecdat_names": [
         "None"
        ],
@@ -7390,23 +3479,6 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABHCase2.java",
-       "line": 16,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABHCase2.java",
        "line": 33,
        "labelled_primitive": null,
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);",
@@ -7424,45 +3496,11 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABICase1.java",
-       "line": 13,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABICase1.java",
        "line": 17,
        "labelled_primitive": null,
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABICase2.java",
-       "line": 18,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
        "ecdat_names": [
         "None"
        ],
@@ -7492,45 +3530,11 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABICase3.java",
-       "line": 13,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABICase3.java",
        "line": 17,
        "labelled_primitive": null,
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABMC1.java",
-       "line": 15,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
        "ecdat_names": [
         "None"
        ],
@@ -7560,23 +3564,6 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABPSCase1.java",
-       "line": 12,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABPSCase1.java",
        "line": 26,
        "labelled_primitive": null,
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);",
@@ -7594,45 +3581,11 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABSCase1.java",
-       "line": 33,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABSCase1.java",
        "line": 36,
        "labelled_primitive": null,
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorBBCase1.java",
-       "line": 12,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
        "ecdat_names": [
         "None"
        ],
@@ -7713,23 +3666,6 @@
       },
       {
        "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorCorrected.java",
-       "line": 39,
-       "labelled_primitive": "AES",
-       "labelled_code": "KeyGenerator keyGen = KeyGenerator.getInstance(\"AES\");",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P1: KeyGenerator.getInstance selects algorithm 'AES'",
-       "ecdat_names": [
-        "None"
-       ],
-       "ecdat_rule_ids": [
-        "None"
-       ],
-       "ecdat_match": [
-        null
-       ]
-      },
-      {
-       "file": "src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorCorrected.java",
        "line": 50,
        "labelled_primitive": null,
        "labelled_code": "cipher.init(Cipher.ENCRYPT_MODE,key,ivSpec);",
@@ -7748,137 +3684,74 @@
      ],
      "file_level": {
       "counts": {
-       "TP": 41,
-       "FP": 0,
-       "FN": 78,
+       "TP": 106,
+       "FP": 1,
+       "FN": 13,
        "labelled_positive_files": 119
       },
-      "precision": 1.0,
-      "precision_fraction": "41/41",
-      "recall": 0.3445,
-      "recall_fraction": "41/119",
-      "false_positive_files": [],
+      "precision": 0.9907,
+      "precision_fraction": "106/107",
+      "recall": 0.8908,
+      "recall_fraction": "106/119",
+      "false_positive_files": [
+       "src/main/java/org/cryptoapi/bench/untrustedprng/UntrustedPRNGCase1.java"
+      ],
       "false_negative_files": [
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase1.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase10.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase11.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase12.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase14.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase15.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase2.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase4.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase5.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase6.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase8.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase9.java",
        "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMC1.java",
        "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMC2.java",
        "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMC3.java",
        "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMC4.java",
        "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMC5.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase1.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase2.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase4.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABMCCase5.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase1.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase2.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase4.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase5.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase1.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase2.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase4.java",
-       "src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase5.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase1.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase10.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase11.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase12.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase2.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase3.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase4.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase5.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase6.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase7.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase8.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase9.java",
        "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMC1.java",
        "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMC2.java",
        "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMC3.java",
        "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMC4.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMCCase1.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMCCase2.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMCCase3.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABMCCase4.java",
        "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase1.java",
        "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase2.java",
        "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase3.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase4.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashBBCase3.java",
-       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashBBCase4.java",
-       "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase1.java",
-       "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacBBCase2.java",
-       "src/main/java/org/cryptoapi/bench/brokenmac/BrokenMacCorrected.java",
-       "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABHCase1.java",
-       "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABICase1.java",
-       "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABICase2.java",
-       "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABICase3.java",
-       "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABMC1.java",
-       "src/main/java/org/cryptoapi/bench/credentialinstring/CredentialInStringABSCase1.java",
-       "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase1.java",
-       "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase2.java",
-       "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase3.java",
-       "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABMC1.java",
-       "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABMCCase1.java",
-       "src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABSCase1.java",
-       "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABHCase2.java",
-       "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABICase1.java",
-       "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABICase2.java",
-       "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABICase3.java",
-       "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABMC1.java",
-       "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABPSCase1.java",
-       "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABSCase1.java",
-       "src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyBBCase1.java"
+       "src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase4.java"
       ]
      },
      "by_primitive": {
       "AES (grover)": {
        "labelled": 82,
-       "detected": 23,
-       "recall": 0.2805
+       "detected": 72,
+       "recall": 0.878
       },
       "Blowfish (grover)": {
        "labelled": 12,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 8,
+       "recall": 0.6667
       },
       "DES (grover)": {
        "labelled": 15,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 12,
+       "recall": 0.8
       },
       "HMAC (grover)": {
        "labelled": 3,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 3,
+       "recall": 1.0
       },
       "IDEA (grover)": {
        "labelled": 12,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 8,
+       "recall": 0.6667
       },
       "MD2 (grover)": {
        "labelled": 10,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 6,
+       "recall": 0.6
       },
       "MD4 (grover)": {
        "labelled": 10,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 6,
+       "recall": 0.6
       },
       "MD5 (grover)": {
        "labelled": 10,
-       "detected": 2,
-       "recall": 0.2
+       "detected": 6,
+       "recall": 0.6
       },
       "None (not-affected)": {
        "labelled": 113,
@@ -7887,8 +3760,8 @@
       },
       "RC2 (grover)": {
        "labelled": 12,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 8,
+       "recall": 0.6667
       },
       "RC4 (grover)": {
        "labelled": 12,
@@ -7897,13 +3770,13 @@
       },
       "RSA (shor)": {
        "labelled": 17,
-       "detected": 6,
-       "recall": 0.3529
+       "detected": 17,
+       "recall": 1.0
       },
       "SHA-1 (grover)": {
        "labelled": 10,
-       "detected": 2,
-       "recall": 0.2
+       "detected": 6,
+       "recall": 0.6
       },
       "SHA-256 (grover)": {
        "labelled": 5,
@@ -7954,15 +3827,15 @@
      "SaaS / third-party boundary crypto (requires attestation)",
      "silicon-embedded keys (requires attestation)"
     ],
-    "findings_total": 180,
+    "findings_total": 172,
     "assurance_histogram": {
      "observed": 0,
-     "used": 180,
+     "used": 172,
      "declared": 0,
      "capability": 0
     },
-    "proven_use": 180,
-    "unresolved_purpose": 72
+    "proven_use": 172,
+    "unresolved_purpose": 61
    },
    "scan_errors": [],
    "findings_by_rule": {
@@ -7970,7 +3843,6 @@
     "ECDH | ECD-SRC-ECDH-001": 22,
     "AES | ECD-SRC-SSH-CIPHER-001": 16,
     "RSA | ECD-SRC-PYCA-RSA-001": 13,
-    "ECC | ECD-SRC-PYCA-EC-002": 12,
     "ECDH | ECD-SRC-SSH-KEX-001": 11,
     "DH | ECD-SRC-SSH-DH-001": 10,
     "AES | ECD-SRC-PYCA-AES-001": 9,
@@ -7986,6 +3858,8 @@
     "ECDSA | ECD-SRC-ECDSA-001": 2,
     "SHA | ECD-SRC-HASHLIB-002": 2,
     "X25519 | ECD-SRC-PYCA-X-001": 2,
+    "AES | ECD-SRC-JAVA-CONST-001": 2,
+    "RSA | ECD-RB-SIG-001": 2,
     "3DES | ECD-SRC-SSH-LEGACY-001": 2,
     "ECDH | ECD-SRC-PYCA-ECDH-001": 1,
     "Ed25519 | ECD-SRC-PYCA-ED-001": 1,
@@ -7996,36 +3870,19 @@
    "variants": {
     "L1": {
      "counts": {
-      "TP": 145,
-      "FP": 18,
-      "FN": 95,
+      "TP": 143,
+      "FP": 19,
+      "FN": 97,
       "labelled_positives": 240,
-      "findings_total": 180
+      "findings_total": 172
      },
-     "precision": 0.8896,
-     "precision_fraction": "145/163",
-     "recall": 0.6042,
-     "recall_fraction": "145/240",
-     "f1": 0.7196,
+     "precision": 0.8827,
+     "precision_fraction": "143/162",
+     "recall": 0.5958,
+     "recall_fraction": "143/240",
+     "f1": 0.7114,
      "f1_note": "F1 is computed from the ROUNDED precision/recall, so it may differ in the 4th decimal from an F1 computed from the raw counts.",
      "false_positives": [
-      {
-       "file": "paramiko/ecdsakey.py",
-       "line": 167,
-       "labelled_primitive": null,
-       "labelled_code": null,
-       "labelled_break_model": null,
-       "labelled_reason": null,
-       "ecdat_names": [
-        "ECC"
-       ],
-       "ecdat_rule_ids": [
-        "ECD-SRC-PYCA-EC-002"
-       ],
-       "ecdat_match": [
-        "ec.EllipticCurvePublicKey"
-       ]
-      },
       {
        "file": "paramiko/ecdsakey.py",
        "line": 305,
@@ -8060,40 +3917,6 @@
        ],
        "ecdat_match": [
         ".exchange(peer_key)"
-       ]
-      },
-      {
-       "file": "paramiko/kex_ecdh_nist.py",
-       "line": 67,
-       "labelled_primitive": null,
-       "labelled_code": null,
-       "labelled_break_model": null,
-       "labelled_reason": null,
-       "ecdat_names": [
-        "ECC"
-       ],
-       "ecdat_rule_ids": [
-        "ECD-SRC-PYCA-EC-002"
-       ],
-       "ecdat_match": [
-        "ec.EllipticCurvePublicKey"
-       ]
-      },
-      {
-       "file": "paramiko/kex_ecdh_nist.py",
-       "line": 113,
-       "labelled_primitive": null,
-       "labelled_code": null,
-       "labelled_break_model": null,
-       "labelled_reason": null,
-       "ecdat_names": [
-        "ECC"
-       ],
-       "ecdat_rule_ids": [
-        "ECD-SRC-PYCA-EC-002"
-       ],
-       "ecdat_match": [
-        "ec.EllipticCurvePublicKey"
        ]
       },
       {
@@ -8216,6 +4039,57 @@
        ]
       },
       {
+       "file": "paramiko/pkey.py",
+       "line": 128,
+       "labelled_primitive": null,
+       "labelled_code": "\"AES-128-CBC\": {",
+       "labelled_break_model": "not-affected",
+       "labelled_reason": "no quantum-vulnerable primitive is named on this line",
+       "ecdat_names": [
+        "AES"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-JAVA-CONST-001"
+       ],
+       "ecdat_match": [
+        "\"AES-128-CBC\""
+       ]
+      },
+      {
+       "file": "paramiko/pkey.py",
+       "line": 134,
+       "labelled_primitive": null,
+       "labelled_code": "\"AES-256-CBC\": {",
+       "labelled_break_model": "not-affected",
+       "labelled_reason": "no quantum-vulnerable primitive is named on this line",
+       "ecdat_names": [
+        "AES"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-JAVA-CONST-001"
+       ],
+       "ecdat_match": [
+        "\"AES-256-CBC\""
+       ]
+      },
+      {
+       "file": "paramiko/rsakey.py",
+       "line": 137,
+       "labelled_primitive": null,
+       "labelled_code": "sig = self.key.sign(",
+       "labelled_break_model": "not-affected",
+       "labelled_reason": "no quantum-vulnerable primitive is named on this line",
+       "ecdat_names": [
+        "RSA"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-RB-SIG-001"
+       ],
+       "ecdat_match": [
+        "key.sign("
+       ]
+      },
+      {
        "file": "paramiko/rsakey.py",
        "line": 139,
        "labelled_primitive": null,
@@ -8230,6 +4104,23 @@
        ],
        "ecdat_match": [
         "padding.PKCS1v15"
+       ]
+      },
+      {
+       "file": "paramiko/rsakey.py",
+       "line": 166,
+       "labelled_primitive": null,
+       "labelled_code": "key.verify(",
+       "labelled_break_model": "not-affected",
+       "labelled_reason": "no quantum-vulnerable primitive is named on this line",
+       "ecdat_names": [
+        "RSA"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-RB-SIG-001"
+       ],
+       "ecdat_match": [
+        "key.verify("
        ]
       },
       {
@@ -8666,6 +4557,23 @@
        "labelled_code": "return cls._ECDSA_CURVES.get_key_format_identifier_list()",
        "labelled_break_model": "shor",
        "labelled_reason": "P1: names the ECDSA primitive in executable code",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "paramiko/ecdsakey.py",
+       "line": 250,
+       "labelled_primitive": "EllipticCurvePrivateKey",
+       "labelled_code": "def private_key(self) -> Optional[ec.EllipticCurvePrivateKey]:",
+       "labelled_break_model": "shor",
+       "labelled_reason": "P1: names the EllipticCurvePrivateKey primitive in executable code",
        "ecdat_names": [
         "None"
        ],
@@ -9392,6 +5300,23 @@
       },
       {
        "file": "paramiko/pkey.py",
+       "line": 216,
+       "labelled_primitive": "EllipticCurvePrivateKey",
+       "labelled_code": "elif isinstance(loaded, asymmetric.ec.EllipticCurvePrivateKey):",
+       "labelled_break_model": "shor",
+       "labelled_reason": "P1: names the EllipticCurvePrivateKey primitive in executable code",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "paramiko/pkey.py",
        "line": 217,
        "labelled_primitive": "ECDSA",
        "labelled_code": "key_class = ECDSAKey",
@@ -10001,8 +5926,8 @@
       },
       "EllipticCurvePrivateKey (shor)": {
        "labelled": 3,
-       "detected": 2,
-       "recall": 0.6667
+       "detected": 0,
+       "recall": 0.0
       },
       "HMAC (grover)": {
        "labelled": 16,
@@ -10078,36 +6003,19 @@
     },
     "L2": {
      "counts": {
-      "TP": 145,
-      "FP": 18,
-      "FN": 114,
+      "TP": 143,
+      "FP": 19,
+      "FN": 116,
       "labelled_positives": 259,
-      "findings_total": 180
+      "findings_total": 172
      },
-     "precision": 0.8896,
-     "precision_fraction": "145/163",
-     "recall": 0.5598,
-     "recall_fraction": "145/259",
-     "f1": 0.6872,
+     "precision": 0.8827,
+     "precision_fraction": "143/162",
+     "recall": 0.5521,
+     "recall_fraction": "143/259",
+     "f1": 0.6793,
      "f1_note": "F1 is computed from the ROUNDED precision/recall, so it may differ in the 4th decimal from an F1 computed from the raw counts.",
      "false_positives": [
-      {
-       "file": "paramiko/ecdsakey.py",
-       "line": 167,
-       "labelled_primitive": null,
-       "labelled_code": null,
-       "labelled_break_model": null,
-       "labelled_reason": null,
-       "ecdat_names": [
-        "ECC"
-       ],
-       "ecdat_rule_ids": [
-        "ECD-SRC-PYCA-EC-002"
-       ],
-       "ecdat_match": [
-        "ec.EllipticCurvePublicKey"
-       ]
-      },
       {
        "file": "paramiko/ecdsakey.py",
        "line": 305,
@@ -10142,40 +6050,6 @@
        ],
        "ecdat_match": [
         ".exchange(peer_key)"
-       ]
-      },
-      {
-       "file": "paramiko/kex_ecdh_nist.py",
-       "line": 67,
-       "labelled_primitive": null,
-       "labelled_code": null,
-       "labelled_break_model": null,
-       "labelled_reason": null,
-       "ecdat_names": [
-        "ECC"
-       ],
-       "ecdat_rule_ids": [
-        "ECD-SRC-PYCA-EC-002"
-       ],
-       "ecdat_match": [
-        "ec.EllipticCurvePublicKey"
-       ]
-      },
-      {
-       "file": "paramiko/kex_ecdh_nist.py",
-       "line": 113,
-       "labelled_primitive": null,
-       "labelled_code": null,
-       "labelled_break_model": null,
-       "labelled_reason": null,
-       "ecdat_names": [
-        "ECC"
-       ],
-       "ecdat_rule_ids": [
-        "ECD-SRC-PYCA-EC-002"
-       ],
-       "ecdat_match": [
-        "ec.EllipticCurvePublicKey"
        ]
       },
       {
@@ -10298,6 +6172,57 @@
        ]
       },
       {
+       "file": "paramiko/pkey.py",
+       "line": 128,
+       "labelled_primitive": null,
+       "labelled_code": "\"AES-128-CBC\": {",
+       "labelled_break_model": "not-affected",
+       "labelled_reason": "no quantum-vulnerable primitive is named on this line",
+       "ecdat_names": [
+        "AES"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-JAVA-CONST-001"
+       ],
+       "ecdat_match": [
+        "\"AES-128-CBC\""
+       ]
+      },
+      {
+       "file": "paramiko/pkey.py",
+       "line": 134,
+       "labelled_primitive": null,
+       "labelled_code": "\"AES-256-CBC\": {",
+       "labelled_break_model": "not-affected",
+       "labelled_reason": "no quantum-vulnerable primitive is named on this line",
+       "ecdat_names": [
+        "AES"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-SRC-JAVA-CONST-001"
+       ],
+       "ecdat_match": [
+        "\"AES-256-CBC\""
+       ]
+      },
+      {
+       "file": "paramiko/rsakey.py",
+       "line": 137,
+       "labelled_primitive": null,
+       "labelled_code": "sig = self.key.sign(",
+       "labelled_break_model": "not-affected",
+       "labelled_reason": "no quantum-vulnerable primitive is named on this line",
+       "ecdat_names": [
+        "RSA"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-RB-SIG-001"
+       ],
+       "ecdat_match": [
+        "key.sign("
+       ]
+      },
+      {
        "file": "paramiko/rsakey.py",
        "line": 139,
        "labelled_primitive": null,
@@ -10312,6 +6237,23 @@
        ],
        "ecdat_match": [
         "padding.PKCS1v15"
+       ]
+      },
+      {
+       "file": "paramiko/rsakey.py",
+       "line": 166,
+       "labelled_primitive": null,
+       "labelled_code": "key.verify(",
+       "labelled_break_model": "not-affected",
+       "labelled_reason": "no quantum-vulnerable primitive is named on this line",
+       "ecdat_names": [
+        "RSA"
+       ],
+       "ecdat_rule_ids": [
+        "ECD-RB-SIG-001"
+       ],
+       "ecdat_match": [
+        "key.verify("
        ]
       },
       {
@@ -10748,6 +6690,23 @@
        "labelled_code": "return cls._ECDSA_CURVES.get_key_format_identifier_list()",
        "labelled_break_model": "shor",
        "labelled_reason": "P1: names the ECDSA primitive in executable code",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "paramiko/ecdsakey.py",
+       "line": 250,
+       "labelled_primitive": "EllipticCurvePrivateKey",
+       "labelled_code": "def private_key(self) -> Optional[ec.EllipticCurvePrivateKey]:",
+       "labelled_break_model": "shor",
+       "labelled_reason": "P1: names the EllipticCurvePrivateKey primitive in executable code",
        "ecdat_names": [
         "None"
        ],
@@ -11678,6 +7637,23 @@
       },
       {
        "file": "paramiko/pkey.py",
+       "line": 216,
+       "labelled_primitive": "EllipticCurvePrivateKey",
+       "labelled_code": "elif isinstance(loaded, asymmetric.ec.EllipticCurvePrivateKey):",
+       "labelled_break_model": "shor",
+       "labelled_reason": "P1: names the EllipticCurvePrivateKey primitive in executable code",
+       "ecdat_names": [
+        "None"
+       ],
+       "ecdat_rule_ids": [
+        "None"
+       ],
+       "ecdat_match": [
+        null
+       ]
+      },
+      {
+       "file": "paramiko/pkey.py",
        "line": 217,
        "labelled_primitive": "ECDSA",
        "labelled_code": "key_class = ECDSAKey",
@@ -12406,8 +8382,8 @@
       },
       "EllipticCurvePrivateKey (shor)": {
        "labelled": 3,
-       "detected": 2,
-       "recall": 0.6667
+       "detected": 0,
+       "recall": 0.0
       },
       "HMAC (grover)": {
        "labelled": 16,

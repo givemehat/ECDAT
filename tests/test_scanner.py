@@ -63,7 +63,9 @@ def test_every_rule_is_actually_executed(tmp_path, scanner):
         "ECD-SRC-PYCA-HASH-001": "self.hash_object = hashes.SHA256",
         "ECD-SRC-PYCA-HASH-002": "h = hashes.SHA1",
         "ECD-SRC-PYCA-EC-001": "_ECDSACurve(ec.SECP256R1, \"nistp256\")",
-        "ECD-SRC-PYCA-EC-002": "def private_key(self) -> ec.EllipticCurvePrivateKey:",
+        # ECD-SRC-PYCA-EC-002 was removed as a strict subset of -001: the curve was reported
+        # twice from two rule_ids, and the second carried no extra information. The dedup key
+        # includes rule_id, so two rules with the same name never collapse.
         "ECD-SRC-PYCA-ECDH-001": "kex = exchanges.ECDH()",
         "ECD-SRC-PYCA-ED-001": "k = ed25519.Ed25519PrivateKey.generate()",
         "ECD-SRC-PYCA-RSA-001": "n = rsa.RSAPrivateNumbers(p, q, d, dmp1, dmq1, iqmp)",
@@ -79,6 +81,45 @@ def test_every_rule_is_actually_executed(tmp_path, scanner):
         "ECD-SRC-SSH-MAC-001": '"hmac-sha2-256"',
         "ECD-SRC-SSH-DH-001": 'name = "diffie-hellman-group-exchange-sha256"',
         "ECD-SRC-SSH-LEGACY-001": '"3des-cbc"',
+        # --- the Java pack, added against MEASURED CryptoAPI-Bench misses (recall 0.219, FP=0).
+        # Each sample is a real call shape from the corpus, not an invented string.
+        "ECD-SRC-JAVA-LEGACY-001": 'String t = "DES/ECB/PKCS5Padding";',
+        "ECD-SRC-JAVA-KEYGEN-001": "KeyGenerator kg = KeyGenerator.getInstance(\"AES\");",
+        "ECD-SRC-JAVA-SECRETKEY-001": 'SecretKeySpec ks = new SecretKeySpec(keyBytes, "AES");',
+        "ECD-SRC-JAVA-CIPHER-001": 'Cipher c = Cipher.getInstance("Blowfish");',
+        "ECD-SRC-JAVA-MAC-001": 'Mac mac = Mac.getInstance("HmacSHA256");',
+        # MD2/MD4 only. MD5 is deliberately NOT here: ECD-SRC-MD5-001 already owns it, and
+        # matching it again published the same algorithm twice from two rule_ids.
+        "ECD-SRC-JAVA-DIGEST-001": 'MessageDigest md = MessageDigest.getInstance("MD4");',
+        "ECD-SRC-JAVA-EC-001": 'new ECGenParameterSpec("secp256r1")',
+        "ECD-SRC-JAVA-DSA-001": 'KeyPairGenerator.getInstance("DSA")',
+        "ECD-SRC-JAVA-CONST-001": 'String a = "AES/GCM/NoPadding";',
+        "ECD-SRC-JAVA-CONST-003": 'String t = "RSA/ECB/PKCS1Padding";',
+        "ECD-SRC-JAVA-CONST-004": 'String h = "SHA-256";',
+        "ECD-SRC-JAVA-WEAKRNG-001": "Random r = new java.util.Random();",
+        # --- PHP and Ruby, which previously had NO rules and were not even scanned.
+        "ECD-PHP-AES-001": "openssl_encrypt($data, 'aes-256-gcm', $key);",
+        "ECD-PHP-AES-002": "openssl_cipher_iv_length('aes-256-cbc');",
+        "ECD-PHP-KEM-001": "openssl_public_encrypt($data, $pubkey);",
+        "ECD-PHP-SIG-001": "openssl_sign($data, $sig, $privkey);",
+        "ECD-PHP-SODIUM-001": "sodium_crypto_aead_chacha20_ietf_encrypt($m, $aad, $npub, $k);",
+        "ECD-PHP-SODIUM-002": "sodium_crypto_aead_aes256gcm_encrypt($m, $aad, $npub, $k);",
+        "ECD-PHP-SIG-002": "sodium_crypto_sign_keypair();",
+        "ECD-PHP-HASH-001": "$h = hash('sha1', $data);",
+        "ECD-PHP-WEAKRNG-001": "$t = mt_rand();",
+        "ECD-RB-AES-001": "c = OpenSSL::Cipher.new('aes-256-gcm')",
+        "ECD-RB-AES-002": "c = OpenSSL::Cipher.new('chacha20')",
+        "ECD-RB-LEGACY-001": "c = OpenSSL::Cipher.new('bf-cbc')",
+        "ECD-RB-RSA-001": "k = OpenSSL::PKey::RSA.new(2048)",
+        "ECD-RB-SIG-001": "sig = key.sign_pss('SHA256', digest)",
+        "ECD-RB-EC-001": "k = OpenSSL::PKey::EC.generate('prime256v1')",
+        "ECD-RB-DH-001": "dh = OpenSSL::PKey::DH.new(2048)",
+        "ECD-RB-MAC-001": "h = OpenSSL::HMAC.digest('SHA256', key, data)",
+        "ECD-RB-HASH-001": "d = Digest::SHA1.hexdigest(data)",
+        "ECD-RB-HASH-002": "d = Digest::SHA256.hexdigest(data)",
+        # `SecureRandom.hex` deliberately does NOT match this rule -- a rule that fired on the
+        # secure generator too would make the finding meaningless.
+        "ECD-RB-WEAKRNG-001": "token = Kernel.rand(16)",
     }
     assert set(samples) == {r["id"] for r in RULES}, "a rule has no positive test"
     unreachable = []
@@ -182,6 +223,85 @@ def test_a_curve_object_alone_is_not_called_a_signature(tmp_path, scanner):
     for f in findings:
         assert f["primitive"] != "signature", (
             "a curve object does not establish that it is used for signing")
+
+
+# --------------------------------------------------------------------------------------------
+# PHP and Ruby. Both had ZERO rules AND were not in SOURCE_EXTENSIONS, so a PHP or Rails codebase
+# produced no findings whatsoever. Precision matters more here than coverage: both languages use
+# `#` as their PRIMARY comment style, so without comment stripping every rule in these packs
+# would fire on prose and the tool would report a comment as a cryptographic algorithm.
+# --------------------------------------------------------------------------------------------
+
+PHP_REAL = (
+    "<?php\n"
+    "$c = openssl_encrypt($d, 'aes-256-gcm', $k);\n"
+    "openssl_public_encrypt($d, $pub);\n"
+    "$h = hash('sha1', $d);\n"
+    "mt_rand();\n"
+)
+
+RUBY_REAL = (
+    "c = OpenSSL::Cipher.new('aes-256-gcm')\n"
+    "k = OpenSSL::PKey::RSA.new(2048)\n"
+    "d = Digest::SHA1.hexdigest(data)\n"
+    "t = Kernel.rand(16)\n"
+)
+
+# Every line names a real algorithm. Not one of them is a CALL. A tool that reports these is
+# reporting prose as an inventory, which is worse than reporting nothing.
+PHP_DECOY = (
+    "<?php\n"
+    "// encrypt with aes-256-gcm in production\n"
+    "# TODO: replace sha1 with something better\n"
+    "$aesMode = 'aes-128-cbc';\n"
+    "echo \"we use RSA and SHA-256\";\n"
+)
+
+RUBY_DECOY = (
+    "# switch to OpenSSL::Cipher.new('aes-256-gcm') later\n"
+    "=begin\n"
+    "OpenSSL::PKey::RSA.new(2048)\n"
+    "=end\n"
+    "x = 1 # Digest::SHA1.hexdigest(data)\n"
+)
+
+
+def test_php_crypto_calls_are_detected(tmp_path, scanner):
+    _write(str(tmp_path / "app.php"), PHP_REAL)
+    findings = scanner.scan_directory(str(tmp_path))
+    names = {f["name"] for f in findings}
+    assert "AES" in names and "RSA" in names, f"expected openssl_* detection, got {names}"
+    assert "PRNG" in names, "mt_rand() is not a cryptographic generator and must be flagged"
+
+
+def test_php_comments_and_prose_are_not_findings(tmp_path, scanner):
+    _write(str(tmp_path / "notes.php"), PHP_DECOY)
+    assert scanner.scan_directory(str(tmp_path)) == [], (
+        "a PHP comment or a bare cipher string in an echo is not a cryptographic call site")
+
+
+def test_ruby_crypto_calls_are_detected(tmp_path, scanner):
+    _write(str(tmp_path / "app.rb"), RUBY_REAL)
+    findings = scanner.scan_directory(str(tmp_path))
+    names = {f["name"] for f in findings}
+    assert "AES" in names and "RSA" in names, f"expected OpenSSL:: detection, got {names}"
+    aes = [f for f in findings if f["name"] == "AES"][0]
+    assert aes["key_length"] == 256, "aes-256-gcm must resolve to a 256-bit key"
+
+
+def test_ruby_comments_and_block_comments_are_not_findings(tmp_path, scanner):
+    _write(str(tmp_path / "notes.rb"), RUBY_DECOY)
+    assert scanner.scan_directory(str(tmp_path)) == [], (
+        "Ruby `#` comments and =begin/=end blocks are prose, not call sites")
+
+
+def test_secure_random_is_not_flagged_as_a_weak_generator(tmp_path, scanner):
+    """`SecureRandom` is the CORRECT call. A weak-RNG rule that also fired on it would make the
+    finding meaningless, so the negative lookbehind on the Ruby rule is load-bearing."""
+    _write(str(tmp_path / "good.rb"), "token = SecureRandom.hex(16)\n")
+    findings = scanner.scan_directory(str(tmp_path))
+    assert not [f for f in findings if f["name"] == "PRNG"], (
+        "SecureRandom must never be reported as a non-cryptographic generator")
 
 
 def test_provenance_is_recorded(tmp_path, scanner):

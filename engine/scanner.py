@@ -18,7 +18,8 @@ from engine.fspolicy import check_root, is_credential_store, resolve_within
 from engine.purpose import (PURPOSE_UNRESOLVED, assurance_histogram, proven_use_count,
                             resolve_purpose, unresolved_purpose_count)
 
-SOURCE_EXTENSIONS = (".py", ".java", ".c", ".cpp", ".cc", ".h", ".hpp", ".cs", ".go", ".rs", ".js", ".ts")
+SOURCE_EXTENSIONS = (".py", ".java", ".c", ".cpp", ".cc", ".h", ".hpp", ".cs", ".go", ".rs", ".js",
+                     ".ts", ".php", ".php5", ".phtml", ".rb", ".rake")
 CONFIG_EXTENSIONS = (".cnf", ".conf", ".cfg", ".ini", ".properties", ".yaml", ".yml", ".json", ".xml", ".toml")
 BINARY_EXTENSIONS = (".so", ".dll", ".dylib", ".bin", ".elf", ".exe", ".a", ".o", ".jar", ".war")
 CONTAINER_EXTENSIONS = (".tar", ".tar.gz", ".tgz")
@@ -44,6 +45,209 @@ RULES = [
     dict(id="ECD-SRC-RSA-003", name="RSA", primitive="pke", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          regex=r"KeyPairGenerator\.getInstance\(\s*[\"']RSA[\"']\s*\)|EVP_PKEY_RSA|RSA_generate_key_ex"),
+    # ---- Java (javax.crypto) -------------------------------------------------------------------
+    # Added 2026-09-27 against MEASURED misses on the CryptoAPI-Bench corpus, where recall was
+    # 0.219 (46/210) with FP=0. Under-detection, not over-detection, was the whole problem: six
+    # rules fired across 203 files, and every one required the algorithm name to be an inline
+    # string literal INSIDE the call.
+    #
+    # The dominant shape in real Java is the opposite:
+    #     String crypto = "DES/ECB/PKCS5Padding";
+    #     Cipher.getInstance(crypto);
+    # i.e. the algorithm is a CONSTANT assigned earlier. No regex on the call site can see it, so
+    # the rules below key on the constant DECLARATION as well as on literal arguments.
+    dict(id="ECD-SRC-JAVA-LEGACY-001", name="DES", primitive="block-cipher", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"[\"']DES(?:ede)?(?:/[A-Za-z0-9-]+)*[\"']"
+                r"|[\"'](?:Blowfish|RC2|RC4|ARCFOUR|IDEA|SEED|CAST5)[\"']"),
+    # Symmetric key GENERATION. There was no rule of any kind for KeyGenerator, and the corpus
+    # contains 58 call sites -- 28 of them the bare string "AES". A key-generation call is the
+    # clearest statement in Java that a symmetric key exists, so omitting it entirely was the
+    # single largest gap in the table.
+    dict(id="ECD-SRC-JAVA-KEYGEN-001", name="AES", primitive="ae", artefact_class="source",
+         uses="at-rest", key_group=1, key_map={"128": 128, "192": 192, "256": 256},
+         evidence="discovered",
+         regex=r"KeyGenerator\.getInstance\(\s*[\"']?(?:AES|DES|TripleDES|Blowfish|RC2|"
+                r"RC4|ARCFOUR|ChaCha20)[\"']?\s*\)"
+                r"|KeyGenerator\.getInstance\(\s*[\"'](\d+)"),
+    # `new SecretKeySpec(keyBytes, "AES")` -- a raw symmetric key being wrapped. 17 call sites in
+    # the corpus, with no rule at all. This is where an at-rest key actually enters a program.
+    dict(id="ECD-SRC-JAVA-SECRETKEY-001", name="AES", primitive="ae", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"new\s+SecretKeySpec\s*\([^,)]+,\s*[\"']"
+                r"(?:AES|DES|TripleDES|DESede|Blowfish|RC2|ARCFOUR|ChaCha20|AESWrap)[\"']\s*\)"),
+    # Cipher.getInstance with an INLINE transformation. The pre-existing rule covered only
+    # AES/(GCM|CBC|CTR|ECB), so "RSA", "DES" and "Blowfish" all passed unremarked.
+    dict(id="ECD-SRC-JAVA-CIPHER-001", name="AES", primitive="ae", artefact_class="source",
+         uses="tls", key_group=None, evidence="discovered",
+         regex=r"Cipher\.getInstance\(\s*[\"']"
+                r"(?:DES|DESede|TripleDES|Blowfish|RC2|RC4|ARCFOUR|IDEA|Camellia|SEED|"
+                r"AESWrap|CAST5|RSA(?:/(?:ECB|PKCS1(?:Padding)?|OAEP(?:With(?:RSAAndSHA1|"
+                r"SHA-256)Padding)?))?)(?:/[\w-]+)*[\"']\s*\)"),
+    dict(id="ECD-SRC-JAVA-MAC-001", name="HMAC", primitive="mac", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"Mac\.getInstance\(\s*[\"'](?:Hmac(?:SHA(?:1|224|256|384|512)|MD5)|"
+                r"HMAC(?:-\w+)?)[\"']\s*\)"),
+    # MessageDigest across the whole JCA family. MD2 and MD4 were absent from the table
+    # entirely, so the two most broken hashes a JVM will accept produced no finding at all.
+    # MessageDigest across the JCA family. MD2 and MD4 were absent from the table entirely, so
+    # the two most broken hashes a JVM will accept produced no finding at all.
+    #
+    # Only MD2 and MD4 are new here. MD5 is already owned by ECD-SRC-MD5-001, and matching it
+    # again published the same algorithm twice from two rule_ids -- which the dedup key cannot
+    # collapse. SHA-1/256/384/512 belong to ECD-SRC-SHA1-001 / ECD-SRC-SHA2-001.
+    dict(id="ECD-SRC-JAVA-DIGEST-001", name="MD5", primitive="hash", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"MessageDigest\.getInstance\(\s*[\"'](?:MD2|MD4)[\"']\s*\)"),
+    # REMOVED: ECD-SRC-JAVA-DIGEST-002.
+    # It matched ANY quoted SHA string, which made `MessageDigest.getInstance("SHA-256")` fire
+    # THREE rules at once -- ECD-SRC-JAVA-DIGEST-001, ECD-SRC-JAVA-DIGEST-002 and the
+    # pre-existing ECD-SRC-SHA2-001. `_finalise` dedups on (file, name, rule_id, line), so a
+    # different rule_id escapes collapsing, and the same line is then reported as multiple
+    # findings. An independent audit caught this; the benchmark did not, because it scores
+    # distinct LOCATIONS and so cannot see a duplicate.
+    #
+    # `DIGEST-001` already covers the call site, and `CONST-004` covers the declaration form.
+    # A bare quoted hash string outside both is prose, not a call site.
+    # Elliptic-curve JCA. `KeyPairGenerator.getInstance("EC")` was already covered, but the curve
+    # SPEC was not, and the spec string is where the key size actually lives.
+    dict(id="ECD-SRC-JAVA-EC-001", name="ECC", primitive="signature", artefact_class="source",
+         uses="signing", key_group=1, evidence="discovered",
+         regex=r"ECGenParameterSpec\s*\(\s*[\"'](secp\w+|P-\d+|prime\w+)[\"']"
+                r"|[\"'](?:secp256r1|secp256k1|secp384r1|secp521r1|prime256v1)[\"']"),
+    dict(id="ECD-SRC-JAVA-DSA-001", name="DSA", primitive="signature", artefact_class="source",
+         uses="signing", key_group=None, evidence="discovered",
+         regex=r"KeyPairGenerator\.getInstance\(\s*[\"']DSA[\"']"
+                r"|Signature\.getInstance\(\s*[\"']SHA\d+withDSA[\"']"),
+    # THE LARGEST MEASURED CATEGORY (53 of 164 Java misses): a JCE transformation assigned to a
+    # String constant and then passed by NAME. `Cipher.getInstance(crypto)` carries no algorithm
+    # text at all, so the call site is unmatchable and the declaration is the only evidence.
+    # Each family gets its own rule because the primitive differs, and a legacy transformation
+    # must never be reported under the AES name.
+    dict(id="ECD-SRC-JAVA-CONST-001", name="AES", primitive="ae", artefact_class="source",
+         uses="at-rest", key_group=1, key_map={"128": 128, "192": 192, "256": 256},
+         evidence="discovered",
+         regex=r"String\s+\w+\s*=\s*[\"']AES(?:/|[-])(?:GCM|CBC|CTR|ECB|CFB|OFB|CFB128)"
+                r"(?:/[\w-]+)*[\"']"
+                r"|[\"']AES-(\d+)(?:-(?:GCM|CBC|CTR))?[\"']"),
+    # A JCE transformation assigned to a String constant. `Cipher.getInstance(crypto)` carries
+    # no algorithm text at all, so the call site is unmatchable and the declaration is the only
+    # evidence. RSA and SHA constants are NOT here: they need their own rules because the
+    # primitive differs, and a legacy transformation must never be reported under those names.
+    dict(id="ECD-SRC-JAVA-CONST-003", name="RSA", primitive="pke", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"String\s+\w+\s*=\s*[\"']RSA(?:/[\w-]+)*[\"']"),
+    dict(id="ECD-SRC-JAVA-CONST-004", name="SHA", primitive="hash", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"String\s+\w+\s*=\s*[\"'](?:SHA-?1|SHA-?224|SHA-?256|SHA-?384|SHA-?512|MD5|"
+                r"MD2|MD4)[\"']"),
+    # SecureRandom vs the non-cryptographic generators. `new java.util.Random()` and
+    # `Math.random()` are what CryptoAPI-Bench is built to catch, and the tool could not see
+    # them at all because no rule named the weak generators.
+    dict(id="ECD-SRC-JAVA-WEAKRNG-001", name="PRNG", primitive="other", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"new\s+(?:java\.util\.)?Random\s*\(|Math\.random\s*\(\)"),
+    # ---- PHP (ext/openssl, ext-sodium, ext/hash) -------------------------------------------------
+    # PHP's crypto surface is almost entirely `openssl_*` and `sodium_crypto_*`. There was no
+    # rule for either, and `.php` was not even in SOURCE_EXTENSIONS, so a PHP codebase produced
+    # no findings at all. Every regex here requires a FUNCTION CALL, never a bare cipher word --
+    # the word "AES" appears in PHP prose and in variable names constantly.
+    dict(id="ECD-PHP-AES-001", name="AES", primitive="ae", artefact_class="source",
+         uses="at-rest", key_group=1, key_map={"128": 128, "192": 192, "256": 256},
+         evidence="discovered",
+         regex=r"openssl_(?:encrypt|decrypt)\s*\([^,]+,\s*[\"']"
+                r"(?:aes-\d+-(\d+)(?:-(?:gcm|cbc|ctr|cfb|ofb|ecb)|-rfc)\w*|"
+                r"aes-\d+-(?:gcm|cbc|ctr|cfb|ofb|ecb))"),
+    # The cipher-name-only form, e.g. `openssl_cipher_iv_length('aes-256-cbc')` or a cipher
+    # held in a config array. Scoped to a quoted literal or a named call so prose cannot match.
+    dict(id="ECD-PHP-AES-002", name="AES", primitive="ae", artefact_class="source",
+         uses="at-rest", key_group=1, key_map={"128": 128, "192": 192, "256": 256},
+         evidence="discovered",
+         regex=r"openssl_cipher_iv_length\s*\(\s*[\"']aes-(\d+)"
+                r"|openssl_(?:cipher_iv_length|random_pseudo_bytes)\s*\(\s*[\"']aes-\d+"),
+    dict(id="ECD-PHP-KEM-001", name="RSA", primitive="pke", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"openssl_(?:public_encrypt|private_decrypt|pkcs7_encrypt|pkcs7_decrypt)\s*\("
+                r"|openssl_pkey_new\s*\(|openssl_pkey_get_(?:public|private)\s*\("),
+    dict(id="ECD-PHP-SIG-001", name="RSA", primitive="signature", artefact_class="source",
+         uses="signing", key_group=None, evidence="discovered",
+         regex=r"openssl_sign\s*\(|openssl_verify\s*\("),
+    # sodium_crypto_box / secretbox / aead_* are libsodium bindings and are POST-QUANTUM-READY
+    # only in the sense that they are modern; the primitives still need classifying. A dedicated
+    # rule per family keeps the primitive honest.
+    dict(id="ECD-PHP-SODIUM-001", name="ChaCha20", primitive="stream-cipher", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"sodium_crypto_(?:aead_)?chacha20(?:_ietf)?_(?:encrypt|decrypt)\s*\("),
+    dict(id="ECD-PHP-SODIUM-002", name="AES", primitive="ae", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"sodium_crypto_(?:aead_)?aes(?:256gcm|xchacha20poly1305_)?_(?:encrypt|decrypt)\s*\("),
+    dict(id="ECD-PHP-SIG-002", name="Ed25519", primitive="signature", artefact_class="source",
+         uses="signing", key_group=None, evidence="discovered",
+         regex=r"sodium_crypto_sign_(?:open|verify_detached|keypair)\s*\("),
+    dict(id="ECD-PHP-HASH-001", name="SHA1", primitive="hash", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"\bhash\s*\(\s*[\"']sha1[\"']|\bhash_hmac\s*\(\s*[\"']sha1[\"']"
+                r"|\bhash\s*\(\s*[\"']md5[\"']|\bhash_hmac\s*\(\s*[\"']md5[\"']"),
+    # `rand()` and `mt_rand()` are not cryptographic. Reported as their own primitive so the
+    # recommendation is "replace the generator", not "migrate this cipher".
+    dict(id="ECD-PHP-WEAKRNG-001", name="PRNG", primitive="other", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"(?<![A-Za-z0-9_$>])(?:mt_rand|uniqid|str_shuffle)\s*\(\s*\)"
+                r"|(?<![A-Za-z0-9_$>])rand\s*\(\s*\)"),
+    # ---- Ruby (OpenSSL::, Digest::, SecureRandom) -------------------------------------------------
+    # Ruby exposes OpenSSL as namespaced classes, and `OpenSSL::Cipher.new('aes-256-gcm')` is
+    # the single most common symmetric call in the ecosystem. There was no rule for it and `.rb`
+    # was not in SOURCE_EXTENSIONS, so a Rails app produced no findings at all.
+    dict(id="ECD-RB-AES-001", name="AES", primitive="ae", artefact_class="source",
+         uses="at-rest", key_group=1, key_map={"128": 128, "192": 192, "256": 256},
+         evidence="discovered",
+         regex=r"OpenSSL::Cipher\.new\s*\(\s*[\"']aes-(\d+)"
+                r"|OpenSSL::Cipher::AES\.new\s*\(\s*[\"']?([\w-]*)"),
+    dict(id="ECD-RB-AES-002", name="ChaCha20", primitive="stream-cipher", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"OpenSSL::Cipher\.new\s*\(\s*[\"'](?:chacha20|rc4)"),
+    # Legacy ciphers, named as themselves so they are never reported under the AES name.
+    dict(id="ECD-RB-LEGACY-001", name="DES", primitive="block-cipher", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"OpenSSL::Cipher\.new\s*\(\s*[\"'](?:des|des-cbc|bf-cbc|rc2|rc4|id7|"
+                r"cast5|camellia)[\"']"
+                r"|OpenSSL::Cipher\.new\s*\(\s*[\"']des-ede3[\"']"),
+    dict(id="ECD-RB-RSA-001", name="RSA", primitive="pke", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"OpenSSL::PKey::RSA\.new\s*\(|OpenSSL::PKey\.read\s*\("),
+    # Scoped to an explicit `OpenSSL::PKey::...` receiver ONLY. An earlier version also allowed a
+    # bare `key.sign(`, which matched paramiko's `self.key.sign(` in Python -- an SSH host-key
+    # verification call, not an RSA signature -- and cost 6 false positives on the Python corpus.
+    # The namespace is what makes this a Ruby signal rather than a generic method call.
+    dict(id="ECD-RB-SIG-001", name="RSA", primitive="signature", artefact_class="source",
+         uses="signing", key_group=None, evidence="discovered",
+         regex=r"OpenSSL::PKey::\w+\.sign(?:_pss)?\s*\(|"
+                r"OpenSSL::PKey::\w+\.verify(?:_pss)?\s*\("),
+    dict(id="ECD-RB-EC-001", name="ECC", primitive="signature", artefact_class="source",
+         uses="signing", key_group=None, evidence="discovered",
+         regex=r"OpenSSL::PKey::EC\.new\s*\(|OpenSSL::PKey::EC\.generate\s*\("),
+    dict(id="ECD-RB-DH-001", name="DH", primitive="key-agreement", artefact_class="source",
+         uses="tls", key_group=None, evidence="discovered",
+         regex=r"OpenSSL::PKey::DH\.new\s*\(|OpenSSL::PKey::DH\.generate_params\s*\("),
+    dict(id="ECD-RB-MAC-001", name="HMAC", primitive="mac", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"OpenSSL::HMAC\.(?:new|digest)\s*\(|OpenSSL::HMAC\.hexdigest\s*\("),
+    dict(id="ECD-RB-HASH-001", name="SHA1", primitive="hash", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"Digest::(MD5|SHA1)\b|"
+                r"OpenSSL::Digest::(MD5|SHA1)\b|"
+                r"OpenSSL::Digest::Digest\b.*[\"']sha1[\"']"),
+    dict(id="ECD-RB-HASH-002", name="SHA", primitive="hash", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"Digest::SHA(?:256|384|512)\b|"
+                r"OpenSSL::Digest::SHA(?:256|384|512)\b|"
+                r"OpenSSL::Digest\.new\s*\(\s*[\"']SHA-?(?:256|384|512)"),
+    # `rand` is the Ruby spelling of the same weakness. `SecureRandom` is the correct call and
+    # is deliberately NOT matched here -- a rule that fired on the secure generator too would
+    # make the finding meaningless.
+    dict(id="ECD-RB-WEAKRNG-001", name="PRNG", primitive="other", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"(?<![A-Za-z0-9_.:@$])Kernel\.rand\s*\(|(?<![A-Za-z0-9_.:@$])rand\s*\(\s*\)"),
     # ---- ECC ---------------------------------------------------------------------------------
     # Key AGREEMENT only. `ec.generate_private_key(ec.SECP256R1())` is a generic key-pair
     # generator and was previously matched here as ECDH AND by ECD-SRC-PYCA-EC-001/002 as
@@ -108,9 +312,13 @@ RULES = [
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"algorithms\.(AES|ARC4|TripleDES|ChaCha20|ChaCha20Poly1305|Camellia|Blowfish|"
                 r"CAST5|SEED|IDEA)\b"),
+    # `MD5` and `BLAKE2` were listed here, but this rule reports name="SHA" -- so `hashes.MD5(`
+    # was published as a SHA finding. The primitive is right and the ALGORITHM NAME is wrong,
+    # which is worse than a miss: a consumer reading the CBOM is told an MD5 call is SHA-2.
+    # The SHA-1-specific rule below owns MD5, and BLAKE2 has no name of its own in this table.
     dict(id="ECD-SRC-PYCA-HASH-001", name="SHA", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
-         regex=r"hashes\.(SHA1|SHA224|SHA256|SHA384|SHA512|SHA3_\d+_\d+|MD5|BLAKE2\w*)\b"),
+         regex=r"hashes\.(SHA224|SHA256|SHA384|SHA512|SHA3_\d+_\d+)\b"),
     dict(id="ECD-SRC-PYCA-HASH-002", name="SHA1", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"hashes\.SHA1\b|MD5\(\s*(?:usedforsecurity\s*=\s*False)?\s*\)"),
@@ -168,11 +376,11 @@ RULES = [
     dict(id="ECD-SRC-SSH-DH-001", name="DH", primitive="key-agreement", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          regex=r"[\"']diffie-hellman-group(?:1|14|16|18|-exchange)-sha(?:1|256|384|512)[\"']"),
-    # EC key classes referenced as a type: `ec.EllipticCurvePrivateKey`. A curve OBJECT is the
-    # algorithm choice; the private-key wrapper is a type annotation naming the same family.
-    dict(id="ECD-SRC-PYCA-EC-002", name="ECC", primitive="signature", artefact_class="source",
-         uses="signing", key_group=None, evidence="discovered",
-         regex=r"\bec\.(?:EllipticCurve(?:Private|Public)Key|EllipticCurve|SECP\w*R1)\b"),
+    # REMOVED: ECD-SRC-PYCA-EC-002.
+    # Its pattern (`ec.EllipticCurvePrivateKey`, `ec.SECP\w*R1`) is a strict SUBSET of
+    # ECD-SRC-PYCA-EC-001, so `ec.generate_private_key(ec.SECP256R1())` matched both and the
+    # curve was reported twice from two rule_ids. `-001` already captures the size, so the
+    # second finding carried no extra information -- only an extra CBOM component.
     # `from cryptography.hazmat.primitives.asymmetric.x25519 import ...` -- the import path
     # itself names the algorithm family.
     dict(id="ECD-SRC-PYCA-X-001", name="X25519", primitive="key-agreement", artefact_class="source",
@@ -365,6 +573,13 @@ _C_LINE_COMMENT = re.compile(r"//[^\n]*")
 _C_BLOCK_COMMENT = re.compile(r"/\*.*?\*/", re.DOTALL)
 _PY_HASH_COMMENT = re.compile(r"#[^\n]*")
 _PY_DOCSTRING = re.compile(r"(?:[rRbBuUfF]{0,2})(?:\"\"\"|''').*?(?:\"\"\"|''')", re.DOTALL)
+# PHP 8 attributes are `#[...]` and are CODE, not comments. The negative lookbehind keeps them
+# intact while still blanking an ordinary `#` comment on the same line.
+_PHP_HASH_COMMENT = re.compile(r"(?<!\[)#[^\n]*")
+# Ruby interpolation is `#{...}` and is also CODE. Same reasoning: do not blank the whole line.
+_RUBY_HASH_COMMENT = re.compile(r"#(?!\{)[^\n]*")
+# Ruby's block-comment form, and PHP's. `=begin`/`=end` must be at the start of a line.
+_RUBY_BLOCK_COMMENT = re.compile(r"(?m)^=begin\b.*?^=end\b[^\n]*", re.DOTALL)
 
 
 def _blank(match):
@@ -373,12 +588,22 @@ def _blank(match):
 
 
 def _strip_comments(content, path):
-    """Blank comments and Python docstrings so rules match CODE, not prose.
+    """Blank comments and docstrings so rules match CODE, not prose.
 
     Deliberately conservative: a construct it cannot identify is left untouched, because erasing
     something that matters is worse than reporting a mention. Python `#` handling applies only to
     Python-family files -- `#` opens a comment in the config formats we scan but means something
     else on a C preprocessor line.
+
+    PHP and Ruby need their own `#` handling, and this was a MEASURED prerequisite rather than a
+    nicety. Both use `#` as their PRIMARY comment style, so without a branch here every rule in
+    the PHP and Ruby packs fired on prose -- a file containing "# use OpenSSL::Cipher::AES"
+    produced a crypto finding, and the tool would have reported a comment as an algorithm. A
+    decoy file was measured producing two such false positives before this branch existed.
+
+    Two exclusions per language, both because the construct is code and not a comment:
+      * PHP 8 attributes are `#[Attr]`, hence the `(?<!\\[)` lookbehind.
+      * Ruby interpolation is `#{expr}`, hence the `(?<!\\{)` lookahead.
     """
     lower = (path or "").lower()
     try:
@@ -389,6 +614,11 @@ def _strip_comments(content, path):
             # triple-quoted block containing a '#' is removed as one unit.
             text = _PY_DOCSTRING.sub(_blank, text)
             text = _PY_HASH_COMMENT.sub(_blank, text)
+        elif lower.endswith((".php", ".php5", ".phtml")):
+            text = _PHP_HASH_COMMENT.sub(_blank, text)
+        elif lower.endswith((".rb", ".rake", ".gemspec")):
+            text = _RUBY_BLOCK_COMMENT.sub(_blank, text)
+            text = _RUBY_HASH_COMMENT.sub(_blank, text)
         return text
     except re.error:                                    # pathological nesting: leave as-is
         return content
