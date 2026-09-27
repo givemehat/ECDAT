@@ -459,7 +459,13 @@ def auditor_rows(records) -> list:
             "Z (y)": risk.get("z"),
             "Margin": risk.get("margin"),
             "HNDL now": "YES" if risk.get("hndl_exposed") else "",
-            "Tier at Z=5/10/15": " / ".join(str(band.get(f"Z={z}", "-")) for z in (5, 10, 15)),
+            # Read the Z values FROM the band, not from a hardcoded (5, 10, 15). The engine now
+            # centres the band on the caller's Z, so at Z=40 the keys are Z=35/40/45 -- and
+            # probing (5, 10, 15) rendered three dashes for a band that was actually populated,
+            # while `z_stable` still said "yes". A sensitivity column that displays nothing
+            # while claiming stability is worse than no column.
+            "Tier at Z": " / ".join(str(v) for v in band.values()) if band else "not assessed",
+            "Z values": ", ".join(sorted(band, key=lambda k: float(k.split("=")[1]))) or "n/a",
             "Stable across Z": "yes" if risk.get("z_stable", True) else "FLIPS",
             # A string, not a number: mixing "" and 2048 in one column makes the table
             # unserialisable, and "not stated" is a more honest cell than an empty one.

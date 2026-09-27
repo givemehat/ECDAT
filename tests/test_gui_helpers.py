@@ -117,10 +117,32 @@ def test_queue_puts_the_human_review_items_first():
 
 def test_auditor_rows_carry_the_inputs_not_just_the_verdict():
     row = auditor_rows(_rate([SIGNING_RSA]))[0]
-    for column in ("X (y)", "Y (y)", "Z (y)", "Margin", "Tier at Z=5/10/15",
+    # "Tier at Z=5/10/15" became "Tier at Z" plus a "Z values" column. The hardcoded label
+    # asserted a fixed 5/10/15 range, but the engine now centres the sensitivity band on the
+    # CALLER's Z, so at Z=40 the band is 35/40/45. A column whose name promises Z values the
+    # table does not contain is a false claim about the analysis, not a label.
+    for column in ("X (y)", "Y (y)", "Z (y)", "Margin", "Tier at Z", "Z values",
                    "Stable across Z", "Rule", "Location"):
-        assert column in row
+        assert column in row, "auditor table must carry %r" % column
     assert row["Location"].endswith("keys.py:9")
+
+
+def test_auditor_z_columns_agree_with_the_band_the_engine_produced():
+    """The regression test for the hardcoded (5, 10, 15).
+
+    At a non-default Z the engine emits keys like Z=35/40/45. The table used to probe
+    (5, 10, 15) against those keys, found nothing, and rendered three dashes -- while
+    "Stable across Z" still said "yes". A sensitivity column that displays nothing while
+    claiming stability is worse than no column at all.
+    """
+    # `_rate` is the module's own enrich helper, so purpose and assurance are populated exactly
+    # as they are in the real pipeline. The z it is given becomes the Z the band is centred on.
+    row = auditor_rows(_rate([SIGNING_RSA], z_years=40))[0]
+    assert "-" * 3 not in row["Tier at Z"], (
+        "a populated band must not render as dashes: %r" % row["Tier at Z"])
+    probed = {float(v.split("=")[-1]) for v in row["Z values"].split(",") if v.strip()}
+    assert 40.0 in probed, (
+        "the table must show the Z values the engine actually evaluated, got %s" % probed)
 
 
 def test_evidence_needed_is_specific_to_the_primitive_not_generic():

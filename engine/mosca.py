@@ -378,10 +378,24 @@ def _grover_effective_bits(name, key_length):
         return 28
     if "MD5" in upper:
         return 32
-    if "SHA1" in upper or "SHA-1" in upper:
+    if "SHA-1" in upper or upper.endswith("SHA1") or "-SHA1" in upper:
         return 40
     if "SHA" in upper:
-        return int(key_length) // 2 if key_length else 128   # SHA-256 pre-image ~128
+        # NO hardcoded 128 fallback. `key_length` absent means the digest is unmeasured, and
+        # returning 128 invented a confident number that then crossed the >= 128 threshold in
+        # `_tier` and produced a LOW verdict -- the SAFE side of the boundary. An unmeasured
+        # hash was therefore rated LOW by default. `None` propagates instead, and the tier
+        # logic treats an unknown strength as unknown rather than as adequate.
+        #
+        # The digest family is still inferable from the NAME for the standard families, so a
+        # finding that says "SHA-384" without a key_length is rated rather than abandoned.
+        for bits, tokens in ((512, ("SHA512", "SHA-512")), (384, ("SHA384", "SHA-384")),
+                             (256, ("SHA256", "SHA-256")), (224, ("SHA224", "SHA-224"))):
+            if any(t in upper for t in tokens):
+                return bits // 2
+        if "SHA3" in upper or "SHAKE" in upper or "BLAKE2" in upper:
+            return 128      # these families are defined at 256 and above
+        return int(key_length) // 2 if key_length else None
     return None
 
 

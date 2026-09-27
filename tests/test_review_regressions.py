@@ -16,6 +16,7 @@ the test exists.
 
 Run: python -m pytest tests/test_review_regressions.py -v
 """
+import json
 import os
 import re
 import sys
@@ -24,7 +25,9 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from engine.cbom import is_pqc
+import engine.mosca as mosca
+from engine.cbom import (CLASSICAL_STRENGTH_BITS, _algorithm_properties, _classical_strength,
+                         generate_cbom, is_pqc)
 from engine.gui_helpers import (DEADLINE_NO_POLICY, DEADLINE_OVERRUN, DEADLINE_UNRATED,
                                 DEADLINE_WITHIN, deadline_countdown, deadline_verdict,
                                 late_records, queue_rows, unrated_records)
@@ -535,6 +538,119 @@ def test_policy_choices_are_constrained_on_every_subparser():
             assert "choices=" in line, (
                 "--policy must constrain its values: an unrecognised policy yields a null "
                 "deadline, and a null deadline never reports anything as late")
+
+
+# --------------------------------------------------------------------------------------------
+# A TABLE THAT CANNOT BE READ: CLASSICAL_STRENGTH_BITS was 8/47 dead
+# --------------------------------------------------------------------------------------------
+
+def test_every_strength_table_entry_is_actually_reachable():
+    """Ed25519 and Ed448 were UNREACHABLE, so both published `classicalSecurityLevel: 0`.
+
+    The table is keyed in SP 800-57 canonical casing ("Ed25519", "SLH-DSA-SHA2-128f") but the
+    lookup upper-cased the NAME before probing it, and the substring fallback was
+    case-sensitive too. 8 of 47 entries could never match -- including two Shor-broken,
+    NIST-registered algorithms, which therefore read as having *no* security.
+
+    `MD5` is excluded because its correct value IS 0: it is broken, and a table that reported
+    it as 128-bit would be the bug, not the fix. So the test asserts a reachable ENTRY, not a
+    non-zero one.
+    """
+    dead = [k for k, v in CLASSICAL_STRENGTH_BITS.items()
+            if v != 0 and _classical_strength({"name": k}, "signature") == 0]
+    assert not dead, ("these table entries can never be matched, so they are silently wrong: %s"
+                      % dead)
+
+
+@pytest.mark.parametrize("name,expected", [("Ed25519", 128), ("Ed448", 224),
+                                            ("SLH-DSA-SHA2-128f", 128),
+                                            ("SLH-DSA-SHA2-256s", 256)])
+def test_mixed_case_canonical_names_resolve(name, expected):
+    assert _classical_strength({"name": name}, "signature") == expected
+
+
+# --------------------------------------------------------------------------------------------
+# A COMPONENT THAT ASSERTS AND DENIES THE SAME FIELD
+# --------------------------------------------------------------------------------------------
+
+def test_a_component_never_claims_a_nist_level_and_denies_one_is_derivable():
+    """One component emitted nistQuantumSecurityLevel=0 AND "no NIST category is derivable".
+
+    The level was computed from the NORMALISED primitive ("digital-signature" -> "signature")
+    while the gap note was computed from the RAW one, which is not a table member. Four of
+    twenty-two components carried both. A consumer reading the two lines gets opposite answers
+    to the same question.
+    """
+    f = {"name": "ECDSA", "primitive": "digital-signature", "file": "a.py", "line": 1,
+         "key_length": 256}
+    f["risk"] = calculate_risk(f, policy="india_dst_nqm")
+    doc = json.loads(generate_cbom([f], enriched=True))
+    comp = doc["components"][0]
+    ap = comp["cryptoProperties"]["algorithmProperties"]
+    props = {p["name"]: p["value"] for p in comp.get("properties", [])}
+    has_level = "nistQuantumSecurityLevel" in ap
+    has_gap = "ecd:nist_level_gap" in props
+    assert not (has_level and has_gap), (
+        "the document must not both state a level and say none is derivable")
+
+
+def test_a_shor_broken_algorithm_is_marked_even_when_the_primitive_is_unknown():
+    """An ECC finding arrives with primitive="unknown" from the scanner.
+
+    `_nist_quantum_level` could not classify it and omitted the field, while the same
+    record's risk block said `break_model=broken-by-Shor`. The document was denying the
+    quantum marking the engine had just established, for the most common ECC shape in Python.
+    """
+    f = {"name": "ECC", "primitive": "unknown", "file": "a.py", "line": 1}
+    f["risk"] = calculate_risk(f, policy="india_dst_nqm")
+    assert f["risk"]["break_model"] == "broken-by-Shor"
+    doc = json.loads(generate_cbom([f], enriched=True))
+    ap = doc["components"][0]["cryptoProperties"]["algorithmProperties"]
+    assert ap.get("nistQuantumSecurityLevel") == 0, (
+        "a Shor-broken algorithm must be marked 0 in the document, whatever the primitive is")
+
+
+# --------------------------------------------------------------------------------------------
+# ABSENT MEASUREMENT READING AS A PASS
+# --------------------------------------------------------------------------------------------
+
+def test_an_unmeasured_hash_is_not_published_as_128_bit():
+    """MD5 returned 0 from `_classical_strength` and a fallback published it as 128.
+
+    0 means "I could not determine this"; the fallback converted that absence into a
+    confident number. Inventing a measurement is the failure mode this project exists to
+    avoid, and it happened in the fix for a different instance of the same idea.
+    """
+    for name in ("MD5", "BLAKE2b", "unknown-digest"):
+        assert _algorithm_properties({"name": name}, "hash").get(
+            "classicalSecurityLevel") != 128, (
+            "%s was not measured and must not be published as 128-bit" % name)
+
+
+def test_an_unmeasured_hash_is_not_rated_LOW_by_default():
+    """`_grover_effective_bits` returned a hardcoded 128 for a SHA with no key_length.
+
+    128 crossed the `>= 128` threshold in `_tier` and produced LOW -- the SAFE side of the
+    boundary. An unmeasured digest was therefore rated safe by default, while the CBOM for the
+    same component said no category could be derived.
+    """
+    assert mosca._grover_effective_bits("SHA", None) is None, (
+        "an unmeasured digest must not be given an invented strength")
+    risk = calculate_risk({"name": "SHA", "primitive": "hash", "uses": "at-rest"})
+    assert risk.get("grover_effective_bits") in (None, 0), (
+        "the invented 128 leaked into the published verdict: %r" % risk.get("grover_effective_bits"))
+
+
+@pytest.mark.parametrize("name,expected", [("SHA-256", 128), ("SHA384", 192),
+                                            ("SHA-512", 256), ("SHA224", 112)])
+def test_a_named_digest_family_is_still_rated(name, expected):
+    """The counterpart, so `None` cannot be reached by refusing every hash.
+
+    The digest size is often in the NAME, so a family that identifies itself is rated rather
+    than abandoned. The expected values are HALF the digest, which is what Grover costs:
+    SHA-512 -> 256, not 128.
+    """
+    assert mosca._grover_effective_bits(name, None) == expected
 
 
 # --------------------------------------------------------------------------------------------

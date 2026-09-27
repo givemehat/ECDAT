@@ -310,9 +310,17 @@ def _classical_strength(finding, primitive):
     """
     name = str(finding.get("name", "") or "")
     upper = name.upper()
-    if upper in CLASSICAL_STRENGTH_BITS:
-        return CLASSICAL_STRENGTH_BITS[upper]
-    for key, bits in CLASSICAL_STRENGTH_BITS.items():
+    # The table is keyed in SP 800-57 canonical casing ("Ed25519", "SLH-DSA-SHA2-128f"), but
+    # `upper` is uppercase, so every mixed-case key was UNREACHABLE and the substring fallback
+    # was case-sensitive too. Measured before the fix: 8 of 47 entries dead, including Ed25519
+    # and Ed448 -- both Shor-broken, both NIST-registered -- which were therefore published as
+    # `classicalSecurityLevel: 0` ("no security"). A table that silently cannot be read is
+    # worse than no table.
+    if name in CLASSICAL_STRENGTH_BITS:
+        return CLASSICAL_STRENGTH_BITS[name]
+    if upper in CLASSICAL_STRENGTH_BITS_UPPER:
+        return CLASSICAL_STRENGTH_BITS_UPPER[upper]
+    for key, bits in CLASSICAL_STRENGTH_BITS_UPPER.items():
         if key in upper:
             return bits
     key_bits = _coerce_int(finding.get("key_length"))
@@ -355,6 +363,12 @@ def _crypto_functions(finding, primitive):
     return list(fns)
 
 
+# Case-folded view of the table above, built once at import. Without it the mixed-case canonical
+# spellings ("Ed25519", "Ed448", "SLH-DSA-SHA2-128f") could never be matched, because the lookup
+# upper-cases the NAME before probing a table keyed in canonical casing.
+CLASSICAL_STRENGTH_BITS_UPPER = {k.upper(): v for k, v in CLASSICAL_STRENGTH_BITS.items()}
+
+
 def _algorithm_properties(finding, primitive):
     props = {
         "primitive": primitive,
@@ -377,13 +391,33 @@ def _algorithm_properties(finding, primitive):
     # classicalSecurityLevel is EQUIVALENT SECURITY IN BITS (NIST SP 800-57), not key length.
     props["classicalSecurityLevel"] = _classical_strength(finding, primitive)
     if not props["classicalSecurityLevel"] and primitive == "hash":
-        props["classicalSecurityLevel"] = 128
+        # REMOVED: this published an unmeasured hash as 128-bit. `_classical_strength` returned
+        # 0 for MD5 and BLAKE2b -- "I could not determine this" -- and the fallback turned that
+        # absence into a confident 128, which is the safe-looking direction and therefore the
+        # dangerous one. An unknown strength is now reported as unknown (the property is simply
+        # absent) rather than invented.
+        props["classicalSecurityLevel"] = 0
     # 0 is a load-bearing claim in this field -- "a CRQC breaks this" -- so it is emitted only
     # when the tool can justify it. `_nist_quantum_level` returns None for a category it does
     # not know, and an unknown category is OMITTED rather than published as 0. Emitting 0 for
     # every symmetric cipher, MAC, KDF and unrecognised primitive was how AES-256 and RSA came
     # to share a value that means opposite things.
     nist_level = _nist_quantum_level(finding, primitive)
+    if nist_level is None:
+        # The primitive alone is not always enough. `engine/mosca.quantum_break_model` decides
+        # Shor vs Grover vs unaffected from the ALGORITHM NAME, and it knows about named curves
+        # (secp256k1, P-384, brainpool, SM2) that the primitive enum cannot express. An ECC
+        # finding that arrives with primitive="unknown" was therefore emitted with no
+        # nistQuantumSecurityLevel at all, while the SAME record's risk block said
+        # `break_model=broken-by-Shor`. The document denied the quantum marking the engine had
+        # just established. Where mosca says Shor-broken, 0 is the correct value regardless of
+        # how the primitive was labelled.
+        try:
+            from engine.mosca import quantum_break_model
+            if quantum_break_model(finding.get("name", ""), primitive) == "broken-by-Shor":
+                nist_level = QUANTUM_BROKEN
+        except Exception:      # never let a cross-module import break CBOM generation
+            pass
     if nist_level is not None:
         props["nistQuantumSecurityLevel"] = nist_level
     return props
@@ -429,7 +463,14 @@ def _ecd_properties(finding, risk, recommendation):
     # Say WHY nistQuantumSecurityLevel is missing. A consumer that sees the field absent cannot
     # distinguish "this asset was assessed and has no category" from "ECDAT never looked", and
     # the first reading of an absent field is usually the optimistic one.
-    gap = nist_level_gap(finding, finding.get("primitive", ""))
+    # The gap reason must be computed from the SAME primitive the LEVEL was computed from.
+    # `_algorithm_properties` normalises through PRIMITIVE_ENUM, but this was called with the raw
+    # `finding["primitive"]`. So a "digital-signature" finding emitted
+    # nistQuantumSecurityLevel=0 (because it normalises to "signature", a known member) AND the
+    # text "no NIST category is derivable" (because the raw string is not a member). One
+    # component, two opposite claims about the same field; 4 of 22 components carried both.
+    # Normalising here makes the two answers agree by construction.
+    gap = nist_level_gap(finding, _canonical_primitive(finding.get("primitive", "")))
     if gap:
         out.append({"name": f"{PROPERTY_NS}:nist_level_gap", "value": gap})
 
