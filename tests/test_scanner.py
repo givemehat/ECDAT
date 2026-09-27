@@ -122,18 +122,28 @@ def test_every_rule_is_actually_executed(tmp_path, scanner):
         # `SecureRandom.hex` deliberately does NOT match this rule -- a rule that fired on the
         # secure generator too would make the finding meaningless.
         "ECD-RB-WEAKRNG-001": "token = Kernel.rand(16)",
-            "ECD-KEY-PEM-001": "-----BEGIN RSA PRIVATE KEY-----",
-            "ECD-KEY-PGP-001": "-----BEGIN PGP PRIVATE KEY BLOCK-----",
-            "ECD-PROTO-TLS-001": "ssl_protocols TLSv1.2",
-            "ECD-CLOUD-KMS-001": "boto3.client('kms')",
-            "ECD-CLOUD-AZURE-001": "azure.keyvault",
-            "ECD-CLOUD-GCP-001": "google-cloud-kms",
-            "ECD-HARDWARE-PKCS11-001": "SunPKCS11",
+        "ECD-KEY-PEM-001": "-----BEGIN RSA PRIVATE KEY-----",
+        "ECD-KEY-PGP-001": "-----BEGIN PGP PRIVATE KEY BLOCK-----",
+        # The Apache directive, which is what this rule uniquely owns. The old sample was
+        # `ssl_protocols TLSv1.2`, which this rule deliberately no longer matches: that form is
+        # ECD-CFG-TLS-001's, and matching both made one nginx line produce two protocol
+        # components that _finalise cannot collapse.
+        "ECD-PROTO-TLS-001": "SSLProtocol all -SSLv3",
+        "ECD-CLOUD-KMS-001": "boto3.client('kms')",
+        "ECD-CLOUD-AZURE-001": "azure.keyvault",
+        "ECD-CLOUD-GCP-001": "google-cloud-kms",
+        "ECD-HARDWARE-PKCS11-001": "SunPKCS11",
     }
     assert set(samples) == {r["id"] for r in RULES}, "a rule has no positive test"
+    # A rule declared `artefact_class="config"` only fires for a file the scanner recognises as
+    # configuration. Writing every sample to `<rule_id>.txt.py` made the config rules
+    # unreachable while the reachability test still passed for the rest, which is how a rule
+    # could be shipped that never matches anything.
+    config_rules = {r["id"] for r in RULES if r["artefact_class"] == "config"}
     unreachable = []
     for rule_id, snippet in samples.items():
-        p = _write(str(tmp_path / f"{rule_id}.txt.py"), snippet)
+        suffix = ".conf" if rule_id in config_rules else ".txt.py"
+        p = _write(str(tmp_path / f"{rule_id}{suffix}"), snippet)
         fired = {f["rule_id"] for f in scanner._match_rules(p, snippet)}
         if rule_id not in fired:
             unreachable.append(rule_id)

@@ -26,13 +26,14 @@ import pytest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import engine.mosca as mosca
-from engine.cbom import (CLASSICAL_STRENGTH_BITS, _algorithm_properties, _classical_strength,
-                         generate_cbom, is_pqc)
+from engine.cbom import (CLASSICAL_STRENGTH_BITS, _algorithm_properties, _canonical_primitive,
+                         _classical_strength, generate_cbom, is_pqc)
 from engine.gui_helpers import (DEADLINE_NO_POLICY, DEADLINE_OVERRUN, DEADLINE_UNRATED,
                                 DEADLINE_WITHIN, deadline_countdown, deadline_verdict,
                                 late_records, queue_rows, unrated_records)
 from engine.mosca import (POLICY_DEADLINES, calculate_risk, quantum_break_model,
                           resolve_policy_deadline)
+from engine.purpose import resolve_assurance
 from engine.recommender import get_pqc_recommendation
 from engine.scanner import RULES
 
@@ -651,6 +652,122 @@ def test_a_named_digest_family_is_still_rated(name, expected):
     SHA-512 -> 256, not 128.
     """
     assert mosca._grover_effective_bits(name, None) == expected
+
+
+# --------------------------------------------------------------------------------------------
+# CAPABILITIES ARE NOT ALGORITHMS: the 7 rules added in 66ccb92/98833bc
+# --------------------------------------------------------------------------------------------
+
+CAPABILITY_RULES = ["ECD-CLOUD-KMS-001", "ECD-CLOUD-AZURE-001", "ECD-CLOUD-GCP-001",
+                    "ECD-HARDWARE-PKCS11-001"]
+
+
+@pytest.mark.parametrize("rule_id", CAPABILITY_RULES)
+def test_a_cloud_or_hsm_rule_is_typed_as_a_capability_not_an_algorithm(rule_id):
+    """A KMS call names no cipher and no key size, so it cannot carry a risk verdict.
+
+    `primitive="cloud-service"` / `"hardware-module"` are not CycloneDX 1.7 enum members, so
+    they canonicalised to `unknown` and shipped as assetType=algorithm / primitive=unknown /
+    tier=LOW. A capability was being reported as a used algorithm -- the primary way a
+    discovery tool misleads, as the assurance taxonomy itself says.
+    """
+    rule = next(r for r in RULES if r["id"] == rule_id)
+    assert rule.get("type") == "library", (
+        "%s detects a capability, so it must be typed as one" % rule_id)
+    assert rule["primitive"] == "cryptographic-library", (
+        "%s must use the capability primitive the recommender already routes" % rule_id)
+    # `cryptographic-library` canonicalises to "unknown" BY DESIGN and always has: cbom's
+    # library branch emits a `type: library` component with NO cryptoProperties at all, so there
+    # is no primitive field for it to be wrong in. What matters is that it takes that branch.
+    assert _canonical_primitive(rule["primitive"]) == "unknown"
+
+
+def test_a_capability_is_graded_as_capability_not_used():
+    """The assurance taxonomy must place these in `capability`, not `used`.
+
+    `used` means "code invokes it", which for a KMS client is true but is not the claim being
+    made. `capability` is the honest grade for something present but not exercised.
+    """
+    rule = next(r for r in RULES if r["id"] == "ECD-CLOUD-KMS-001")
+    finding = {"name": rule["name"], "primitive": rule["primitive"], "type": rule["type"],
+               "evidence_class": rule["evidence"], "file": "a.py", "line": 1}
+    grade, _ = resolve_assurance(finding)
+    assert grade == "capability", "a KMS client is a capability, got %r" % grade
+
+
+def test_a_cloud_rule_survives_the_trip_to_the_cbom_as_a_library():
+    """End to end, because the primitive mapping is where the defect actually surfaced."""
+    finding = {"name": "AWS KMS", "primitive": "cryptographic-library", "type": "library",
+               "evidence_class": "dependency", "file": "a.py", "line": 1}
+    doc = json.loads(generate_cbom([finding], enriched=True))
+    comp = doc["components"][0]
+    assert comp.get("type") == "library", (
+        "a capability must be a library component, got %r" % comp.get("type"))
+
+
+def test_a_private_key_is_related_crypto_material_not_an_algorithm():
+    """CycloneDX 1.7 has an asset type for exactly this and we were not using it.
+
+    `relatedCryptoMaterialProperties` has no `primitive` field at all, so the previous
+    `primitive="key"` -- not an enum member -- is no longer needed, and the question of which
+    enum member describes a PEM header does not arise.
+    """
+    finding = {"name": "Private Key (PEM)", "rule_id": "ECD-KEY-PEM-001", "type": "algorithm",
+               "primitive": "key", "file": "a.py", "line": 1}
+    doc = json.loads(generate_cbom([finding], enriched=True))
+    cp = doc["components"][0]["cryptoProperties"]
+    assert cp["assetType"] == "related-crypto-material", (
+        "a private key is related-crypto-material, got %r" % cp.get("assetType"))
+    assert cp["relatedCryptoMaterialProperties"]["type"] == "private-key"
+    assert "algorithmProperties" not in cp, (
+        "related-crypto-material carries no primitive; emitting one is a schema error")
+
+
+def test_the_pkcs11_rule_no_longer_matches_any_identifier_containing_pkcs11():
+    """`PKCS11` with no word boundary matched variables, comments and vendored filenames."""
+    rule = next(r for r in RULES if r["id"] == "ECD-HARDWARE-PKCS11-001")
+    for decoy in ("x = 'PKCS11TOKEN'", "# PKCS11ish thing", "PKCS11_ENABLED = False"):
+        assert not re.search(rule["regex"], decoy), (
+            "decoy %r must not match the HSM rule" % decoy)
+    for real in ("tok = pkcs11.get_token(label='x')", "import SunPKCS11", "c = PKCS11()"):
+        assert re.search(rule["regex"], real), "real HSM usage %r must match" % real
+
+
+def test_the_legacy_tls_rule_does_not_duplicate_the_existing_config_rule():
+    """ECD-PROTO-TLS-001 was ~83% redundant with ECD-CFG-TLS-001 and _finalise cannot dedup it.
+
+    Different rule_id means a different dedup key, so one nginx line produced TWO
+    assetType=protocol components. And the rule required a DOTTED version, so the most common
+    legacy nginx line in existence, `ssl_protocols TLSv1 TLSv1.1;`, was invisible to the rule
+    added to catch legacy TLS. It now keeps only the Apache `SSLProtocol` directive.
+    """
+    proto = next(r for r in RULES if r["id"] == "ECD-PROTO-TLS-001")
+    cfg = next(r for r in RULES if r["id"] == "ECD-CFG-TLS-001")
+    overlapping = [s for s in ("ssl_protocols TLSv1.1;", "ssl_protocols TLSv1 TLSv1.1;",
+                               "ssl_protocols TLSv1.2 TLSv1.3;")
+                   if re.search(proto["regex"], s) and re.search(cfg["regex"], s)]
+    assert not overlapping, (
+        "these match BOTH TLS rules and produce duplicate components: %s" % overlapping)
+    assert re.search(proto["regex"], "SSLProtocol all -SSLv3"), (
+        "the Apache directive is what this rule uniquely owns and must still match")
+    assert re.search(proto["regex"], "sslprotocol all"), "Apache directives are case-insensitive"
+
+
+def test_every_rule_primitive_is_either_schema_valid_or_a_capability():
+    """The invariant that would have caught all of the above at once.
+
+    A rule may use a primitive outside the enum ONLY if it also declares a non-`algorithm`
+    type -- because that is the signal that the schema models it somewhere else entirely.
+    """
+    for rule in RULES:
+        canonical = _canonical_primitive(rule["primitive"])
+        if canonical == "unknown" and rule.get("type", "algorithm") == "algorithm":
+            if rule.get("primitive") in ("key", "protocol"):   # handled by a dedicated branch
+                continue
+            pytest.fail(
+                "%s has primitive %r, which is not a CycloneDX 1.7 enum member and is typed as "
+                "an algorithm, so it will be emitted as primitive=unknown"
+                % (rule["id"], rule["primitive"]))
 
 
 # --------------------------------------------------------------------------------------------

@@ -369,6 +369,25 @@ def _crypto_functions(finding, primitive):
 CLASSICAL_STRENGTH_BITS_UPPER = {k.upper(): v for k, v in CLASSICAL_STRENGTH_BITS.items()}
 
 
+# CycloneDX 1.7 `relatedCryptoMaterialProperties.type` enum members we can justify from a
+# source-level match. A private key found in a repository is `private-key`; we do NOT claim
+# `credential` or `token`, because finding the string does not prove the credential is live.
+RELATED_MATERIAL_TYPES = {
+    "ECD-KEY-PEM-001": "private-key",
+    "ECD-KEY-PGP-001": "private-key",
+}
+
+
+def _related_material_type(finding):
+    """The `relatedCryptoMaterialProperties.type` for this finding, or None if it is not one.
+
+    Keyed on the RULE, not the name. A finding whose `name` merely contains the word "key" is
+    not thereby key material -- an algorithm called "key-agreement" is an algorithm, and typing
+    it as `related-crypto-material` would be a new category error in the opposite direction.
+    """
+    return RELATED_MATERIAL_TYPES.get(str(finding.get("rule_id", "")))
+
+
 def _algorithm_properties(finding, primitive):
     props = {
         "primitive": primitive,
@@ -589,6 +608,33 @@ def generate_cbom(findings, enriched=False, subject_name="ECDAT-Scanned-Artefact
             continue
 
         algo = _algorithm_properties(f, primitive)
+        # A PRIVATE KEY is not an algorithm, and `related-crypto-material` is the asset type
+        # CycloneDX 1.7 defines for exactly this: "other cryptographic assets related to
+        # algorithms, certificates, and protocols such as keys and tokens". Its properties object
+        # has NO `primitive` field, so the whole question of which enum member describes a PEM
+        # header simply does not arise -- the previous shape forced a hardcoded "key" primitive
+        # that canonicalised to `unknown`.
+        if _related_material_type(f) is not None:
+            material = _related_material_type(f)
+            components.append({
+                "type": "cryptographic-asset",
+                "bom-ref": ref,
+                "name": f.get("name") or "unknown",
+                "cryptoProperties": {
+                    "assetType": "related-crypto-material",
+                    "relatedCryptoMaterialProperties": {
+                        "type": material,
+                        "state": "pre-activation",
+                    },
+                },
+                "properties": _ecd_properties(f, risk, recommendation),
+            })
+            if f.get("line"):
+                components[-1]["evidence"] = {
+                    "occurrences": [{"bom-ref": f"occ-{idx}",
+                                     "location": f.get("file", ""), "line": f.get("line")}]
+                }
+            continue
         # `dict.get(k, default)` returns None when the key EXISTS with a None value, so a
         # finding from an external source carrying `"name": null` produced `"name": null` and an
         # invalid document. Falling back only on falsy covers both the missing key and the null.

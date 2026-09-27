@@ -449,23 +449,49 @@ RULES = [
          regex=r"-----BEGIN PGP PRIVATE KEY BLOCK-----"),
          
     # ---- Protocols ----
+    # Apache/mod_ssl ONLY. This rule previously also carried an `ssl_protocols TLSv1.x`
+    # alternative, which was 83% redundant with ECD-CFG-TLS-001 (that rule's pattern is
+    # `ssl_protocols\s+[^;]+;`, a strict superset) AND missed the most common legacy nginx line
+    # in existence, `ssl_protocols TLSv1 TLSv1.1;`, because it required a dotted version.
+    # A rule added to catch legacy TLS that is blind to legacy TLS, and that doubles a rule
+    # that is not, is worse than no rule. What is uniquely Apache's is the `SSLProtocol`
+    # directive, so that is all this keeps -- case-insensitively, because Apache directives are.
+    # `type="protocol"` is what routes the finding to cbom's protocol branch.
     dict(id="ECD-PROTO-TLS-001", name="TLS Configuration", primitive="protocol", artefact_class="config",
-         uses="tls", key_group=None, evidence="configured",
-         regex=r"ssl_protocols\s+TLSv[0-1]\.[0-3]|SSLProtocol\s+(?:All|-SSLv[2-3]|[-+]?TLSv[1-3]\.[0-3]?)"),
-         
-    # ---- Cloud Services / Hardware Modules ----
-    dict(id="ECD-CLOUD-KMS-001", name="AWS KMS", primitive="cloud-service", artefact_class="source",
-         uses="at-rest", key_group=None, evidence="discovered",
+         type="protocol", uses="tls", key_group=None, evidence="configured",
+         regex=r"(?i)SSLProtocol\s+(?:all|[-+]?SSLv[0-9.]*|none)\b"),
+
+    # ---- Cloud Services / Hardware Modules --------------------------------------------------
+    # A KMS call is a CAPABILITY, not an algorithm. It names no cipher and no key size, so the
+    # scanner cannot say anything quantum-relevant about the keys it protects -- and pretending
+    # otherwise is a guess. What it CAN say is that a managed key service is in the estate and
+    # must be inventoried, which is exactly the `cryptographic-library` capability the
+    # recommender already routes to "inventory as a dependency" and the assurance taxonomy
+    # already grades as `capability` rather than `used`.
+    #
+    # `primitive="cloud-service"` and `primitive="hardware-module"` are not CycloneDX 1.7 enum
+    # members, so all four were silently canonicalised to "unknown" and shipped as
+    # assetType=algorithm / primitive=unknown / tier=LOW with no migration target.
+    dict(id="ECD-CLOUD-KMS-001", name="AWS KMS", primitive="cryptographic-library",
+         artefact_class="source", type="library", uses="at-rest", key_group=None,
+         evidence="dependency",
          regex=r"boto3\.client\(\s*['\"]kms['\"]\s*\)|aws_kms_key|kms\.Decrypt|kms\.Encrypt"),
-    dict(id="ECD-CLOUD-AZURE-001", name="Azure Key Vault", primitive="cloud-service", artefact_class="source",
-         uses="at-rest", key_group=None, evidence="discovered",
-         regex=r"SecretClient\(|azure\.keyvault|KeyVaultClient"),
-    dict(id="ECD-CLOUD-GCP-001", name="Google Cloud KMS", primitive="cloud-service", artefact_class="source",
-         uses="at-rest", key_group=None, evidence="discovered",
-         regex=r"google-cloud-kms|KeyManagementServiceClient"),
-    dict(id="ECD-HARDWARE-PKCS11-001", name="PKCS#11 HSM", primitive="hardware-module", artefact_class="source",
-         uses="at-rest", key_group=None, evidence="discovered",
-         regex=r"SunPKCS11|PKCS11|pkcs11\.get_token"),
+    # `SecretClient(` alone is far too generic -- it matches any Azure SDK credential helper.
+    # Anchored to the key-vault namespace instead.
+    dict(id="ECD-CLOUD-AZURE-001", name="Azure Key Vault", primitive="cryptographic-library",
+         artefact_class="source", type="library", uses="at-rest", key_group=None,
+         evidence="dependency",
+         regex=r"azure\.keyvault|KeyVaultClient|azurervault|key_vault\.client"),
+    dict(id="ECD-CLOUD-GCP-001", name="Google Cloud KMS", primitive="cryptographic-library",
+         artefact_class="source", type="library", uses="at-rest", key_group=None,
+         evidence="dependency",
+         regex=r"google-cloud-kms|KeyManagementServiceClient|google\.cloud\.kms"),
+    # `PKCS11` with no boundary matches any identifier containing those six characters -- a
+    # variable, a vendored filename, a comment. Anchored to what actually appears in code.
+    dict(id="ECD-HARDWARE-PKCS11-001", name="PKCS#11 HSM", primitive="cryptographic-library",
+         artefact_class="source", type="library", uses="at-rest", key_group=None,
+         evidence="dependency",
+         regex=r"\bSunPKCS11\b|\bPKCS11\b|pkcs11\.(?:get_token|lib|load)|PyKCS11"),
 ]
 
 # Binary/firmware evidence: symbol or string fragments identifying a crypto library or algorithm.
@@ -749,7 +775,13 @@ class ECDATScanner:
                 finding = {
                     "file": file_path,
                     "line": line,
-                    "type": "algorithm",
+                    # Read the type from the rule instead of hardcoding "algorithm". A rule
+                    # that matches a KMS call or an HSM handle is detecting a CAPABILITY, not
+                    # an algorithm, and calling it an algorithm made every such finding land
+                    # in the `used` assurance bucket and carry a primitive the schema has no
+                    # word for. `engine/cbom.py` already has a working library branch, so
+                    # this needs no other code change.
+                    "type": rule.get("type", "algorithm"),
                     "name": name,
                     "primitive": primitive,
                     "rule_id": rule["id"],
