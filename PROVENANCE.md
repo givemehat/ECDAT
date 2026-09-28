@@ -21,7 +21,7 @@ Public prior art was studied, as any engineer would. The distinction we maintain
 | NIST FIPS 197/180-4/203/204/205, SP 800-52r2, IR 8547 | published standards | **Parameter sizes and normative text.** These are facts, not code. |
 | Mosca's inequality; GRI/evolutionQ expert survey | published literature | The **formula** and the published Z-window. |
 | GitHub Search API; 17 public repositories | `research/competitive/` | **Read their READMEs only.** Recorded in `research/competitive/ANALYSIS.md` with URLs, pinned commits, and an explicit take/adapt/reject decision for each. |
-| CryptoAPI-Bench (`e6b6b50f`), paramiko (`142f593e`) | cloned as **test corpora** | **Used as measurement input only.** Not in git — see below. |
+| CryptoAPI-Bench (`e6b6b50f`), paramiko (`142f593e`), golang.org/x/crypto (`7a4a4d6b`) | cloned as **test corpora** | **Used as measurement input only.** Not in git — see below. |
 
 The ideas that changed our design — the assurance taxonomy and the purpose model — are recorded
 with their source in `research/competitive/ANALYSIS.md` and cited in the module docstring of
@@ -37,6 +37,12 @@ an idea is attribution, not copying.
 |---|---|---|
 | CryptoAPI-Bench | MIT | measurement input |
 | paramiko | LGPL-2.1 | measurement input |
+| golang.org/x/crypto | BSD-3-Clause | measurement input (Go standard library's official crypto library) |
+
+The Go corpus is a **three-file slice** of `x/crypto`'s `ssh/` package: `cipher.go`, `mac.go` and
+`mlkem.go`. The other 28 non-test files in that package are cloned but neither annotated nor
+scanned. The pin covers the whole clone; the measured scope is those three files, and the scope
+is declared in `benchmark/annotate.py` and in the label file's `scope_caveat`.
 
 - These are **excluded from version control** by `.gitignore` and have **never appeared in any
   commit** — verifiable with `git log --all -- benchmark/corpora`, which returns nothing.

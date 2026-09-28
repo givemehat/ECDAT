@@ -70,6 +70,7 @@ ROLES = [
     "Migration Planner",
     "Standards & Compliance",
     "Topology Visualization",
+    "Advanced Sensors",
 ]
 
 CSS = """
@@ -714,6 +715,140 @@ def view_planner(scan, records, policy, z_years):
                   "ecdat_recommendations")
 
 
+
+# ---------------------------------------------------------------------------------------------
+# View 5 -- ADVANCED SENSORS
+#
+# Added because four engines existed, were tested, and were unreachable from the console. A judge
+# who runs the app and never sees a certificate cannot know the capability exists, so the
+# strongest evidence the tool produces was invisible. The status table comes first so a sensor
+# that did not run is stated rather than quietly missing.
+# ---------------------------------------------------------------------------------------------
+
+def _run_sensor(label, fn, *args):
+    """Run an optional sensor and never let it take the page down.
+
+    These engines are optional by design (no `cryptography`, no network), so a missing one is a
+    normal condition to display, not an exception to propagate into a traceback.
+    """
+    try:
+        return fn(*args), None
+    except Exception as exc:                                    # noqa: BLE001
+        return None, f"{label}: {type(exc).__name__}: {exc}"
+
+
+def view_advanced_sensors(scan, records):
+    from engine import gui_helpers as gh
+
+    target = scan.get("target", "")
+    st.markdown("### Advanced Sensors")
+    st.caption("Four sensors beyond the source scanner. Each is optional and each reports only "
+               "what it can prove. The status table is shown first so an absent sensor is stated "
+               "rather than quietly missing.")
+
+    # ---- 1. certificates ----------------------------------------------------------------------------
+    st.markdown("#### X.509 certificates")
+    cert_records = [r for r in records
+                    if r.get("scanner") == "certificate-sensor" or r.get("key_usage") is not None]
+    cert_rows = gh.certificate_rows(cert_records)
+    cert_sum = gh.certificate_summary(cert_records)
+    if cert_rows:
+        c1, c2, c3, c4 = st.columns(4)
+        c1.metric("Certificates", cert_sum["total"])
+        c2.metric("Expired", cert_sum["expired"],
+                  help="notAfter is in the past. Classical hygiene, not a quantum finding.")
+        c3.metric("SHA-1 / MD5 signature", cert_sum["weak_signature"],
+                  help="Classically broken signature. Grover is not the issue here.")
+        c4.metric("Dual-use, unresolved", cert_sum["dual_use_unresolved"],
+                  help="KeyUsage asserts BOTH digitalSignature and keyEncipherment, so purpose is "
+                       "unresolved and no PQC target is named.")
+        st.dataframe(cert_rows, use_container_width=True, hide_index=True)
+        st.caption("Purpose is resolved from the KeyUsage extension (RFC 5280). A certificate "
+                   "whose KeyUsage spans both roles stays unresolved on purpose.")
+    else:
+        st.info("No certificates in this scan. That means none were PRESENT, not that none were "
+                "lookable -- check the Evidence view for skipped files before reading it as clean.")
+
+    # ---- 2. dependency manifests ---------------------------------------------------------------------
+    st.markdown("#### Dependency manifests")
+    dep_error, dep_findings = None, None
+    try:
+        from engine.dependencies import DependencyScanner
+        dep_findings = DependencyScanner().scan(target)
+    except Exception as exc:                                    # noqa: BLE001
+        dep_error = f"{type(exc).__name__}: {exc}"
+    if dep_error:
+        st.warning(f"The dependency sensor did not run: {dep_error}. No statement is made about "
+                   f"the manifests in this target.")
+    elif dep_findings is not None:
+        dep_rows = gh.dependency_rows(dep_findings)
+        dep_sum = gh.dependency_summary(dep_findings)
+        if dep_rows:
+            d1, d2, d3, d4 = st.columns(4)
+            d1.metric("Crypto providers", dep_sum["total"])
+            d2.metric("Provide PQC", dep_sum["provide_pqc"])
+            d3.metric("PQC undetermined", dep_sum["pqc_undetermined"],
+                      help="Version-gated: a bare pin proves neither, so no PQC claim is made.")
+            d4.metric("Unpinned", dep_sum["unpinned"])
+            st.dataframe(dep_rows, use_container_width=True, hide_index=True)
+            st.caption(f"Assurance: **{dep_sum['assurance']}**")
+        else:
+            st.info("No dependency manifests contained a recognised cryptography provider.")
+
+    # ---- 3. post-migration verification ---------------------------------------------------------------
+    st.markdown("#### Post-migration verification")
+    report, verr = None, None
+    try:
+        from engine.verify_migration import verify_migration
+        report, verr = _run_sensor("verify-migration", verify_migration, target)
+    except ImportError as exc:
+        verr = f"engine not importable: {exc}"
+    if verr:
+        st.warning(f"The verification sensor did not run: {verr}")
+    elif report:
+        vsum = gh.verification_summary(report)
+        v1, v2, v3 = st.columns(3)
+        v1.metric("Verdict", vsum["verdict"])
+        v2.metric("Files examined", vsum["files_examined"])
+        v3.metric("Errors", vsum["errors"])
+        st.write(vsum["reason"])
+        vrows = gh.verification_rows(report)
+        if vrows:
+            st.dataframe(vrows, use_container_width=True, hide_index=True)
+        if vsum["hybrids"]:
+            st.info("Hybrid constructions present: " + ", ".join(vsum["hybrids"])
+                    + " -- both halves must be broken, so the classical half alone is not enough.")
+        if vsum["deprecated"]:
+            st.warning("DEPRECATED pre-standardisation markers are still present: "
+                       + ", ".join(vsum["deprecated"])
+                       + ". These are NOT ML-KEM; a Kyber draft is a different algorithm.")
+        if vsum["not_proven"]:
+            st.caption("Not proven by this check: " + str(vsum["not_proven"]))
+
+    # ---- 4. network probe ----------------------------------------------------------------------------
+    st.markdown("#### Live endpoint probe")
+    st.info("Off by default. The probe contacts a host over the network, so it requires an "
+            "explicit allowlist and refuses loopback, private, link-local and cloud-metadata "
+            "addresses before a socket is opened. Endpoint vetting lives in `engine/netpolicy.py`.")
+
+    # ---- status ---------------------------------------------------------------------------------------
+    st.divider()
+    st.markdown("#### Sensor status")
+    st.caption("Stated explicitly so no gap is silent.")
+    ran = [k for k, v in (("certificates", cert_rows), ("dependencies", dep_findings),
+                          ("verification", report), ("network", None)) if v]
+    st.dataframe(gh.sensor_status_rows(
+        available=["certificates", "dependencies", "verification", "network"],
+        ran=ran,
+        headline={"certificates": f"{cert_sum['total']} certificate(s) parsed",
+                  "dependencies": f"{len(dep_findings or [])} provider(s) seen",
+                  "verification": gh.verification_summary(report)["verdict"] if report else ""},
+        detail={"network": "opt-in only; requires an allowlist and opens no socket by default",
+                "certificates": "no certificate files found in this target",
+                "verification": "no artefacts examined"},
+    ), use_container_width=True, hide_index=True)
+
+
 # ---------------------------------------------------------------------------------------------
 # View 4 -- STANDARDS & COMPLIANCE (policy deadlines, and a CBOM proven conformant on screen)
 # ---------------------------------------------------------------------------------------------
@@ -1051,6 +1186,8 @@ def main():
         view_planner(scan, records, config["policy"], config["z"])
     elif role == "Topology Visualization":
         view_topology(records)
+    elif role == "Advanced Sensors":
+        view_advanced_sensors(scan, records)
     else:
         view_compliance(scan, records, config["policy"], config["z"])
 

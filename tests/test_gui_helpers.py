@@ -12,10 +12,12 @@ import pytest
 
 from engine.cbom import generate_cbom
 from engine.gui_helpers import (ASSURANCE_COLOURS, TIER_COLOURS, assurance_counts,
-                                auditor_rows, bar_chart_svg, contrast_ratio, coverage_verdict,
-                                enrich_findings, escape, evidence_needed, ink_on, proven_use,
-                                queue_rows, short_path, tier_counts, unresolved_split,
-                                validate_cbom_document)
+                                auditor_rows, bar_chart_svg, certificate_rows,
+                                certificate_summary, contrast_ratio, coverage_verdict,
+                                dependency_rows, dependency_summary, enrich_findings, escape,
+                                evidence_needed, ink_on, proven_use, queue_rows,
+                                sensor_status_rows, short_path, tier_counts, unresolved_split,
+                                validate_cbom_document, verification_rows, verification_summary)
 
 SCHEMA = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                       "schemas", "bom-1.7.schema.json")
@@ -213,3 +215,107 @@ def test_a_missing_schema_is_explained_and_never_raises():
     assert not result["ok"]
     assert result["state"] in ("schema-missing", "library-missing")
     assert "conformant" in result["message"] or "no CBOM download" in result["message"]
+
+
+# ===========================================================================================
+# Advanced-sensor presentation helpers.
+#
+# These four engines were built and tested but were unreachable from the console, so the tests
+# here guard the thing that actually caused the gap: a sensor that silently contributes nothing.
+# Every one of these asserts the QUALIFIER survives, not just the total.
+# ===========================================================================================
+
+def test_sensor_status_distinguishes_ran_from_available_from_missing():
+    rows = sensor_status_rows(
+        available=["certificates", "dependencies", "network"],
+        ran=["certificates"],
+        headline={"certificates": "3 certificate(s) parsed"})
+    by_key = {r["key"]: r for r in rows}
+    assert by_key["certificates"]["state"] == "ran"
+    assert "3 certificate" in by_key["certificates"]["note"]
+    assert by_key["dependencies"]["state"] == "not run"
+    assert by_key["verification"]["state"] == "unavailable"
+    # Every sensor is listed even when absent -- that is the whole point of the table.
+    assert len(rows) == 4
+
+
+def test_certificate_rows_expose_key_usage_and_never_guess_purpose():
+    rows = certificate_rows([
+        {"file": "a/b/cert.pem", "name": "RSA-2048", "sig_algorithm": "sha256WithRSAEncryption",
+         "key_usage": ["digitalSignature"], "purpose": "signature", "not_after": "2030-01-01"},
+        {"file": "d/e/f.pem", "name": "EC-P256", "sig_algorithm": "sha1WithRSAEncryption",
+         "key_usage": ["digitalSignature", "keyEncipherment"]},
+    ])
+    assert rows[0]["purpose"] == "signature"
+    assert rows[0]["key_usage"] == "digitalSignature"
+    # A dual-use cert has ambiguous KeyUsage, so it must NOT be assigned a purpose.
+    assert rows[1]["purpose"] == "unresolved"
+    assert "digitalsignature" in rows[1]["key_usage"].lower()
+
+
+def test_certificate_summary_breaks_down_rather_than_reporting_a_bare_total():
+    recs = [
+        {"expired": True, "sig_algorithm": "sha1WithRSAEncryption",
+         "key_usage": ["digitalSignature"], "purpose": "signature"},
+        {"sig_algorithm": "sha256WithRSAEncryption",
+         "key_usage": ["digitalSignature", "keyEncipherment"]},
+    ]
+    s = certificate_summary(recs)
+    assert s["total"] == 2
+    assert s["expired"] == 1
+    assert s["weak_signature"] == 1        # SHA-1 is classically broken, not a Grover issue
+    assert s["dual_use_unresolved"] == 1
+    assert s["by_purpose"]
+
+
+def test_certificate_rows_tolerate_missing_fields():
+    rows = certificate_rows([{}])
+    assert rows[0]["key_usage"] == "absent"
+    assert rows[0]["purpose"] == "unresolved"
+
+
+def test_dependency_rows_preserve_the_capability_assurance_and_none_verdict():
+    rows = dependency_rows([
+        {"name": "pyca/cryptography", "ecosystem": "pypi", "version": "42.0.0",
+         "provides": ["AES-GCM", "ECDH", "RSA"], "provides_pqc": True},
+        {"name": "jose", "ecosystem": "npm", "provides": ["RSA", "HS256"], "provides_pqc": None},
+    ])
+    assert rows[0]["provides_pqc"] is True
+    assert rows[0]["version"] == "42.0.0"
+    # Undetermined must stay None, NOT collapse to False: "maybe after an upgrade" != "no".
+    assert rows[1]["provides_pqc"] is None
+    assert rows[1]["version"] == "unpinned"
+    s = dependency_summary([
+        {"provides_pqc": True}, {"provides_pqc": None}, {"provides_pqc": False}, {},
+    ])
+    assert s["total"] == 4
+    assert s["provide_pqc"] == 1
+    assert s["pqc_undetermined"] == 2   # `{}` has no PQC claim: undetermined, NOT classical-only
+    assert s["provide_classical_only"] == 1
+    assert s["unpinned"] == 4
+    assert "capability" in s["assurance"]
+
+
+def test_verification_keeps_deprecated_kyber_separate_from_ml_kem():
+    report = {"verdict": "MIGRATED", "verified": True, "files_examined": 12,
+              "algorithms": {"ML-KEM-768": {"status": "verified", "matches": 3,
+                                            "reasons": ["kyber768 in tlslite"]},
+                             "ECDH": {"status": "no-usage", "matches": 0, "reasons": []}},
+              "deprecated_variants": [{"marker": "kyber512r1"}],
+              "hybrids": [{"name": "ECDHE-ML-KEM"}], "verdict_reason": "ML-KEM in use."}
+    rows = verification_rows(report)
+    by_algo = {r["algorithm"]: r for r in rows}
+    assert by_algo["ML-KEM-768"]["status"] == "verified"
+    assert by_algo["ECDH"]["status"] == "no-usage"
+    # The deprecated draft marker must travel with the row, so it cannot read as "migrated".
+    assert by_algo["ML-KEM-768"]["deprecated"] == "kyber512r1"
+    s = verification_summary(report)
+    assert s["verdict"] == "MIGRATED"
+    assert s["hybrids"] == ["ECDHE-ML-KEM"]
+    assert s["deprecated"] == ["kyber512r1"]
+
+
+def test_verification_summary_of_nothing_is_not_a_pass():
+    s = verification_summary(None)
+    assert s["verdict"] == "not run"
+    assert s["verified"] is False

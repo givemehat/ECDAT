@@ -1,11 +1,43 @@
 # Ground-truth labels
 
-Two files, one per corpus:
+Three files, one per corpus:
 
 | file | corpus | unit | positives | negatives audited |
 |---|---|---|---|---|
 | `cryptoapi_bench_pq.json` | CryptoAPI-Bench (external, SecDev 2019) | one `(file, line)` | see `annotation.positive_labels` | see `annotation.negative_labels_audited` |
 | `paramiko_pq.json` | paramiko (external, real production code) | one `(file, line)` | see `annotation.positive_labels` | see `annotation.negative_labels_audited` |
+| `xcrypto_ssh_algorithms_pq.json` | golang.org/x/crypto `ssh/` (external, real production Go) | one `(file, line)` | see `annotation.positive_labels` | see `annotation.negative_labels_audited` |
+
+### The Go label set: scope, and why it is narrow
+
+It covers **three files** — `ssh/cipher.go`, `ssh/mac.go`, `ssh/mlkem.go`. Those are the files
+that *enumerate* a Go estate's cryptographic surface (the cipher-mode table, the MAC-mode table,
+and the hybrid ML-KEM key exchange), and they are the only files in the package that have been
+read end to end. The other 28 non-test files in `ssh/` are **not** annotated and **not** scanned,
+so recall is relative to these three files and says nothing about the rest of x/crypto.
+
+Two judgements in that set are worth stating explicitly, because a reviewer may reasonably
+disagree with either:
+
+- **ML-KEM is labelled NEGATIVE.** `crypto/mlkem` is FIPS 203 — post-quantum, the *remedy*. The
+  criterion asks for quantum-**vulnerable** primitives. Labelling ML-KEM a vulnerability would
+  invert the meaning of the scan. The consequence is visible in the results: ECDAT's correct,
+  useful ML-KEM detection is scored as a false positive. It is a property of the criterion, not a
+  defect, and it is recorded in `negatives_audited` rather than suppressed.
+- **Poly1305 is L2-only**, because it is in neither declared break model in `pqtaxonomy.py`.
+
+### Label corrections, and in which direction they went
+
+The Go set was corrected three times after it was first written, and **every correction moved
+against the tool's score**: one missed RC4 positive added (lowers precision), two unlabelled
+`chacha20.NewUnauthenticatedCipher` call sites added (removes two false positives), and two
+L1/L2 rows corrected so that L2 is not silently identical to L1. The root cause of all three was
+a case-sensitive sweep token list that missed lowercase qualified calls such as
+`rc4.NewCipher(...)`, plus an annotation pass that labelled one of two structurally identical call
+sites and not the other. `annotation.label_corrections` records this in the label file itself.
+
+**A detector measured against incomplete labels is not evidence of anything**, which is why these
+were found and fixed rather than tuned around.
 
 ## Who wrote these, and how
 
