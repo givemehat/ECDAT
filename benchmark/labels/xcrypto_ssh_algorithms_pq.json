@@ -15,13 +15,14 @@
   "annotated_by": "ECDAT benchmark harness author, by direct reading of every line in scope",
   "unit": "one (file, 1-based line) location",
   "files_in_scope": 3,
-  "candidate_lines_swept": 90,
-  "positive_labels_L1": 44,
+  "candidate_lines_swept": 94,
+  "positive_labels_L1": 47,
   "positive_labels_L2_only": 2,
-  "negative_labels_audited": 22,
+  "negative_labels_audited": 23,
   "method": "A location is POSITIVE in L1 iff it names, or binds a name to, a quantum-vulnerable cryptographic primitive in a position that determines the algorithm: P1 factory call or mode registration, P1b naming a primitive identifier in executable code, P2 a key-spec/hash binding, P3 an import that determines the algorithm downstream, P4 an SSH/OpenSSL algorithm identifier. A line that merely OPERATES on a primitive chosen elsewhere is NEGATIVE in L1 and POSITIVE in L2; the harness reports both.",
   "deliberate_exclusions": "ML-KEM is labelled NEGATIVE, and this is the most consequential judgement in the set. crypto/mlkem is FIPS 203 -- post-quantum, the REMEDY. The criterion asks for quantum-VULNERABLE primitives, so labelling ML-KEM a vulnerability would invert the meaning of the scan. Poly1305 is negative for the narrower reason that it is in neither declared break model in pqtaxonomy.py.",
-  "scope_caveat": "THREE files, not the package. The other 28 non-test files under ssh/ were swept but NOT annotated and are NOT scanned. Recall here is relative to these three files only and says nothing about the rest of x/crypto. This is a small corpus: denominators are printed beside every ratio, and the figure should be read as a smoke test of the Go pack, not as a characterisation of Go detection."
+  "scope_caveat": "THREE files, not the package. The other 28 non-test files under ssh/ were swept but NOT annotated and are NOT scanned. Recall here is relative to these three files only and says nothing about the rest of x/crypto. This is a small corpus: denominators are printed beside every ratio, and the figure should be read as a smoke test of the Go pack, not as a characterisation of Go detection.",
+  "label_corrections": "Corrected after the first measurement, in the direction AGAINST the tool: one missed RC4 positive added (which lowers measured precision), two chacha20 read-path positives added (which removes two false positives), and two L1/L2 rows corrected so the L2 variant is not silently identical to L1. The original token sweep was case-sensitive and missed lowercase qualified calls such as `rc4.NewCipher`; the first annotation pass also labelled only one of two structurally identical call sites. A detector that scores well against incomplete labels is not evidence of anything, which is the reason these were found and fixed rather than tuned around."
  },
  "labels": [
   {
@@ -357,7 +358,7 @@
   {
    "file": "ssh/cipher.go",
    "line": 710,
-   "decision": "positive",
+   "decision": "negative",
    "category": "-",
    "primitive": "Poly1305",
    "break_model": "none",
@@ -390,7 +391,7 @@
   {
    "file": "ssh/cipher.go",
    "line": 781,
-   "decision": "positive",
+   "decision": "negative",
    "category": "-",
    "primitive": "Poly1305",
    "break_model": "none",
@@ -771,6 +772,39 @@
    "code": "Hash:      crypto.SHA256,",
    "L1_verdict": "P",
    "reason": "Hash: crypto.SHA256 binds the digest for the KEX"
+  },
+  {
+   "file": "ssh/cipher.go",
+   "line": 57,
+   "decision": "positive",
+   "category": "P1",
+   "primitive": "RC4",
+   "break_model": "grover",
+   "L1_verdict": "P",
+   "code": "return rc4.NewCipher(key)",
+   "reason": "rc4.NewCipher(key) is the RC4 factory call; missed by a case-sensitive sweep"
+  },
+  {
+   "file": "ssh/cipher.go",
+   "line": 670,
+   "decision": "positive",
+   "category": "P1",
+   "primitive": "ChaCha20",
+   "break_model": "grover",
+   "L1_verdict": "P",
+   "code": "s, err := chacha20.NewUnauthenticatedCipher(c.contentKey[:], nonce)",
+   "reason": "chacha20.NewUnauthenticatedCipher selects ChaCha20 (read path); the same factory call was already labelled in the write path, so omitting this pair turned correct detections into scored false positives"
+  },
+  {
+   "file": "ssh/cipher.go",
+   "line": 684,
+   "decision": "positive",
+   "category": "P1",
+   "primitive": "ChaCha20",
+   "break_model": "grover",
+   "L1_verdict": "P",
+   "code": "ls, err := chacha20.NewUnauthenticatedCipher(c.lengthKey[:], nonce)",
+   "reason": "chacha20.NewUnauthenticatedCipher selects ChaCha20 (read path); the same factory call was already labelled in the write path, so omitting this pair turned correct detections into scored false positives"
   }
  ],
  "negatives_audited": [
@@ -1015,6 +1049,17 @@
    "code": "package ssh",
    "L1_verdict": "X",
    "reason": "token swept; names no quantum-vulnerable primitive"
+  },
+  {
+   "file": "ssh/mlkem.go",
+   "line": 34,
+   "decision": "negative",
+   "category": "X",
+   "primitive": "(none)",
+   "break_model": "none",
+   "L1_verdict": "X",
+   "code": "mlkemDk, err := mlkem.NewDecapsulationKey768(seed)",
+   "reason": "ECDAT correctly detects ML-KEM-768 here, and that detection is USEFUL. It is still not a POSITIVE under this criterion, which counts quantum-VULNERABLE primitives. ML-KEM is the remedy, so a correct detection counts against precision. Recorded so the scored precision is interpretable."
   }
  ]
 }

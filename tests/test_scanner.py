@@ -77,6 +77,9 @@ def test_every_rule_is_actually_executed(tmp_path, scanner):
         "ECD-SRC-SSH-SIG-001": '"rsa-sha2-256": SSH_AGENT_RSA_SHA2_256,',
         "ECD-SRC-SSH-ED-001": 'PREF = "ssh-ed25519"',
         "ECD-SRC-SSH-CIPHER-001": 'C = "aes256-ctr"',
+        # Its own rule now, because it used to be reported as name=AES while sitting in a rule
+        # declared as AES. A decoy in test_multilang_pack.py pins the name.
+        "ECD-SRC-SSH-CHACHA-001": 'C = "chacha20-poly1305@openssh.com"',
         "ECD-SRC-SSH-CIPHER-002": '"aes128-gcm@openssh.com"',
         "ECD-SRC-SSH-MAC-001": '"hmac-sha2-256"',
         "ECD-SRC-SSH-DH-001": 'name = "diffie-hellman-group-exchange-sha256"',
@@ -145,7 +148,33 @@ def test_every_rule_is_actually_executed(tmp_path, scanner):
         "ECD-GO-SIG-003": "o := &rsa.PSSOptions{}",
         "ECD-GO-PQKEM-001": "dk, err := mlkem.NewDecapsulationKey768(seed)",
         "ECD-GO-PQKEM-002": "dk, err := mlkem.NewDecapsulationKey1024(seed)",
-        "ECD-GO-PQKEM-003": "dk, err := mlkem.NewDecapsulationKey512(seed)",
+        # Import paths are P3 taint sources under the labelling criterion, same as
+        # `from hashlib import sha1`. The x/crypto measurement showed they were the single largest
+        # miss class, so each primitive package import is reachable in its own right.
+        "ECD-GO-IMPORT-001": '\t"crypto/md5"',
+        "ECD-GO-IMPORT-002": '\t"crypto/sha1"',
+        "ECD-GO-IMPORT-003": '\t"crypto/sha256"',
+        "ECD-GO-IMPORT-004": '\t"crypto/hmac"',
+        "ECD-GO-IMPORT-005": '\t"crypto/des"',
+        "ECD-GO-IMPORT-006": '\t"crypto/rc4"',
+        "ECD-GO-IMPORT-007": '\t"crypto/aes"',
+        "ECD-GO-IMPORT-008": '\t"golang.org/x/crypto/chacha20"',
+        "ECD-GO-IMPORT-009": '\t"golang.org/x/crypto/curve25519"',
+        "ECD-GO-IMPORT-010": '\t"crypto/sha512"',
+        "ECD-GO-HASHBIND-001": "Hash:      crypto.SHA256,",
+        # P1b declarations. Each is anchored to `func`/`type`/`var` so a mention in an
+        # expression cannot fire it.
+        "ECD-GO-DECL-001": "func (c *chacha20Poly1305Cipher) readCipherPacket(n uint32) {",
+        "ECD-GO-DECL-002": "func newAESCTR(key, iv []byte) (cipher.Stream, error) {",
+        "ECD-GO-DECL-003": "func newTripleDESCBCCipher(key, iv, macKey []byte) {",
+        "ECD-GO-DECL-004": "func newRC4(key, iv []byte) (cipher.Stream, error) {",
+        "ECD-GO-DECL-005": "var c25519kp curve25519KeyPair",
+        "ECD-GO-DECL-006": "if !poly1305.Verify(&mac, buf, &key) {",
+        # Go SSH mode tables: the registration idiom, not the factory-call idiom.
+        "ECD-GO-SSHTBL-AES": "cipherModes[CipherAES128CTR] = &cipherMode{16, aes.BlockSize, nil}",
+        "ECD-GO-SSHTBL-RC4": "cipherModes[InsecureCipherRC4128] = &cipherMode{16, 0, nil}",
+        "ECD-GO-SSHTBL-3DES": "cipherModes[InsecureCipherTripleDESCBC] = &cipherMode{24, 0, nil}",
+        "ECD-GO-SSHTBL-MAC": "macModes[HMACSHA512ETM] = &macMode{64, true, nil}",
         "ECD-GO-SIG-004": "pub, _, _ := ed25519.GenerateKey(rnd)",
         "ECD-GO-KEX-001": "k, _ := ecdh.P256().GenerateKey(rnd)",
         "ECD-GO-RNG-001": "n := rand.Intn(100)",

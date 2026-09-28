@@ -63,7 +63,40 @@ POSITIVES = [
     # X25519 SSH key exchange in ssh/mlkem.go, and before these rules it scored ZERO findings.
     ("go mlkem768", "a.go", "dk, err := mlkem.NewDecapsulationKey768(seed)", ["ECD-GO-PQKEM-001"]),
     ("go mlkem1024", "a.go", "dk, err := mlkem.NewDecapsulationKey1024(seed)", ["ECD-GO-PQKEM-002"]),
-    ("go mlkem512", "a.go", "dk, err := mlkem.NewDecapsulationKey512(seed)", ["ECD-GO-PQKEM-003"]),
+    # NO mlkem512 sample. FIPS 203 has three parameter sets, but Go's crypto/mlkem ships only
+    # 768 and 1024, so an ML-KEM-512 rule asserted an API no implementation exposes. A test
+    # asserting a rule fires on a non-existent API is a test that protects a fiction.
+    # --- Go SSH mode-table and import/declaration idioms (loop 8) -------------------------------
+    ("go cipherModes AES128", "a.go",
+     "cipherModes[CipherAES128CTR] = &cipherMode{16, aes.BlockSize, nil}",
+     ["ECD-GO-SSHTBL-AES"]),
+    ("go cipherModes RC4", "a.go", "cipherModes[InsecureCipherRC4128] = &cipherMode{16, 0, nil}",
+     ["ECD-GO-SSHTBL-RC4"]),
+    ("go cipherModes 3DES", "a.go", "cipherModes[InsecureCipherTripleDESCBC] = &cipherMode{24, 0, nil}",
+     ["ECD-GO-SSHTBL-3DES"]),
+    ("go macModes HMAC", "a.go", "macModes[HMACSHA512ETM] = &macMode{64, true, nil}",
+     ["ECD-GO-SSHTBL-MAC"]),
+    ("go import aes", "a.go", '\t"crypto/aes"', ["ECD-GO-IMPORT-007"]),
+    ("go import sha512", "a.go", '\t"crypto/sha512"', ["ECD-GO-IMPORT-010"]),
+    ("go hash binding", "a.go", "Hash:      crypto.SHA256,", ["ECD-GO-HASHBIND-001"]),
+    ("go chacha receiver decl", "a.go",
+     "func (c *chacha20Poly1305Cipher) readCipherPacket(n uint32) {", ["ECD-GO-DECL-001"]),
+    ("go newAESCTR decl", "a.go", "func newAESCTR(key, iv []byte) (cipher.Stream, error) {",
+     ["ECD-GO-DECL-002"]),
+    ("go poly1305 verify", "a.go", "if !poly1305.Verify(&mac, c.buf[:n], &k) {", ["ECD-GO-DECL-006"]),
+    ("go import md5", "a.go", '\t"crypto/md5"', ["ECD-GO-IMPORT-001"]),
+    ("go import sha1", "a.go", '\t"crypto/sha1"', ["ECD-GO-IMPORT-002"]),
+    ("go import sha256", "a.go", '\t"crypto/sha256"', ["ECD-GO-IMPORT-003"]),
+    ("go import hmac", "a.go", '\t"crypto/hmac"', ["ECD-GO-IMPORT-004"]),
+    ("go import des", "a.go", '\t"crypto/des"', ["ECD-GO-IMPORT-005"]),
+    ("go import rc4", "a.go", '\t"crypto/rc4"', ["ECD-GO-IMPORT-006"]),
+    ("go import chacha20", "a.go", '\t"golang.org/x/crypto/chacha20"', ["ECD-GO-IMPORT-008"]),
+    ("go import curve25519", "a.go", '\t"golang.org/x/crypto/curve25519"', ["ECD-GO-IMPORT-009"]),
+    ("go newTripleDES decl", "a.go", "func newTripleDESCBCCipher(key, iv, macKey []byte) {",
+     ["ECD-GO-DECL-003"]),
+    ("go newRC4 decl", "a.go", "func newRC4(key, iv []byte) (cipher.Stream, error) {",
+     ["ECD-GO-DECL-004"]),
+    ("go curve25519 var", "a.go", "var c25519kp curve25519KeyPair", ["ECD-GO-DECL-005"]),
 ]
 
 # The same failure mode as the bare `\bMD5\b` bug, generalised.
@@ -222,15 +255,44 @@ def test_mlkem_is_a_standardised_algorithm_not_a_weak_primitive():
     `crypto/mlkem` therefore has a POST-QUANTUM key exchange in production, and reporting it as
     generic ECDH -- or as nothing at all -- is the difference between "already migrated" and
     "needs migration".
+
+    Only the parameter sets Go ACTUALLY SHIPS are asserted. FIPS 203 defines three, but
+    crypto/mlkem exposes only 768 and 1024; an earlier version of this test asserted a 512 rule
+    fires, which protected a rule matching `mlkem.GenerateKey512` -- an API that does not exist.
     """
     sc = ECDATScanner(enable_ml=False)
-    for level, rule in (("512", "ECD-GO-PQKEM-003"), ("768", "ECD-GO-PQKEM-001"),
-                        ("1024", "ECD-GO-PQKEM-002")):
+    for level, rule in (("768", "ECD-GO-PQKEM-001"), ("1024", "ECD-GO-PQKEM-002")):
         content = "dk, err := mlkem.NewDecapsulationKey%s(seed)" % level
         found = {f["name"] for f in sc._match_rules("x.go", content)}
         assert "ML-KEM-%s" % level in found, "ML-KEM-%s not named correctly: %s" % (level, found)
         assert "ECDH" not in found, "ML-KEM-%s must not be reported as ECDH" % level
         assert rule in {f["rule_id"] for f in sc._match_rules("x.go", content)}
+
+    # Go does not expose ML-KEM-512, and neither do we.
+    gone = {f["rule_id"] for f in sc._match_rules("x.go", "k, _ := mlkem.GenerateKey512()")}
+    assert not gone, "an ML-KEM-512 rule exists for an API Go does not ship: %s" % gone
+
+
+def test_ssh_cipher_wire_names_are_not_mislabelled_as_aes():
+    """Two ciphers were being reported as name=AES while sitting in a rule declared as AES.
+
+    `ECD-SRC-SSH-CIPHER-001` listed `3des-cbc` and `ECD-SRC-SSH-CIPHER-002` listed
+    `chacha20-poly1305@openssh.com`, so `InsecureCipherTripleDESCBC = "3des-cbc"` and
+    `CipherChaCha20Poly1305 = "chacha20-poly1305@openssh.com"` both came out as AES. 3DES now
+    belongs to ECD-SRC-SSH-LEGACY-001 and ChaCha20 has its own rule, so the names must be right.
+    Found by adversarial review against real x/crypto lines, not by reading the patterns.
+    """
+    sc = ECDATScanner(enable_ml=False)
+    for wire, want, must_not in (
+            ('"chacha20-poly1305@openssh.com"', "ChaCha20", "AES"),
+            ('"3des-cbc"', "3DES", "AES"),
+            ('"aes128-ctr"', "AES", "3DES")):
+        found = sc._match_rules("x.go", wire)
+        names = {f["name"] for f in found}
+        assert want in names, "%s should be reported as %s, got %s" % (wire, want, names)
+        assert must_not not in names, (
+            "%s must not be reported as %s (it was, via a rule declared for another cipher)"
+            % (wire, must_not))
 
 
 def test_no_duplicate_rule_for_existing_primitives():

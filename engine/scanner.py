@@ -196,8 +196,12 @@ RULES = [
          # omitted `.`, so the PHP rule matched Go's `c.rand()` -- a crypto/rand wrapper -- five
          # times in the x/crypto corpus while the Ruby rule correctly did not. Two rules with the
          # same idea and different guards is how one of them ends up wrong.
+         #
+         # The `(?<!func )` guard was then needed in BOTH: aligning the lookbehalf stopped
+         # `c.rand()` but left `func (c *Conversation) rand() io.Reader`, which both rules matched
+         # and which could not be collapsed. Two rules, one idea, one guard -- kept identical.
          regex=r"(?<![A-Za-z0-9_.:@$>])(?:mt_rand|uniqid|str_shuffle)\s*\(\s*\)"
-                r"|(?<![A-Za-z0-9_.:@$])rand\s*\(\s*\)"),
+                r"|(?<![A-Za-z0-9_.:@$])(?<!func )\brand\s*\(\s*\)"),
     # ---- Go (stdlib crypto/*) --------------------------------------------------------------------
     # Names verified against pkg.go.dev rather than recalled.
     #
@@ -213,7 +217,13 @@ RULES = [
          regex=r"\brc4\.NewCipher\s*\("),
     dict(id="ECD-GO-CIPHER-003", name="ChaCha20", primitive="stream-cipher", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
-         regex=r"\bchacha20(?:poly1305)?\.New\s*\(|\bchacha20poly1305\.NewX\s*\("),
+         # The real constructors are `chacha20.NewUnauthenticatedCipher` and `chacha20.HChaCha20`.
+         # An earlier version of this rule asserted `chacha20.New`, which DOES NOT EXIST -- so it
+         # scored zero on the 322-file x/crypto corpus while the SSH ChaCha20 implementation in
+         # ssh/cipher.go went undetected. A dead rule is worse than no rule: it looks like
+         # coverage. Found by adversarial review, not by reading the pattern.
+         regex=r"\bchacha20\.NewUnauthenticatedCipher\s*\(|\bchacha20\.HChaCha20\s*\(|"
+                r"\bchacha20poly1305\.New\w*\s*\("),
     dict(id="ECD-GO-HASH-001", name="MD5", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"\bmd5\.(?:New|Sum)\s*\(|\bcrypto/md5\b|\bgolang\.org/x/crypto/md5\b"),
@@ -248,10 +258,12 @@ RULES = [
     dict(id="ECD-GO-PQKEM-002", name="ML-KEM-1024", primitive="kem", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"\bmlkem\.NewDecapsulationKey1024\s*\(|\bmlkem\.GenerateKey1024\s*\("),
-    dict(id="ECD-GO-PQKEM-003", name="ML-KEM-512", primitive="kem", artefact_class="source",
-         uses="at-rest", key_group=None, evidence="discovered",
-         regex=r"\bmlkem\.NewDecapsulationKey512\s*\(|\bmlkem\.GenerateKey512\s*\("),
-    dict(id="ECD-GO-KEX-001", name="ECDH", primitive="kem", artefact_class="source",
+    # NO ML-KEM-512 RULE, and there never should be one. FIPS 203 defines three parameter sets
+    # and Go's crypto/mlkem ships only 768 and 1024; an ML-KEM-512 rule was written in the first
+    # pass, asserted `mlkem.GenerateKey512`, and could never match real Go. It looked like
+    # complete FIPS 203 coverage on paper. A rule for a parameter set no implementation exposes
+    # is a claim of coverage that cannot be substantiated.
+    dict(id="ECD-GO-KEX-001", name="ECDH", primitive="key-agreement", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          # `ecdh.` alone matched a STRUCT FIELD of the same name: the x/crypto OpenPGP code has
          # `pk.ecdh.parse(r)`, `pk.ecdh.serialize(w)` and `pk.ecdh.byteLen()` on a
@@ -263,11 +275,136 @@ RULES = [
          # token `X25519`, so including it put two ECDH components on one line. Running the
          # corpus is what caught that; reading the rules was not enough.
          regex=r"\becies\.GenerateKey\s*\(|\becdh\.P\d+\s*\("),
+    # ---- Go SSH mode tables (`cipherModes[...]`, `macModes[...]`) ------------------------------
+    # THE TABLE-REGISTRATION IDIOM. Measured against the x/crypto ssh corpus: the factory-call
+    # idiom (`des.NewCipher`, `ecdsa.Sign`) is what the Go pack above matches, and it found 5 of
+    # 46 labelled positives there. Go's own SSH implementation does not use that idiom for its
+    # supported modes -- it REGISTERS them:
+    #
+    #     cipherModes[CipherAES128CTR]        = &cipherMode{16, aes.BlockSize, ...}
+    #     cipherModes[InsecureCipherRC4128]  = &cipherMode{16, 0, ...}
+    #     macModes[HMACSHA512ETM]             = &macMode{64, true, ...}
+    #
+    # Those lines ARE the algorithm selection -- they are what makes a cipher reachable -- and
+    # every one was a false negative. Each constant name carries the algorithm and, for AES, the
+    # key size, so the key size is recovered from the constant rather than guessed.
+    #
+    # Deliberately anchored to `cipherModes[` / `macModes[`, NOT to the constant name alone.
+    # The constants are DEFINED in ssh/common.go as quoted wire names ("aes128-ctr"), which the
+    # SSH rules above already own; matching the bare identifier would double-report the
+    # definition line while adding nothing at the registration line.
+    dict(id="ECD-GO-SSHTBL-AES", name="AES", primitive="ae", artefact_class="source",
+         uses="tls", key_group=1, key_map={"128": 128, "192": 192, "256": 256},
+         evidence="discovered",
+         # `InsecureCipherAES128CBC` also matches, because it contains `CipherAES128`. That is
+         # intended: AES-CBC is registered in the same table and is grover-affected.
+         regex=r"cipherModes\[(?:Insecure)?CipherAES(128|192|256)\w*\]"),
+    dict(id="ECD-GO-SSHTBL-RC4", name="RC4", primitive="stream-cipher", artefact_class="source",
+         uses="tls", key_group=None, evidence="discovered",
+         regex=r"cipherModes\[InsecureCipherRC4(?:128|256)?\]"),
+    dict(id="ECD-GO-SSHTBL-3DES", name="3DES", primitive="block-cipher", artefact_class="source",
+         uses="tls", key_group=None, evidence="discovered",
+         regex=r"cipherModes\[InsecureCipher(?:TripleDESCBC|3DES\w*)\]"),
+    # NO ChaCha20 rule, deliberately. `ECD-SRC-CHACHA-001` already matches the token
+    # `ChaCha20Poly1305`, so a table rule for `cipherModes[CipherChaCha20Poly1305]` put two
+    # ChaCha20 components on one line. That is the FOURTH time the same duplicate defect has
+    # appeared (loop 4's TLS rule, loop 5's `ecdh.X25519()`, and twice here) -- and the fourth
+    # time it was caught by MEASURING rather than by reading. Every one of these is a rule that
+    # looked obviously correct in the diff.
+    dict(id="ECD-GO-SSHTBL-MAC", name="HMAC", primitive="mac", artefact_class="source",
+         uses="tls", key_group=None, evidence="discovered",
+         # One rule for the whole MAC table: the primitive is HMAC in every case, and the digest
+         # inside it does not change the fact that this is an HMAC registration. Splitting
+         # HMAC-SHA1 from HMAC-SHA512 would multiply rules without changing the finding, which
+         # is the same mistake as the six duplicate rules removed in loop 5.
+         regex=r"macModes\[(?:Insecure)?HMAC(?:SHA1|SHA256|SHA512|96|128)\w*\]"),
     dict(id="ECD-GO-RNG-001", name="PRNG", primitive="other", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          # `math/rand` is the non-cryptographic generator. Matched only as an explicit package
          # qualifier or a qualified call, so a local variable named `rand` cannot trigger it.
-         regex=r"\bmath/rand\b|\brand\.(?:Intn|Int31|Int63|Float64|Seed)\s*\("),
+         # `Read` is DELIBERATELY ABSENT. `rand.Read(b)` is the CORRECT API in crypto/rand and the
+         # deprecated weak one in math/rand, and the call is spelled identically in both. My own
+         # decoy -- `rand.Read(buf)` under the comment "crypto/rand, correct" -- caught this
+         # rule firing on the safe form. An ambiguous token is not a detection; the import
+         # decides, and the scanner does not resolve imports. The explicit `math/rand` package
+         # token above still catches the real case.
+         regex=r"\bmath/rand\b|\brand\.(?:Int31n|Int63n|Intn|Int31|Int63|Int|Uint32|Uint64|Float32|Float64|Seed|Shuffle|Perm)\s*\("),
+    # ---- Go DECLARATION AND IMPORT IDIOMS ------------------------------------------------------
+    # Measured against x/crypto: after the mode-table rules, the largest remaining miss class was
+    # Go code that NAMES a primitive without calling a factory -- an import path, a function or
+    # type declaration, a hash constant. The criterion in benchmark/labels/README.md counts all
+    # three as positives (P3 taint source, P1b naming in executable code, P2 hash binding), the
+    # same way it counts `from hashlib import sha1`. These rules close that class.
+    dict(id="ECD-GO-IMPORT-001", name="MD5", primitive="hash", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"[\"']crypto/md5[\"']|[\"']golang\.org/x/crypto/md5[\"']"),
+    dict(id="ECD-GO-IMPORT-002", name="SHA1", primitive="hash", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"[\"']crypto/sha1[\"']|[\"']golang\.org/x/crypto/sha1[\"']"),
+    dict(id="ECD-GO-IMPORT-003", name="SHA256", primitive="hash", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"[\"']crypto/sha256[\"']|[\"'](?:golang\.org/x/crypto/)?sha256[\"']"),
+    # sha1 already has ECD-GO-IMPORT-002, but sha512 had no import rule and was a measured false
+    # negative. The three SHA-2 sizes are separate imports in Go, so all three are needed.
+    dict(id="ECD-GO-IMPORT-010", name="SHA512", primitive="hash", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"[\"']crypto/sha512[\"']|[\"'](?:golang\.org/x/crypto/)?sha512[\"']"),
+    dict(id="ECD-GO-IMPORT-004", name="HMAC", primitive="mac", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"[\"']crypto/hmac[\"']"),
+    dict(id="ECD-GO-IMPORT-005", name="DES", primitive="block-cipher", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"[\"']crypto/des[\"']"),
+    dict(id="ECD-GO-IMPORT-006", name="RC4", primitive="stream-cipher", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"[\"']crypto/rc4[\"']"),
+    dict(id="ECD-GO-IMPORT-007", name="AES", primitive="ae", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"[\"']crypto/aes[\"']"),
+    dict(id="ECD-GO-IMPORT-008", name="ChaCha20", primitive="stream-cipher",
+         artefact_class="source", uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"[\"']golang\.org/x/crypto/chacha20[\"']"),
+    dict(id="ECD-GO-IMPORT-009", name="X25519", primitive="key-agreement",
+         artefact_class="source", uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"[\"']golang\.org/x/crypto/curve25519[\"']"),
+    # P2: a hash constant bound to a field. `Hash: crypto.SHA256` is how Go's SSH KEX binds its
+    # exchange hash, and it is a real algorithm binding rather than a mention.
+    dict(id="ECD-GO-HASHBIND-001", name="SHA256", primitive="hash", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"\bcrypto\.SHA(1|256|512)\b"),
+    # P1b: a type or function declaration whose NAME is the primitive. Anchored to the
+    # declaration keywords so a bare mention in an expression cannot trigger it.
+    dict(id="ECD-GO-DECL-001", name="ChaCha20", primitive="ae", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         # A Go method DECLARATION puts the primitive in the RECEIVER, not the method name:
+    # `func (c *chacha20Poly1305Cipher) readCipherPacket(...)`. The primitive name appears inside
+    # the parenthesised receiver, so a pattern that expects it to be the function name misses it.
+    # All three shapes are covered: type decl, func decl by name, and func decl by receiver.
+    regex=r"\btype\s+\w*[Cc]?[Hh]a?[Cc]ha20\w*\b|"
+                r"\bfunc\s+(?:\([^)]*\)\s*)?\w*[Cc]?[Hh]a?[Cc]ha20\w*\s*\(|"
+                r"\bfunc\s*\([^)]*[Cc]?[Hh]a?[Cc]ha20[^)]*\)|"
+                r"(?<![\w.])(?:&)?\w*[Cc]?[Hh]a?[Cc]ha20\w*Cipher\s*\{"),
+    # `func newAESCTR(`, `func newAESCBCCipher(`, `func newTripleDESCBCCipher(`, `func newRC4(`
+    # are all P1b declarations. Anchored to `func` so a mention in an expression cannot fire.
+    dict(id="ECD-GO-DECL-002", name="AES", primitive="ae", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"\bfunc\s+(?:\([^)]*\)\s*)?new\w*AES\w*\s*\("),
+    dict(id="ECD-GO-DECL-003", name="3DES", primitive="block-cipher", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"\bfunc\s+(?:\([^)]*\)\s*)?new\w*(?:TripleDES|3DES)\w*\s*\("),
+    dict(id="ECD-GO-DECL-004", name="RC4", primitive="stream-cipher", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"\bfunc\s+(?:\([^)]*\)\s*)?new\w*RC4\w*\s*\("),
+    # `var c25519kp curve25519KeyPair` binds a named X25519 key-pair type. ECD-SRC-ECDH-001
+    # matches the UPPERCASE token `X25519`; this type is lowercase, so there is no overlap.
+    dict(id="ECD-GO-DECL-005", name="X25519", primitive="key-agreement", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"\bvar\s+\w+\s+curve25519\w*(?:KeyPair|PublicKey|PrivateKey)\b"),
+    # `poly1305.Verify` / `poly1305.Sum` OPERATE on a MAC chosen at construction. They are the
+    # L2-only shape (negative in L1, positive in L2), which is exactly what the label set records.
+    dict(id="ECD-GO-DECL-006", name="Poly1305", primitive="mac", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"\bpoly1305\.(?:Verify|Sum|New)\s*\("),
 
 
     # ---- Rust (`ring` / rustcrypto) -------------------------------------------------------------
@@ -544,8 +681,11 @@ RULES = [
     # tag, not an encryption cipher, so it is a MAC rather than a cipher-suite primitive.
     dict(id="ECD-SRC-SSH-CIPHER-002", name="AES", primitive="ae", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
-         regex=r"[\"']aes(?:128|192|256)-(?:gcm|ctr)@openssh\.com[\"']|"
-                r"[\"']chacha20-poly1305@openssh\.com[\"']"),
+         # OpenSSH-suffixed AES names ONLY. `chacha20-poly1305@openssh.com` was in this list
+         # too, and the rule is named AES -- so the ChaCha20 constant was reported as AES. It now
+         # has its own rule, ECD-SRC-SSH-CHACHA-001. With ChaCha20 gone, the two AES rules differ
+         # only by the `@openssh.com` suffix and cannot both fire on one line.
+         regex=r"[\"']aes(?:128|192|256)-(?:gcm|ctr)@openssh\.com[\"']"),
     dict(id="ECD-SRC-SSH-MAC-001", name="HMAC", primitive="mac", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          regex=r"[\"'](?:hmac-sha2-(?:256|512)|hmac-sha1(?:-96|-160)?|"
@@ -592,8 +732,23 @@ RULES = [
          regex=r"[\"']ssh-ed25519[\"']"),
     dict(id="ECD-SRC-SSH-CIPHER-001", name="AES", primitive="ae", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
-         regex=r"[\"'](?:aes(?:128|192|256)-(?:ctr|gcm|cbc)|3des-cbc|"
-                r"aes128-cbc|aes256-cbc)[\"']"),
+         # AES names ONLY. Two corrections, both found by adversarial review against real
+         # x/crypto lines rather than by reading the pattern:
+         #   `3des-cbc` was in this list and the rule is named AES, so
+         #   `InsecureCipherTripleDESCBC = "3des-cbc"` was reported as name=AES. It is already
+         #   owned by ECD-SRC-SSH-LEGACY-001, which names it 3DES, so that line produced an AES
+         #   finding AND a 3DES finding for the same cipher. 3DES is removed from here.
+         #   `aes128-cbc`/`aes256-cbc` were redundant with the first alternative and were
+         #   removed; leaving them cannot change the outcome and only misleads a reader.
+         regex=r"[\"'](?:aes(?:128|192|256)-(?:ctr|gcm|cbc))[\"']"),
+    # `chacha20-poly1305@openssh.com` was in ECD-SRC-SSH-CIPHER-002, which is named AES, so
+    # `CipherChaCha20Poly1305 = "chacha20-poly1305@openssh.com"` was reported as name=AES. It is
+    # its own algorithm and gets its own rule. This is the second cipher mislabelled by that
+    # rule; the pattern is that a "cipher" rule accumulates every quoted wire name and inherits
+    # whichever name it was declared with.
+    dict(id="ECD-SRC-SSH-CHACHA-001", name="ChaCha20", primitive="ae", artefact_class="source",
+         uses="tls", key_group=None, evidence="discovered",
+         regex=r"[\"']chacha20-poly1305@openssh\.com[\"']"),
     dict(id="ECD-SRC-SSH-LEGACY-001", name="3DES", primitive="block-cipher", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          regex=r"[\"'](?:3des-cbc|des-cbc|arcfour|arcfour256|blowfish-cbc|cast128-cbc)[\"']"),
