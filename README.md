@@ -40,6 +40,16 @@ pip install -r requirements.txt
 Everything the code imports is declared in `requirements.txt`. Scanning also works with
 **`--no-ml`** (regex-only), which needs no PyTorch at all.
 
+
+### Running via Docker
+For enterprise environments, ECDAT can be run entirely via a Docker container without installing any local dependencies.
+
+```bash
+docker build -t ecdat .
+docker run -p 8501:8501 -v $(pwd):/target ecdat
+```
+*The interactive GUI will be available at `http://localhost:8501`.*
+
 ## Use
 
 ```bash
