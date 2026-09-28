@@ -18,6 +18,7 @@ from engine.gui_helpers import (ASSURANCE_COLOURS, TIER_COLOURS, assurance_count
                                 evidence_needed, ink_on, proven_use, queue_rows,
                                 sensor_status_rows, short_path, tier_counts, unresolved_split,
                                 validate_cbom_document, verification_rows, verification_summary)
+from engine.theme import proof_bar, reveal, scanning_indicator
 
 SCHEMA = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                       "schemas", "bom-1.7.schema.json")
@@ -319,3 +320,78 @@ def test_verification_summary_of_nothing_is_not_a_pass():
     s = verification_summary(None)
     assert s["verdict"] == "not run"
     assert s["verified"] is False
+
+
+# ===========================================================================================
+# Theme system.
+#
+# The CSS was written by appending to a file, and appending silently truncated two rules mid-block
+# on the first attempt. A browser drops a malformed rule without a word, so `test_the_stylesheet_is_structurally_balanced` is not pedantry: it is the only thing standing between a broken edit and a console that looks fine and styles nothing.
+# ===========================================================================================
+
+def test_the_stylesheet_is_structurally_balanced():
+    from engine.theme import CSS
+    assert CSS.count("<style>") == CSS.count("</style>") == 1
+    assert CSS.count("{") == CSS.count("}"), "an unbalanced brace makes a browser drop the rule"
+    assert CSS.count("(") == CSS.count(")"), "an unbalanced paren does the same"
+
+
+def test_the_stylesheet_honours_reduced_motion():
+    from engine.theme import CSS
+    assert "prefers-reduced-motion" in CSS
+    # Motion is permitted, but only conditionally. A console that cannot be read by someone who
+    # has asked their OS for less motion is not finished.
+    assert "@keyframes" in CSS
+
+
+def test_the_stylesheet_defines_every_token_it_uses():
+    import re
+    from engine.theme import CSS
+    declared = set(re.findall(r"(--[a-z0-9-]+)\s*:", CSS))
+    used = set(re.findall(r"var\((--[a-z0-9-]+)\)", CSS))
+    # A var() with no declaration resolves to nothing and inherits silently -- no error, just a
+    # colour that quietly falls back to the browser default.
+    assert used <= declared, f"undeclared custom properties: {sorted(used - declared)}"
+
+
+def test_proof_bar_encodes_the_proven_share_and_its_remainder():
+    html = proof_bar(3, 12)
+    assert "width:25.00%" in html
+    assert "3 proven use" in html
+    assert "9 other findings" in html            # singular/plural on the remainder
+    assert 'role="img"' in html                  # the bar carries meaning for a screen reader
+    assert "3 of 12" in html
+
+
+def test_proof_bar_never_renders_a_zero_total_as_zero_percent():
+    """Zero findings is ambiguous by construction: an unreadable tree and a clean tree both
+    produce it. A 0% bar would render that ambiguity as a clean result."""
+    html = proof_bar(0, 0)
+    assert "width:" not in html
+    assert "no findings" in html
+    assert "coverage manifest" in html
+
+
+def test_proof_bar_singular_remainder_and_clamped_width():
+    assert "1 other finding<" in proof_bar(8, 9)   # singular, and not "1 other findings"
+    # A corrupt input (proven > total) must not overflow the bar past 100%.
+    assert "width:100.00%" in proof_bar(50, 10)
+
+
+def test_proof_bar_escapes_a_hostile_caption():
+    hostile = proof_bar(1, 2, caption="<script>alert(1)</script>")
+    assert "<script>" not in hostile
+    assert "&lt;script&gt;" in hostile
+
+
+def test_reveal_is_capped_so_the_tail_never_arrives_late():
+    assert reveal(0) == "ec-reveal"
+    assert reveal(2) == "ec-reveal ec-reveal-2"
+    # Past step 4 the delay would read as a broken page rather than a stagger.
+    assert reveal(4) == "ec-reveal ec-reveal-4"
+    assert reveal(99) == "ec-reveal ec-reveal-4"
+
+
+def test_scanning_indicator_is_the_only_unattended_animation():
+    assert "ec-scanning" in scanning_indicator("scanning")
+    assert scanning_indicator("probing").count("probing") == 1

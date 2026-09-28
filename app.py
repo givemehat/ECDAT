@@ -73,22 +73,19 @@ ROLES = [
     "Advanced Sensors",
 ]
 
+# The visual system lives in engine/theme.py so it can be reviewed and tested without a running
+# server. These few rules are the components that exist only here.
 CSS = """
 <style>
-  .ecdat-chip { display:inline-block; padding:1px 9px; border-radius:999px; font-size:0.76rem;
-               font-weight:600; letter-spacing:0.02em; }
-  .ecdat-callout { border-left:4px solid #3D4756; padding:0.55rem 0.9rem; margin:0.3rem 0 0.7rem 0;
-                   border-radius:0 6px 6px 0; background:rgba(128,128,128,0.10); }
+  .ecdat-callout { border-left:3px solid var(--panel-edge, #3D4756); padding:0.55rem 0.9rem;
+                   margin:0.3rem 0 0.7rem 0; border-radius:0 2px 2px 0;
+                   background:rgba(128,128,128,0.08); }
   .ecdat-callout p { margin:0.15rem 0; }
-  .ecdat-title { font-size:1.5rem; font-weight:700; line-height:1.2; margin:0; }
-  .ecdat-sub { font-size:0.95rem; opacity:0.85; margin:0.1rem 0 0.7rem 0; }
-  .ecdat-mono { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-                font-size:0.85rem; }
-  .ecdat-foot { font-size:0.8rem; opacity:0.75; }
+  .ecdat-sub { color:var(--ink-dim, #93a1b0); font-size:0.9rem; margin:0.1rem 0 0.7rem 0; }
   .ecdat-tiles { display:flex; flex-wrap:wrap; gap:0.4rem; margin:0.2rem 0 0.6rem 0; }
-  div[data-testid="stMetric"] { border:1px solid rgba(128,128,128,0.32); border-radius:8px;
-                                padding:0.55rem 0.8rem; background:rgba(128,128,128,0.04); }
-  div[data-testid="stMetricLabel"] p { font-size:0.78rem; letter-spacing:0.02em; }
+  div[data-testid="stMetric"] { border:1px solid var(--panel-edge, rgba(128,128,128,0.32));
+                                border-radius:3px; padding:0.55rem 0.8rem;
+                                background:rgba(128,128,128,0.04); }
   ul.ecdat-list li { margin-bottom:0.3rem; }
 </style>
 """
@@ -302,12 +299,22 @@ def integrity_strip(records, coverage):
 
 
 def scan_header(scan, records):
-    """One line describing WHICH scan the numbers on screen came from."""
+    """One line describing WHICH scan the numbers on screen came from, plus the evidence bar.
+
+    The bar sits here, directly under the finding count, because that is the only place a reader
+    will look first -- and a bare count at that moment is exactly the number this tool refuses to
+    show on its own. Filled is proven use; the empty remainder is everything merely reachable.
+    """
+    from engine.theme import proof_bar
     st.markdown(
         f'<div class="ecdat-foot">Scan of <span class="ecdat-mono">'
         f'{escape(short_path(scan["target"]))}</span> at {escape(scan["scanned_at"])} '
         f'· ML engine: {escape(scan["coverage"].get("ml_reason", "unknown"))} '
         f'· {len(records)} finding(s) after de-duplication.</div>', unsafe_allow_html=True)
+    st.markdown(proof_bar(proven_use(records), len(records),
+                          caption="Proven use is a call site or an observed artefact. "
+                                 "Everything else is a capability nothing has been shown to call."),
+                unsafe_allow_html=True)
 
 
 # ---------------------------------------------------------------------------------------------
@@ -1133,7 +1140,14 @@ def main():
         render_no_streamlit()
         return
 
-    st.set_page_config(page_title="ECDAT console", layout="wide")
+    st.set_page_config(page_title="ECDAT console", layout="wide",
+                       initial_sidebar_state="expanded")
+    # The design system is injected first so every later surface inherits it. engine/theme.py is
+    # imported here rather than at module scope because `python -c "import app"` must stay
+    # side-effect free, and because a reviewer should be able to read the stylesheet without
+    # scrolling past a thousand lines of analysis code.
+    from engine.theme import CSS as THEME_CSS
+    st.markdown(THEME_CSS, unsafe_allow_html=True)
     st.markdown(CSS, unsafe_allow_html=True)
     st.markdown('<p class="ecdat-title">ECDAT &mdash; cryptographic discovery console</p>'
                 '<p class="ecdat-sub">Enterprise Cryptographic Discovery &amp; Analysis Tool '
