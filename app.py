@@ -755,8 +755,31 @@ def view_advanced_sensors(scan, records):
 
     # ---- 1. certificates ----------------------------------------------------------------------------
     st.markdown("#### X.509 certificates")
-    cert_records = [r for r in records
-                    if r.get("scanner") == "certificate-sensor" or r.get("key_usage") is not None]
+    # The sensor is RUN HERE, not merely filtered for. This panel previously searched the scan's
+    # existing records for a "certificate-sensor" tag that the source scanner never emits, so the
+    # list was always empty -- and an empty list was then reported as "none were PRESENT". That
+    # is the exact conflation of "did not look" with "found nothing" that this console exists to
+    # prevent, and it was the most serious defect in the file: the panel looked like evidence.
+    cert_error, cert_records = None, []
+    try:
+        from engine.certificates import scan_certificates
+        cert_out, cert_error = _run_sensor("certificate sensor", scan_certificates, target)
+    except ImportError as exc:
+        cert_error = f"engine not importable: {exc}"
+    if cert_error:
+        st.warning(f"The certificate sensor did not run: {cert_error}. Nothing is being claimed "
+                   f"about the certificates in this target.")
+    elif cert_out:
+        # Accept either a bare list of findings or the sensor's dict envelope.
+        if isinstance(cert_out, dict):
+            cert_records = cert_out.get("findings") or cert_out.get("certificates") or []
+            cert_errors = cert_out.get("errors") or []
+            if cert_errors:
+                st.caption(f"{len(cert_errors)} file(s) could not be parsed as certificates. "
+                           f"They are listed as unexamined, not as clean.")
+        else:
+            cert_records = list(cert_out)
+
     cert_rows = gh.certificate_rows(cert_records)
     cert_sum = gh.certificate_summary(cert_records)
     if cert_rows:
@@ -772,9 +795,13 @@ def view_advanced_sensors(scan, records):
         st.dataframe(cert_rows, use_container_width=True, hide_index=True)
         st.caption("Purpose is resolved from the KeyUsage extension (RFC 5280). A certificate "
                    "whose KeyUsage spans both roles stays unresolved on purpose.")
-    else:
-        st.info("No certificates in this scan. That means none were PRESENT, not that none were "
-                "lookable -- check the Evidence view for skipped files before reading it as clean.")
+    elif not cert_error:
+        # Only reachable when the sensor RAN and returned nothing. That is a real negative
+        # result, and it is still qualified rather than stated flatly.
+        st.info("The certificate sensor ran and parsed no X.509 certificate in this target. "
+                "That is a statement about what it read, not a guarantee that none exist: files "
+                "it could not read are counted as unexamined, not as clean. See the Evidence "
+                "view for the coverage manifest.")
 
     # ---- 2. dependency manifests ---------------------------------------------------------------------
     st.markdown("#### Dependency manifests")

@@ -7,9 +7,9 @@ no competitor can make.
 
 | measure | before | after |
 |---|---|---|
-| tests passing | 145 | **406** (+261) |
+| tests passing | 145 | **819** (+674) |
 | mutation score | 57.9% (11/19) | **100% (19/19)** |
-| real defects found by testing | — | **21** (8 mutation + 13 property/fuzz) |
+| real defects found by testing | — | **24** (8 mutation + 13 property/fuzz + 3 UI/schema) |
 | external accuracy benchmark | none | **precision + recall on 2 published corpora** |
 | evidence classes covered | 3 | **5** (+ dependency, + negotiated) |
 
@@ -69,7 +69,7 @@ benchmark already identified. That is measured, prioritised work, not guesswork.
 ## Reproducing everything
 
 ```bash
-python -m pytest tests -q          # 406 tests
+python -m pytest tests -q          # 819 passing, 8 skipped
 python mutation_test.py            # 19 mutants, expects 100% killed
 python benchmark/run_benchmark.py  # external accuracy
 python -c "import app"             # GUI imports without a server

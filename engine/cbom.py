@@ -220,13 +220,29 @@ def _nist_quantum_level(finding, primitive):
     if _is_pqc(name):
         if name in QUANTUM_CATEGORY:
             return QUANTUM_CATEGORY[name]
-        # Parameter-set families: 512/44/128s -> 1, 768/65/192s -> 3, 1024/87/256s -> 5.
-        for token, level in (("512", 1), ("44", 1), ("128s", 1),
-                             ("768", 3), ("65", 3), ("192s", 3),
-                             ("1024", 5), ("87", 5), ("256s", 5)):
+        # Parameter-set families, per FIPS 203 (ML-KEM), 204 (ML-DSA) and 205 (SLH-DSA).
+        #
+        # `name` is upper-cased above, so every token here MUST be upper-case too. These tokens
+        # were once written "128s"/"192s"/"256s", which can never match an upper-cased name, so
+        # all six SLH-DSA parameter sets fell through to the default and every one of them
+        # claimed NIST level 3. That is wrong for 128 (level 1) and 256 (level 5): the tool
+        # overstated a level-1 signature as level 3 and understated a level-5 one as level 3.
+        #
+        # Both the slow ("S") and fast ("F") SLH-DSA variants are listed. FIPS 205 defines six
+        # parameter sets, and recognising only three of them is silently wrong on the rest.
+        #
+        # The two-digit ML-DSA tokens ("44", "65", "87") are checked against a name that also
+        # carries a hash family, so they are matched on a dash boundary rather than as bare
+        # substrings: "44" must not be found inside an unrelated token.
+        for token, level in (("ML-KEM-512", 1), ("ML-DSA-44", 1), ("128S", 1), ("128F", 1),
+                             ("ML-KEM-768", 3), ("ML-DSA-65", 3), ("192S", 3), ("192F", 3),
+                             ("ML-KEM-1024", 5), ("ML-DSA-87", 5), ("256S", 5), ("256F", 5),
+                             ("HQC-128", 1), ("HQC-192", 3), ("HQC-256", 5)):
             if token in name:
                 return level
-        return 3                     # a PQC family we do not have a level for is not "broken"
+        # A PQC family we have no level for is not "broken", and 3 is the honest floor: these
+        # algorithms are not Shor-broken and the tool does not yet have the table to say better.
+        return 3
 
     # Asymmetric primitives really are broken by a CRQC. 0 is correct HERE and only here.
     #
@@ -235,8 +251,16 @@ def _nist_quantum_level(finding, primitive):
     # a list containing only the internal name silently returned None for every key-agreement
     # asset -- the same value an unrecognised primitive gets. An ECDH finding therefore lost its
     # "broken by a CRQC" marking entirely.
+    #
+    # `kdf` and `key-derive` are DELIBERATELY ABSENT. They were here once, and it was wrong:
+    # PBKDF2, Argon2id, scrypt and bcrypt are not Shor targets, so listing them published
+    # `nistQuantumSecurityLevel: 0` -- CycloneDX's own definition of "vulnerable to attack by a
+    # quantum computer" -- for algorithms a CRQC does not break. It also contradicted
+    # `mosca.py`, which scopes KDFs out of the public-key analysis and returns `not-in-scope` for
+    # them. A KDF's quantum story is Grover on its underlying hash, which is a preimage effect
+    # already reflected by the hash's own level; asserting 0 here overstated it by five levels.
     if primitive in ("pke", "signature", "key-agreement", "key-agree", "kem",
-                     "key-derive", "keyderive", "kdf", "pke-encapsulation"):
+                     "pke-encapsulation"):
         return QUANTUM_BROKEN
 
     if "AES" in name:

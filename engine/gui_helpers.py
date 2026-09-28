@@ -45,6 +45,11 @@ TIER_COLOURS = {
 }
 
 ASSURANCE_ORDER = [ASSURANCE_OBSERVED, ASSURANCE_USED, ASSURANCE_DECLARED, ASSURANCE_CAPABILITY]
+
+# A fifth, non-taxonomy state: the record carries no assurance at all. It is deliberately NOT
+# part of ASSURANCE_ORDER's ladder -- it is not a weaker rung, it is the absence of a claim, and
+# folding it into "capability" would claim we assessed something we did not.
+ASSURANCE_UNRATED = "unrated"
 ASSURANCE_COLOURS = {
     ASSURANCE_OBSERVED: "#14532D",
     ASSURANCE_USED: "#1F5C3A",
@@ -74,6 +79,81 @@ POLICY_NOTES = {
         "source": "engine/recommender.py CNSA 2.0 note",
     },
 }
+
+
+def _z_band_label(band):
+    """Render a Z band dict ("Z=5" -> "LOW") as a sorted, readable list.
+
+    The sort key is parsed out of the dict key, and a key that is not "Z=<number>" used to raise
+    IndexError. Malformed keys are skipped rather than allowed to take down the Auditor view; if
+    nothing survives, the column says "n/a" so the absence is visible rather than silent.
+    """
+    parsed = []
+    for key in (band or {}):
+        if "=" not in str(key):
+            continue
+        n = _num(str(key).split("=", 1)[1])
+        if n is not None:
+            parsed.append((n, str(key)))
+    if not parsed:
+        return "n/a"
+    return ", ".join(k for _, k in sorted(parsed, key=lambda pair: pair[0]))
+
+
+def _count(value, default=0):
+    """Coerce a counter to a non-negative int without ever raising.
+
+    Scan output crosses a trust boundary: it is produced by the scanner, serialised to JSON, and
+    re-read at the app boundary with `default=str`, which means an unexpected type is silently
+    stringified rather than rejected. Every numeric field downstream must therefore assume it may
+    arrive as "12", "many", None or a float. `int()` raises on all of those, and a raise inside a
+    helper called by the default view replaces the tool's most honest screen with a traceback.
+
+    A value that cannot be read as a number becomes `default` (0), which is the honest reading:
+    we do not know the count, so we do not claim one. It is deliberately NOT the maximum, because
+    inflating an unknown count would understate the coverage gap.
+    """
+    if isinstance(value, bool):        # bool is an int subclass; True is not a count of 1 file
+        return default
+    if isinstance(value, int):
+        return max(0, value)
+    if isinstance(value, float):
+        return max(0, int(value))
+    if isinstance(value, str):
+        digits = value.strip()
+        if digits.isdigit():
+            return int(digits)
+    return default
+
+
+def _num(value, default=None):
+    """Coerce to a number, tolerating numeric strings. Returns `default` when unreadable."""
+    if isinstance(value, bool):
+        return default
+    if isinstance(value, (int, float)):
+        return value
+    if isinstance(value, str):
+        try:
+            return float(value) if ("." in value or "e" in value.lower()) else int(value)
+        except ValueError:
+            return default
+    return default
+
+
+def _assurance_value(record):
+    """The assurance level of a record, or None when the record does not carry one.
+
+    `proven_use` and `assurance_counts` used `record["assurance"]["value"]` and raised KeyError on
+    any record without that key -- while `tier_counts`, doing the identical job three functions
+    away, used `.get`. The inconsistency was inside one module. `proven_use` is the worse case: it
+    runs in the scan header before the app's error handling starts, so one malformed record
+    killed the header on every view.
+    """
+    node = (record or {}).get("assurance")
+    if isinstance(node, dict):
+        return node.get("value")
+    return node
+
 
 Z_BANDS = (
     (0, 5, "below the expert-consensus window: plan-as-if-early (the window itself is 10-20y)"),
@@ -281,10 +361,18 @@ def deadline_verdict(record, deadline_year) -> str:
     """
     if not deadline_year:
         return DEADLINE_NO_POLICY
-    start = (record.get("risk") or {}).get("latest_safe_migration_start")
+    # Both sides are coerced before comparing. A year that arrives as a string -- which happens
+    # whenever the record has been through the JSON boundary -- made `start > deadline_year`
+    # raise TypeError, and that comparison is in the function whose own docstring records that
+    # this line once let an unassessed artefact silently become a pass. A crash here is the
+    # second-worst outcome; a wrong verdict is the worst.
+    deadline = _num(deadline_year)
+    if deadline is None:
+        return DEADLINE_NO_POLICY
+    start = _num((record.get("risk") or {}).get("latest_safe_migration_start"))
     if start is None:
         return DEADLINE_UNRATED
-    return DEADLINE_OVERRUN if start > deadline_year else DEADLINE_WITHIN
+    return DEADLINE_OVERRUN if start > deadline else DEADLINE_WITHIN
 
 
 def late_records(records, deadline_year) -> list:
@@ -384,9 +472,17 @@ def tier_counts(records) -> dict:
 
 
 def assurance_counts(records) -> dict:
+    """Histogram of assurance levels, with a real bucket for "we could not tell".
+
+    A record whose assurance is missing used to land under a literal `None` key, which the chart
+    then rendered as a category with no label. An unassessable finding is a distinct and
+    important state -- the same reason DEADLINE_UNRATED exists -- so it gets a named bucket
+    rather than a null. It is deliberately NOT folded into "capability": absence of evidence is
+    not evidence of a weaker-but-known claim.
+    """
     histogram = {level: 0 for level in ASSURANCE_ORDER}
     for record in records:
-        level = record["assurance"]["value"]
+        level = _assurance_value(record) or ASSURANCE_UNRATED
         histogram[level] = histogram.get(level, 0) + 1
     return histogram
 
@@ -394,7 +490,7 @@ def assurance_counts(records) -> dict:
 def proven_use(records) -> int:
     """Findings whose evidence proves a USE, not merely a capability. Never report without it."""
     return sum(1 for r in records
-               if r["assurance"]["value"] in (ASSURANCE_USED, ASSURANCE_OBSERVED))
+               if _assurance_value(r) in (ASSURANCE_USED, ASSURANCE_OBSERVED))
 
 
 def hndl_records(records) -> list:
@@ -409,9 +505,14 @@ def coverage_verdict(coverage) -> dict:
     instead of a bare '0 findings'.
     """
     coverage = coverage or {}
-    seen = int(coverage.get("files_seen", 0) or 0)
-    scanned = int(coverage.get("files_scanned", 0) or 0)
-    skipped = int(coverage.get("files_skipped", 0) or 0)
+    # Every counter is coerced through a helper rather than int() directly. `coverage` is
+    # attacker-adjacent data: it is produced by the scanner, round-tripped through JSON, and
+    # re-read with default=str at the app boundary, so a non-numeric value reaches here intact.
+    # int("many") raised ValueError and took down the DEFAULT view -- the one screen whose entire
+    # job is to be trustworthy -- with a raw traceback.
+    seen = _count(coverage.get("files_seen", 0))
+    scanned = _count(coverage.get("files_scanned", 0))
+    skipped = _count(coverage.get("files_skipped", 0))
     errors = list(coverage.get("errors") or [])
     if seen == 0 and scanned == 0:
         state = "nothing-examined"
@@ -451,7 +552,7 @@ def auditor_rows(records) -> list:
             "Artefact": record.get("name"),
             "Primitive": record.get("primitive"),
             "Tier": record.get("tier"),
-            "Assurance": record["assurance"]["value"],
+            "Assurance": _assurance_value(record) or "unrated",
             "Purpose": record["purpose"]["value"],
             "X (y)": risk.get("x"),
             "Y (y)": risk.get("y"),
@@ -465,7 +566,12 @@ def auditor_rows(records) -> list:
             # while `z_stable` still said "yes". A sensitivity column that displays nothing
             # while claiming stability is worse than no column.
             "Tier at Z": " / ".join(str(v) for v in band.values()) if band else "not assessed",
-            "Z values": ", ".join(sorted(band, key=lambda k: float(k.split("=")[1]))) or "n/a",
+            # The Z band is keyed "Z=<n>". A key without "=" used to raise IndexError on
+            # k.split("=")[1] -- a crash in the Auditor view, from a dict literal that
+            # engine/mosca.py owns. The key format is an implicit contract between two modules,
+            # so it is now parsed defensively: an unparseable key is dropped and, if that
+            # leaves nothing, the column says so rather than exploding.
+            "Z values": _z_band_label(band),
             "Stable across Z": "yes" if risk.get("z_stable", True) else "FLIPS",
             # A string, not a number: mixing "" and 2048 in one column makes the table
             # unserialisable, and "not stated" is a more honest cell than an empty one.
@@ -506,7 +612,7 @@ def queue_rows(records, deadline_year=None) -> list:
             "Target": rec.get("algorithm"),
             "Status": status,
             "Action": rec.get("action"),
-            "Assurance": record["assurance"]["value"],
+            "Assurance": _assurance_value(record) or "unrated",
             "X+Y": risk.get("x_y"),
             "Z (y)": risk.get("z"),
             "Margin": risk.get("margin"),
@@ -563,7 +669,13 @@ def deadline_countdown(year, current_year) -> str:
     """
     if not year:
         return "n/a"
-    remaining = year - current_year
+    # A year arriving as a string (every value that has been through JSON) made this subtraction
+    # raise TypeError. Unknown is rendered as "n/a" rather than guessed at.
+    target = _num(year)
+    now = _num(current_year, 0)
+    if target is None:
+        return "n/a"
+    remaining = target - now
     if remaining < 0:
         # A lapsed deadline must never read as a countdown. "-3 year(s) from 2026" is arithmetically
         # correct and rhetorically useless: the reader skims "from 2026", sees a small magnitude,

@@ -60,3 +60,6 @@ m*.txt
 
 # Third-party corpora cloned by the benchmark harness (pinned, not committed)
 benchmark/corpora/
+
+# Reference attachment from the SIH deck comparison; unreadable (truncated archive), kept local only
+_ref/

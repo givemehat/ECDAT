@@ -26,11 +26,27 @@ jobs:
     # Scan the repository itself. `--fail-on` is a gate: the job fails when a
     # CRITICAL artefact appears, which is the DevSecOps use case the brief asks
     # for. Adjust Z and the policy pack per organisation.
+    #
+    # The exit code must be inspected rather than discarded. A bare `|| echo ...` was here and
+    # it was a false assurance: `||` consumes the status, so a policy trip, a traceback and a
+    # bad-argument crash all exited 0, and the most alarming message the tool can emit was
+    # printed for a plain crash. Only signal 1 (the gate tripping) is downgraded here; anything
+    # >= 2 is a real failure and still fails the job.
     - name: Run ECDAT scan
       run: |
         export PYTHONPATH=.
-        python cli.py . --format cbom --z 10 --policy india_dst_nqm --out ./out --fail-on CRITICAL \
-          || echo "::warning::ECDAT found CRITICAL quantum risk (see artefacts)"
+        set +e
+        python cli.py . --format cbom --z 10 --policy india_dst_nqm --out ./out --fail-on CRITICAL
+        rc=$?
+        set -e
+        if [ "$rc" -eq 0 ]; then
+          echo "ECDAT scan completed with no CRITICAL finding."
+        elif [ "$rc" -eq 1 ]; then
+          echo "::warning::ECDAT found CRITICAL quantum risk (see artefacts)"
+        else
+          echo "::error::ECDAT scan failed to run (exit $rc) -- this is a tool failure, not a finding"
+          exit "$rc"
+        fi
 
     - name: Summarise
       if: always()

@@ -1,0 +1,74 @@
+# .dockerignore
+#
+# THIS FILE IS A PROVENANCE CONTROL, NOT A BUILD OPTIMISATION.
+#
+# `Dockerfile` runs `COPY . .`, and the working tree deliberately contains cloned checkouts of
+# third-party code under `benchmark/corpora/` (paramiko, CryptoAPI-Bench, golang.org/x/crypto).
+# Those are excluded from git by .gitignore -- but .gitignore is NOT consulted by Docker. Without
+# this file, `docker build` would bake another project's source code into our published image, which
+# is exactly the provenance failure PROVENANCE.md exists to prevent.
+#
+# It also keeps scratch output and local virtualenvs out of the image, and keeps the build context
+# small enough that a rebuild is fast.
+
+# ---- third-party source: must never enter the image --------------------------------------------
+benchmark/corpora/
+**/corpora/
+benchmark/_output/
+_verify/
+_out/
+scratch/
+tmp/
+
+# ---- scratch output from the long-running tools --------------------------------------------------
+*.report.json
+ecdat_report.json
+_*.txt
+_*.html
+st.txt
+st_e.txt
+*.log
+
+# ---- secrets and credentials: refuse them unconditionally -----------------------------------------
+# engine/fspolicy.py refuses to read these at scan time; the build context deserves the same rule.
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+*.keystore
+.netrc
+.git-credentials
+.aws/
+.ssh/
+credentials.json
+secrets/
+
+# ---- local Python environment and caches --------------------------------------------------------
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.mutation_out/
+
+# ---- VCS and editor noise ------------------------------------------------------------------------
+.git/
+.gitignore
+.github/
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# ---- local benchmark state that is regenerated, not shipped ---------------------------------------
+benchmark/_bench_state.json
+*.pyc

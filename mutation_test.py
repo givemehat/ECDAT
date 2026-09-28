@@ -163,6 +163,9 @@ def main():
     survived = [r for r in results if r[1] == "SURVIVED"]
     stale = [r for r in results if r[1] == "STALE"]
     total = len(results)
+    # A STALE mutant was never actually tested: the pattern no longer matches the source, so no
+    # mutant was applied and no test ran. Scoring those as anything other than zero would let
+    # the score drift upward as the code moves and the harness silently stops measuring.
     score = (100.0 * killed / total) if total else 0.0
 
     print("\n" + "=" * 74)
@@ -175,8 +178,30 @@ def main():
         print("                        would ship undetected. Each is a test to write next:")
         for mid, _, detail in survived:
             print(f"    - {mid}: {detail}")
-    else:
+    elif not stale:
         print("  Every mutant was killed: the suite detects defects of these shapes.")
+    else:
+        print("  Every mutant that could be applied was killed -- but see the STALE entries")
+        print("  above: the harness did not measure the whole mutation set.")
+
+    # THE EXIT CODE IS THE POINT OF THIS SCRIPT, so it must not be reachable by a run that
+    # measured nothing. `return 1 if survived else 0` used to return 0 when EVERY mutant was
+    # stale -- the suite never ran, and the harness reported a perfect result. PROVENANCE.md
+    # nominates this exact command as the project's proof of correctness, so a false pass here
+    # is a false claim in the project's own documentation. An unmeasured run now fails.
+    if total == 0:
+        print("\nFAIL: no mutants were defined. Nothing was measured.")
+        return 2
+    if len(stale) == total:
+        print(f"\nFAIL: all {total} mutants are STALE. The test suite was never run, so this")
+        print("      result says nothing about the suite. Fix the patterns in MUTANTS so they")
+        print("      match the current source, then re-run.")
+        return 2
+    if stale:
+        print(f"\nPARTIAL: {len(stale)} of {total} mutants are stale and were not measured.")
+        print("        The {killed}/{total} figure above covers only the applicable mutants."
+              .format(killed=killed, total=total))
+        return 2
     return 1 if survived else 0
 
 

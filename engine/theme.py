@@ -39,9 +39,22 @@ from engine.gui_helpers import escape
 
 CSS = """
 <style>
-/* ---- tokens ------------------------------------------------------------------------------- */
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap');
+/* ---- tokens -------------------------------------------------------------------------------
+   NO @import, ON PURPOSE.
 
+   An earlier version of this stylesheet began with an `@import` of Google Fonts. That was a real
+   network request on every page load, and it silently broke a claim this project makes in three
+   places and treats as a product guarantee: "Everything renders offline: no CDN, no network
+   call, no telemetry." A security tool that phones a font CDN the moment an analyst opens it
+   is leaking the fact that they are analysing cryptography, and it cannot be used in an
+   air-gapped review at all.
+
+   So the type stack is declared as a LOCAL font list with a solid generic fallback, and the
+   pairing degrades rather than blocking. Instrument Serif and IBM Plex Mono are named first
+   because they are what the design was drawn around; on a machine without them the console
+   falls back to the platform serif and monospace and loses only the character, never legibility
+   or a single bit of function.
+   ------------------------------------------------------------------------------------------ */
 :root {
   --chassis:     #0d1014;   /* the bench the instrument sits on */
   --panel:       #141920;   /* raised surface, one step up from the chassis */
