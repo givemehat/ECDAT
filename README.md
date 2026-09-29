@@ -4,6 +4,7 @@
 
 [![Tests](https://github.com/givemehat/IndraMesh/actions/workflows/tests.yml/badge.svg)](https://github.com/givemehat/IndraMesh/actions/workflows/tests.yml)
 [![Quantum Risk Scan](https://github.com/givemehat/IndraMesh/actions/workflows/indramesh_scan.yml/badge.svg)](https://github.com/givemehat/IndraMesh/actions/workflows/indramesh_scan.yml)
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/deploy?repository=givemehat/ECDAT&branch=master&mainModule=app.py)
 
 **Smart India Hackathon 2026 | Problem Statement SIH26164**
 National Technical Research Organisation (NTRO) | Blockchain & Cybersecurity | Category: Software
