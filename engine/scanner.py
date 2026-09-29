@@ -700,6 +700,62 @@ RULES = [
     dict(id="ECD-SRC-SSH-DH-001", name="DH", primitive="key-agreement", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          regex=r"[\"']diffie-hellman-group(?:1|14|16|18|-exchange)-sha(?:1|256|384|512)[\"']"),
+
+    # -----------------------------------------------------------------------------------------
+    # OpenSSH algorithm identifiers.
+    #
+    # WHY THIS RULE EXISTS, AND WHY IT IS SAFE. Every other rule in this file matches a token
+    # like "RSA" or "ECDSA" that a developer chose freely. This one matches a CLOSED, PUBLISHED
+    # vocabulary: the algorithm names defined by the OpenSSH protocol and by RFC 8332. A string
+    # ending in "@openssh.com" can only be one of those registered names, so the false-positive
+    # risk is close to zero -- unlike a rule for, say, a variable named `ec_key`.
+    #
+    # It was added because 13 labelled misses in the paramiko corpus were exactly this shape, in
+    # files like transport.py where the entire supported-algorithm table is built from these
+    # names. That table IS the cryptographic posture of an SSH implementation; missing it means
+    # reporting an SSH client as having no key exchange at all.
+    #
+    # The `@openssh.com` suffix is REQUIRED in the pattern and is the whole safety argument. A
+    # bare `ecdsa-sha2-nistp256` would match prose and comments; requiring the namespaced suffix
+    # keeps it to executable registrations.
+    # -----------------------------------------------------------------------------------------
+    dict(id="ECD-SRC-SSHNAME-001", name="ECDSA", primitive="signature", artefact_class="source",
+         uses="tls", key_group=None, evidence="discovered",
+         regex=r"[\"']ecdsa-sha2-nistp(?:256|384|521)(?:-cert)?-v01@openssh\.com[\"']"),
+    dict(id="ECD-SRC-SSHNAME-002", name="RSA", primitive="signature", artefact_class="source",
+         uses="tls", key_group=None, evidence="discovered",
+         regex=r"[\"'](?:ssh-rsa|rsa-sha2-(?:256|512))(?:-cert)?-v01@openssh\.com[\"']"),
+    dict(id="ECD-SRC-SSHNAME-003", name="Ed25519", primitive="signature", artefact_class="source",
+         uses="tls", key_group=None, evidence="discovered",
+         regex=r"[\"']ssh-ed25519(?:-cert)?-v01@openssh\.com[\"']"),
+    dict(id="ECD-SRC-SSHNAME-004", name="HMAC", primitive="mac", artefact_class="source",
+         uses="tls", key_group=None, evidence="discovered",
+         regex=r"[\"']hmac-(?:sha2-(?:256|512)(?:-etm)?|sha1(?:-96)?|md5(?:-96)?)"
+                r"(?:-etm)?@openssh\.com[\"']"),
+    # `curve25519-sha256` and `curve25519-sha256@libssh.org` are ECDH: X25519 is a Montgomery
+    # curve and Diffie-Hellman on it is key agreement, not a signature. Getting this primitive
+    # wrong would send an auditor to the wrong replacement algorithm.
+    dict(id="ECD-SRC-SSHNAME-005", name="ECDH", primitive="key-agreement", artefact_class="source",
+         uses="tls", key_group=None, evidence="discovered",
+         regex=r"[\"']curve25519-sha256(?:@libssh\.org)?@openssh\.com[\"']"
+                r"|[\"']curve25519-sha256@libssh\.org[\"']"),
+    # ecdh-sha2-nistp256/384/521 is Diffie-Hellman on the NIST curves. Declared BEFORE any
+    # generic `ecdh` rule so the specific group name wins, and deliberately NOT matching
+    # `ecdsa-sha2-*`: ECDH and ECDSA share the curve but not the job.
+    dict(id="ECD-SRC-SSHNAME-006", name="ECDH", primitive="key-agreement", artefact_class="source",
+         uses="tls", key_group=None, evidence="discovered",
+         regex=r"[\"']ecdh-sha2-nistp(?:256|384|521)(?:-cert)?-v01@openssh\.com[\"']"),
+    # A hybrid: X25519 classical PLUS ML-KEM-768. The composite is reported, and the migration
+    # verifier treats it as a hybrid -- BOTH halves must be broken, so this is a weaker
+    # exposure than either half alone. Reporting only ML-KEM would understate it.
+    dict(id="ECD-SRC-SSHNAME-007", name="ML-KEM-768", primitive="kem", artefact_class="source",
+         uses="tls", key_group=None, evidence="discovered",
+         regex=r"[\"']mlkem768x25519-(?:sha256|mlkem768x25519)@openssh\.com[\"']"
+                r"|[\"']sntrup761x25519-sha512@openssh\.com[\"']"),
+    # `ext-info-c`, `kex-strict-c-v00@openssh.com` and `server-sig-algs` are PROTOCOL markers,
+    # not algorithms. They are excluded on purpose: a rule matching them would inflate the count
+    # with entries that name no primitive at all.
+    # -----------------------------------------------------------------------------------------
     # REMOVED: ECD-SRC-PYCA-EC-002.
     # Its pattern (`ec.EllipticCurvePrivateKey`, `ec.SECP\w*R1`) is a strict SUBSET of
     # ECD-SRC-PYCA-EC-001, so `ec.generate_private_key(ec.SECP256R1())` matched both and the

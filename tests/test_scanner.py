@@ -196,7 +196,23 @@ def test_every_rule_is_actually_executed(tmp_path, scanner):
         "ECD-JS-SIG-003": "crypto.createSign('ecdsa-with-SHA256')",
         # --- dedup + recall fixes found by probing the SSH rule set directly.
         "ECD-SRC-SSH-DH-002": 'KEX = "ffdh2048-sha256"',
+        # --- OpenSSH algorithm identifiers.
+        #
+        # These are a CLOSED, PUBLISHED vocabulary, which is why these rules are near
+        # false-positive-free: a quoted string ending in "@openssh.com" can only be a registered
+        # protocol name. They were added to recover 13 labelled misses in the paramiko corpus,
+        # where the whole supported-algorithm table is built from these identifiers. The primitive
+        # is asserted too, because getting ECDH and ECDSA the wrong way round would point an
+        # auditor at the wrong replacement algorithm.
+        "ECD-SRC-SSHNAME-001": '"ecdsa-sha2-nistp256-cert-v01@openssh.com": ECDSAKey,',
+        "ECD-SRC-SSHNAME-002": '"rsa-sha2-256-cert-v01@openssh.com": RSAKey,',
+        "ECD-SRC-SSHNAME-003": '"ssh-ed25519-cert-v01@openssh.com": Ed25519Key,',
+        "ECD-SRC-SSHNAME-004": '"hmac-sha2-256-etm@openssh.com": {"class": sha256, "size": 32},',
+        "ECD-SRC-SSHNAME-005": 'KEX = "curve25519-sha256@libssh.org"',
+        "ECD-SRC-SSHNAME-006": '"ecdh-sha2-nistp256-cert-v01@openssh.com": ECDHKey,',
+        "ECD-SRC-SSHNAME-007": 'KEX = "mlkem768x25519-sha256@openssh.com"',
     }
+
     assert set(samples) == {r["id"] for r in RULES}, "a rule has no positive test"
     # A rule declared `artefact_class="config"` only fires for a file the scanner recognises as
     # configuration. Writing every sample to `<rule_id>.txt.py` made the config rules
@@ -211,6 +227,66 @@ def test_every_rule_is_actually_executed(tmp_path, scanner):
         if rule_id not in fired:
             unreachable.append(rule_id)
     assert not unreachable, f"rules defined but never fire: {unreachable}"
+
+
+# ===========================================================================================
+# OpenSSH algorithm identifiers: primitive correctness and false-positive rejection.
+#
+# The reachability test above proves each rule FIRES. These prove it fires for the RIGHT REASON.
+# Both directions matter: an OpenSSH identifier that resolves to the wrong primitive would send
+# an auditor to the wrong replacement algorithm, which is worse than reporting nothing.
+# ===========================================================================================
+
+def test_openssh_identifiers_resolve_to_the_right_primitive(tmp_path, scanner):
+    """curve25519 and ecdh-sha2 are KEY AGREEMENT; ecdsa-sha2 and rsa-sha2 are SIGNATURES.
+
+    ECDSA and ECDH share the NIST curves, so the distinction is easy to get backwards and
+    impossible to notice from a count. Getting it wrong would recommend a signature algorithm
+    where a KEM belongs.
+    """
+    cases = {
+        '"ecdsa-sha2-nistp384-cert-v01@openssh.com": ECDSAKey,': "signature",
+        '"rsa-sha2-512-cert-v01@openssh.com": RSAKey,': "signature",
+        '"ssh-ed25519-cert-v01@openssh.com": Ed25519Key,': "signature",
+        '"ecdh-sha2-nistp256-cert-v01@openssh.com": ECDHKey,': "key-agreement",
+        'KEX = "curve25519-sha256@libssh.org"': "key-agreement",
+    }
+    for line, want in cases.items():
+        p = _write(str(tmp_path / f"t{abs(hash(line))}.py"), line)
+        fired = [f for f in scanner._match_rules(p, line)
+                 if f["rule_id"].startswith("ECD-SRC-SSHNAME")]
+        assert fired, f"no OpenSSH rule fired on {line!r}"
+        assert any(f["primitive"] == want for f in fired), (
+            f"{line!r} should resolve to {want}, got {[f['primitive'] for f in fired]}")
+
+
+def test_openssh_protocol_markers_are_not_reported_as_algorithms(tmp_path, scanner):
+    """`kex-strict-c-v00@openssh.com` and `ext-info-c` name NO primitive.
+
+    They are protocol negotiation markers. A rule that matched them would report cryptography
+    that does not exist -- and would do it in exactly the file (transport.py) where the real
+    algorithm table lives, making the noise hard to spot.
+    """
+    for line in ('"kex-strict-c-v00@openssh.com"', '"ext-info-c"',
+                 "# supports ecdsa-sha2-nistp256-cert-v01@openssh.com in theory"):
+        p = _write(str(tmp_path / f"m{abs(hash(line))}.py"), line)
+        fired = [f for f in scanner._match_rules(p, line)
+                 if f["rule_id"].startswith("ECD-SRC-SSHNAME")]
+        assert not fired, f"protocol marker {line!r} was reported as {fired}"
+
+
+def test_a_bare_curve_name_is_not_double_counted_as_an_openssh_identifier(tmp_path, scanner):
+    """`"ecdsa-sha2-nistp256"` without the namespaced suffix is another rule's job.
+
+    Double-reporting one ECDSA use from two rule_ids was a real defect we already fixed once
+    (ECD-SRC-PYCA-EC-002 was removed for exactly this). This guards against reintroducing it
+    through the new rules.
+    """
+    p = _write(str(tmp_path / "bare.py"), 'ALG = "ecdsa-sha2-nistp256"')
+    fired = [f["rule_id"] for f in scanner._match_rules(p, 'ALG = "ecdsa-sha2-nistp256"')
+             if f["rule_id"].startswith("ECD-SRC-SSHNAME")]
+    assert not fired, f"a bare curve name matched the OpenSSH rules: {fired}"
+
 
 
 def test_ecc_is_detected(tmp_path, scanner):
