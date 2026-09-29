@@ -21,7 +21,7 @@ disagree with either:
 
 - **ML-KEM is labelled NEGATIVE.** `crypto/mlkem` is FIPS 203 — post-quantum, the *remedy*. The
   criterion asks for quantum-**vulnerable** primitives. Labelling ML-KEM a vulnerability would
-  invert the meaning of the scan. The consequence is visible in the results: ECDAT's correct,
+  invert the meaning of the scan. The consequence is visible in the results: IndraMesh's correct,
   useful ML-KEM detection is scored as a false positive. It is a property of the criterion, not a
   defect, and it is recorded in `negatives_audited` rather than suppressed.
 - **Poly1305 is L2-only**, because it is in neither declared break model in `pqtaxonomy.py`.
@@ -47,7 +47,7 @@ important caveat in this benchmark:
 
 - CryptoAPI-Bench ships `CryptoAPI-Bench_details.xlsx` with 182 rows of **API-misuse** labels
   (`Constant Seed`, `Usage of ECB`, `RSA keysize 1024 bits`, `DES used`, `PBE iteration < 1000`,
-  ...). ECDAT detects **quantum**-vulnerable primitives. Scoring one against the other would be a
+  ...). IndraMesh detects **quantum**-vulnerable primitives. Scoring one against the other would be a
   category error, so no number in `RESULTS.md` is derived from that spreadsheet.
 - paramiko ships no labels at all.
 

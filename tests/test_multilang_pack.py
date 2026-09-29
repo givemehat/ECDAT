@@ -21,82 +21,82 @@ published API surfaces; no third-party scanner's identifiers or patterns were co
 
 import pytest
 
-from engine.scanner import ECDATScanner, RULES
+from engine.scanner import IndraMeshScanner, RULES
 
 _ALL_IDS = {r["id"] for r in RULES}
 
 # (label, filename, content, rule_ids that MUST fire)
 POSITIVES = [
     # --- Go (stdlib crypto/*) -------------------------------------------------------------------
-    ("go des", "a.go", "b, _ := des.NewCipher(key)", ["ECD-GO-CIPHER-001"]),
-    ("go 3des", "a.go", "c, _ := des.NewTripleDESCipher(key)", ["ECD-GO-CIPHER-001"]),
-    ("go rc4", "a.go", "c, _ := rc4.NewCipher(key)", ["ECD-GO-CIPHER-002"]),
-    ("go chacha20poly1305", "a.go", "aead, _ := chacha20poly1305.New(key)", ["ECD-GO-CIPHER-003"]),
-    ("go md5", "a.go", "h := md5.New()", ["ECD-GO-HASH-001"]),
-    ("go sha1 import", "a.go", 'import "crypto/sha1"', ["ECD-GO-HASH-002"]),
-    ("go ecdsa", "a.go", "r, s, _ := ecdsa.Sign(rnd, priv, digest)", ["ECD-GO-SIG-001"]),
+    ("go des", "a.go", "b, _ := des.NewCipher(key)", ["IM-GO-CIPHER-001"]),
+    ("go 3des", "a.go", "c, _ := des.NewTripleDESCipher(key)", ["IM-GO-CIPHER-001"]),
+    ("go rc4", "a.go", "c, _ := rc4.NewCipher(key)", ["IM-GO-CIPHER-002"]),
+    ("go chacha20poly1305", "a.go", "aead, _ := chacha20poly1305.New(key)", ["IM-GO-CIPHER-003"]),
+    ("go md5", "a.go", "h := md5.New()", ["IM-GO-HASH-001"]),
+    ("go sha1 import", "a.go", 'import "crypto/sha1"', ["IM-GO-HASH-002"]),
+    ("go ecdsa", "a.go", "r, s, _ := ecdsa.Sign(rnd, priv, digest)", ["IM-GO-SIG-001"]),
     ("go rsa pkcs1v15", "a.go", "err := rsa.SignPKCS1v15(rnd, priv, crypto.SHA256, d)",
-     ["ECD-GO-SIG-002"]),
-    ("go rsa pss", "a.go", "o := &rsa.PSSOptions{}", ["ECD-GO-SIG-003"]),
-    ("go ed25519", "a.go", "pub, _, _ := ed25519.GenerateKey(rnd)", ["ECD-GO-SIG-004"]),
-    ("go ecdh", "a.go", "k, _ := ecdh.P256().GenerateKey(rnd)", ["ECD-GO-KEX-001"]),
-    ("go math/rand", "a.go", 'import "math/rand"', ["ECD-GO-RNG-001"]),
-    ("go math/rand qualified", "a.go", "n := rand.Intn(100)", ["ECD-GO-RNG-001"]),
+     ["IM-GO-SIG-002"]),
+    ("go rsa pss", "a.go", "o := &rsa.PSSOptions{}", ["IM-GO-SIG-003"]),
+    ("go ed25519", "a.go", "pub, _, _ := ed25519.GenerateKey(rnd)", ["IM-GO-SIG-004"]),
+    ("go ecdh", "a.go", "k, _ := ecdh.P256().GenerateKey(rnd)", ["IM-GO-KEX-001"]),
+    ("go math/rand", "a.go", 'import "math/rand"', ["IM-GO-RNG-001"]),
+    ("go math/rand qualified", "a.go", "n := rand.Intn(100)", ["IM-GO-RNG-001"]),
     # --- Rust (ring / rustcrypto) -----------------------------------------------------------------
-    ("rust aes-gcm", "a.rs", "use aes_gcm::Aes256Gcm;", ["ECD-RUST-CIPHER-002"]),
-    ("rust md5", "a.rs", "let h = md5::Md5::new();", ["ECD-RUST-HASH-001"]),
-    ("rust sha1", "a.rs", "let h = sha1::Sha1::new();", ["ECD-RUST-HASH-002"]),
-    ("rust ecdsa", "a.rs", "let k = ecdsa::SigningKey::from_bytes(&b)?;", ["ECD-RUST-SIG-001"]),
-    ("rust ed25519", "a.rs", "let kp = Ed25519KeyPair::generate();", ["ECD-RUST-SIG-002"]),
-    ("rust rsa", "a.rs", "let k = rsa::RsaPrivateKey::new(n, e);", ["ECD-RUST-SIG-003"]),
-    ("rust thread_rng", "a.rs", "let mut r = thread_rng();", ["ECD-RUST-RNG-001"]),
+    ("rust aes-gcm", "a.rs", "use aes_gcm::Aes256Gcm;", ["IM-RUST-CIPHER-002"]),
+    ("rust md5", "a.rs", "let h = md5::Md5::new();", ["IM-RUST-HASH-001"]),
+    ("rust sha1", "a.rs", "let h = sha1::Sha1::new();", ["IM-RUST-HASH-002"]),
+    ("rust ecdsa", "a.rs", "let k = ecdsa::SigningKey::from_bytes(&b)?;", ["IM-RUST-SIG-001"]),
+    ("rust ed25519", "a.rs", "let kp = Ed25519KeyPair::generate();", ["IM-RUST-SIG-002"]),
+    ("rust rsa", "a.rs", "let k = rsa::RsaPrivateKey::new(n, e);", ["IM-RUST-SIG-003"]),
+    ("rust thread_rng", "a.rs", "let mut r = thread_rng();", ["IM-RUST-RNG-001"]),
     # --- JavaScript / TypeScript (Node crypto, WebCrypto) ----------------------------------------
-    ("js 3des", "a.js", "createCipheriv('des-ede3-cbc', k, iv)", ["ECD-JS-CIPHER-001"]),
-    ("js rc4", "a.js", "crypto.createCipheriv('rc4', key, iv)", ["ECD-JS-CIPHER-002"]),
-    ("js md5", "a.js", "crypto.createHash('md5')", ["ECD-JS-HASH-001"]),
-    ("js sha1", "a.js", "crypto.createHmac('sha1', key)", ["ECD-JS-HASH-002"]),
-    ("js rsa-sha1", "a.js", "crypto.createSign('RSA-SHA1')", ["ECD-JS-SIG-001"]),
-    ("js rsa verify", "a.js", "crypto.createVerify('RSA')", ["ECD-JS-SIG-001"]),
-    ("js rsa-pss", "a.js", "s = crypto.constants.RSA_PKCS1_PSS_PADDING;", ["ECD-JS-SIG-002"]),
-    ("js ecdsa", "a.js", "crypto.createSign('ecdsa-with-SHA256')", ["ECD-JS-SIG-003"]),
+    ("js 3des", "a.js", "createCipheriv('des-ede3-cbc', k, iv)", ["IM-JS-CIPHER-001"]),
+    ("js rc4", "a.js", "crypto.createCipheriv('rc4', key, iv)", ["IM-JS-CIPHER-002"]),
+    ("js md5", "a.js", "crypto.createHash('md5')", ["IM-JS-HASH-001"]),
+    ("js sha1", "a.js", "crypto.createHmac('sha1', key)", ["IM-JS-HASH-002"]),
+    ("js rsa-sha1", "a.js", "crypto.createSign('RSA-SHA1')", ["IM-JS-SIG-001"]),
+    ("js rsa verify", "a.js", "crypto.createVerify('RSA')", ["IM-JS-SIG-001"]),
+    ("js rsa-pss", "a.js", "s = crypto.constants.RSA_PKCS1_PSS_PADDING;", ["IM-JS-SIG-002"]),
+    ("js ecdsa", "a.js", "crypto.createSign('ecdsa-with-SHA256')", ["IM-JS-SIG-003"]),
     # Go 1.24 crypto/mlkem, FIPS 203. The x/crypto corpus carries a real hybrid ML-KEM-768 +
     # X25519 SSH key exchange in ssh/mlkem.go, and before these rules it scored ZERO findings.
-    ("go mlkem768", "a.go", "dk, err := mlkem.NewDecapsulationKey768(seed)", ["ECD-GO-PQKEM-001"]),
-    ("go mlkem1024", "a.go", "dk, err := mlkem.NewDecapsulationKey1024(seed)", ["ECD-GO-PQKEM-002"]),
+    ("go mlkem768", "a.go", "dk, err := mlkem.NewDecapsulationKey768(seed)", ["IM-GO-PQKEM-001"]),
+    ("go mlkem1024", "a.go", "dk, err := mlkem.NewDecapsulationKey1024(seed)", ["IM-GO-PQKEM-002"]),
     # NO mlkem512 sample. FIPS 203 has three parameter sets, but Go's crypto/mlkem ships only
     # 768 and 1024, so an ML-KEM-512 rule asserted an API no implementation exposes. A test
     # asserting a rule fires on a non-existent API is a test that protects a fiction.
     # --- Go SSH mode-table and import/declaration idioms (loop 8) -------------------------------
     ("go cipherModes AES128", "a.go",
      "cipherModes[CipherAES128CTR] = &cipherMode{16, aes.BlockSize, nil}",
-     ["ECD-GO-SSHTBL-AES"]),
+     ["IM-GO-SSHTBL-AES"]),
     ("go cipherModes RC4", "a.go", "cipherModes[InsecureCipherRC4128] = &cipherMode{16, 0, nil}",
-     ["ECD-GO-SSHTBL-RC4"]),
+     ["IM-GO-SSHTBL-RC4"]),
     ("go cipherModes 3DES", "a.go", "cipherModes[InsecureCipherTripleDESCBC] = &cipherMode{24, 0, nil}",
-     ["ECD-GO-SSHTBL-3DES"]),
+     ["IM-GO-SSHTBL-3DES"]),
     ("go macModes HMAC", "a.go", "macModes[HMACSHA512ETM] = &macMode{64, true, nil}",
-     ["ECD-GO-SSHTBL-MAC"]),
-    ("go import aes", "a.go", '\t"crypto/aes"', ["ECD-GO-IMPORT-007"]),
-    ("go import sha512", "a.go", '\t"crypto/sha512"', ["ECD-GO-IMPORT-010"]),
-    ("go hash binding", "a.go", "Hash:      crypto.SHA256,", ["ECD-GO-HASHBIND-001"]),
+     ["IM-GO-SSHTBL-MAC"]),
+    ("go import aes", "a.go", '\t"crypto/aes"', ["IM-GO-IMPORT-007"]),
+    ("go import sha512", "a.go", '\t"crypto/sha512"', ["IM-GO-IMPORT-010"]),
+    ("go hash binding", "a.go", "Hash:      crypto.SHA256,", ["IM-GO-HASHBIND-001"]),
     ("go chacha receiver decl", "a.go",
-     "func (c *chacha20Poly1305Cipher) readCipherPacket(n uint32) {", ["ECD-GO-DECL-001"]),
+     "func (c *chacha20Poly1305Cipher) readCipherPacket(n uint32) {", ["IM-GO-DECL-001"]),
     ("go newAESCTR decl", "a.go", "func newAESCTR(key, iv []byte) (cipher.Stream, error) {",
-     ["ECD-GO-DECL-002"]),
-    ("go poly1305 verify", "a.go", "if !poly1305.Verify(&mac, c.buf[:n], &k) {", ["ECD-GO-DECL-006"]),
-    ("go import md5", "a.go", '\t"crypto/md5"', ["ECD-GO-IMPORT-001"]),
-    ("go import sha1", "a.go", '\t"crypto/sha1"', ["ECD-GO-IMPORT-002"]),
-    ("go import sha256", "a.go", '\t"crypto/sha256"', ["ECD-GO-IMPORT-003"]),
-    ("go import hmac", "a.go", '\t"crypto/hmac"', ["ECD-GO-IMPORT-004"]),
-    ("go import des", "a.go", '\t"crypto/des"', ["ECD-GO-IMPORT-005"]),
-    ("go import rc4", "a.go", '\t"crypto/rc4"', ["ECD-GO-IMPORT-006"]),
-    ("go import chacha20", "a.go", '\t"golang.org/x/crypto/chacha20"', ["ECD-GO-IMPORT-008"]),
-    ("go import curve25519", "a.go", '\t"golang.org/x/crypto/curve25519"', ["ECD-GO-IMPORT-009"]),
+     ["IM-GO-DECL-002"]),
+    ("go poly1305 verify", "a.go", "if !poly1305.Verify(&mac, c.buf[:n], &k) {", ["IM-GO-DECL-006"]),
+    ("go import md5", "a.go", '\t"crypto/md5"', ["IM-GO-IMPORT-001"]),
+    ("go import sha1", "a.go", '\t"crypto/sha1"', ["IM-GO-IMPORT-002"]),
+    ("go import sha256", "a.go", '\t"crypto/sha256"', ["IM-GO-IMPORT-003"]),
+    ("go import hmac", "a.go", '\t"crypto/hmac"', ["IM-GO-IMPORT-004"]),
+    ("go import des", "a.go", '\t"crypto/des"', ["IM-GO-IMPORT-005"]),
+    ("go import rc4", "a.go", '\t"crypto/rc4"', ["IM-GO-IMPORT-006"]),
+    ("go import chacha20", "a.go", '\t"golang.org/x/crypto/chacha20"', ["IM-GO-IMPORT-008"]),
+    ("go import curve25519", "a.go", '\t"golang.org/x/crypto/curve25519"', ["IM-GO-IMPORT-009"]),
     ("go newTripleDES decl", "a.go", "func newTripleDESCBCCipher(key, iv, macKey []byte) {",
-     ["ECD-GO-DECL-003"]),
+     ["IM-GO-DECL-003"]),
     ("go newRC4 decl", "a.go", "func newRC4(key, iv []byte) (cipher.Stream, error) {",
-     ["ECD-GO-DECL-004"]),
-    ("go curve25519 var", "a.go", "var c25519kp curve25519KeyPair", ["ECD-GO-DECL-005"]),
+     ["IM-GO-DECL-004"]),
+    ("go curve25519 var", "a.go", "var c25519kp curve25519KeyPair", ["IM-GO-DECL-005"]),
 ]
 
 # The same failure mode as the bare `\bMD5\b` bug, generalised.
@@ -109,12 +109,12 @@ POSITIVES = [
 #
 # The `allowed` column records which PRE-EXISTING rules may legitimately fire. `MessageDigest
 # .getInstance("MD5")` and `hashlib.md5(...)` are genuine MD5 detections owned by
-# ECD-SRC-MD5-001, so those rows allow it; the point of the row is that the new packs must
+# IM-SRC-MD5-001, so those rows allow it; the point of the row is that the new packs must
 # not ALSO fire. A row that listed an empty `allowed` would be asserting that MD5 is
 # undetectable in Java, which is false.
 CROSS_LANGUAGE = [
-    ("md5 token in java", "x.java", 'MessageDigest.getInstance("MD5");', ("ECD-SRC-MD5-001",)),
-    ("md5 token in python", "x.py", "hashlib.md5(data)", ("ECD-SRC-MD5-001",)),
+    ("md5 token in java", "x.java", 'MessageDigest.getInstance("MD5");', ("IM-SRC-MD5-001",)),
+    ("md5 token in python", "x.py", "hashlib.md5(data)", ("IM-SRC-MD5-001",)),
     ("sha1 token in c", "x.c", "SHA1_CTX ctx;", ()),
     ("ecdsa token in java", "x.java", 'KeyPairGenerator.getInstance("ECDSA");', ()),
     ("rsa-shal in python", "x.py", 'alg = "RSA-SHA1"', ()),
@@ -122,7 +122,7 @@ CROSS_LANGUAGE = [
     ("thread_rng in python", "x.py", "# thread_rng equivalent", ()),
     ("modp5 in java", "x.java", 'String g = "modp5";', ()),
     ("rsa padding in java", "x.java", "Cipher.getInstance(\"RSA/ECB/PKCS1Padding\");",
-     ("ECD-SRC-JAVA-CIPHER-001",)),
+     ("IM-SRC-JAVA-CIPHER-001",)),
 ]
 
 # (label, filename, content, pre-existing rules allowed to fire)
@@ -138,7 +138,7 @@ DECOYS = [
     ("js aes-256-gcm is fine", "a.js", "crypto.createCipheriv('aes-256-gcm', k, iv)", ()),
     ("js ed25519 is not rsa", "a.js", "crypto.createSign('ED25519')", ()),
     ("js strong dh group is fine", "a.js", "crypto.createDiffieHellman('modp2048');",
-     ("ECD-SRC-ECDH-001",)),
+     ("IM-SRC-ECDH-001",)),
     ("js absent minVersion is safe", "a.conf", "const o = { rejectUnauthorized: true };", ()),
     # A variable whose name merely CONTAINS a matched token. `\brand\.` in the Go PRNG rule is
     # qualified precisely so that `brand` cannot trigger it.
@@ -154,13 +154,13 @@ DECOYS = [
 #
 # Line 1 is the decisive one: `c.rand()` is a method on an OTR Conversation that returns a
 # crypto/rand io.Reader. It is a CSPRNG wrapper, and the PHP and Ruby PRNG rules were both
-# reporting it as a WEAK generator. ECD-PHP-WEAKRNG-001's lookbehind omitted `.` while
-# ECD-RB-WEAKRNG-001's had it -- two rules with one idea and two different guards.
+# reporting it as a WEAK generator. IM-PHP-WEAKRNG-001's lookbehind omitted `.` while
+# IM-RB-WEAKRNG-001's had it -- two rules with one idea and two different guards.
 CORPUS_FOUND = [
     ("go c.rand() is a CSPRNG wrapper", "otr.go",
      "_, err := io.ReadFull(c.rand(), buf)", ()),
     ("go method decl is not a weak PRNG", "otr.go",
-     "func (c *Conversation) rand() io.Reader {", ("ECD-PHP-WEAKRNG-001", "ECD-RB-WEAKRNG-001")),
+     "func (c *Conversation) rand() io.Reader {", ("IM-PHP-WEAKRNG-001", "IM-RB-WEAKRNG-001")),
     # `pk.ecdh` is a PublicKey STRUCT FIELD in the OpenPGP code. `pk.ecdh.parse(r)` and
     # `pk.ecdh.serialize(w)` are packet serialisation, not the crypto/ecdh package. The Go pack's
     # `\becdh\.\w+\(` matched all three, so the corpus reported ECDH where there is none.
@@ -168,21 +168,21 @@ CORPUS_FOUND = [
      "if err = pk.ecdh.parse(r); err != nil {", ()),
     ("go ecdh serialize is not the package", "x.go",
      "return pk.ecdh.serialize(w)", ()),
-    # X25519 is owned by ECD-SRC-ECDH-001. The Go pack briefly also matched `ecdh.X25519()`,
+    # X25519 is owned by IM-SRC-ECDH-001. The Go pack briefly also matched `ecdh.X25519()`,
     # which put two ECDH components on one line -- the same duplicate class as loop 4's TLS.
     ("go ecdh.X25519 not duplicated", "x.go",
-     "curve := ecdh.X25519()", ("ECD-SRC-ECDH-001",)),
+     "curve := ecdh.X25519()", ("IM-SRC-ECDH-001",)),
     # ML-KEM is the positive case: FIPS 203, NIST category 3, and entirely invisible before.
     ("go mlkem768 detected", "x.go",
-     "dk, err := mlkem.NewDecapsulationKey768(seed)", ("ECD-GO-PQKEM-001",)),
+     "dk, err := mlkem.NewDecapsulationKey768(seed)", ("IM-GO-PQKEM-001",)),
     ("go mlkem1024 detected", "x.go",
-     "dk, err := mlkem.NewDecapsulationKey1024(seed)", ("ECD-GO-PQKEM-002",)),
+     "dk, err := mlkem.NewDecapsulationKey1024(seed)", ("IM-GO-PQKEM-002",)),
 ]
 
 
 @pytest.fixture
 def scanner():
-    return ECDATScanner(enable_ml=False)
+    return IndraMeshScanner(enable_ml=False)
 
 
 @pytest.mark.parametrize("label,filename,content,expected", POSITIVES,
@@ -207,7 +207,7 @@ def test_multilang_decoy_silent(scanner, tmp_path, label, filename, content, all
     path = tmp_path / filename
     path.write_text(content + "\n", encoding="utf-8")
     fired = {f["rule_id"] for f in scanner._match_rules(str(path), content)} & _ALL_IDS
-    new_fired = {r for r in fired if r.startswith(("ECD-GO-", "ECD-RUST-", "ECD-JS-"))}
+    new_fired = {r for r in fired if r.startswith(("IM-GO-", "IM-RUST-", "IM-JS-"))}
     assert not new_fired, "%s: new pack fired %s" % (label, sorted(new_fired))
     assert fired == set(allowed), "%s: expected exactly %s, got %s" % (
         label, sorted(allowed), sorted(fired))
@@ -225,7 +225,7 @@ def test_multilang_no_cross_language_leak(scanner, tmp_path, label, filename, co
     path = tmp_path / filename
     path.write_text(content + "\n", encoding="utf-8")
     fired = {f["rule_id"] for f in scanner._match_rules(str(path), content)} & _ALL_IDS
-    new_fired = {r for r in fired if r.startswith(("ECD-GO-", "ECD-RUST-", "ECD-JS-"))}
+    new_fired = {r for r in fired if r.startswith(("IM-GO-", "IM-RUST-", "IM-JS-"))}
     assert not new_fired, "%s (%s): the new packs leaked into %s: %s" % (
         label, content, filename, sorted(new_fired))
     assert fired == set(allowed), "%s: expected exactly %s, got %s" % (
@@ -251,7 +251,7 @@ def test_defects_found_by_the_go_corpus(scanner, tmp_path, label, filename, cont
 def test_mlkem_is_a_standardised_algorithm_not_a_weak_primitive():
     """ML-KEM must be reported as ML-KEM, never collapsed into a weak-ECDH finding.
 
-    ECDAT already classifies ML-KEM-768 at NIST category 3 in engine/cbom.py. A Go estate using
+    IndraMesh already classifies ML-KEM-768 at NIST category 3 in engine/cbom.py. A Go estate using
     `crypto/mlkem` therefore has a POST-QUANTUM key exchange in production, and reporting it as
     generic ECDH -- or as nothing at all -- is the difference between "already migrated" and
     "needs migration".
@@ -260,8 +260,8 @@ def test_mlkem_is_a_standardised_algorithm_not_a_weak_primitive():
     crypto/mlkem exposes only 768 and 1024; an earlier version of this test asserted a 512 rule
     fires, which protected a rule matching `mlkem.GenerateKey512` -- an API that does not exist.
     """
-    sc = ECDATScanner(enable_ml=False)
-    for level, rule in (("768", "ECD-GO-PQKEM-001"), ("1024", "ECD-GO-PQKEM-002")):
+    sc = IndraMeshScanner(enable_ml=False)
+    for level, rule in (("768", "IM-GO-PQKEM-001"), ("1024", "IM-GO-PQKEM-002")):
         content = "dk, err := mlkem.NewDecapsulationKey%s(seed)" % level
         found = {f["name"] for f in sc._match_rules("x.go", content)}
         assert "ML-KEM-%s" % level in found, "ML-KEM-%s not named correctly: %s" % (level, found)
@@ -276,13 +276,13 @@ def test_mlkem_is_a_standardised_algorithm_not_a_weak_primitive():
 def test_ssh_cipher_wire_names_are_not_mislabelled_as_aes():
     """Two ciphers were being reported as name=AES while sitting in a rule declared as AES.
 
-    `ECD-SRC-SSH-CIPHER-001` listed `3des-cbc` and `ECD-SRC-SSH-CIPHER-002` listed
+    `IM-SRC-SSH-CIPHER-001` listed `3des-cbc` and `IM-SRC-SSH-CIPHER-002` listed
     `chacha20-poly1305@openssh.com`, so `InsecureCipherTripleDESCBC = "3des-cbc"` and
     `CipherChaCha20Poly1305 = "chacha20-poly1305@openssh.com"` both came out as AES. 3DES now
-    belongs to ECD-SRC-SSH-LEGACY-001 and ChaCha20 has its own rule, so the names must be right.
+    belongs to IM-SRC-SSH-LEGACY-001 and ChaCha20 has its own rule, so the names must be right.
     Found by adversarial review against real x/crypto lines, not by reading the patterns.
     """
-    sc = ECDATScanner(enable_ml=False)
+    sc = IndraMeshScanner(enable_ml=False)
     for wire, want, must_not in (
             ('"chacha20-poly1305@openssh.com"', "ChaCha20", "AES"),
             ('"3des-cbc"', "3DES", "AES"),
@@ -305,17 +305,17 @@ def test_no_duplicate_rule_for_existing_primitives():
     which rule owns each primitive so re-adding a language alias fails loudly.
     """
     owned = {
-        "ChaCha20Poly1305": "ECD-SRC-CHACHA-001",
-        "X25519": "ECD-SRC-ECDH-001",
-        "DiffieHellman": "ECD-SRC-ECDH-001",
-        "Math.random": "ECD-SRC-JAVA-WEAKRNG-001",
-        "minVersion": "ECD-CFG-TLS-001",
+        "ChaCha20Poly1305": "IM-SRC-CHACHA-001",
+        "X25519": "IM-SRC-ECDH-001",
+        "DiffieHellman": "IM-SRC-ECDH-001",
+        "Math.random": "IM-SRC-JAVA-WEAKRNG-001",
+        "minVersion": "IM-CFG-TLS-001",
     }
     for token, owner in owned.items():
         assert owner in _ALL_IDS, "the owning rule %s no longer exists" % owner
 
     new_packs = [r for r in RULES
-                 if r["id"].startswith(("ECD-GO-", "ECD-RUST-", "ECD-JS-"))]
+                 if r["id"].startswith(("IM-GO-", "IM-RUST-", "IM-JS-"))]
     for rule in new_packs:
         for token, owner in owned.items():
             assert token not in rule["regex"], (
@@ -333,11 +333,11 @@ def test_string_literal_limitation_is_documented_not_accidental(tmp_path):
     Written under `tmp_path`: `_match_rules` takes a path, and passing a bare relative name here
     litters the repository root with a.go/b.py/b.rb on every run.
     """
-    sc = ECDATScanner(enable_ml=False)
+    sc = IndraMeshScanner(enable_ml=False)
     cases = [
-        ("b.py", 'x = "hashlib.md5(data)"', "ECD-SRC-MD5-001"),   # pre-existing, Python
-        ("b.rb", "puts \"OpenSSL::Cipher.new('aes-256-gcm')\"", "ECD-RB-AES-001"),
-        ("a.go", 'log.Print("call des.NewCipher(key) later")', "ECD-GO-CIPHER-001"),
+        ("b.py", 'x = "hashlib.md5(data)"', "IM-SRC-MD5-001"),   # pre-existing, Python
+        ("b.rb", "puts \"OpenSSL::Cipher.new('aes-256-gcm')\"", "IM-RB-AES-001"),
+        ("a.go", 'log.Print("call des.NewCipher(key) later")', "IM-GO-CIPHER-001"),
     ]
     for filename, content, expected in cases:
         path = tmp_path / filename
@@ -352,7 +352,7 @@ def test_every_new_rule_has_a_positive_sample():
     """No rule in the Go/Rust/JS packs may exist without a test that proves it fires."""
     covered = {rid for _, _, _, ids in POSITIVES for rid in ids}
     new_packs = {r["id"] for r in RULES
-                 if r["id"].startswith(("ECD-GO-", "ECD-RUST-", "ECD-JS-"))}
+                 if r["id"].startswith(("IM-GO-", "IM-RUST-", "IM-JS-"))}
     assert new_packs, "the new packs are missing entirely"
     assert not (new_packs - covered), "rules with no positive sample: %s" % sorted(
         new_packs - covered)

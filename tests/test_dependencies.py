@@ -804,8 +804,8 @@ def test_findings_flow_through_mosca_and_the_cbom_as_library_components(tmp_path
     component = document["components"][0]
     assert component["type"] == "library"
     properties = {p["name"]: p["value"] for p in component["properties"]}
-    assert properties["ecd:assurance"] == ASSURANCE_CAPABILITY
-    assert properties["ecd:evidence_class"] == "dependency"
+    assert properties["im:assurance"] == ASSURANCE_CAPABILITY
+    assert properties["im:evidence_class"] == "dependency"
 
 
 # ------------------------------------------------------------------ manifest identification

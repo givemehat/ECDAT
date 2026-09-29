@@ -35,8 +35,8 @@ when the halves must carry a different `name`, `primitive` or `mode`.**
 
 ### F2 - Two shipped rules already own some cipher-string tokens, and they are lower-case only
 
-`ECD-SRC-SSH-CIPHER-001` is `["'](?:aes(?:128|192|256)-(?:ctr|gcm|cbc)|...)["']` and
-`ECD-SRC-SSH-LEGACY-001` is `["'](?:3des-cbc|des-cbc|arcfour|arcfour256|blowfish-cbc|cast128-cbc)["']`.
+`IM-SRC-SSH-CIPHER-001` is `["'](?:aes(?:128|192|256)-(?:ctr|gcm|cbc)|...)["']` and
+`IM-SRC-SSH-LEGACY-001` is `["'](?:3des-cbc|des-cbc|arcfour|arcfour256|blowfish-cbc|cast128-cbc)["']`.
 Both are language-agnostic and case-sensitive, so:
 
 * PHP's dominant spelling `'AES-256-CBC'` is matched by **nothing** today (measured).
@@ -47,7 +47,7 @@ OpenSSL/SSH cipher strings*; this pack owns (a) upper-case PHP spellings, (b) mo
 (`ecb`, `cfb`, `ofb`, `xts`, `ccm`, `ocb`, `eax`, `siv`), (c) constant and symbol forms, and
 (d) calls whose cipher is not a literal. PREREQ-1 in section 10 states the alternative.
 
-### F3 - `ECD-SRC-AES-001` already matches `AES.new(`
+### F3 - `IM-SRC-AES-001` already matches `AES.new(`
 
 Its regex contains `AES\.new\(` with **no capture group**, although the rule already declares
 `key_group=1` and a `key_map`. Measured: it fires on `OpenSSL::Cipher::AES.new(256, :gcm)` and
@@ -152,13 +152,13 @@ fields followed by numbered justification lines.
 
 | id | name | primitive | uses | kg | regex |
 |---|---|---|---|---|---|
-| ECD-SRC-PHP-SYM-001 | OPENSSL-SYM | block-cipher | at-rest | - | `(?i:openssl_(?:en\|de)crypt)\s*\(\s*[^,()]*,\s*\$[A-Za-z_]` |
-| ECD-SRC-PHP-AES-ECB-001 | AES | block-cipher | at-rest | 1 | `(?i:openssl_(?:en\|de)crypt)\s*\(\s*[^,()]*,\s*['"]\s*aes[-_]?(128\|192\|256)[-_]?ecb\b` |
-| ECD-SRC-PHP-AES-AEAD-001 | AES | ae | at-rest | 1 | `(?i:openssl_(?:en\|de)crypt)\s*\(\s*[^,()]*,\s*['"]\s*aes[-_]?(128\|192\|256)[-_]?(?:gcm\|ccm\|ocb\|eax\|siv)\b` |
-| ECD-SRC-PHP-AES-OTHER-001 | AES | block-cipher | at-rest | 1 | `(?i:openssl_(?:en\|de)crypt)\s*\(\s*[^,()]*,\s*['"]\s*aes[-_]?(128\|192\|256)[-_]?(?:cfb\|ofb\|xts)\b` |
-| ECD-SRC-PHP-AES-UPPER-001 (dagger) | AES | block-cipher | at-rest | 1 | `(?i:openssl_(?:en\|de)crypt)\s*\([^)]*['"]AES[-_]?(128\|192\|256)\b` |
-| ECD-SRC-PHP-CHACHA-001 | ChaCha20 | ae | at-rest | - | `(?i:openssl_(?:en\|de)crypt)\s*\(\s*[^,()]*,\s*['"]\s*chacha20(?:[-_]poly1305)?\b` |
-| ECD-SRC-PHP-IV-001 | AES | ae | at-rest | 1 | `(?i:openssl_cipher_iv_length)\s*\(\s*['"]\s*aes[-_]?(128\|192\|256)\b` |
+| IM-SRC-PHP-SYM-001 | OPENSSL-SYM | block-cipher | at-rest | - | `(?i:openssl_(?:en\|de)crypt)\s*\(\s*[^,()]*,\s*\$[A-Za-z_]` |
+| IM-SRC-PHP-AES-ECB-001 | AES | block-cipher | at-rest | 1 | `(?i:openssl_(?:en\|de)crypt)\s*\(\s*[^,()]*,\s*['"]\s*aes[-_]?(128\|192\|256)[-_]?ecb\b` |
+| IM-SRC-PHP-AES-AEAD-001 | AES | ae | at-rest | 1 | `(?i:openssl_(?:en\|de)crypt)\s*\(\s*[^,()]*,\s*['"]\s*aes[-_]?(128\|192\|256)[-_]?(?:gcm\|ccm\|ocb\|eax\|siv)\b` |
+| IM-SRC-PHP-AES-OTHER-001 | AES | block-cipher | at-rest | 1 | `(?i:openssl_(?:en\|de)crypt)\s*\(\s*[^,()]*,\s*['"]\s*aes[-_]?(128\|192\|256)[-_]?(?:cfb\|ofb\|xts)\b` |
+| IM-SRC-PHP-AES-UPPER-001 (dagger) | AES | block-cipher | at-rest | 1 | `(?i:openssl_(?:en\|de)crypt)\s*\([^)]*['"]AES[-_]?(128\|192\|256)\b` |
+| IM-SRC-PHP-CHACHA-001 | ChaCha20 | ae | at-rest | - | `(?i:openssl_(?:en\|de)crypt)\s*\(\s*[^,()]*,\s*['"]\s*chacha20(?:[-_]poly1305)?\b` |
+| IM-SRC-PHP-IV-001 | AES | ae | at-rest | 1 | `(?i:openssl_cipher_iv_length)\s*\(\s*['"]\s*aes[-_]?(128\|192\|256)\b` |
 
 dagger CONFLICTING under PREREQ-1; see F2 and section 10.
 
@@ -176,10 +176,10 @@ dagger CONFLICTING under PREREQ-1; see F2 and section 10.
   mutually exclusive on any line and cannot both fire; the AEAD/non-AEAD split is what lets the
   pack state the primitive honestly without a `mode` field.
 * **P-04 `AES-OTHER`.** `cfb|ofb|xts` are exactly the modes absent from
-  `ECD-SRC-SSH-CIPHER-001`, so this rule adds coverage rather than duplicating it.
+  `IM-SRC-SSH-CIPHER-001`, so this rule adds coverage rather than duplicating it.
 * **P-05 `AES-UPPER`.** **Case is the discriminator, deliberately.** PHP's own documentation and
   essentially all PHP code write the cipher upper-case (`'AES-256-CBC'`), while Ruby's OpenSSL and
-  the SSH wire names are lower-case, and `ECD-SRC-SSH-CIPHER-001` is lower-case only (measured: no
+  the SSH wire names are lower-case, and `IM-SRC-SSH-CIPHER-001` is lower-case only (measured: no
   PHP cross-table collision). Making this rule case-insensitive would double-count every lower-case
   literal. `[^)]*` rather than `[^,()]*` because the first argument of a real call is frequently
   itself a call, and stopping at the first `)` is the conservative choice: on
@@ -187,7 +187,7 @@ dagger CONFLICTING under PREREQ-1; see F2 and section 10.
   rule still find the algorithm.
 * **P-06 `CHACHA`.** `chacha20(?:[-_]poly1305)?\b` requires a word boundary after the optional
   suffix, so the literal `'ChaCha20Poly1305'` (no separator) is *not* matched and cannot
-  double-report against `ECD-SRC-CHACHA-001`, which matches that exact spelling.
+  double-report against `IM-SRC-CHACHA-001`, which matches that exact spelling.
 * **P-07 `IV-LENGTH`.** `openssl_cipher_iv_length` is the only PHP function that takes a cipher
   name and returns its IV size, so naming it names a cipher, and the digits are the key size.
 
@@ -195,16 +195,16 @@ dagger CONFLICTING under PREREQ-1; see F2 and section 10.
 
 | id | name | primitive | uses | kg | regex |
 |---|---|---|---|---|---|
-| ECD-SRC-PHP-3DES-001 | 3DES | block-cipher | at-rest | - | `(?i:openssl_(?:en\|de)crypt)\s*\(\s*[^,()]*,\s*['"]\s*(?:3des(?!-cbc)\|des-ede3\|tripledes\|des3)` |
-| ECD-SRC-PHP-LEGACY-001 | LEGACY-CIPHER | block-cipher | at-rest | - | `(?i:openssl_(?:en\|de)crypt)\s*\(\s*[^,()]*,\s*['"]\s*(?:des(?!-cbc)\|bf\|blowfish(?!-cbc)\|cast5\|idea\|seed\|rc2\|sm4)` |
-| ECD-SRC-PHP-RC4-001 | RC4 | stream-cipher | at-rest | - | `(?i:openssl_(?:en\|de)crypt)\s*\(\s*[^,()]*,\s*['"]\s*rc4\b` |
-| ECD-SRC-PHP-PKCS7-RC2-001 | RC2 | block-cipher | at-rest | 1 | `OPENSSL_CIPHER_RC2_(40\|64)_CBC` |
-| ECD-SRC-PHP-RC4-002 | RC4 | stream-cipher | at-rest | - | `OPENSSL_CIPHER_RC4\b` |
+| IM-SRC-PHP-3DES-001 | 3DES | block-cipher | at-rest | - | `(?i:openssl_(?:en\|de)crypt)\s*\(\s*[^,()]*,\s*['"]\s*(?:3des(?!-cbc)\|des-ede3\|tripledes\|des3)` |
+| IM-SRC-PHP-LEGACY-001 | LEGACY-CIPHER | block-cipher | at-rest | - | `(?i:openssl_(?:en\|de)crypt)\s*\(\s*[^,()]*,\s*['"]\s*(?:des(?!-cbc)\|bf\|blowfish(?!-cbc)\|cast5\|idea\|seed\|rc2\|sm4)` |
+| IM-SRC-PHP-RC4-001 | RC4 | stream-cipher | at-rest | - | `(?i:openssl_(?:en\|de)crypt)\s*\(\s*[^,()]*,\s*['"]\s*rc4\b` |
+| IM-SRC-PHP-PKCS7-RC2-001 | RC2 | block-cipher | at-rest | 1 | `OPENSSL_CIPHER_RC2_(40\|64)_CBC` |
+| IM-SRC-PHP-RC4-002 | RC4 | stream-cipher | at-rest | - | `OPENSSL_CIPHER_RC4\b` |
 
-`ECD-SRC-PHP-PKCS7-RC2-001` uses `key_map={"40": 40, "64": 64}`.
+`IM-SRC-PHP-PKCS7-RC2-001` uses `key_map={"40": 40, "64": 64}`.
 
 * **P-08 `3DES`.** The `(?!-cbc)` guard excludes exactly the one spelling
-  `ECD-SRC-SSH-LEGACY-001` already owns (`3des-cbc`) and nothing else, so `des-ede3-cbc` is still
+  `IM-SRC-SSH-LEGACY-001` already owns (`3des-cbc`) and nothing else, so `des-ede3-cbc` is still
   caught. The guard sits on the `3des` alternative alone; my first version put it after the whole
   group and the rule went dead on its own sample (measured dead, then fixed).
 * **P-09 `LEGACY`.** The same guard applied per alternative: `des(?!-cbc)` and `blowfish(?!-cbc)`
@@ -212,7 +212,7 @@ dagger CONFLICTING under PREREQ-1; see F2 and section 10.
   at all. One rule rather than six, because they share `name` and `primitive` and F1 would turn
   six ids into six identical components.
 * **P-10 `RC4`.** `['"]\s*rc4\b` matches only the `rc4` spelling; `arcfour`/`arcfour256` belong
-  to `ECD-SRC-SSH-LEGACY-001` and are deliberately left alone.
+  to `IM-SRC-SSH-LEGACY-001` and are deliberately left alone.
 * **P-11 `RC2`.** The OpenSSL constant's own name carries the key size, so the capture is the size
   and `key_map` maps it. This matters because RC2-40-CBC is the **documented default cipher of
   `openssl_pkcs7_encrypt`** **[doc]**, so a PKCS#7 call that names no cipher at all is still a
@@ -225,31 +225,31 @@ dagger CONFLICTING under PREREQ-1; see F2 and section 10.
 
 | id | name | primitive | uses | kg | regex |
 |---|---|---|---|---|---|
-| ECD-SRC-PHP-HASH-SHA2-001 | SHA256 | hash | at-rest | - | `(?i:hash\|hash_file\|openssl_digest)\s*\(\s*['"](?:sha2?-?256\|sha-?3-?256)['"]` |
-| ECD-SRC-PHP-HASH-SHA1-001 | SHA1 | hash | at-rest | - | `(?i:hash\|hash_file\|openssl_digest)\s*\(\s*['"]sha-?1['"]` |
-| ECD-SRC-PHP-HASH-MD5-001 | MD5 | hash | at-rest | - | `(?i:hash\|hash_file\|openssl_digest)\s*\(\s*['"]md5['"]` |
-| ECD-SRC-PHP-MAC-001 | HMAC | mac | at-rest | - | `(?i:hash_hmac)\s*\(\s*['"][a-z0-9-]{3,15}['"]` |
-| ECD-SRC-PHP-KDF-PBKDF2-001 | PBKDF2 | kdf | at-rest | - | `(?i:hash_pbkdf2)\s*\(` |
-| ECD-SRC-PHP-KDF-HKDF-001 | HKDF | kdf | at-rest | - | `(?i:hash_hkdf)\s*\(` |
-| ECD-SRC-PHP-PWD-ARGON2-001 | Argon2id | kdf | at-rest | - | `(?i:password_hash)\s*\([^,()]+,\s*(?:PASSWORD_)?ARGON2I?D?\b` |
-| ECD-SRC-PHP-PWD-DEFAULT-001 | PASSWORD-HASH | kdf | at-rest | - | `(?i:password_hash)\s*\(\s*[^,()]+(?:\s*,\s*(?:PASSWORD_DEFAULT\|NULL)\s*)?\)` |
-| ECD-SRC-PHP-PWD-INFO-001 | PASSWORD-HASH | kdf | at-rest | - | `(?i:password_get_info)\s*\(` |
-| ECD-SRC-PHP-DIGESTALG-SHA1-001 | SHA1 | hash | signing | - | `['"]digest_alg['"]\s*=>\s*['"]sha-?1['"]` |
-| ECD-SRC-PHP-DIGESTALG-SHA2-001 | SHA2 | hash | signing | - | `['"]digest_alg['"]\s*=>\s*['"]sha-?(?:224\|256\|384\|512)['"]` |
-| ECD-SRC-PHP-SHA1-SIGALG-001 | SHA1 | hash | signing | - | `(?i:openssl_(?:sign\|verify))\s*\([^)]*OPENSSL_ALGO_SHA1\b` |
-| ECD-SRC-PHP-SIGN-DEFAULT-001 | SHA1 | hash | signing | - | `(?i:openssl_sign)\s*\(\s*[^,()]+,\s*[^,()]+,\s*[^,()]+\s*\)` |
-| ECD-SRC-PHP-SHA2-SIGALG-001 | SHA2 | hash | signing | - | `(?i:openssl_(?:sign\|verify))\s*\([^)]*OPENSSL_ALGO_SHA(?:224\|256\|384\|512)\b` |
+| IM-SRC-PHP-HASH-SHA2-001 | SHA256 | hash | at-rest | - | `(?i:hash\|hash_file\|openssl_digest)\s*\(\s*['"](?:sha2?-?256\|sha-?3-?256)['"]` |
+| IM-SRC-PHP-HASH-SHA1-001 | SHA1 | hash | at-rest | - | `(?i:hash\|hash_file\|openssl_digest)\s*\(\s*['"]sha-?1['"]` |
+| IM-SRC-PHP-HASH-MD5-001 | MD5 | hash | at-rest | - | `(?i:hash\|hash_file\|openssl_digest)\s*\(\s*['"]md5['"]` |
+| IM-SRC-PHP-MAC-001 | HMAC | mac | at-rest | - | `(?i:hash_hmac)\s*\(\s*['"][a-z0-9-]{3,15}['"]` |
+| IM-SRC-PHP-KDF-PBKDF2-001 | PBKDF2 | kdf | at-rest | - | `(?i:hash_pbkdf2)\s*\(` |
+| IM-SRC-PHP-KDF-HKDF-001 | HKDF | kdf | at-rest | - | `(?i:hash_hkdf)\s*\(` |
+| IM-SRC-PHP-PWD-ARGON2-001 | Argon2id | kdf | at-rest | - | `(?i:password_hash)\s*\([^,()]+,\s*(?:PASSWORD_)?ARGON2I?D?\b` |
+| IM-SRC-PHP-PWD-DEFAULT-001 | PASSWORD-HASH | kdf | at-rest | - | `(?i:password_hash)\s*\(\s*[^,()]+(?:\s*,\s*(?:PASSWORD_DEFAULT\|NULL)\s*)?\)` |
+| IM-SRC-PHP-PWD-INFO-001 | PASSWORD-HASH | kdf | at-rest | - | `(?i:password_get_info)\s*\(` |
+| IM-SRC-PHP-DIGESTALG-SHA1-001 | SHA1 | hash | signing | - | `['"]digest_alg['"]\s*=>\s*['"]sha-?1['"]` |
+| IM-SRC-PHP-DIGESTALG-SHA2-001 | SHA2 | hash | signing | - | `['"]digest_alg['"]\s*=>\s*['"]sha-?(?:224\|256\|384\|512)['"]` |
+| IM-SRC-PHP-SHA1-SIGALG-001 | SHA1 | hash | signing | - | `(?i:openssl_(?:sign\|verify))\s*\([^)]*OPENSSL_ALGO_SHA1\b` |
+| IM-SRC-PHP-SIGN-DEFAULT-001 | SHA1 | hash | signing | - | `(?i:openssl_sign)\s*\(\s*[^,()]+,\s*[^,()]+,\s*[^,()]+\s*\)` |
+| IM-SRC-PHP-SHA2-SIGALG-001 | SHA2 | hash | signing | - | `(?i:openssl_(?:sign\|verify))\s*\([^)]*OPENSSL_ALGO_SHA(?:224\|256\|384\|512)\b` |
 
 * **P-13/14/15 `HASH-*`.** `hash()` is the only PHP entry point that takes the algorithm as a
   string in argument 1, and the case-insensitive scope is *correct* rather than loose because PHP
   algorithm names are case-insensitive; the quoted literal is what makes this a call rather than a
   mention. `openssl_digest` is included because it is a documented alias of `hash()` **[doc]**. The
-  bare `sha1()` and `md5()` **functions** are deliberately absent: `ECD-SRC-SHA1-001` and
-  `ECD-SRC-MD5-001` already match them (their regexes contain `sha1\(` and `\bmd5\(`), so new
+  bare `sha1()` and `md5()` **functions** are deliberately absent: `IM-SRC-SHA1-001` and
+  `IM-SRC-MD5-001` already match them (their regexes contain `sha1\(` and `\bmd5\(`), so new
   rules would be pure duplication under F1.
 * **P-16 `MAC`.** The quoted first argument forces the digest to be visible, which is what makes
   this an HMAC *use* rather than a function name; the token `hmac-sha2-256` that
-  `ECD-SRC-SSH-MAC-001` owns cannot match a bare digest name, so there is no overlap (measured).
+  `IM-SRC-SSH-MAC-001` owns cannot match a bare digest name, so there is no overlap (measured).
 * **P-17/18 `KDF`.** `hash_pbkdf2` and `hash_hkdf` are separate rules because they carry different
   `name`s, and F1 makes different names a legitimate reason to split. Both take the algorithm as a
   string, so the call alone is enough evidence.
@@ -284,14 +284,14 @@ dagger CONFLICTING under PREREQ-1; see F2 and section 10.
 
 | id | name | primitive | uses | kg | regex |
 |---|---|---|---|---|---|
-| ECD-SRC-PHP-RSA-PKE-001 | RSA | pke | at-rest | - | `(?i:openssl_(?:public_encrypt\|private_decrypt\|seal\|open))\s*\(` |
-| ECD-SRC-PHP-RSA-SIG-001 | RSA | signature | signing | - | `(?i:openssl_(?:sign\|verify))\s*\(` |
-| ECD-SRC-PHP-PKCS7-ENC-001 | RSA | pke | at-rest | - | `(?i:openssl_pkcs7_encrypt)\s*\(` |
-| ECD-SRC-PHP-PKCS7-SIG-001 | RSA | signature | signing | - | `(?i:openssl_pkcs7_sign)\s*\(` |
-| ECD-SRC-PHP-CSR-001 | RSA | signature | signing | - | `(?i:openssl_csr_sign)\s*\(` |
-| ECD-SRC-PHP-RSA-KEYGEN-001 | RSA | unknown | at-rest | 1 | three alternatives, below |
-| ECD-SRC-PHP-DSA-KEYGEN-001 | DSA | signature | signing | 1 | three alternatives, below |
-| ECD-SRC-PHP-DH-KEYGEN-001 | DH | key-agreement | tls | 1 | three alternatives, below |
+| IM-SRC-PHP-RSA-PKE-001 | RSA | pke | at-rest | - | `(?i:openssl_(?:public_encrypt\|private_decrypt\|seal\|open))\s*\(` |
+| IM-SRC-PHP-RSA-SIG-001 | RSA | signature | signing | - | `(?i:openssl_(?:sign\|verify))\s*\(` |
+| IM-SRC-PHP-PKCS7-ENC-001 | RSA | pke | at-rest | - | `(?i:openssl_pkcs7_encrypt)\s*\(` |
+| IM-SRC-PHP-PKCS7-SIG-001 | RSA | signature | signing | - | `(?i:openssl_pkcs7_sign)\s*\(` |
+| IM-SRC-PHP-CSR-001 | RSA | signature | signing | - | `(?i:openssl_csr_sign)\s*\(` |
+| IM-SRC-PHP-RSA-KEYGEN-001 | RSA | unknown | at-rest | 1 | three alternatives, below |
+| IM-SRC-PHP-DSA-KEYGEN-001 | DSA | signature | signing | 1 | three alternatives, below |
+| IM-SRC-PHP-DH-KEYGEN-001 | DH | key-agreement | tls | 1 | three alternatives, below |
 
 The three keygen rules share one shape, parameterised by the `OPENSSL_KEYTYPE_*` constant
 (`RSA` shown; substitute `DSA` or `DH`):
@@ -331,22 +331,22 @@ The three keygen rules share one shape, parameterised by the `OPENSSL_KEYTYPE_*`
 Every one of these functions has a **fixed** algorithm with no parameter to vary, so the function
 name alone is a complete algorithm assertion. That is the opposite of Java's
 `KeyPairGenerator.getInstance(...)`, and it is why these rules can be confident where
-`ECD-SRC-ECDH-001` had to abstain (see the comment at `scanner.py:48-55`).
+`IM-SRC-ECDH-001` had to abstain (see the comment at `scanner.py:48-55`).
 
 | id | name | primitive | uses | kg | regex |
 |---|---|---|---|---|---|
-| ECD-SRC-PHP-SODIUM-SECRETBOX-001 | XSalsa20-Poly1305 | ae | at-rest | - | `(?i:sodium_crypto_secretbox(?:_open)?)\s*\(` |
-| ECD-SRC-PHP-SODIUM-AEAD-AES-001 | AES | ae | at-rest | - | `(?i:sodium_crypto_aead_aes256gcm_(?:encrypt\|decrypt))\s*\(` |
-| ECD-SRC-PHP-SODIUM-AEAD-CHACHA-001 | ChaCha20 | ae | at-rest | - | `(?i:sodium_crypto_aead_(?:x?chacha20poly1305_ietf)_(?:encrypt\|decrypt))\s*\(` |
-| ECD-SRC-PHP-SODIUM-BOX-001 | X25519-XSalsa20-Poly1305 | pke | at-rest | - | `(?i:sodium_crypto_box(?:_seal\|_seal_open)?)\s*\(` |
-| ECD-SRC-PHP-SODIUM-BOXKEY-001 | X25519 | key-agreement | tls | - | `(?i:sodium_crypto_box_keypair\|sodium_crypto_scalarmult(?:_base)?)\s*\(` |
-| ECD-SRC-PHP-SODIUM-SIGN-001 | Ed25519 | signature | signing | - | `(?i:sodium_crypto_sign(?:_detached\|_verify_detached\|_open)?)\s*\(` |
-| ECD-SRC-PHP-SODIUM-SIGNKEY-001 | Ed25519 | signature | signing | - | `(?i:sodium_crypto_sign_(?:seed_)?keypair)\s*\(` |
-| ECD-SRC-PHP-SODIUM-KX-001 | X25519-XChaCha20-Poly1305 | key-agreement | tls | - | `(?i:sodium_crypto_kx_(?:client\|server)_session_keys)\s*\(` |
-| ECD-SRC-PHP-SODIUM-AUTH-001 | BLAKE2b | mac | at-rest | - | `(?i:sodium_crypto_(?:auth\|verify))\s*\(` |
-| ECD-SRC-PHP-SODIUM-GHASH-001 | BLAKE2b | hash | at-rest | - | `(?i:sodium_crypto_generichash)\s*\(\s*[^,()]+\s*\)` |
-| ECD-SRC-PHP-SODIUM-GMAC-001 | BLAKE2b | mac | at-rest | - | `(?i:sodium_crypto_generichash)\s*\(\s*[^,()]+,[^,()]+\)\|(?i:sodium_crypto_generichash_init)\s*\(` |
-| ECD-SRC-PHP-SODIUM-PWHASH-001 | scrypt | kdf | at-rest | - | `(?i:sodium_crypto_pwhash(?:_str)?)\s*\(` |
+| IM-SRC-PHP-SODIUM-SECRETBOX-001 | XSalsa20-Poly1305 | ae | at-rest | - | `(?i:sodium_crypto_secretbox(?:_open)?)\s*\(` |
+| IM-SRC-PHP-SODIUM-AEAD-AES-001 | AES | ae | at-rest | - | `(?i:sodium_crypto_aead_aes256gcm_(?:encrypt\|decrypt))\s*\(` |
+| IM-SRC-PHP-SODIUM-AEAD-CHACHA-001 | ChaCha20 | ae | at-rest | - | `(?i:sodium_crypto_aead_(?:x?chacha20poly1305_ietf)_(?:encrypt\|decrypt))\s*\(` |
+| IM-SRC-PHP-SODIUM-BOX-001 | X25519-XSalsa20-Poly1305 | pke | at-rest | - | `(?i:sodium_crypto_box(?:_seal\|_seal_open)?)\s*\(` |
+| IM-SRC-PHP-SODIUM-BOXKEY-001 | X25519 | key-agreement | tls | - | `(?i:sodium_crypto_box_keypair\|sodium_crypto_scalarmult(?:_base)?)\s*\(` |
+| IM-SRC-PHP-SODIUM-SIGN-001 | Ed25519 | signature | signing | - | `(?i:sodium_crypto_sign(?:_detached\|_verify_detached\|_open)?)\s*\(` |
+| IM-SRC-PHP-SODIUM-SIGNKEY-001 | Ed25519 | signature | signing | - | `(?i:sodium_crypto_sign_(?:seed_)?keypair)\s*\(` |
+| IM-SRC-PHP-SODIUM-KX-001 | X25519-XChaCha20-Poly1305 | key-agreement | tls | - | `(?i:sodium_crypto_kx_(?:client\|server)_session_keys)\s*\(` |
+| IM-SRC-PHP-SODIUM-AUTH-001 | BLAKE2b | mac | at-rest | - | `(?i:sodium_crypto_(?:auth\|verify))\s*\(` |
+| IM-SRC-PHP-SODIUM-GHASH-001 | BLAKE2b | hash | at-rest | - | `(?i:sodium_crypto_generichash)\s*\(\s*[^,()]+\s*\)` |
+| IM-SRC-PHP-SODIUM-GMAC-001 | BLAKE2b | mac | at-rest | - | `(?i:sodium_crypto_generichash)\s*\(\s*[^,()]+,[^,()]+\)\|(?i:sodium_crypto_generichash_init)\s*\(` |
+| IM-SRC-PHP-SODIUM-PWHASH-001 | scrypt | kdf | at-rest | - | `(?i:sodium_crypto_pwhash(?:_str)?)\s*\(` |
 
 * **P-35 `SECRETBOX`.** `secretbox` is XSalsa20-Poly1305 with a 32-byte key **[doc]**; the key size
   is fixed by the algorithm and cannot be captured from source, so `key_length` is left unset and
@@ -386,11 +386,11 @@ name alone is a complete algorithm assertion. That is the opposite of Java's
 
 | id | name | primitive | uses | kg | regex |
 |---|---|---|---|---|---|
-| ECD-SRC-PHP-RNG-001 | CSPRNG | drbg | at-rest | - | `(?i:random_bytes\|random_int)\s*\(` |
-| ECD-SRC-PHP-RNG-OPENSSL-001 | CSPRNG | drbg | at-rest | - | `(?i:openssl_random_pseudo_bytes)\s*\(` |
-| ECD-SRC-PHP-WEAKRNG-MT-001 | MT19937 | drbg | at-rest | - | `(?i:mt_rand\|mt_srand\|mt_getrandmax)\s*\(` |
-| ECD-SRC-PHP-WEAKRNG-RAND-001 | LIBC-RAND | drbg | at-rest | - | `(?<![A-Za-z0-9_$:>])rand\s*\(` |
-| ECD-SRC-PHP-WEAKRNG-WEAK-001 | INSECURE-RNG | drbg | at-rest | - | `(?i:uniqid\|str_shuffle\|shuffle\|lcg_value\|array_rand)\s*\(` |
+| IM-SRC-PHP-RNG-001 | CSPRNG | drbg | at-rest | - | `(?i:random_bytes\|random_int)\s*\(` |
+| IM-SRC-PHP-RNG-OPENSSL-001 | CSPRNG | drbg | at-rest | - | `(?i:openssl_random_pseudo_bytes)\s*\(` |
+| IM-SRC-PHP-WEAKRNG-MT-001 | MT19937 | drbg | at-rest | - | `(?i:mt_rand\|mt_srand\|mt_getrandmax)\s*\(` |
+| IM-SRC-PHP-WEAKRNG-RAND-001 | LIBC-RAND | drbg | at-rest | - | `(?<![A-Za-z0-9_$:>])rand\s*\(` |
+| IM-SRC-PHP-WEAKRNG-WEAK-001 | INSECURE-RNG | drbg | at-rest | - | `(?i:uniqid\|str_shuffle\|shuffle\|lcg_value\|array_rand)\s*\(` |
 
 * **P-47 `CSPRNG`.** `random_bytes`/`random_int` are PHP's CSPRNG entry points **[doc]**; the
   `\s*\(` is belt-and-braces because they cannot be used as bare words.
@@ -419,9 +419,9 @@ name alone is a complete algorithm assertion. That is the opposite of Java's
 
 | id | name | primitive | uses | kg | regex |
 |---|---|---|---|---|---|
-| ECD-CFG-PHP-CA-001 | CA-BUNDLE | unknown | tls | - | `(?i:\bopenssl\.(?:cafile\|capath)\s*=\s*\S+)` |
-| ECD-SRC-PHP-CFG-CIPHER-001 | AES | block-cipher | at-rest | 1 | `(?i)['"]cipher['"]\s*=>\s*['"]\s*aes[-_]?(128\|192\|256)(?![-_]?ecb)\b` |
-| ECD-SRC-PHP-CFG-CIPHER-ECB-001 | AES | block-cipher | at-rest | 1 | `(?i)['"]cipher['"]\s*=>\s*['"]\s*aes[-_]?(128\|192\|256)[-_]?ecb` |
+| IM-CFG-PHP-CA-001 | CA-BUNDLE | unknown | tls | - | `(?i:\bopenssl\.(?:cafile\|capath)\s*=\s*\S+)` |
+| IM-SRC-PHP-CFG-CIPHER-001 | AES | block-cipher | at-rest | 1 | `(?i)['"]cipher['"]\s*=>\s*['"]\s*aes[-_]?(128\|192\|256)(?![-_]?ecb)\b` |
+| IM-SRC-PHP-CFG-CIPHER-ECB-001 | AES | block-cipher | at-rest | 1 | `(?i)['"]cipher['"]\s*=>\s*['"]\s*aes[-_]?(128\|192\|256)[-_]?ecb` |
 
 All three use `evidence="configured"`, so `artefact_class` is `config`.
 
@@ -451,60 +451,60 @@ Add these to the `samples` dict in `tests/test_scanner.py`, which asserts set eq
 `{r["id"] for r in RULES}`. All 54 were executed; every one fires its own rule.
 
 ```python
-"ECD-SRC-PHP-SYM-001": "$c = openssl_encrypt($data, $cipher, $key);",
-"ECD-SRC-PHP-AES-ECB-001": "$c = openssl_encrypt($d, 'aes-256-ecb', $k, 0, $iv);",
-"ECD-SRC-PHP-AES-UPPER-001": "$c = openssl_encrypt($d, 'AES-256-CBC', $k, 0, $iv);",
-"ECD-SRC-PHP-AES-AEAD-001": "$c = openssl_encrypt($d, 'aes-256-gcm', $k, OPENSSL_RAW_DATA, $iv);",
-"ECD-SRC-PHP-AES-OTHER-001": "$c = openssl_encrypt($d, 'aes-128-ofb', $k);",
-"ECD-SRC-PHP-CHACHA-001": "$c = openssl_encrypt($d, 'chacha20-poly1305', $k, 0, $n);",
-"ECD-SRC-PHP-IV-001": "$n = openssl_cipher_iv_length('aes-256-gcm');",
-"ECD-SRC-PHP-3DES-001": "$c = openssl_encrypt($d, 'des-ede3-cbc', $k);",
-"ECD-SRC-PHP-LEGACY-001": "$c = openssl_encrypt($d, 'bf-cbc', $k);",
-"ECD-SRC-PHP-RC4-001": "$c = openssl_encrypt($d, 'rc4', $k);",
-"ECD-SRC-PHP-PKCS7-RC2-001": "$p = openssl_pkcs7_encrypt($f, $crt, $pub, 0, OPENSSL_CIPHER_RC2_40_CBC);",
-"ECD-SRC-PHP-RC4-002": "$p = openssl_pkcs7_encrypt($f, $crt, $pub, 0, OPENSSL_CIPHER_RC4);",
-"ECD-SRC-PHP-PKCS7-ENC-001": "$p = openssl_pkcs7_encrypt($f, $crt, $pub);",
-"ECD-SRC-PHP-PKCS7-SIG-001": "$p = openssl_pkcs7_sign($d, $crt, $key, $h);",
-"ECD-SRC-PHP-CSR-001": "$csr = openssl_csr_sign($csr, $key, 365, $opts);",
-"ECD-SRC-PHP-RSA-PKE-001": "openssl_public_encrypt($d, $out, $pub);",
-"ECD-SRC-PHP-RSA-SIG-001": "openssl_sign($d, $sig, $key, OPENSSL_ALGO_SHA256);",
-"ECD-SRC-PHP-SHA1-SIGALG-001": "openssl_sign($d, $sig, $key, OPENSSL_ALGO_SHA1);",
-"ECD-SRC-PHP-SIGN-DEFAULT-001": "openssl_sign($data, $signature, $privKey);",
-"ECD-SRC-PHP-SHA2-SIGALG-001": "openssl_verify($d, $sig, $pub, OPENSSL_ALGO_SHA512);",
-"ECD-SRC-PHP-RSA-KEYGEN-001": "$k = openssl_pkey_new(['private_key_bits' => 2048, 'private_key_type' => OPENSSL_KEYTYPE_RSA]);",
-"ECD-SRC-PHP-DSA-KEYGEN-001": "$k = openssl_pkey_new(['private_key_bits' => 2048, 'private_key_type' => OPENSSL_KEYTYPE_DSA]);",
-"ECD-SRC-PHP-DH-KEYGEN-001": "$k = openssl_pkey_new(['private_key_bits' => 2048, 'private_key_type' => OPENSSL_KEYTYPE_DH]);",
-"ECD-SRC-PHP-HASH-SHA2-001": "$h = hash('sha256', $password);",
-"ECD-SRC-PHP-HASH-SHA1-001": "$h = hash('sha1', $data);",
-"ECD-SRC-PHP-HASH-MD5-001": "$h = hash('md5', $file);",
-"ECD-SRC-PHP-MAC-001": "$t = hash_hmac('sha256', $data, $key);",
-"ECD-SRC-PHP-KDF-PBKDF2-001": "$k = hash_pbkdf2('sha256', $p, $s, 100000);",
-"ECD-SRC-PHP-KDF-HKDF-001": "$k = hash_hkdf('sha256', $ikm, 32);",
-"ECD-SRC-PHP-PWD-ARGON2-001": "$h = password_hash($p, PASSWORD_ARGON2ID);",
-"ECD-SRC-PHP-PWD-DEFAULT-001": "$h = password_hash($p);",
-"ECD-SRC-PHP-PWD-INFO-001": "$i = password_get_info($hash);",
-"ECD-SRC-PHP-DIGESTALG-SHA1-001": "$csr = openssl_csr_new($dn, $k, ['digest_alg' => 'sha1']);",
-"ECD-SRC-PHP-DIGESTALG-SHA2-001": "$csr = openssl_csr_new($dn, $k, ['digest_alg' => 'sha256']);",
-"ECD-SRC-PHP-SODIUM-SECRETBOX-001": "$c = sodium_crypto_secretbox($m, $n, $k);",
-"ECD-SRC-PHP-SODIUM-AEAD-AES-001": "$c = sodium_crypto_aead_aes256gcm_encrypt($m, $ad, $n, $k);",
-"ECD-SRC-PHP-SODIUM-AEAD-CHACHA-001": "$c = sodium_crypto_aead_xchacha20poly1305_ietf_encrypt($m, $ad, $n, $k);",
-"ECD-SRC-PHP-SODIUM-BOX-001": "$c = sodium_crypto_box_seal($m, $pk);",
-"ECD-SRC-PHP-SODIUM-BOXKEY-001": "$kp = sodium_crypto_box_keypair();",
-"ECD-SRC-PHP-SODIUM-SIGN-001": "$sig = sodium_crypto_sign_detached($m, $sk);",
-"ECD-SRC-PHP-SODIUM-SIGNKEY-001": "$kp = sodium_crypto_sign_keypair();",
-"ECD-SRC-PHP-SODIUM-KX-001": "$r = sodium_crypto_kx_client_session_keys($pk, $sk);",
-"ECD-SRC-PHP-SODIUM-AUTH-001": "$t = sodium_crypto_auth($m, $k);",
-"ECD-SRC-PHP-SODIUM-GHASH-001": "$h = sodium_crypto_generichash($m);",
-"ECD-SRC-PHP-SODIUM-GMAC-001": "$t = sodium_crypto_generichash($m, $k);",
-"ECD-SRC-PHP-SODIUM-PWHASH-001": "$h = sodium_crypto_pwhash(32, $p);",
-"ECD-SRC-PHP-RNG-001": "$b = random_bytes(32);",
-"ECD-SRC-PHP-RNG-OPENSSL-001": "$b = openssl_random_pseudo_bytes(32, $strong);",
-"ECD-SRC-PHP-WEAKRNG-MT-001": "$n = mt_rand(1000, 9999);",
-"ECD-SRC-PHP-WEAKRNG-RAND-001": "$n = rand(1, 6);",
-"ECD-SRC-PHP-WEAKRNG-WEAK-001": "$id = uniqid('req_', true);",
-"ECD-CFG-PHP-CA-001": "openssl.cafile = /etc/ssl/certs/ca-certificates.crt",
-"ECD-SRC-PHP-CFG-CIPHER-001": "    'cipher' => 'AES-256-CBC',",
-"ECD-SRC-PHP-CFG-CIPHER-ECB-001": "    'cipher' => 'AES-256-ECB',",
+"IM-SRC-PHP-SYM-001": "$c = openssl_encrypt($data, $cipher, $key);",
+"IM-SRC-PHP-AES-ECB-001": "$c = openssl_encrypt($d, 'aes-256-ecb', $k, 0, $iv);",
+"IM-SRC-PHP-AES-UPPER-001": "$c = openssl_encrypt($d, 'AES-256-CBC', $k, 0, $iv);",
+"IM-SRC-PHP-AES-AEAD-001": "$c = openssl_encrypt($d, 'aes-256-gcm', $k, OPENSSL_RAW_DATA, $iv);",
+"IM-SRC-PHP-AES-OTHER-001": "$c = openssl_encrypt($d, 'aes-128-ofb', $k);",
+"IM-SRC-PHP-CHACHA-001": "$c = openssl_encrypt($d, 'chacha20-poly1305', $k, 0, $n);",
+"IM-SRC-PHP-IV-001": "$n = openssl_cipher_iv_length('aes-256-gcm');",
+"IM-SRC-PHP-3DES-001": "$c = openssl_encrypt($d, 'des-ede3-cbc', $k);",
+"IM-SRC-PHP-LEGACY-001": "$c = openssl_encrypt($d, 'bf-cbc', $k);",
+"IM-SRC-PHP-RC4-001": "$c = openssl_encrypt($d, 'rc4', $k);",
+"IM-SRC-PHP-PKCS7-RC2-001": "$p = openssl_pkcs7_encrypt($f, $crt, $pub, 0, OPENSSL_CIPHER_RC2_40_CBC);",
+"IM-SRC-PHP-RC4-002": "$p = openssl_pkcs7_encrypt($f, $crt, $pub, 0, OPENSSL_CIPHER_RC4);",
+"IM-SRC-PHP-PKCS7-ENC-001": "$p = openssl_pkcs7_encrypt($f, $crt, $pub);",
+"IM-SRC-PHP-PKCS7-SIG-001": "$p = openssl_pkcs7_sign($d, $crt, $key, $h);",
+"IM-SRC-PHP-CSR-001": "$csr = openssl_csr_sign($csr, $key, 365, $opts);",
+"IM-SRC-PHP-RSA-PKE-001": "openssl_public_encrypt($d, $out, $pub);",
+"IM-SRC-PHP-RSA-SIG-001": "openssl_sign($d, $sig, $key, OPENSSL_ALGO_SHA256);",
+"IM-SRC-PHP-SHA1-SIGALG-001": "openssl_sign($d, $sig, $key, OPENSSL_ALGO_SHA1);",
+"IM-SRC-PHP-SIGN-DEFAULT-001": "openssl_sign($data, $signature, $privKey);",
+"IM-SRC-PHP-SHA2-SIGALG-001": "openssl_verify($d, $sig, $pub, OPENSSL_ALGO_SHA512);",
+"IM-SRC-PHP-RSA-KEYGEN-001": "$k = openssl_pkey_new(['private_key_bits' => 2048, 'private_key_type' => OPENSSL_KEYTYPE_RSA]);",
+"IM-SRC-PHP-DSA-KEYGEN-001": "$k = openssl_pkey_new(['private_key_bits' => 2048, 'private_key_type' => OPENSSL_KEYTYPE_DSA]);",
+"IM-SRC-PHP-DH-KEYGEN-001": "$k = openssl_pkey_new(['private_key_bits' => 2048, 'private_key_type' => OPENSSL_KEYTYPE_DH]);",
+"IM-SRC-PHP-HASH-SHA2-001": "$h = hash('sha256', $password);",
+"IM-SRC-PHP-HASH-SHA1-001": "$h = hash('sha1', $data);",
+"IM-SRC-PHP-HASH-MD5-001": "$h = hash('md5', $file);",
+"IM-SRC-PHP-MAC-001": "$t = hash_hmac('sha256', $data, $key);",
+"IM-SRC-PHP-KDF-PBKDF2-001": "$k = hash_pbkdf2('sha256', $p, $s, 100000);",
+"IM-SRC-PHP-KDF-HKDF-001": "$k = hash_hkdf('sha256', $ikm, 32);",
+"IM-SRC-PHP-PWD-ARGON2-001": "$h = password_hash($p, PASSWORD_ARGON2ID);",
+"IM-SRC-PHP-PWD-DEFAULT-001": "$h = password_hash($p);",
+"IM-SRC-PHP-PWD-INFO-001": "$i = password_get_info($hash);",
+"IM-SRC-PHP-DIGESTALG-SHA1-001": "$csr = openssl_csr_new($dn, $k, ['digest_alg' => 'sha1']);",
+"IM-SRC-PHP-DIGESTALG-SHA2-001": "$csr = openssl_csr_new($dn, $k, ['digest_alg' => 'sha256']);",
+"IM-SRC-PHP-SODIUM-SECRETBOX-001": "$c = sodium_crypto_secretbox($m, $n, $k);",
+"IM-SRC-PHP-SODIUM-AEAD-AES-001": "$c = sodium_crypto_aead_aes256gcm_encrypt($m, $ad, $n, $k);",
+"IM-SRC-PHP-SODIUM-AEAD-CHACHA-001": "$c = sodium_crypto_aead_xchacha20poly1305_ietf_encrypt($m, $ad, $n, $k);",
+"IM-SRC-PHP-SODIUM-BOX-001": "$c = sodium_crypto_box_seal($m, $pk);",
+"IM-SRC-PHP-SODIUM-BOXKEY-001": "$kp = sodium_crypto_box_keypair();",
+"IM-SRC-PHP-SODIUM-SIGN-001": "$sig = sodium_crypto_sign_detached($m, $sk);",
+"IM-SRC-PHP-SODIUM-SIGNKEY-001": "$kp = sodium_crypto_sign_keypair();",
+"IM-SRC-PHP-SODIUM-KX-001": "$r = sodium_crypto_kx_client_session_keys($pk, $sk);",
+"IM-SRC-PHP-SODIUM-AUTH-001": "$t = sodium_crypto_auth($m, $k);",
+"IM-SRC-PHP-SODIUM-GHASH-001": "$h = sodium_crypto_generichash($m);",
+"IM-SRC-PHP-SODIUM-GMAC-001": "$t = sodium_crypto_generichash($m, $k);",
+"IM-SRC-PHP-SODIUM-PWHASH-001": "$h = sodium_crypto_pwhash(32, $p);",
+"IM-SRC-PHP-RNG-001": "$b = random_bytes(32);",
+"IM-SRC-PHP-RNG-OPENSSL-001": "$b = openssl_random_pseudo_bytes(32, $strong);",
+"IM-SRC-PHP-WEAKRNG-MT-001": "$n = mt_rand(1000, 9999);",
+"IM-SRC-PHP-WEAKRNG-RAND-001": "$n = rand(1, 6);",
+"IM-SRC-PHP-WEAKRNG-WEAK-001": "$id = uniqid('req_', true);",
+"IM-CFG-PHP-CA-001": "openssl.cafile = /etc/ssl/certs/ca-certificates.crt",
+"IM-SRC-PHP-CFG-CIPHER-001": "    'cipher' => 'AES-256-CBC',",
+"IM-SRC-PHP-CFG-CIPHER-ECB-001": "    'cipher' => 'AES-256-ECB',",
 ```
 
 ---
@@ -519,14 +519,14 @@ Declining is a design decision and each of these is one.
 | `openssl_pkcs12_read/export/parse` | **DECLINE, gap recorded** | PKCS#12 is a *key container*; the certificate sensor handles PEM/DER, not PKCS#12. A `primitive="unknown"` rule would route to manual review without adding information. A gap in the certificate sensor, not in the rule table. |
 | `openssl_csr_new` | **DECLINE** | It takes an already-generated `$privkey`; key generation is caught by P-32 and the signature by P-31, so a rule here would be a third finding for one statement (F1). Its `digest_alg` option *is* covered, by P-22. |
 | `openssl_seal` / `openssl_open` as a separate rule | **MERGED into P-27** | Same primitive, same `name`; the merge is what F1 requires. |
-| An `OPENSSL_KEYTYPE_EC` key-generation rule | **DECLINE** | `ECD-SRC-ECC-001` already matches the curve literal `prime256v1`/`secp256r1`/... in the same options array, so a new rule would produce a second component named `ECC` for one statement. The only uncovered form is `OPENSSL_KEYTYPE_EC` with no `curve` key, which is not worth a duplicate. See also the note in section 10 about how the engine rewrites any `name="ECC"` finding. |
-| `sha1($x)`, `md5($x)` (the bare PHP functions) | **NO NEW RULE** | Already matched by `ECD-SRC-SHA1-001` (`sha1\(`) and `ECD-SRC-MD5-001` (`\bmd5\(`). Verified by reading those regexes. |
+| An `OPENSSL_KEYTYPE_EC` key-generation rule | **DECLINE** | `IM-SRC-ECC-001` already matches the curve literal `prime256v1`/`secp256r1`/... in the same options array, so a new rule would produce a second component named `ECC` for one statement. The only uncovered form is `OPENSSL_KEYTYPE_EC` with no `curve` key, which is not worth a duplicate. See also the note in section 10 about how the engine rewrites any `name="ECC"` finding. |
+| `sha1($x)`, `md5($x)` (the bare PHP functions) | **NO NEW RULE** | Already matched by `IM-SRC-SHA1-001` (`sha1\(`) and `IM-SRC-MD5-001` (`\bmd5\(`). Verified by reading those regexes. |
 | `openssl_get_cipher_methods()`, `openssl_get_md_methods()` | **DECLINE** | These are *capability enumeration*. Reporting them as algorithm use would claim a use the code does not make. The engine has an `ASSURANCE_CAPABILITY` concept, but a source rule cannot express it. |
 | `hash_equals()` | **DECLINE** | Not a primitive. Evidence that the author cared about comparison is not an algorithm claim. |
 | `openssl_cipher_key_length()` | **DECLINE** | Removed in PHP 8.0 **[doc, high confidence]**. A rule for a function that cannot be called on any supported version is dead weight. |
 | `mcrypt_*` | **DECLINE** | Removed from PHP 7.2 **[doc, high confidence]**. Same reasoning as `openssl_cipher_key_length`. |
 | `php.ini` `ssl.cipher_list` / `openssl.cipher_list` | **DECLINE - uncertain** | I could not establish that either key exists. `openssl.cafile`/`capath` I am confident about. A guessed ini key produces a rule that never fires. |
-| Apache `SSLOpenSSLConfCmd CipherString ...`, `SSLCipherSuite ...` | **DECLINE** | `ECD-CFG-LEGACY-001` already covers the legacy suite names in config files, and a second rule would double-report (F1). A non-legacy `SSLCipherSuite` line is TLS configuration, not an algorithm. |
+| Apache `SSLOpenSSLConfCmd CipherString ...`, `SSLCipherSuite ...` | **DECLINE** | `IM-CFG-LEGACY-001` already covers the legacy suite names in config files, and a second rule would double-report (F1). A non-legacy `SSLCipherSuite` line is TLS configuration, not an algorithm. |
 | WordPress `AUTH_KEY`, Laravel `APP_KEY`, `DB_PASSWORD` | **DECLINE - and a disclosure note** | These are *secrets*, not algorithms. `.env` is already in `CREDENTIAL_STORE_NAMES` and is never read (`fspolicy.py:27`), but **`wp-config.php`, `config/credentials.yml.enc` and `secrets/*.pem` are not on that list**, and would be read with their key material placed in an evidence snippet. An `fspolicy` gap, not a rule-table gap: E8. |
 | phpseclib (`phpseclib\Crypt\RSA`, `…\AES`, `…\Random`) | **DEFERRED - section 9** | Very widely used, but I cannot check its API surface from here, and a rule built on a guessed class name is exactly what `test_every_rule_is_actually_executed` exists to catch. |
 | defuse/php-encryption (`Defuse\Crypto\Crypto::encrypt`) | **DEFERRED - section 9** | Same reason. Its cipher is selected by a class constant, which is the pattern this pack handles well, so it is a good candidate once the constant names are confirmed. |
@@ -571,7 +571,7 @@ call; P-01 needs a `$` in argument 2. P-13/14/15 need `hash(` - the only occurre
 $doc = "call random_bytes(16) for tokens";
 ```
 
-**Measured: two false positives - `ECD-SRC-PHP-AES-UPPER-001` and `ECD-SRC-PHP-RNG-001`.** The
+**Measured: two false positives - `IM-SRC-PHP-AES-UPPER-001` and `IM-SRC-PHP-RNG-001`.** The
 second comes from the *string* on line 2, not from the comment, which shows the rules are right and
 the *preprocessing* is missing: `_strip_comments` applies `#` handling only when the path ends
 `.py`/`.pyw` (`scanner.py:387-389`), and `#` is PHP's most common comment style. The `//` and
@@ -593,7 +593,7 @@ $out = openssl_error_string();
 $rows = array_rand($options, 3);
 ```
 
-**Measured: one finding - `ECD-SRC-PHP-WEAKRNG-WEAK-001` on `array_rand(`, and it is correct.**
+**Measured: one finding - `IM-SRC-PHP-WEAKRNG-WEAK-001` on `array_rand(`, and it is correct.**
 `openssl_get_cipher_methods()` is declined in section 5 because it enumerates rather than uses.
 `array_rand` *is* entropy-hostile by the rule's definition and a static analyser cannot prove the
 array is a deck of cards; flagging it is the same position `tests/fixtures/decoys/decoy_source.py`
@@ -618,15 +618,15 @@ correct; judging their purpose is a review step, not a detection step."
 the 34 shipped ones over every positive sample and grouped findings by `(name, line)`; nothing was
 claimed by two different owners. Two collisions were found during development and designed out:
 
-* **`ECD-SRC-PHP-AES-UPPER-001` vs `ECD-SRC-SSH-CIPHER-001`.** These would collide on
+* **`IM-SRC-PHP-AES-UPPER-001` vs `IM-SRC-SSH-CIPHER-001`.** These would collide on
   `'aes-256-cbc'` if the PHP rule were case-insensitive. Resolved by making case the discriminator
   (P-05), not by a negative lookahead - a lookahead cannot know what another rule will claim.
-* **`ECD-SRC-PHP-3DES-001` / `-LEGACY-001` vs `ECD-SRC-SSH-LEGACY-001`.** Resolved with
+* **`IM-SRC-PHP-3DES-001` / `-LEGACY-001` vs `IM-SRC-SSH-LEGACY-001`.** Resolved with
   per-alternative `(?!-cbc)` guards naming exactly the tokens the SSH rule owns.
 
-One conditional conflict remains. If the team takes **PREREQ-1** - make `ECD-SRC-SSH-CIPHER-001`
+One conditional conflict remains. If the team takes **PREREQ-1** - make `IM-SRC-SSH-CIPHER-001`
 case-insensitive and widen its mode list, which is the better long-term design - then
-`ECD-SRC-PHP-AES-UPPER-001` becomes redundant *and* colliding and must be dropped. It is the only
+`IM-SRC-PHP-AES-UPPER-001` becomes redundant *and* colliding and must be dropped. It is the only
 rule whose status depends on a prerequisite.
 
 ### 7.1 One behaviour of the engine these rules must live with
@@ -806,16 +806,16 @@ existing rule's *meaning*.
 
 | id | change | why it is needed | evidence |
 |---|---|---|---|
-| **PREREQ-1** | Either (a) make `ECD-SRC-SSH-CIPHER-001` case-insensitive and widen its mode list to `cfb\|ofb\|xts\|ccm\|ocb\|eax\|siv`, or (b) keep it as it is. **If (a), drop `ECD-SRC-PHP-AES-UPPER-001`.** | (a) is the better design - one rule should own quoted OpenSSL cipher strings regardless of case, and the SSH rules should never have been language-agnostic. (b) is zero-risk. Choosing (a) without dropping the PHP rule double-counts every upper-case literal. | F2, section 7 |
+| **PREREQ-1** | Either (a) make `IM-SRC-SSH-CIPHER-001` case-insensitive and widen its mode list to `cfb\|ofb\|xts\|ccm\|ocb\|eax\|siv`, or (b) keep it as it is. **If (a), drop `IM-SRC-PHP-AES-UPPER-001`.** | (a) is the better design - one rule should own quoted OpenSSL cipher strings regardless of case, and the SSH rules should never have been language-agnostic. (b) is zero-risk. Choosing (a) without dropping the PHP rule double-counts every upper-case literal. | F2, section 7 |
 | **E1** | Extend `_strip_comments` to blank `#` comments for `.php`, `.phtml`, `.inc`, `.module`, `.rb`, `.rake`, `.gemspec`, excluding `#[` (PHP 8 attribute), `#{...}` and `?#` (Ruby), and `=begin`/`=end` blocks. | **Largest measured false-positive source in both packs.** `#` is the dominant comment style in both languages and is currently only handled for `.py`. | F4, D2 (measured: 2 FPs in a 2-line file) |
 | **E2** | Add `openssl_keytype_rsa`, `openssl_pkey_new`, `pkey::rsa.generate`, `pkey::rsa.new` to the UNRESOLVED needle tuple in `purpose.py`, alongside the existing `rsa_new`. | The recommender only declines to name a target when `bool(purpose_signals)`. A bare key generator currently produces an **empty** signal list, so `openssl_pkey_new(... OPENSSL_KEYTYPE_RSA ...)` is confidently told to migrate to ML-KEM even if the key only ever signs. The existing `rsa_new` token does not match a dotted spelling. | section 1, A1 (measured) |
 | **E3** | One line in `_match_rules`: `if rule.get("mode"): finding["mode"] = rule["mode"]`. Optionally add a `mode` key to the rule dict. | `cbom.py:369-372` already reads `finding["mode"]` and `_canonical_mode` already maps `gcm cbc ecb ccm cfb ofb ctr`. Without this, "this was ECB" survives only in a field no consumer reads, and an ECB finding is reported as "No migration required". | F5, A6 (measured) |
 | **E4** | Decide whether `kdf` and `key-derive` belong in the Shor-broken list at `cbom.py:238-240`. **Recommendation: remove them.** | Measured: a PBKDF2 finding emits `nistQuantumSecurityLevel: 0` ("a CRQC breaks this") in the same row where `mosca` says `not-affected`. PBKDF2, Argon2id, scrypt and bcrypt are not Shor targets. This is the self-contradiction class `cbom.py:200-214` says was fixed. | section 1 (measured) |
 | **E5** | Tighten `_refine_uses` so that `certificate` / `sign(` in the matched *value* cannot set `uses`. | Measured: `openssl.cafile = /etc/ssl/certs/ca-certificates.crt` produced `uses="signing"` because the path contains "certificate". | P-52 (measured) |
 | **E6** | Optional: a `fixed_key_bits` key on rules, so an algorithm whose key size is fixed by construction (libsodium secretbox, box, sign, AEAD) can publish it. | These findings currently land in the recommender's "Confirm key size (inventory gap)" branch even though the size is known by definition - 32 bytes. | P-35 (measured) |
-| **E7** | Optional, but the pack is weak without it: an advisory channel for classical-but-not-quantum defects (ECB mode, PKCS#1 v1.5 padding, MT19937, `null` ciphers). A minimal version is a `severity` or `advisory` key on the rule plus an `ecd:`-namespaced property, which is this project's existing convention for data the standard has no slot for. | Measured: every one of these findings is routed to `RULE-UNKNOWN -> "Manual review required"` and rated `not-affected`. Detection-complete and action-invisible is a poor place to stop, and the honest thing is to say so rather than let the CBOM imply "fine". | A4, A6, A7 (measured) |
+| **E7** | Optional, but the pack is weak without it: an advisory channel for classical-but-not-quantum defects (ECB mode, PKCS#1 v1.5 padding, MT19937, `null` ciphers). A minimal version is a `severity` or `advisory` key on the rule plus an `im:`-namespaced property, which is this project's existing convention for data the standard has no slot for. | Measured: every one of these findings is routed to `RULE-UNKNOWN -> "Manual review required"` and rated `not-affected`. Detection-complete and action-invisible is a poor place to stop, and the honest thing is to say so rather than let the CBOM imply "fine". | A4, A6, A7 (measured) |
 | **E8** | Add `wp-config.php`, `credentials.yml.enc`, `secrets.yml`, and a `*.pem`-not-`id_*` rule to `CREDENTIAL_STORE_NAMES`. | These files hold key material and are not on the list, so they are read and any rule match lands in an evidence snippet. Found while doing this work; it is an `fspolicy` issue, not a rule-table issue. | `fspolicy.py:24-31`, section 5 |
-| **E9** | Add a capture group to `ECD-SRC-AES-001`'s `AES\.new\(` alternative, e.g. `AES\.new\(\s*(\d+)`. | That rule already declares `key_group=1` and a `key_map` but its `AES.new(` alternative has no group, so Ruby's `OpenSSL::Cipher::AES.new(256, :gcm)` is detected with `key_length=None`. A one-token fix; it is what makes the Ruby ctor rules withdrawable. | F3 (measured) |
+| **E9** | Add a capture group to `IM-SRC-AES-001`'s `AES\.new\(` alternative, e.g. `AES\.new\(\s*(\d+)`. | That rule already declares `key_group=1` and a `key_map` but its `AES.new(` alternative has no group, so Ruby's `OpenSSL::Cipher::AES.new(256, :gcm)` is detected with `key_length=None`. A one-token fix; it is what makes the Ruby ctor rules withdrawable. | F3 (measured) |
 | **E10** | Optional: an `extensions=` key on rules, so a pack rule can be restricted to `.php/.phtml/.inc` or `.rb/.rake/.gemspec`. | The durable fix for cross-language bleed. The pack does not need it today - measured zero collisions in both directions - but that is a property of these regexes, not of the engine. | section 5, section 7 |
 | **E11** | Extend the recommender-totality test's primitive domain with `kdf`, `drbg`, `stream-cipher`. | The pack introduces those three primitive values and a fixed-domain property test would be asserting totality over a domain the engine no longer has. I am not editing tests; this is a required follow-up for whoever merges the pack. | `tests/test_properties.py:75-95` |
 
@@ -828,7 +828,7 @@ document; nothing here required modifying the repository.
 
 **What I ran.** A throwaway harness outside the repo imported `engine.scanner`, replaced
 `RULES` and `_COMPILED_RULES` **in memory** with the candidate pack, and called the real
-`ECDATScanner._match_rules()` on each positive sample, each decoy, and a combined table. Results:
+`IndraMeshScanner._match_rules()` on each positive sample, each decoy, and a combined table. Results:
 
 | check | result |
 |---|---|

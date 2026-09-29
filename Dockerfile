@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-# Enterprise Cryptographic Discovery & Analysis Tool (ECDAT)
+# Enterprise Cryptographic Discovery & Analysis Tool (IndraMesh)
 # Standard Dockerfile for running the tool in isolated environments.
 
 FROM python:3.11-slim-bookworm
@@ -11,7 +11,7 @@ ENV PYTHONUNBUFFERED=1
 # App environment configuration
 ENV PORT=8501
 
-WORKDIR /opt/ecdat
+WORKDIR /opt/indramesh
 
 # Install system dependencies.
 # `curl` is NOT optional decoration here: the HEALTHCHECK below invokes it, and python:3.11-slim
@@ -42,7 +42,7 @@ VOLUME ["/target"]
 # Expose web console port
 EXPOSE 8501
 
-# Add a healthcheck for the ECDAT web console
+# Add a healthcheck for the IndraMesh web console
 HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
     CMD curl --fail --silent http://localhost:8501/api/status || exit 1
 

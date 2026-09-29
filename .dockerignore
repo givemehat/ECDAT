@@ -22,7 +22,7 @@ tmp/
 
 # ---- scratch output from the long-running tools --------------------------------------------------
 *.report.json
-ecdat_report.json
+indramesh_report.json
 _*.txt
 _*.html
 st.txt

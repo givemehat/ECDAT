@@ -1,4 +1,4 @@
-# Competitive Analysis — SIH26164 (ECDAT)
+# Competitive Analysis — SIH26164 (IndraMesh)
 
 **Method.** 24 GitHub Search API queries → **349 unique repositories** scraped → relevance-scored
 against the four brief requirements → **119 shortlisted** → README + metadata fetched for the

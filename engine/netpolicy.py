@@ -57,15 +57,15 @@ THE FOUR FAILURE MODES THIS CLOSES
 
 CONFIGURATION (all environment-driven, all fail-closed)
 ---------------------------------------------------------------------------------------------------
-    ECDAT_ALLOWED_HOSTS          Hostname allowlist. EMPTY = DENY ALL. Fail-closed on purpose: a
+    INDRAMESH_ALLOWED_HOSTS          Hostname allowlist. EMPTY = DENY ALL. Fail-closed on purpose: a
                                  fresh checkout must not be able to reach anything, and a policy
                                  that defaults to "permit" is a policy nobody reads.
-    ECDAT_ALLOWED_PORTS          Port allowlist, default "22 443 465 587 636 993 995 3306 5432
+    INDRAMESH_ALLOWED_PORTS          Port allowlist, default "22 443 465 587 636 993 995 3306 5432
                                  8443". Deliberately not "any port": without it, the HOST
                                  allowlist is a port scanner, because a tool that completes a
                                  TLS handshake will happily try all 65535 of them.
-    ECDAT_MAX_ENDPOINTS          Batch cap, default 16, so one request cannot become a sweep.
-    ECDAT_ALLOW_PRIVATE_TARGETS  Off by default. If enabled, private and loopback targets are
+    INDRAMESH_MAX_ENDPOINTS          Batch cap, default 16, so one request cannot become a sweep.
+    INDRAMESH_ALLOW_PRIVATE_TARGETS  Off by default. If enabled, private and loopback targets are
                                  permitted FOR A LAB, and every result is marked `lab_derived`
                                  so a loopback finding can never be mistaken for evidence about
                                  a real deployment.
@@ -73,7 +73,7 @@ CONFIGURATION (all environment-driven, all fail-closed)
 CLOUD METADATA IS REFUSED EVEN WHEN PRIVATE TARGETS ARE ALLOWED
 ---------------------------------------------------------------------------------------------------
 `169.254.169.254` is the address whose whole purpose is to hand temporary cloud credentials to
-anything that asks. `ECDAT_ALLOW_PRIVATE_TARGETS` exists so an operator can point this at a lab
+anything that asks. `INDRAMESH_ALLOW_PRIVATE_TARGETS` exists so an operator can point this at a lab
 server on 127.0.0.1; it is not a request to be able to read instance metadata, and no lab needs
 it. There is no environment variable that turns it on, because an SSRF gadget whose metadata path
 is a configuration option is an SSRF gadget that will be configured that way by someone at 2am.
@@ -98,11 +98,11 @@ VERDICT_PRIVATE = "private-target"         # RFC1918 / unique-local / loopback /
 VERDICT_METADATA = "cloud-metadata"        # instance credential endpoint; refused unconditionally
 VERDICT_DENIED = "denied"                  # multicast, reserved, unspecified, broadcast
 VERDICT_SPLIT_HORIZON = "split-horizon"    # public AND internal in one answer
-VERDICT_NOT_ALLOWLISTED = "not-allowlisted"        # host not in ECDAT_ALLOWED_HOSTS
+VERDICT_NOT_ALLOWLISTED = "not-allowlisted"        # host not in INDRAMESH_ALLOWED_HOSTS
 VERDICT_PORT_NOT_ALLOWLISTED = "port-not-allowlisted"
 VERDICT_UNRESOLVED = "unresolved"          # name did not resolve at all
 
-# Categories that may be probed only when ECDAT_ALLOW_PRIVATE_TARGETS is on.
+# Categories that may be probed only when INDRAMESH_ALLOW_PRIVATE_TARGETS is on.
 PRIVATE_VERDICTS = frozenset({VERDICT_PRIVATE, VERDICT_METADATA})
 
 # Cloud instance-metadata endpoints, in every spelling we can recognise. Refused ALWAYS.
@@ -127,14 +127,14 @@ DEFAULT_PORT = 443
 # with the data instead of living only in a log line the operator may not have read.
 LAB_DERIVED_NOTE = (
     "LAB-DERIVED: this target is not a public host. It was reached only because "
-    "ECDAT_ALLOW_PRIVATE_TARGETS was set. It says nothing about any real deployment."
+    "INDRAMESH_ALLOW_PRIVATE_TARGETS was set. It says nothing about any real deployment."
 )
 
 # Environment variable names, named once so the policy and its tests cannot drift apart.
-ENV_ALLOWED_HOSTS = "ECDAT_ALLOWED_HOSTS"
-ENV_ALLOWED_PORTS = "ECDAT_ALLOWED_PORTS"
-ENV_MAX_ENDPOINTS = "ECDAT_MAX_ENDPOINTS"
-ENV_ALLOW_PRIVATE = "ECDAT_ALLOW_PRIVATE_TARGETS"
+ENV_ALLOWED_HOSTS = "INDRAMESH_ALLOWED_HOSTS"
+ENV_ALLOWED_PORTS = "INDRAMESH_ALLOWED_PORTS"
+ENV_MAX_ENDPOINTS = "INDRAMESH_MAX_ENDPOINTS"
+ENV_ALLOW_PRIVATE = "INDRAMESH_ALLOW_PRIVATE_TARGETS"
 
 _TRUTHY = frozenset({"1", "true", "yes", "on", "enable", "enabled"})
 
@@ -169,7 +169,7 @@ class VettedEndpoint(object):
                     which certificate and which virtual host the server selects. It is not a
                     routing instruction, and it is never resolved again.
 
-    `lab_derived` is True when the target was permitted only because ECDAT_ALLOW_PRIVATE_TARGETS
+    `lab_derived` is True when the target was permitted only because INDRAMESH_ALLOW_PRIVATE_TARGETS
     was set. It propagates into every finding, so evidence from a loopback lab server is never
     silently mixed with evidence about a real deployment.
     """
@@ -319,7 +319,7 @@ class NetPolicy(object):
     def from_env(cls, environ=None, resolver=None):
         """Build a policy from the environment. Every value fails closed on garbage.
 
-        A malformed `ECDAT_ALLOWED_PORTS` does not mean "any port" and does not raise: it means
+        A malformed `INDRAMESH_ALLOWED_PORTS` does not mean "any port" and does not raise: it means
         NO ports, because a configuration value we cannot understand must not become a wider grant
         than the operator intended. A scanner that silently widens its own permissions when its
         config file is corrupted is a scanner with a remote exploit.
@@ -408,7 +408,7 @@ class NetPolicy(object):
         # 3. Host allowlist.
         if not host_allowed(host, self.allowed_hosts):
             return Refusal(spec, VERDICT_NOT_ALLOWLISTED,
-                           "host %r is not in ECDAT_ALLOWED_HOSTS (%s). An empty allowlist denies "
+                           "host %r is not in INDRAMESH_ALLOWED_HOSTS (%s). An empty allowlist denies "
                            "every target by design."
                            % (host, ", ".join(self.allowed_hosts) or "empty -- deny all"))
 
@@ -445,11 +445,11 @@ class NetPolicy(object):
             # An unconditional refusal must not depend on DNS answer order.
             metadata_hits = [a for a, v in blocking if v[0] == VERDICT_METADATA]
             if metadata_hits:
-                # Unconditional. Not reachable by ECDAT_ALLOW_PRIVATE_TARGETS; see the docstring.
+                # Unconditional. Not reachable by INDRAMESH_ALLOW_PRIVATE_TARGETS; see the docstring.
                 return Refusal(spec, VERDICT_METADATA,
                                "%s resolves to the cloud instance-metadata endpoint %s, which "
                                "hands out temporary credentials. Refused unconditionally, "
-                               "whatever else the name resolves to; ECDAT_ALLOW_PRIVATE_TARGETS "
+                               "whatever else the name resolves to; INDRAMESH_ALLOW_PRIVATE_TARGETS "
                                "does not enable it."
                                % (host, ", ".join(str(a) for a in metadata_hits)))
             addr, (verdict, reason) = blocking[0]
@@ -673,7 +673,7 @@ def classify_address(addr):
     if text in METADATA_ADDRESSES:
         return (VERDICT_METADATA,
                 "%s is a cloud instance-metadata endpoint that hands out temporary credentials. "
-                "Refused unconditionally; ECDAT_ALLOW_PRIVATE_TARGETS does not enable it."
+                "Refused unconditionally; INDRAMESH_ALLOW_PRIVATE_TARGETS does not enable it."
                 % text)
 
     # 3. Loopback. Named first because "refused because it is a loopback address" is the single

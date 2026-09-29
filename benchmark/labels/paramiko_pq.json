@@ -8,7 +8,7 @@
   "notes": "Real production library, not a constructed benchmark. Scoped to the 'paramiko/' package directory; 'tests/' and 'sites/' are excluded, and that exclusion is part of the declared measurement scope."
  },
  "annotation": {
-  "annotated_by": "ECDAT benchmark harness author, by direct reading of every file in scope",
+  "annotated_by": "IndraMesh benchmark harness author, by direct reading of every file in scope",
   "unit": "one (file, 1-based line) location",
   "files_in_scope": 42,
   "candidate_lines_reviewed": 407,

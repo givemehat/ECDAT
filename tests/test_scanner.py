@@ -15,13 +15,13 @@ import tarfile
 
 import pytest
 
-from engine.scanner import ECDATScanner, RULES, BINARY_MARKERS
+from engine.scanner import IndraMeshScanner, RULES, BINARY_MARKERS
 
 
 @pytest.fixture
 def scanner():
     # enable_ml=False keeps these tests hermetic: no torch, no model file, regex only.
-    return ECDATScanner(enable_ml=False)
+    return IndraMeshScanner(enable_ml=False)
 
 
 def _write(path, text):
@@ -36,166 +36,166 @@ def _write(path, text):
 def test_every_rule_is_actually_executed(tmp_path, scanner):
     """Each rule in the table must be reachable: give it a positive sample and assert a hit."""
     samples = {
-        "ECD-SRC-RSA-001": "key = rsa.newkeys(2048)",
-        "ECD-SRC-RSA-002": "sig = pkcs1_15.new(key).sign(h)",
-        "ECD-SRC-RSA-003": 'KeyPairGenerator.getInstance("RSA")',
+        "IM-SRC-RSA-001": "key = rsa.newkeys(2048)",
+        "IM-SRC-RSA-002": "sig = pkcs1_15.new(key).sign(h)",
+        "IM-SRC-RSA-003": 'KeyPairGenerator.getInstance("RSA")',
         # A bare `ec.generate_private_key(ec.SECP256R1())` no longer matches this rule: it is a
         # generic key-pair generator that cannot say which operation follows, and matching it
         # here made one line report as BOTH ECDH and ECDSA. The curve is still found, by
-        # ECD-SRC-PYCA-EC-001.
-        "ECD-SRC-ECDH-001": "shared = kex.exchange(peer_public_key)",
-        "ECD-SRC-ECDSA-001": 'Signature.getInstance("SHA256withECDSA")',
-        "ECD-SRC-ECC-001": 'kpg = KeyPairGenerator.getInstance("EC")',
-        "ECD-SRC-EDDSA-001": "sk = Ed25519PrivateKey.generate()",
-        "ECD-SRC-DSA-001": "EVP_PKEY_DSA *pkey = NULL;",
-        "ECD-SRC-DH-001": "DH_get_2048_256();",
-        "ECD-SRC-AES-001": "aesgcm = AESGCM(key)",
-        "ECD-SRC-CHACHA-001": "AEADChaCha20Poly1305()",
-        "ECD-SRC-SHA2-001": "digest = hashes.Hash(hashes.SHA256())",
-        "ECD-SRC-SHA1-001": 'MessageDigest.getInstance("SHA-1")',
-        "ECD-SRC-MD5-001": "hashlib.md5(data)",
-        "ECD-CFG-TLS-001": "ssl_protocols TLSv1.2 TLSv1.3;",
-        "ECD-CFG-LEGACY-001": "ciphers = RC4-SHA:DES-CBC3-SHA",
+        # IM-SRC-PYCA-EC-001.
+        "IM-SRC-ECDH-001": "shared = kex.exchange(peer_public_key)",
+        "IM-SRC-ECDSA-001": 'Signature.getInstance("SHA256withECDSA")',
+        "IM-SRC-ECC-001": 'kpg = KeyPairGenerator.getInstance("EC")',
+        "IM-SRC-EDDSA-001": "sk = Ed25519PrivateKey.generate()",
+        "IM-SRC-DSA-001": "EVP_PKEY_DSA *pkey = NULL;",
+        "IM-SRC-DH-001": "DH_get_2048_256();",
+        "IM-SRC-AES-001": "aesgcm = AESGCM(key)",
+        "IM-SRC-CHACHA-001": "AEADChaCha20Poly1305()",
+        "IM-SRC-SHA2-001": "digest = hashes.Hash(hashes.SHA256())",
+        "IM-SRC-SHA1-001": 'MessageDigest.getInstance("SHA-1")',
+        "IM-SRC-MD5-001": "hashlib.md5(data)",
+        "IM-CFG-TLS-001": "ssl_protocols TLSv1.2 TLSv1.3;",
+        "IM-CFG-LEGACY-001": "ciphers = RC4-SHA:DES-CBC3-SHA",
         # --- the recall rules, added against measured misses on paramiko (a real SSH library).
         # The samples are the actual source lines the benchmark said we failed on, so each rule
         # is pinned to the evidence that motivated it rather than to an invented string.
-        "ECD-SRC-PYCA-AES-001": '"cipher": algorithms.AES,',
-        "ECD-SRC-PYCA-HASH-001": "self.hash_object = hashes.SHA256",
-        "ECD-SRC-PYCA-HASH-002": "h = hashes.SHA1",
-        "ECD-SRC-PYCA-EC-001": "_ECDSACurve(ec.SECP256R1, \"nistp256\")",
-        # ECD-SRC-PYCA-EC-002 was removed as a strict subset of -001: the curve was reported
+        "IM-SRC-PYCA-AES-001": '"cipher": algorithms.AES,',
+        "IM-SRC-PYCA-HASH-001": "self.hash_object = hashes.SHA256",
+        "IM-SRC-PYCA-HASH-002": "h = hashes.SHA1",
+        "IM-SRC-PYCA-EC-001": "_ECDSACurve(ec.SECP256R1, \"nistp256\")",
+        # IM-SRC-PYCA-EC-002 was removed as a strict subset of -001: the curve was reported
         # twice from two rule_ids, and the second carried no extra information. The dedup key
         # includes rule_id, so two rules with the same name never collapse.
-        "ECD-SRC-PYCA-ECDH-001": "k = ECDHPrivateKey.generate()",
-        "ECD-SRC-PYCA-ED-001": "k = ed25519.Ed25519PrivateKey.generate()",
-        "ECD-SRC-PYCA-RSA-001": "n = rsa.RSAPrivateNumbers(p, q, d, dmp1, dmq1, iqmp)",
-        "ECD-SRC-PYCA-X-001": "from cryptography.hazmat.primitives.asymmetric.x25519 import (",
-        "ECD-SRC-HASHLIB-001": "from hashlib import sha1",
-        "ECD-SRC-HASHLIB-002": "hash_algo = hashlib.sha256",
-        "ECD-SRC-HASHLIB-003": "from hashlib import md5",
-        "ECD-SRC-SSH-KEX-001": 'kex = "ecdh-sha2-nistp256"',
-        "ECD-SRC-SSH-SIG-001": '"rsa-sha2-256": SSH_AGENT_RSA_SHA2_256,',
-        "ECD-SRC-SSH-ED-001": 'PREF = "ssh-ed25519"',
-        "ECD-SRC-SSH-CIPHER-001": 'C = "aes256-ctr"',
+        "IM-SRC-PYCA-ECDH-001": "k = ECDHPrivateKey.generate()",
+        "IM-SRC-PYCA-ED-001": "k = ed25519.Ed25519PrivateKey.generate()",
+        "IM-SRC-PYCA-RSA-001": "n = rsa.RSAPrivateNumbers(p, q, d, dmp1, dmq1, iqmp)",
+        "IM-SRC-PYCA-X-001": "from cryptography.hazmat.primitives.asymmetric.x25519 import (",
+        "IM-SRC-HASHLIB-001": "from hashlib import sha1",
+        "IM-SRC-HASHLIB-002": "hash_algo = hashlib.sha256",
+        "IM-SRC-HASHLIB-003": "from hashlib import md5",
+        "IM-SRC-SSH-KEX-001": 'kex = "ecdh-sha2-nistp256"',
+        "IM-SRC-SSH-SIG-001": '"rsa-sha2-256": SSH_AGENT_RSA_SHA2_256,',
+        "IM-SRC-SSH-ED-001": 'PREF = "ssh-ed25519"',
+        "IM-SRC-SSH-CIPHER-001": 'C = "aes256-ctr"',
         # Its own rule now, because it used to be reported as name=AES while sitting in a rule
         # declared as AES. A decoy in test_multilang_pack.py pins the name.
-        "ECD-SRC-SSH-CHACHA-001": 'C = "chacha20-poly1305@openssh.com"',
-        "ECD-SRC-SSH-CIPHER-002": '"aes128-gcm@openssh.com"',
-        "ECD-SRC-SSH-MAC-001": '"hmac-sha2-256"',
-        "ECD-SRC-SSH-DH-001": 'name = "diffie-hellman-group-exchange-sha256"',
-        "ECD-SRC-SSH-LEGACY-001": '"3des-cbc"',
+        "IM-SRC-SSH-CHACHA-001": 'C = "chacha20-poly1305@openssh.com"',
+        "IM-SRC-SSH-CIPHER-002": '"aes128-gcm@openssh.com"',
+        "IM-SRC-SSH-MAC-001": '"hmac-sha2-256"',
+        "IM-SRC-SSH-DH-001": 'name = "diffie-hellman-group-exchange-sha256"',
+        "IM-SRC-SSH-LEGACY-001": '"3des-cbc"',
         # --- the Java pack, added against MEASURED CryptoAPI-Bench misses (recall 0.219, FP=0).
         # Each sample is a real call shape from the corpus, not an invented string.
-        "ECD-SRC-JAVA-LEGACY-001": 'String t = "DES/ECB/PKCS5Padding";',
-        "ECD-SRC-JAVA-KEYGEN-001": "KeyGenerator kg = KeyGenerator.getInstance(\"AES\");",
-        "ECD-SRC-JAVA-SECRETKEY-001": 'SecretKeySpec ks = new SecretKeySpec(keyBytes, "AES");',
-        "ECD-SRC-JAVA-CIPHER-001": 'Cipher c = Cipher.getInstance("Blowfish");',
-        "ECD-SRC-JAVA-MAC-001": 'Mac mac = Mac.getInstance("HmacSHA256");',
-        # MD2/MD4 only. MD5 is deliberately NOT here: ECD-SRC-MD5-001 already owns it, and
+        "IM-SRC-JAVA-LEGACY-001": 'String t = "DES/ECB/PKCS5Padding";',
+        "IM-SRC-JAVA-KEYGEN-001": "KeyGenerator kg = KeyGenerator.getInstance(\"AES\");",
+        "IM-SRC-JAVA-SECRETKEY-001": 'SecretKeySpec ks = new SecretKeySpec(keyBytes, "AES");',
+        "IM-SRC-JAVA-CIPHER-001": 'Cipher c = Cipher.getInstance("Blowfish");',
+        "IM-SRC-JAVA-MAC-001": 'Mac mac = Mac.getInstance("HmacSHA256");',
+        # MD2/MD4 only. MD5 is deliberately NOT here: IM-SRC-MD5-001 already owns it, and
         # matching it again published the same algorithm twice from two rule_ids.
-        "ECD-SRC-JAVA-DIGEST-001": 'MessageDigest md = MessageDigest.getInstance("MD4");',
-        "ECD-SRC-JAVA-EC-001": 'new ECGenParameterSpec("secp256r1")',
-        "ECD-SRC-JAVA-DSA-001": 'KeyPairGenerator.getInstance("DSA")',
-        "ECD-SRC-JAVA-CONST-001": 'String a = "AES/GCM/NoPadding";',
-        "ECD-SRC-JAVA-CONST-003": 'String t = "RSA/ECB/PKCS1Padding";',
-        "ECD-SRC-JAVA-CONST-004": 'String h = "SHA-256";',
-        "ECD-SRC-JAVA-WEAKRNG-001": "Random r = new java.util.Random();",
+        "IM-SRC-JAVA-DIGEST-001": 'MessageDigest md = MessageDigest.getInstance("MD4");',
+        "IM-SRC-JAVA-EC-001": 'new ECGenParameterSpec("secp256r1")',
+        "IM-SRC-JAVA-DSA-001": 'KeyPairGenerator.getInstance("DSA")',
+        "IM-SRC-JAVA-CONST-001": 'String a = "AES/GCM/NoPadding";',
+        "IM-SRC-JAVA-CONST-003": 'String t = "RSA/ECB/PKCS1Padding";',
+        "IM-SRC-JAVA-CONST-004": 'String h = "SHA-256";',
+        "IM-SRC-JAVA-WEAKRNG-001": "Random r = new java.util.Random();",
         # --- PHP and Ruby, which previously had NO rules and were not even scanned.
-        "ECD-PHP-AES-001": "openssl_encrypt($data, 'aes-256-gcm', $key);",
-        "ECD-PHP-AES-002": "openssl_cipher_iv_length('aes-256-cbc');",
-        "ECD-PHP-KEM-001": "openssl_public_encrypt($data, $pubkey);",
-        "ECD-PHP-SIG-001": "openssl_sign($data, $sig, $privkey);",
-        "ECD-PHP-SODIUM-001": "sodium_crypto_aead_chacha20_ietf_encrypt($m, $aad, $npub, $k);",
-        "ECD-PHP-SODIUM-002": "sodium_crypto_aead_aes256gcm_encrypt($m, $aad, $npub, $k);",
-        "ECD-PHP-SIG-002": "sodium_crypto_sign_keypair();",
-        "ECD-PHP-HASH-001": "$h = hash('sha1', $data);",
-        "ECD-PHP-WEAKRNG-001": "$t = mt_rand();",
-        "ECD-RB-AES-001": "c = OpenSSL::Cipher.new('aes-256-gcm')",
-        "ECD-RB-AES-002": "c = OpenSSL::Cipher.new('chacha20')",
-        "ECD-RB-LEGACY-001": "c = OpenSSL::Cipher.new('bf-cbc')",
-        "ECD-RB-RSA-001": "k = OpenSSL::PKey::RSA.new(2048)",
+        "IM-PHP-AES-001": "openssl_encrypt($data, 'aes-256-gcm', $key);",
+        "IM-PHP-AES-002": "openssl_cipher_iv_length('aes-256-cbc');",
+        "IM-PHP-KEM-001": "openssl_public_encrypt($data, $pubkey);",
+        "IM-PHP-SIG-001": "openssl_sign($data, $sig, $privkey);",
+        "IM-PHP-SODIUM-001": "sodium_crypto_aead_chacha20_ietf_encrypt($m, $aad, $npub, $k);",
+        "IM-PHP-SODIUM-002": "sodium_crypto_aead_aes256gcm_encrypt($m, $aad, $npub, $k);",
+        "IM-PHP-SIG-002": "sodium_crypto_sign_keypair();",
+        "IM-PHP-HASH-001": "$h = hash('sha1', $data);",
+        "IM-PHP-WEAKRNG-001": "$t = mt_rand();",
+        "IM-RB-AES-001": "c = OpenSSL::Cipher.new('aes-256-gcm')",
+        "IM-RB-AES-002": "c = OpenSSL::Cipher.new('chacha20')",
+        "IM-RB-LEGACY-001": "c = OpenSSL::Cipher.new('bf-cbc')",
+        "IM-RB-RSA-001": "k = OpenSSL::PKey::RSA.new(2048)",
         # A real call site. The pattern needs the receiver named (`OpenSSL::PKey::X.sign(...)
         # ), which is why the sample must be a call and not a bare class reference.
-        "ECD-RB-SIG-001": "sig = OpenSSL::PKey::RSA.new.sign(digest, priv)",
-        "ECD-RB-EC-001": "k = OpenSSL::PKey::EC.generate('prime256v1')",
-        "ECD-RB-DH-001": "dh = OpenSSL::PKey::DH.new(2048)",
-        "ECD-RB-MAC-001": "h = OpenSSL::HMAC.digest('SHA256', key, data)",
-        "ECD-RB-HASH-001": "d = Digest::SHA1.hexdigest(data)",
-        "ECD-RB-HASH-002": "d = Digest::SHA256.hexdigest(data)",
+        "IM-RB-SIG-001": "sig = OpenSSL::PKey::RSA.new.sign(digest, priv)",
+        "IM-RB-EC-001": "k = OpenSSL::PKey::EC.generate('prime256v1')",
+        "IM-RB-DH-001": "dh = OpenSSL::PKey::DH.new(2048)",
+        "IM-RB-MAC-001": "h = OpenSSL::HMAC.digest('SHA256', key, data)",
+        "IM-RB-HASH-001": "d = Digest::SHA1.hexdigest(data)",
+        "IM-RB-HASH-002": "d = Digest::SHA256.hexdigest(data)",
         # `SecureRandom.hex` deliberately does NOT match this rule -- a rule that fired on the
         # secure generator too would make the finding meaningless.
-        "ECD-RB-WEAKRNG-001": "token = Kernel.rand(16)",
-        "ECD-KEY-PEM-001": "-----BEGIN RSA PRIVATE KEY-----",
-        "ECD-KEY-PGP-001": "-----BEGIN PGP PRIVATE KEY BLOCK-----",
+        "IM-RB-WEAKRNG-001": "token = Kernel.rand(16)",
+        "IM-KEY-PEM-001": "-----BEGIN RSA PRIVATE KEY-----",
+        "IM-KEY-PGP-001": "-----BEGIN PGP PRIVATE KEY BLOCK-----",
         # The Apache directive, which is what this rule uniquely owns. The old sample was
         # `ssl_protocols TLSv1.2`, which this rule deliberately no longer matches: that form is
-        # ECD-CFG-TLS-001's, and matching both made one nginx line produce two protocol
+        # IM-CFG-TLS-001's, and matching both made one nginx line produce two protocol
         # components that _finalise cannot collapse.
-        "ECD-PROTO-TLS-001": "SSLProtocol all -SSLv3",
-        "ECD-CLOUD-KMS-001": "boto3.client('kms')",
-        "ECD-CLOUD-AZURE-001": "azure.keyvault",
-        "ECD-CLOUD-GCP-001": "google-cloud-kms",
-        "ECD-HARDWARE-PKCS11-001": "SunPKCS11",
+        "IM-PROTO-TLS-001": "SSLProtocol all -SSLv3",
+        "IM-CLOUD-KMS-001": "boto3.client('kms')",
+        "IM-CLOUD-AZURE-001": "azure.keyvault",
+        "IM-CLOUD-GCP-001": "google-cloud-kms",
+        "IM-HARDWARE-PKCS11-001": "SunPKCS11",
         # --- Go. Every alternative is package-qualified: an unqualified token would match the
         # same text in any language, since rules are not filtered by file extension.
-        "ECD-GO-CIPHER-001": "b, _ := des.NewCipher(key)",
-        "ECD-GO-CIPHER-002": "c, _ := rc4.NewCipher(key)",
-        "ECD-GO-CIPHER-003": "aead, _ := chacha20poly1305.New(key)",
-        "ECD-GO-HASH-001": "h := md5.New()",
-        "ECD-GO-HASH-002": 'import "crypto/sha1"',
-        "ECD-GO-SIG-001": "r, s, _ := ecdsa.Sign(rnd, priv, digest)",
-        "ECD-GO-SIG-002": "err := rsa.SignPKCS1v15(rnd, priv, crypto.SHA256, d)",
-        "ECD-GO-SIG-003": "o := &rsa.PSSOptions{}",
-        "ECD-GO-PQKEM-001": "dk, err := mlkem.NewDecapsulationKey768(seed)",
-        "ECD-GO-PQKEM-002": "dk, err := mlkem.NewDecapsulationKey1024(seed)",
+        "IM-GO-CIPHER-001": "b, _ := des.NewCipher(key)",
+        "IM-GO-CIPHER-002": "c, _ := rc4.NewCipher(key)",
+        "IM-GO-CIPHER-003": "aead, _ := chacha20poly1305.New(key)",
+        "IM-GO-HASH-001": "h := md5.New()",
+        "IM-GO-HASH-002": 'import "crypto/sha1"',
+        "IM-GO-SIG-001": "r, s, _ := ecdsa.Sign(rnd, priv, digest)",
+        "IM-GO-SIG-002": "err := rsa.SignPKCS1v15(rnd, priv, crypto.SHA256, d)",
+        "IM-GO-SIG-003": "o := &rsa.PSSOptions{}",
+        "IM-GO-PQKEM-001": "dk, err := mlkem.NewDecapsulationKey768(seed)",
+        "IM-GO-PQKEM-002": "dk, err := mlkem.NewDecapsulationKey1024(seed)",
         # Import paths are P3 taint sources under the labelling criterion, same as
         # `from hashlib import sha1`. The x/crypto measurement showed they were the single largest
         # miss class, so each primitive package import is reachable in its own right.
-        "ECD-GO-IMPORT-001": '\t"crypto/md5"',
-        "ECD-GO-IMPORT-002": '\t"crypto/sha1"',
-        "ECD-GO-IMPORT-003": '\t"crypto/sha256"',
-        "ECD-GO-IMPORT-004": '\t"crypto/hmac"',
-        "ECD-GO-IMPORT-005": '\t"crypto/des"',
-        "ECD-GO-IMPORT-006": '\t"crypto/rc4"',
-        "ECD-GO-IMPORT-007": '\t"crypto/aes"',
-        "ECD-GO-IMPORT-008": '\t"golang.org/x/crypto/chacha20"',
-        "ECD-GO-IMPORT-009": '\t"golang.org/x/crypto/curve25519"',
-        "ECD-GO-IMPORT-010": '\t"crypto/sha512"',
-        "ECD-GO-HASHBIND-001": "Hash:      crypto.SHA256,",
+        "IM-GO-IMPORT-001": '\t"crypto/md5"',
+        "IM-GO-IMPORT-002": '\t"crypto/sha1"',
+        "IM-GO-IMPORT-003": '\t"crypto/sha256"',
+        "IM-GO-IMPORT-004": '\t"crypto/hmac"',
+        "IM-GO-IMPORT-005": '\t"crypto/des"',
+        "IM-GO-IMPORT-006": '\t"crypto/rc4"',
+        "IM-GO-IMPORT-007": '\t"crypto/aes"',
+        "IM-GO-IMPORT-008": '\t"golang.org/x/crypto/chacha20"',
+        "IM-GO-IMPORT-009": '\t"golang.org/x/crypto/curve25519"',
+        "IM-GO-IMPORT-010": '\t"crypto/sha512"',
+        "IM-GO-HASHBIND-001": "Hash:      crypto.SHA256,",
         # P1b declarations. Each is anchored to `func`/`type`/`var` so a mention in an
         # expression cannot fire it.
-        "ECD-GO-DECL-001": "func (c *chacha20Poly1305Cipher) readCipherPacket(n uint32) {",
-        "ECD-GO-DECL-002": "func newAESCTR(key, iv []byte) (cipher.Stream, error) {",
-        "ECD-GO-DECL-003": "func newTripleDESCBCCipher(key, iv, macKey []byte) {",
-        "ECD-GO-DECL-004": "func newRC4(key, iv []byte) (cipher.Stream, error) {",
-        "ECD-GO-DECL-005": "var c25519kp curve25519KeyPair",
-        "ECD-GO-DECL-006": "if !poly1305.Verify(&mac, buf, &key) {",
+        "IM-GO-DECL-001": "func (c *chacha20Poly1305Cipher) readCipherPacket(n uint32) {",
+        "IM-GO-DECL-002": "func newAESCTR(key, iv []byte) (cipher.Stream, error) {",
+        "IM-GO-DECL-003": "func newTripleDESCBCCipher(key, iv, macKey []byte) {",
+        "IM-GO-DECL-004": "func newRC4(key, iv []byte) (cipher.Stream, error) {",
+        "IM-GO-DECL-005": "var c25519kp curve25519KeyPair",
+        "IM-GO-DECL-006": "if !poly1305.Verify(&mac, buf, &key) {",
         # Go SSH mode tables: the registration idiom, not the factory-call idiom.
-        "ECD-GO-SSHTBL-AES": "cipherModes[CipherAES128CTR] = &cipherMode{16, aes.BlockSize, nil}",
-        "ECD-GO-SSHTBL-RC4": "cipherModes[InsecureCipherRC4128] = &cipherMode{16, 0, nil}",
-        "ECD-GO-SSHTBL-3DES": "cipherModes[InsecureCipherTripleDESCBC] = &cipherMode{24, 0, nil}",
-        "ECD-GO-SSHTBL-MAC": "macModes[HMACSHA512ETM] = &macMode{64, true, nil}",
-        "ECD-GO-SIG-004": "pub, _, _ := ed25519.GenerateKey(rnd)",
-        "ECD-GO-KEX-001": "k, _ := ecdh.P256().GenerateKey(rnd)",
-        "ECD-GO-RNG-001": "n := rand.Intn(100)",
-        # --- Rust. `md5::Md5` rather than bare `MD5`; see the note on ECD-RUST-HASH-001.
-        "ECD-RUST-CIPHER-002": "use aes_gcm::Aes256Gcm;",
-        "ECD-RUST-HASH-001": "let h = md5::Md5::new();",
-        "ECD-RUST-HASH-002": "let h = sha1::Sha1::new();",
-        "ECD-RUST-SIG-001": "let k = ecdsa::SigningKey::from_bytes(&b)?;",
-        "ECD-RUST-SIG-002": "let kp = Ed25519KeyPair::generate();",
-        "ECD-RUST-SIG-003": "let k = rsa::RsaPrivateKey::new(n, e);",
-        "ECD-RUST-RNG-001": "let mut r = thread_rng();",
+        "IM-GO-SSHTBL-AES": "cipherModes[CipherAES128CTR] = &cipherMode{16, aes.BlockSize, nil}",
+        "IM-GO-SSHTBL-RC4": "cipherModes[InsecureCipherRC4128] = &cipherMode{16, 0, nil}",
+        "IM-GO-SSHTBL-3DES": "cipherModes[InsecureCipherTripleDESCBC] = &cipherMode{24, 0, nil}",
+        "IM-GO-SSHTBL-MAC": "macModes[HMACSHA512ETM] = &macMode{64, true, nil}",
+        "IM-GO-SIG-004": "pub, _, _ := ed25519.GenerateKey(rnd)",
+        "IM-GO-KEX-001": "k, _ := ecdh.P256().GenerateKey(rnd)",
+        "IM-GO-RNG-001": "n := rand.Intn(100)",
+        # --- Rust. `md5::Md5` rather than bare `MD5`; see the note on IM-RUST-HASH-001.
+        "IM-RUST-CIPHER-002": "use aes_gcm::Aes256Gcm;",
+        "IM-RUST-HASH-001": "let h = md5::Md5::new();",
+        "IM-RUST-HASH-002": "let h = sha1::Sha1::new();",
+        "IM-RUST-SIG-001": "let k = ecdsa::SigningKey::from_bytes(&b)?;",
+        "IM-RUST-SIG-002": "let kp = Ed25519KeyPair::generate();",
+        "IM-RUST-SIG-003": "let k = rsa::RsaPrivateKey::new(n, e);",
+        "IM-RUST-RNG-001": "let mut r = thread_rng();",
         # --- JavaScript / TypeScript.
-        "ECD-JS-CIPHER-001": "createCipheriv('des-ede3-cbc', k, iv)",
-        "ECD-JS-CIPHER-002": "crypto.createCipheriv('rc4', key, iv)",
-        "ECD-JS-HASH-001": "crypto.createHash('md5')",
-        "ECD-JS-HASH-002": "crypto.createHmac('sha1', key)",
-        "ECD-JS-SIG-001": "crypto.createSign('RSA-SHA1')",
-        "ECD-JS-SIG-002": "s = crypto.constants.RSA_PKCS1_PSS_PADDING;",
-        "ECD-JS-SIG-003": "crypto.createSign('ecdsa-with-SHA256')",
+        "IM-JS-CIPHER-001": "createCipheriv('des-ede3-cbc', k, iv)",
+        "IM-JS-CIPHER-002": "crypto.createCipheriv('rc4', key, iv)",
+        "IM-JS-HASH-001": "crypto.createHash('md5')",
+        "IM-JS-HASH-002": "crypto.createHmac('sha1', key)",
+        "IM-JS-SIG-001": "crypto.createSign('RSA-SHA1')",
+        "IM-JS-SIG-002": "s = crypto.constants.RSA_PKCS1_PSS_PADDING;",
+        "IM-JS-SIG-003": "crypto.createSign('ecdsa-with-SHA256')",
         # --- dedup + recall fixes found by probing the SSH rule set directly.
-        "ECD-SRC-SSH-DH-002": 'KEX = "ffdh2048-sha256"',
+        "IM-SRC-SSH-DH-002": 'KEX = "ffdh2048-sha256"',
         # --- OpenSSH algorithm identifiers.
         #
         # These are a CLOSED, PUBLISHED vocabulary, which is why these rules are near
@@ -204,13 +204,13 @@ def test_every_rule_is_actually_executed(tmp_path, scanner):
         # where the whole supported-algorithm table is built from these identifiers. The primitive
         # is asserted too, because getting ECDH and ECDSA the wrong way round would point an
         # auditor at the wrong replacement algorithm.
-        "ECD-SRC-SSHNAME-001": '"ecdsa-sha2-nistp256-cert-v01@openssh.com": ECDSAKey,',
-        "ECD-SRC-SSHNAME-002": '"rsa-sha2-256-cert-v01@openssh.com": RSAKey,',
-        "ECD-SRC-SSHNAME-003": '"ssh-ed25519-cert-v01@openssh.com": Ed25519Key,',
-        "ECD-SRC-SSHNAME-004": '"hmac-sha2-256-etm@openssh.com": {"class": sha256, "size": 32},',
-        "ECD-SRC-SSHNAME-005": 'KEX = "curve25519-sha256@libssh.org"',
-        "ECD-SRC-SSHNAME-006": '"ecdh-sha2-nistp256-cert-v01@openssh.com": ECDHKey,',
-        "ECD-SRC-SSHNAME-007": 'KEX = "mlkem768x25519-sha256@openssh.com"',
+        "IM-SRC-SSHNAME-001": '"ecdsa-sha2-nistp256-cert-v01@openssh.com": ECDSAKey,',
+        "IM-SRC-SSHNAME-002": '"rsa-sha2-256-cert-v01@openssh.com": RSAKey,',
+        "IM-SRC-SSHNAME-003": '"ssh-ed25519-cert-v01@openssh.com": Ed25519Key,',
+        "IM-SRC-SSHNAME-004": '"hmac-sha2-256-etm@openssh.com": {"class": sha256, "size": 32},',
+        "IM-SRC-SSHNAME-005": 'KEX = "curve25519-sha256@libssh.org"',
+        "IM-SRC-SSHNAME-006": '"ecdh-sha2-nistp256-cert-v01@openssh.com": ECDHKey,',
+        "IM-SRC-SSHNAME-007": 'KEX = "mlkem768x25519-sha256@openssh.com"',
     }
 
     assert set(samples) == {r["id"] for r in RULES}, "a rule has no positive test"
@@ -254,7 +254,7 @@ def test_openssh_identifiers_resolve_to_the_right_primitive(tmp_path, scanner):
     for line, want in cases.items():
         p = _write(str(tmp_path / f"t{abs(hash(line))}.py"), line)
         fired = [f for f in scanner._match_rules(p, line)
-                 if f["rule_id"].startswith("ECD-SRC-SSHNAME")]
+                 if f["rule_id"].startswith("IM-SRC-SSHNAME")]
         assert fired, f"no OpenSSH rule fired on {line!r}"
         assert any(f["primitive"] == want for f in fired), (
             f"{line!r} should resolve to {want}, got {[f['primitive'] for f in fired]}")
@@ -271,7 +271,7 @@ def test_openssh_protocol_markers_are_not_reported_as_algorithms(tmp_path, scann
                  "# supports ecdsa-sha2-nistp256-cert-v01@openssh.com in theory"):
         p = _write(str(tmp_path / f"m{abs(hash(line))}.py"), line)
         fired = [f for f in scanner._match_rules(p, line)
-                 if f["rule_id"].startswith("ECD-SRC-SSHNAME")]
+                 if f["rule_id"].startswith("IM-SRC-SSHNAME")]
         assert not fired, f"protocol marker {line!r} was reported as {fired}"
 
 
@@ -279,12 +279,12 @@ def test_a_bare_curve_name_is_not_double_counted_as_an_openssh_identifier(tmp_pa
     """`"ecdsa-sha2-nistp256"` without the namespaced suffix is another rule's job.
 
     Double-reporting one ECDSA use from two rule_ids was a real defect we already fixed once
-    (ECD-SRC-PYCA-EC-002 was removed for exactly this). This guards against reintroducing it
+    (IM-SRC-PYCA-EC-002 was removed for exactly this). This guards against reintroducing it
     through the new rules.
     """
     p = _write(str(tmp_path / "bare.py"), 'ALG = "ecdsa-sha2-nistp256"')
     fired = [f["rule_id"] for f in scanner._match_rules(p, 'ALG = "ecdsa-sha2-nistp256"')
-             if f["rule_id"].startswith("ECD-SRC-SSHNAME")]
+             if f["rule_id"].startswith("IM-SRC-SSHNAME")]
     assert not fired, f"a bare curve name matched the OpenSSH rules: {fired}"
 
 
@@ -465,7 +465,7 @@ def test_secure_random_is_not_flagged_as_a_weak_generator(tmp_path, scanner):
 def test_a_python_sign_call_is_not_a_ruby_signature_finding(tmp_path, scanner):
     """A language pack must not fire on ANOTHER language.
 
-    `ECD-RB-SIG-001` originally matched a bare `.sign(`/`.verify(`, which fired on paramiko's
+    `IM-RB-SIG-001` originally matched a bare `.sign(`/`.verify(`, which fired on paramiko's
     `self.key.sign(...)` -- an SSH host-key operation in Python, reported as an RSA signature.
     That was 6 false positives on the Python corpus, and the benchmark caught them. The rule now
     requires an explicit `OpenSSL::PKey::` receiver, which is what makes it a Ruby signal.
@@ -486,7 +486,7 @@ def test_provenance_is_recorded(tmp_path, scanner):
     findings = scanner.scan_directory(str(tmp_path))
     hit = [f for f in findings if f["name"] == "RSA"][0]
     assert hit["line"] == 3
-    assert hit["rule_id"] == "ECD-SRC-RSA-001"
+    assert hit["rule_id"] == "IM-SRC-RSA-001"
     assert hit["scanner"] == "source-scanner"
     assert hit["evidence_class"] == "discovered"
 

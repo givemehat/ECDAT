@@ -5,7 +5,7 @@ Regressions encoded here (all fixed 2026-09-25):
   * primitives were non-standard strings ("public-key-encryption") -> now the CycloneDX enum
   * nistQuantumSecurityLevel was never emitted -> now 0 for Shor-broken primitives
   * key size/curve/mode went into ad-hoc properties -> now algorithmProperties fields
-  * property names collided with other tools -> now `ecd:`-namespaced
+  * property names collided with other tools -> now `im:`-namespaced
   * libraries were emitted as cryptographic-assets with a fake primitive -> now `type: library`
 """
 import json
@@ -30,7 +30,7 @@ def test_envelope_has_required_metadata():
     cbom = json.loads(generate_cbom([]))
     assert cbom["serialNumber"].startswith("urn:uuid:")
     assert cbom["metadata"]["timestamp"].endswith("Z")
-    assert cbom["metadata"]["tools"]["components"][0]["name"] == "ecdat"
+    assert cbom["metadata"]["tools"]["components"][0]["name"] == "indramesh"
     assert cbom["version"] == 1
 
 
@@ -115,7 +115,7 @@ def test_an_unknown_nist_category_is_omitted_not_asserted_as_zero():
     """Where the category is genuinely unknown the property is absent, and the gap is stated.
 
     The schema has no "unknown" member and sets `additionalProperties: false`, so the honest
-    answer is to omit the field and say why in an `ecd:`-namespaced property -- not to publish
+    answer is to omit the field and say why in an `im:`-namespaced property -- not to publish
     a 0 that means the opposite of what the reader will take it to mean.
     """
     findings = [dict(name="ChaCha20", primitive="stream-cipher", file="a.py", line=1)]
@@ -124,7 +124,7 @@ def test_an_unknown_nist_category_is_omitted_not_asserted_as_zero():
     ap = comp["cryptoProperties"]["algorithmProperties"]
     assert "nistQuantumSecurityLevel" not in ap
     gaps = [p for p in comp.get("properties", [])
-            if p.get("name") == "ecd:nist_level_gap"]
+            if p.get("name") == "im:nist_level_gap"]
     assert gaps, "an absent field must be explained, or it reads as 'no category exists'"
 
 
@@ -141,20 +141,20 @@ def test_key_size_and_mode_use_standard_algorithm_properties():
 def test_all_custom_properties_are_namespaced():
     findings = [dict(name="RSA", primitive="pke", key_length=2048, file="a.py", line=1,
                      evidence_class="discovered", artefact_class="source", uses="at-rest",
-                     scanner="source-scanner", rule_id="ECD-SRC-RSA-001",
+                     scanner="source-scanner", rule_id="IM-SRC-RSA-001",
                      risk={"tier": "CRITICAL", "x": 30, "y": 3, "z": 10, "margin": 23,
                            "hndl_exposed": True},
                      recommendation={"algorithm": "ML-KEM-768", "action": "Migrate",
                                      "rule_trace": "RULE-KEM-002", "standard_basis": ["FIPS 203"]})]
     cbom = json.loads(generate_cbom(findings, enriched=True))
     props = cbom["components"][0]["properties"]
-    assert props, "expected ECDAT properties"
+    assert props, "expected IndraMesh properties"
     for p in props:
-        assert p["name"].startswith("ecd:"), f"collision risk: {p['name']}"
+        assert p["name"].startswith("im:"), f"collision risk: {p['name']}"
     names = {p["name"] for p in props}
-    assert "ecd:mosca.tier" in names
-    assert "ecd:mosca.hndl_exposed" in names
-    assert "ecd:rec.rule_trace" in names
+    assert "im:mosca.tier" in names
+    assert "im:mosca.hndl_exposed" in names
+    assert "im:rec.rule_trace" in names
 
 
 def test_legacy_property_names_are_gone():
@@ -189,8 +189,8 @@ def test_coverage_manifest_is_attached_when_supplied():
                 "never_in_scope": ["network-negotiated crypto"]}
     cbom = json.loads(generate_cbom([], coverage=coverage))
     names = {p["name"] for p in cbom["metadata"]["properties"]}
-    assert "ecd:coverage.files_skipped" in names
-    assert "ecd:coverage.never_in_scope" in names
+    assert "im:coverage.files_skipped" in names
+    assert "im:coverage.never_in_scope" in names
 
 
 def test_documents_are_unique_but_structurally_stable():

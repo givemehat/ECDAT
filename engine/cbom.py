@@ -22,7 +22,7 @@ The previous revision emitted `specVersion: "1.6"` with:
 
 validate_real_world.py even printed "Skipping schema validation due to 404 on schema URL", i.e.
 the document was never checked against the schema. This revision emits a schema-shaped v1.7
-document, keeps all ECDAT-specific values in a documented `ecd:` property namespace so the base
+document, keeps all IndraMesh-specific values in a documented `im:` property namespace so the base
 document stays valid, and `validate_real_world.py` now performs local schema validation.
 """
 import json
@@ -33,7 +33,7 @@ from datetime import datetime, timezone
 from engine.purpose import PURPOSE_UNRESOLVED, resolve_assurance, resolve_purpose
 
 SPEC_VERSION = "1.7"
-PROPERTY_NS = "ecd"          # ECDAT-namespaced extension properties
+PROPERTY_NS = "im"          # IndraMesh-namespaced extension properties
 
 # CycloneDX primitive vocabulary, taken from the published 1.7 JSON Schema enum
 # (schemas/bom-1.7.schema.json -> definitions.cryptoProperties.properties.algorithmProperties).
@@ -342,7 +342,7 @@ def _coerce_int(value):
 # The schema provides `other` and `unknown` precisely so an unrecognised mode can be
 # represented; emitting a raw lowercase mode name would produce a document that fails validation,
 # so a mode outside the enum degrades to `other` and the verbatim value is preserved in the
-# namespaced `ecd:` properties where it costs the document nothing.
+# namespaced `im:` properties where it costs the document nothing.
 CYCLONEDX_MODES = {"cbc", "ecb", "ccm", "gcm", "cfb", "ofb", "ctr"}
 
 
@@ -490,8 +490,8 @@ CLASSICAL_STRENGTH_BITS_UPPER = {k.upper(): v for k, v in CLASSICAL_STRENGTH_BIT
 # source-level match. A private key found in a repository is `private-key`; we do NOT claim
 # `credential` or `token`, because finding the string does not prove the credential is live.
 RELATED_MATERIAL_TYPES = {
-    "ECD-KEY-PEM-001": "private-key",
-    "ECD-KEY-PGP-001": "private-key",
+    "IM-KEY-PEM-001": "private-key",
+    "IM-KEY-PGP-001": "private-key",
 }
 
 
@@ -522,7 +522,7 @@ def _algorithm_properties(finding, primitive):
             props["mode"] = mode
     if finding.get("curve"):
         props["curve"] = str(finding["curve"])
-    # `uses` (at-rest / tls / signing) has no CycloneDX field; it is emitted as an `ecd:uses`
+    # `uses` (at-rest / tls / signing) has no CycloneDX field; it is emitted as an `im:uses`
     # property instead, so it never invalidates the base document.
     #
     # classicalSecurityLevel is EQUIVALENT SECURITY IN BITS (NIST SP 800-57), not key length.
@@ -573,7 +573,7 @@ def nist_level_gap(finding, primitive):
 
     CycloneDX 1.7 sets `additionalProperties: false` on `algorithmProperties`, so the reason
     cannot live beside the value it explains -- an invented sibling field would fail schema
-    validation. It is emitted as an `ecd:`-namespaced property instead, which is this project's
+    validation. It is emitted as an `im:`-namespaced property instead, which is this project's
     existing convention for data the standard has no slot for.
     """
     if _nist_quantum_level(finding, primitive) is not None:
@@ -583,7 +583,7 @@ def nist_level_gap(finding, primitive):
 
 
 def _ecd_properties(finding, risk, recommendation):
-    """All ECDAT-specific values, namespaced so the base document stays schema-valid."""
+    """All IndraMesh-specific values, namespaced so the base document stays schema-valid."""
     out = []
     name = str(finding.get("name", "unknown"))
     for key, value in (
@@ -606,7 +606,7 @@ def _ecd_properties(finding, risk, recommendation):
     out.append({"name": f"{PROPERTY_NS}:assurance_meaning", "value": assurance_reason})
 
     # Say WHY nistQuantumSecurityLevel is missing. A consumer that sees the field absent cannot
-    # distinguish "this asset was assessed and has no category" from "ECDAT never looked", and
+    # distinguish "this asset was assessed and has no category" from "IndraMesh never looked", and
     # the first reading of an absent field is usually the optimistic one.
     # The gap reason must be computed from the SAME primitive the LEVEL was computed from.
     # `_algorithm_properties` normalises through PRIMITIVE_ENUM, but this was called with the raw
@@ -676,12 +676,12 @@ def _ecd_properties(finding, risk, recommendation):
     return out
 
 
-def generate_cbom(findings, enriched=False, subject_name="ECDAT-Scanned-Artefact",
+def generate_cbom(findings, enriched=False, subject_name="IndraMesh-Scanned-Artefact",
                   subject_version=None, coverage=None):
     """Build a CycloneDX v1.7 CBOM from scanner findings.
 
     When `enriched=True` and a finding carries `risk` / `recommendation`, the Mosca verdict and
-    the PQC recommendation are attached as `ecd:`-namespaced properties so the base document
+    the PQC recommendation are attached as `im:`-namespaced properties so the base document
     remains schema-valid and portable to other tools.
     """
     components = []
@@ -816,7 +816,7 @@ def generate_cbom(findings, enriched=False, subject_name="ECDAT-Scanned-Artefact
     metadata = {
         "timestamp": timestamp,
         "tools": {"components": [
-            {"type": "application", "name": "ecdat", "version": "0.2.0"},
+            {"type": "application", "name": "indramesh", "version": "0.2.0"},
         ]},
         "component": metadata_component,
     }

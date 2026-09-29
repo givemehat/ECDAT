@@ -1,4 +1,4 @@
-"""ECDAT headless scanner for CI/CD pipelines and the command line.
+"""IndraMesh headless scanner for CI/CD pipelines and the command line.
 
     python cli.py ./target --format cbom --z 10 --policy india-dst-nqm
     python cli.py ./image.tar --format text
@@ -11,7 +11,7 @@ import json
 import os
 import sys
 
-from engine.scanner import ECDATScanner
+from engine.scanner import IndraMeshScanner
 from engine.mosca import calculate_risk, DEFAULT_Z, POLICY_DEADLINES, Z_PRESETS
 from engine.recommender import get_pqc_recommendation
 from engine.cbom import generate_cbom
@@ -26,11 +26,11 @@ def _z_presets_help():
 def run_headless_scan(target_dir, output_format="text", z_time=DEFAULT_Z,
                       policy="india_dst_nqm", enable_ml=True, out_dir=".",
                       fail_on="CRITICAL", subject_name=None):
-    print(f"[*] ECDAT scan starting on: {target_dir}")
+    print(f"[*] IndraMesh scan starting on: {target_dir}")
     print(f"    Z={z_time}y  policy={policy}"
           f"  policy deadline={POLICY_DEADLINES.get(policy, {}).get('year', 'n/a')}")
 
-    scanner = ECDATScanner(enable_ml=enable_ml)
+    scanner = IndraMeshScanner(enable_ml=enable_ml)
     findings = scanner.scan_directory(target_dir)
     coverage = scanner.coverage_manifest(findings)
 
@@ -59,17 +59,17 @@ def run_headless_scan(target_dir, output_format="text", z_time=DEFAULT_Z,
 
     if output_format == "cbom":
         os.makedirs(out_dir, exist_ok=True)
-        cbom_path = os.path.join(out_dir, "ecdat_report.json")
+        cbom_path = os.path.join(out_dir, "indramesh_report.json")
         with open(cbom_path, "w", encoding="utf-8") as fh:
             fh.write(generate_cbom(findings, enriched=True,
                                     subject_name=subject_name or os.path.basename(target_dir.rstrip("/\\")),
                                     coverage=coverage))
-        recs_path = os.path.join(out_dir, "ecdat_recommendations.json")
+        recs_path = os.path.join(out_dir, "indramesh_recommendations.json")
         with open(recs_path, "w", encoding="utf-8") as fh:
             json.dump([{"target": f["file"], "line": f.get("line"), "artefact": f["name"],
                         "primitive": f["primitive"], "risk": f["risk"],
                         "recommendation": f["recommendation"]} for f in findings], fh, indent=2)
-        cov_path = os.path.join(out_dir, "ecdat_coverage.json")
+        cov_path = os.path.join(out_dir, "indramesh_coverage.json")
         with open(cov_path, "w", encoding="utf-8") as fh:
             json.dump(coverage, fh, indent=2)
         print(f"[+] CBOM          -> {cbom_path}")
@@ -97,7 +97,7 @@ def run_headless_scan(target_dir, output_format="text", z_time=DEFAULT_Z,
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="ECDAT headless cryptographic scanner")
+    parser = argparse.ArgumentParser(description="IndraMesh headless cryptographic scanner")
     parser.add_argument("target", help="Directory, file or container-image tar to scan")
     parser.add_argument("--format", choices=["text", "cbom"], default="text")
     parser.add_argument("--z", type=float, default=DEFAULT_Z,

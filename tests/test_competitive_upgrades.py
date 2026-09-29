@@ -21,7 +21,7 @@ from engine.purpose import (ASSURANCE_CAPABILITY, ASSURANCE_DECLARED, ASSURANCE_
                             PURPOSE_UNRESOLVED, assurance_histogram, proven_use_count,
                             resolve_assurance, resolve_purpose, unresolved_purpose_count)
 from engine.recommender import get_pqc_recommendation
-from engine.scanner import ECDATScanner
+from engine.scanner import IndraMeshScanner
 
 DECOY_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures", "decoys")
 
@@ -36,7 +36,7 @@ def _scan_isolated(name, tmp_path):
     dst = tmp_path / "subject"
     dst.mkdir()
     shutil.copy(os.path.join(DECOY_DIR, name), dst / name)
-    scanner = ECDATScanner(enable_ml=False)     # hermetic: regex rules only, no torch
+    scanner = IndraMeshScanner(enable_ml=False)     # hermetic: regex rules only, no torch
     return scanner.scan_directory(str(dst))
 
 
@@ -93,7 +93,7 @@ def test_comment_stripping_preserves_line_numbers(tmp_path):
     d = tmp_path / "src"
     d.mkdir()
     (d / "x.py").write_text(src, encoding="utf-8")
-    findings = ECDATScanner(enable_ml=False).scan_directory(str(d))
+    findings = IndraMeshScanner(enable_ml=False).scan_directory(str(d))
     hits = [f for f in findings if f["name"] == "SHA256"]
     assert hits, "SHA-256 call must be found"
     assert hits[0]["line"] == 4, (
@@ -103,7 +103,7 @@ def test_comment_stripping_preserves_line_numbers(tmp_path):
 def test_decoy_java_yields_no_findings(tmp_path):
     """Algorithm names in a Javadoc block are mentions, not uses.
 
-    This test failed before comment stripping was added: `ECD-SRC-RSA-003` matched
+    This test failed before comment stripping was added: `IM-SRC-RSA-003` matched
     `KeyPairGenerator.getInstance("RSA")` inside the Javadoc on line 3 and reported an RSA finding
     for a file that never uses RSA.
     """
@@ -261,10 +261,10 @@ def test_cbom_exports_assurance_and_purpose():
                    evidence_class="discovered", match="KeyPairGenerator.getInstance(\"RSA\")")
     cbom = _json.loads(_gen([finding]))
     props = {p["name"]: p["value"] for p in cbom["components"][0]["properties"]}
-    assert props["ecd:assurance"] == "used"
-    assert "strongest claim" in props["ecd:assurance_meaning"]
-    assert props["ecd:purpose"] == "unresolved"
-    assert "keypairgenerator" in props["ecd:purpose_signals"]
+    assert props["im:assurance"] == "used"
+    assert "strongest claim" in props["im:assurance_meaning"]
+    assert props["im:purpose"] == "unresolved"
+    assert "keypairgenerator" in props["im:purpose_signals"]
 
 
 def test_cbom_publishes_proven_use_alongside_the_raw_total():
@@ -284,8 +284,8 @@ def test_cbom_publishes_proven_use_alongside_the_raw_total():
         unresolved_purpose=0)
     cbom = _json.loads(_gen(findings, coverage=coverage))
     props = {p["name"]: p["value"] for p in cbom["metadata"]["properties"]}
-    assert props["ecd:findings_total"] == "3"
-    assert props["ecd:proven_use"] == "2"
-    assert "capability" in props["ecd:assurance_histogram"]
+    assert props["im:findings_total"] == "3"
+    assert props["im:proven_use"] == "2"
+    assert "capability" in props["im:assurance_histogram"]
 
 

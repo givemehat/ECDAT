@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Comprehensive verification of the ECDAT Web Console and API.
+"""Comprehensive verification of the IndraMesh Web Console and API.
 
 Tests the FastAPI backend, REST endpoints, CycloneDX 1.7 schema validation,
 Mosca rating arithmetic, interactive topology graph, secondary sensors,
@@ -34,14 +34,14 @@ def step(name, fn):
 
 
 print("=" * 78)
-print("ECDAT Web Console & API Verification Suite")
+print("IndraMesh Web Console & API Verification Suite")
 print("=" * 78)
 
 # 1. Root HTML serving
 def test_root_html():
     res = client.get("/")
     assert res.status_code == 200
-    assert "ECDAT" in res.text
+    assert "IndraMesh" in res.text
     assert "Enterprise Cryptographic Discovery" in res.text
     assert "CycloneDX 1.7 CBOM" in res.text
     return f"{len(res.text)} bytes served"
@@ -176,13 +176,13 @@ step("GET /api/history & POST /api/history/load", test_history_api)
 def test_report_api():
     html_res = client.get("/api/report/html")
     assert html_res.status_code == 200
-    assert "ECDAT Executive Cryptographic Assessment Report" in html_res.text
+    assert "IndraMesh Executive Cryptographic Assessment Report" in html_res.text
     assert "Mosca Inequality Verdict" in html_res.text
     
     dl_res = client.get("/api/report/download")
     assert dl_res.status_code == 200
     data = dl_res.json()
-    assert data["report_type"] == "ECDAT Post-Quantum Cryptographic Posture Assessment"
+    assert data["report_type"] == "IndraMesh Post-Quantum Cryptographic Posture Assessment"
     return f"Generated HTML report ({len(html_res.text)} bytes) and JSON export"
 
 step("GET /api/report/html & /api/report/download", test_report_api)

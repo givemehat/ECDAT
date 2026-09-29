@@ -26,15 +26,15 @@ SCHEMA = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))
 
 AMBIGUOUS_RSA = dict(name="RSA", primitive="pke", type="algorithm", uses="tls",
                      match='KeyPairGenerator.getInstance("RSA")', file="a/RSAKeyGen.java", line=1,
-                     rule_id="ECD-SRC-RSA-003", evidence_class="discovered")
+                     rule_id="IM-SRC-RSA-003", evidence_class="discovered")
 SIGNING_RSA = dict(name="ECDSA", primitive="signature", type="algorithm", uses="signing",
-                   match="ec.ECDSA(", file="a/keys.py", line=9, rule_id="ECD-SRC-ECDSA-001",
+                   match="ec.ECDSA(", file="a/keys.py", line=9, rule_id="IM-SRC-ECDSA-001",
                    evidence_class="discovered")
 AES = dict(name="AES", primitive="ae", type="algorithm", key_length=256, uses="at-rest",
-           match="AESGCM", file="a/aes.py", line=2, rule_id="ECD-SRC-AES-001",
+           match="AESGCM", file="a/aes.py", line=2, rule_id="IM-SRC-AES-001",
            evidence_class="discovered")
 DECLARED = dict(name="TLS", primitive="protocol", type="protocol", uses="tls",
-                match="TLSv1.2", file="a/openssl.cnf", line=1, rule_id="ECD-CFG-TLS-001",
+                match="TLSv1.2", file="a/openssl.cnf", line=1, rule_id="IM-CFG-TLS-001",
                 evidence_class="configured")
 
 

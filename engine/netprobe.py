@@ -101,11 +101,11 @@ SENSOR_TLS = "tls-handshake-sensor"
 SENSOR_SSH = "ssh-banner-sensor"
 SCANNER_NETWORK = "network-probe"
 
-# Rule IDs in the ECD-NET-* namespace, so they sort apart from the static scanners in a report.
-RULE_TLS_PROTOCOL = "ECD-NET-TLS-PROTO-001"
-RULE_TLS_CIPHER = "ECD-NET-TLS-CIPHER-001"
-RULE_TLS_GROUP = "ECD-NET-TLS-GROUP-001"
-RULE_SSH_KEX = "ECD-NET-SSH-KEX-001"
+# Rule IDs in the IM-NET-* namespace, so they sort apart from the static scanners in a report.
+RULE_TLS_PROTOCOL = "IM-NET-TLS-PROTO-001"
+RULE_TLS_CIPHER = "IM-NET-TLS-CIPHER-001"
+RULE_TLS_GROUP = "IM-NET-TLS-GROUP-001"
+RULE_SSH_KEX = "IM-NET-SSH-KEX-001"
 # NOTE: there is deliberately no RULE_SSH_HOSTKEY. Reading a server's host-key ALGORITHM list is
 # one more name-list in the same KEXINIT packet, so it would be easy to add -- and shipping an
 # unused rule ID would imply a sensor we do not have, which is the over-claim this project exists
@@ -387,7 +387,7 @@ def _classify_ssl_error(endpoint, exc):
 # FINDINGS
 # =============================================================================================
 def _finding(endpoint, rule_id, name, primitive, uses, sensor, match, where, note, **extra):
-    """Build one finding in the shape the rest of ECDAT expects.
+    """Build one finding in the shape the rest of IndraMesh expects.
 
     The shape is load-bearing rather than cosmetic. `engine/cbom.py` reads `name`, `primitive`,
     `type`, `file` and `evidence_class`; `engine/purpose.py::resolve_purpose` reads `uses` and
@@ -579,7 +579,7 @@ def probe_ssh(endpoint, timeout=DEFAULT_TIMEOUT):
         # Send OUR identification string. RFC 4253 requires both directions before KEX, and a
         # server will not send KEXINIT until it has seen ours. This is the only thing we write.
         try:
-            sock.sendall(b"SSH-2.0-ecdat_probe\r\n")
+            sock.sendall(b"SSH-2.0-indramesh_probe\r\n")
         except OSError as exc:
             return _result(endpoint, STATUS_UNREACHABLE,
                            "could not send the SSH identification string: %s" % (exc,),

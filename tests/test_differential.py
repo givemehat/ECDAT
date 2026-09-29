@@ -1,5 +1,5 @@
 ﻿"""
-Differential tests for ECDAT (task HAND-160).
+Differential tests for IndraMesh (task HAND-160).
 
 Where tests/test_properties.py asks "is this input handled sanely?", this file asks "do two
 inputs that MEAN THE SAME THING produce the same answer, and do two inputs that mean DIFFERENT
@@ -14,7 +14,7 @@ a positive control are asserted -- otherwise "always return the same constant" w
 Where a pair MUST differ, both the difference and the specific expected distinction are
 asserted -- otherwise "always return None" would pass.
 
-Hypothesis is configured with `derandomize=True` (profile "ecdat"), so the pairs explored are
+Hypothesis is configured with `derandomize=True` (profile "indramesh"), so the pairs explored are
 identical on every run and a failure is reproducible.
 """
 import json
@@ -30,21 +30,21 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from engine.cbom import _canonical_primitive, generate_cbom
 from engine.mosca import PRIMITIVE_HORIZON, calculate_risk
 from engine.recommender import _normalise_primitive, get_pqc_recommendation
-from engine.scanner import ECDATScanner
+from engine.scanner import IndraMeshScanner
 
 settings.register_profile(
-    "ecdat",
+    "indramesh",
     derandomize=True,
     max_examples=50,
     deadline=None,
     suppress_health_check=[HealthCheck.too_slow, HealthCheck.function_scoped_fixture,
                            HealthCheck.data_too_large],
 )
-settings.load_profile("ecdat")
+settings.load_profile("indramesh")
 
 
 def _scanner():
-    return ECDATScanner(enable_ml=False)
+    return IndraMeshScanner(enable_ml=False)
 
 
 def _scan(tmpdir, name, text):

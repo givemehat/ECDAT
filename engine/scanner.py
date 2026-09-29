@@ -1,5 +1,5 @@
 """
-ECDAT scanning engine.
+IndraMesh scanning engine.
 
 What changed on 2026-09-25 and why: the previous revision (1) defined regexes for RSA/ECC/
 AES-GCM/SHA256 but only ever tested RSA and AES_GCM, so ECC was silently undetectable; (2)
@@ -34,15 +34,15 @@ CONFIG_FILENAMES = ("openssl.cnf", "openssl.conf", "java.security", "nginx.conf"
 #   evidence  -> 'discovered' (found in code) or 'configured' (found in configuration)
 # ---------------------------------------------------------------------------------------------
 RULES = [
-    dict(id="ECD-SRC-RSA-001", name="RSA", primitive="pke", artefact_class="source",
+    dict(id="IM-SRC-RSA-001", name="RSA", primitive="pke", artefact_class="source",
          uses="at-rest", key_group=1, evidence="discovered",
          regex=r"rsa\.newkeys\(\s*(\d+)|"
                r"rsa\.generate_private_key\([^)]*key_size\s*=\s*(\d+)|"
                r"rsa\.generate_private_key\(\s*[\"']?\d+[\"']?\s*,\s*(\d+)"),
-    dict(id="ECD-SRC-RSA-002", name="RSA", primitive="signature", artefact_class="source",
+    dict(id="IM-SRC-RSA-002", name="RSA", primitive="signature", artefact_class="source",
          uses="signing", key_group=None, evidence="discovered",
          regex=r"RSASSA-PSS|rsa\.PSS\(|PKCS1_v1_5|pkcs1_15|padding\.PSS|SHA\d+withRSA"),
-    dict(id="ECD-SRC-RSA-003", name="RSA", primitive="pke", artefact_class="source",
+    dict(id="IM-SRC-RSA-003", name="RSA", primitive="pke", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          regex=r"KeyPairGenerator\.getInstance\(\s*[\"']RSA[\"']\s*\)|EVP_PKEY_RSA|RSA_generate_key_ex"),
     # ---- Java (javax.crypto) -------------------------------------------------------------------
@@ -56,7 +56,7 @@ RULES = [
     #     Cipher.getInstance(crypto);
     # i.e. the algorithm is a CONSTANT assigned earlier. No regex on the call site can see it, so
     # the rules below key on the constant DECLARATION as well as on literal arguments.
-    dict(id="ECD-SRC-JAVA-LEGACY-001", name="DES", primitive="block-cipher", artefact_class="source",
+    dict(id="IM-SRC-JAVA-LEGACY-001", name="DES", primitive="block-cipher", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"[\"']DES(?:ede)?(?:/[A-Za-z0-9-]+)*[\"']"
                 r"|[\"'](?:Blowfish|RC2|RC4|ARCFOUR|IDEA|SEED|CAST5)[\"']"),
@@ -64,7 +64,7 @@ RULES = [
     # contains 58 call sites -- 28 of them the bare string "AES". A key-generation call is the
     # clearest statement in Java that a symmetric key exists, so omitting it entirely was the
     # single largest gap in the table.
-    dict(id="ECD-SRC-JAVA-KEYGEN-001", name="AES", primitive="ae", artefact_class="source",
+    dict(id="IM-SRC-JAVA-KEYGEN-001", name="AES", primitive="ae", artefact_class="source",
          uses="at-rest", key_group=1, key_map={"128": 128, "192": 192, "256": 256},
          evidence="discovered",
          regex=r"KeyGenerator\.getInstance\(\s*[\"']?(?:AES|DES|TripleDES|Blowfish|RC2|"
@@ -72,19 +72,19 @@ RULES = [
                 r"|KeyGenerator\.getInstance\(\s*[\"'](\d+)"),
     # `new SecretKeySpec(keyBytes, "AES")` -- a raw symmetric key being wrapped. 17 call sites in
     # the corpus, with no rule at all. This is where an at-rest key actually enters a program.
-    dict(id="ECD-SRC-JAVA-SECRETKEY-001", name="AES", primitive="ae", artefact_class="source",
+    dict(id="IM-SRC-JAVA-SECRETKEY-001", name="AES", primitive="ae", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"new\s+SecretKeySpec\s*\([^,)]+,\s*[\"']"
                 r"(?:AES|DES|TripleDES|DESede|Blowfish|RC2|ARCFOUR|ChaCha20|AESWrap)[\"']\s*\)"),
     # Cipher.getInstance with an INLINE transformation. The pre-existing rule covered only
     # AES/(GCM|CBC|CTR|ECB), so "RSA", "DES" and "Blowfish" all passed unremarked.
-    dict(id="ECD-SRC-JAVA-CIPHER-001", name="AES", primitive="ae", artefact_class="source",
+    dict(id="IM-SRC-JAVA-CIPHER-001", name="AES", primitive="ae", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          regex=r"Cipher\.getInstance\(\s*[\"']"
                 r"(?:DES|DESede|TripleDES|Blowfish|RC2|RC4|ARCFOUR|IDEA|Camellia|SEED|"
                 r"AESWrap|CAST5|RSA(?:/(?:ECB|PKCS1(?:Padding)?|OAEP(?:With(?:RSAAndSHA1|"
                 r"SHA-256)Padding)?))?)(?:/[\w-]+)*[\"']\s*\)"),
-    dict(id="ECD-SRC-JAVA-MAC-001", name="HMAC", primitive="mac", artefact_class="source",
+    dict(id="IM-SRC-JAVA-MAC-001", name="HMAC", primitive="mac", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"Mac\.getInstance\(\s*[\"'](?:Hmac(?:SHA(?:1|224|256|384|512)|MD5)|"
                 r"HMAC(?:-\w+)?)[\"']\s*\)"),
@@ -93,16 +93,16 @@ RULES = [
     # MessageDigest across the JCA family. MD2 and MD4 were absent from the table entirely, so
     # the two most broken hashes a JVM will accept produced no finding at all.
     #
-    # Only MD2 and MD4 are new here. MD5 is already owned by ECD-SRC-MD5-001, and matching it
+    # Only MD2 and MD4 are new here. MD5 is already owned by IM-SRC-MD5-001, and matching it
     # again published the same algorithm twice from two rule_ids -- which the dedup key cannot
-    # collapse. SHA-1/256/384/512 belong to ECD-SRC-SHA1-001 / ECD-SRC-SHA2-001.
-    dict(id="ECD-SRC-JAVA-DIGEST-001", name="MD5", primitive="hash", artefact_class="source",
+    # collapse. SHA-1/256/384/512 belong to IM-SRC-SHA1-001 / IM-SRC-SHA2-001.
+    dict(id="IM-SRC-JAVA-DIGEST-001", name="MD5", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"MessageDigest\.getInstance\(\s*[\"'](?:MD2|MD4)[\"']\s*\)"),
-    # REMOVED: ECD-SRC-JAVA-DIGEST-002.
+    # REMOVED: IM-SRC-JAVA-DIGEST-002.
     # It matched ANY quoted SHA string, which made `MessageDigest.getInstance("SHA-256")` fire
-    # THREE rules at once -- ECD-SRC-JAVA-DIGEST-001, ECD-SRC-JAVA-DIGEST-002 and the
-    # pre-existing ECD-SRC-SHA2-001. `_finalise` dedups on (file, name, rule_id, line), so a
+    # THREE rules at once -- IM-SRC-JAVA-DIGEST-001, IM-SRC-JAVA-DIGEST-002 and the
+    # pre-existing IM-SRC-SHA2-001. `_finalise` dedups on (file, name, rule_id, line), so a
     # different rule_id escapes collapsing, and the same line is then reported as multiple
     # findings. An independent audit caught this; the benchmark did not, because it scores
     # distinct LOCATIONS and so cannot see a duplicate.
@@ -111,11 +111,11 @@ RULES = [
     # A bare quoted hash string outside both is prose, not a call site.
     # Elliptic-curve JCA. `KeyPairGenerator.getInstance("EC")` was already covered, but the curve
     # SPEC was not, and the spec string is where the key size actually lives.
-    dict(id="ECD-SRC-JAVA-EC-001", name="ECC", primitive="signature", artefact_class="source",
+    dict(id="IM-SRC-JAVA-EC-001", name="ECC", primitive="signature", artefact_class="source",
          uses="signing", key_group=1, evidence="discovered",
          regex=r"ECGenParameterSpec\s*\(\s*[\"'](secp\w+|P-\d+|prime\w+)[\"']"
                 r"|[\"'](?:secp256r1|secp256k1|secp384r1|secp521r1|prime256v1)[\"']"),
-    dict(id="ECD-SRC-JAVA-DSA-001", name="DSA", primitive="signature", artefact_class="source",
+    dict(id="IM-SRC-JAVA-DSA-001", name="DSA", primitive="signature", artefact_class="source",
          uses="signing", key_group=None, evidence="discovered",
          regex=r"KeyPairGenerator\.getInstance\(\s*[\"']DSA[\"']"
                 r"|Signature\.getInstance\(\s*[\"']SHA\d+withDSA[\"']"),
@@ -124,7 +124,7 @@ RULES = [
     # text at all, so the call site is unmatchable and the declaration is the only evidence.
     # Each family gets its own rule because the primitive differs, and a legacy transformation
     # must never be reported under the AES name.
-    dict(id="ECD-SRC-JAVA-CONST-001", name="AES", primitive="ae", artefact_class="source",
+    dict(id="IM-SRC-JAVA-CONST-001", name="AES", primitive="ae", artefact_class="source",
          uses="at-rest", key_group=1, key_map={"128": 128, "192": 192, "256": 256},
          evidence="discovered",
          regex=r"String\s+\w+\s*=\s*[\"']AES(?:/|[-])(?:GCM|CBC|CTR|ECB|CFB|OFB|CFB128)"
@@ -134,17 +134,17 @@ RULES = [
     # no algorithm text at all, so the call site is unmatchable and the declaration is the only
     # evidence. RSA and SHA constants are NOT here: they need their own rules because the
     # primitive differs, and a legacy transformation must never be reported under those names.
-    dict(id="ECD-SRC-JAVA-CONST-003", name="RSA", primitive="pke", artefact_class="source",
+    dict(id="IM-SRC-JAVA-CONST-003", name="RSA", primitive="pke", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"String\s+\w+\s*=\s*[\"']RSA(?:/[\w-]+)*[\"']"),
-    dict(id="ECD-SRC-JAVA-CONST-004", name="SHA", primitive="hash", artefact_class="source",
+    dict(id="IM-SRC-JAVA-CONST-004", name="SHA", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"String\s+\w+\s*=\s*[\"'](?:SHA-?1|SHA-?224|SHA-?256|SHA-?384|SHA-?512|MD5|"
                 r"MD2|MD4)[\"']"),
     # SecureRandom vs the non-cryptographic generators. `new java.util.Random()` and
     # `Math.random()` are what CryptoAPI-Bench is built to catch, and the tool could not see
     # them at all because no rule named the weak generators.
-    dict(id="ECD-SRC-JAVA-WEAKRNG-001", name="PRNG", primitive="other", artefact_class="source",
+    dict(id="IM-SRC-JAVA-WEAKRNG-001", name="PRNG", primitive="other", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"new\s+(?:java\.util\.)?Random\s*\(|Math\.random\s*\(\)"),
     # ---- PHP (ext/openssl, ext-sodium, ext/hash) -------------------------------------------------
@@ -152,7 +152,7 @@ RULES = [
     # rule for either, and `.php` was not even in SOURCE_EXTENSIONS, so a PHP codebase produced
     # no findings at all. Every regex here requires a FUNCTION CALL, never a bare cipher word --
     # the word "AES" appears in PHP prose and in variable names constantly.
-    dict(id="ECD-PHP-AES-001", name="AES", primitive="ae", artefact_class="source",
+    dict(id="IM-PHP-AES-001", name="AES", primitive="ae", artefact_class="source",
          uses="at-rest", key_group=1, key_map={"128": 128, "192": 192, "256": 256},
          evidence="discovered",
          regex=r"openssl_(?:encrypt|decrypt)\s*\([^,]+,\s*[\"']"
@@ -160,39 +160,39 @@ RULES = [
                 r"aes-\d+-(?:gcm|cbc|ctr|cfb|ofb|ecb))"),
     # The cipher-name-only form, e.g. `openssl_cipher_iv_length('aes-256-cbc')` or a cipher
     # held in a config array. Scoped to a quoted literal or a named call so prose cannot match.
-    dict(id="ECD-PHP-AES-002", name="AES", primitive="ae", artefact_class="source",
+    dict(id="IM-PHP-AES-002", name="AES", primitive="ae", artefact_class="source",
          uses="at-rest", key_group=1, key_map={"128": 128, "192": 192, "256": 256},
          evidence="discovered",
          regex=r"openssl_cipher_iv_length\s*\(\s*[\"']aes-(\d+)"
                 r"|openssl_(?:cipher_iv_length|random_pseudo_bytes)\s*\(\s*[\"']aes-\d+"),
-    dict(id="ECD-PHP-KEM-001", name="RSA", primitive="pke", artefact_class="source",
+    dict(id="IM-PHP-KEM-001", name="RSA", primitive="pke", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"openssl_(?:public_encrypt|private_decrypt|pkcs7_encrypt|pkcs7_decrypt)\s*\("
                 r"|openssl_pkey_new\s*\(|openssl_pkey_get_(?:public|private)\s*\("),
-    dict(id="ECD-PHP-SIG-001", name="RSA", primitive="signature", artefact_class="source",
+    dict(id="IM-PHP-SIG-001", name="RSA", primitive="signature", artefact_class="source",
          uses="signing", key_group=None, evidence="discovered",
          regex=r"openssl_sign\s*\(|openssl_verify\s*\("),
     # sodium_crypto_box / secretbox / aead_* are libsodium bindings and are POST-QUANTUM-READY
     # only in the sense that they are modern; the primitives still need classifying. A dedicated
     # rule per family keeps the primitive honest.
-    dict(id="ECD-PHP-SODIUM-001", name="ChaCha20", primitive="stream-cipher", artefact_class="source",
+    dict(id="IM-PHP-SODIUM-001", name="ChaCha20", primitive="stream-cipher", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"sodium_crypto_(?:aead_)?chacha20(?:_ietf)?_(?:encrypt|decrypt)\s*\("),
-    dict(id="ECD-PHP-SODIUM-002", name="AES", primitive="ae", artefact_class="source",
+    dict(id="IM-PHP-SODIUM-002", name="AES", primitive="ae", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"sodium_crypto_(?:aead_)?aes(?:256gcm|xchacha20poly1305_)?_(?:encrypt|decrypt)\s*\("),
-    dict(id="ECD-PHP-SIG-002", name="Ed25519", primitive="signature", artefact_class="source",
+    dict(id="IM-PHP-SIG-002", name="Ed25519", primitive="signature", artefact_class="source",
          uses="signing", key_group=None, evidence="discovered",
          regex=r"sodium_crypto_sign_(?:open|verify_detached|keypair)\s*\("),
-    dict(id="ECD-PHP-HASH-001", name="SHA1", primitive="hash", artefact_class="source",
+    dict(id="IM-PHP-HASH-001", name="SHA1", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"\bhash\s*\(\s*[\"']sha1[\"']|\bhash_hmac\s*\(\s*[\"']sha1[\"']"
                 r"|\bhash\s*\(\s*[\"']md5[\"']|\bhash_hmac\s*\(\s*[\"']md5[\"']"),
     # `rand()` and `mt_rand()` are not cryptographic. Reported as their own primitive so the
     # recommendation is "replace the generator", not "migrate this cipher".
-    dict(id="ECD-PHP-WEAKRNG-001", name="PRNG", primitive="other", artefact_class="source",
+    dict(id="IM-PHP-WEAKRNG-001", name="PRNG", primitive="other", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
-         # The lookbehind is IDENTICAL to ECD-RB-WEAKRNG-001's and must stay so. It previously
+         # The lookbehind is IDENTICAL to IM-RB-WEAKRNG-001's and must stay so. It previously
          # omitted `.`, so the PHP rule matched Go's `c.rand()` -- a crypto/rand wrapper -- five
          # times in the x/crypto corpus while the Ruby rule correctly did not. Two rules with the
          # same idea and different guards is how one of them ends up wrong.
@@ -209,13 +209,13 @@ RULES = [
     # only a prose "cryptographically broken" warning. Reporting them as deprecated Go APIs would
     # misstate the source, so they are matched as broken primitives instead. Also absent:
     # `crypto/chacha20`, which is not in the stdlib at all; it lives in x/crypto, matched below.
-    dict(id="ECD-GO-CIPHER-001", name="DES", primitive="block-cipher", artefact_class="source",
+    dict(id="IM-GO-CIPHER-001", name="DES", primitive="block-cipher", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"\bdes\.NewCipher\s*\(|\bdes\.NewTripleDESCipher\s*\("),
-    dict(id="ECD-GO-CIPHER-002", name="RC4", primitive="stream-cipher", artefact_class="source",
+    dict(id="IM-GO-CIPHER-002", name="RC4", primitive="stream-cipher", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"\brc4\.NewCipher\s*\("),
-    dict(id="ECD-GO-CIPHER-003", name="ChaCha20", primitive="stream-cipher", artefact_class="source",
+    dict(id="IM-GO-CIPHER-003", name="ChaCha20", primitive="stream-cipher", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          # The real constructors are `chacha20.NewUnauthenticatedCipher` and `chacha20.HChaCha20`.
          # An earlier version of this rule asserted `chacha20.New`, which DOES NOT EXIST -- so it
@@ -224,26 +224,26 @@ RULES = [
          # coverage. Found by adversarial review, not by reading the pattern.
          regex=r"\bchacha20\.NewUnauthenticatedCipher\s*\(|\bchacha20\.HChaCha20\s*\(|"
                 r"\bchacha20poly1305\.New\w*\s*\("),
-    dict(id="ECD-GO-HASH-001", name="MD5", primitive="hash", artefact_class="source",
+    dict(id="IM-GO-HASH-001", name="MD5", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"\bmd5\.(?:New|Sum)\s*\(|\bcrypto/md5\b|\bgolang\.org/x/crypto/md5\b"),
-    dict(id="ECD-GO-HASH-002", name="SHA1", primitive="hash", artefact_class="source",
+    dict(id="IM-GO-HASH-002", name="SHA1", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"\bsha1\.(?:New|Sum)\s*\(|\bcrypto/sha1\b|\bgolang\.org/x/crypto/sha1\b"),
-    dict(id="ECD-GO-SIG-001", name="ECDSA", primitive="signature", artefact_class="source",
+    dict(id="IM-GO-SIG-001", name="ECDSA", primitive="signature", artefact_class="source",
          uses="signing", key_group=None, evidence="discovered",
          regex=r"\becdsa\.(?:SignASN1|VerifyASN1|Sign|Verify)\s*\("),
-    dict(id="ECD-GO-SIG-002", name="RSA", primitive="signature", artefact_class="source",
+    dict(id="IM-GO-SIG-002", name="RSA", primitive="signature", artefact_class="source",
          uses="signing", key_group=None, evidence="discovered",
          # PKCS#1 v1.5 is split from PSS so that "move to PSS" advice is never attached to a
          # signature that is already PSS, nor withheld from one that is v1.5.
          regex=r"\brsa\.(?:SignPKCS1v15|VerifyPKCS1v15)\s*\("),
-    dict(id="ECD-GO-SIG-003", name="RSA-PSS", primitive="signature", artefact_class="source",
+    dict(id="IM-GO-SIG-003", name="RSA-PSS", primitive="signature", artefact_class="source",
          uses="signing", key_group=None, evidence="discovered",
          # The type is `rsa.PSSOptions` (all caps), not `PssOptions`. An earlier version of this
          # rule used the camel-case spelling and matched nothing.
          regex=r"\brsa\.(?:SignPSS|VerifyPSS)\s*\(|\brsa\.PSSOptions\s*\{"),
-    dict(id="ECD-GO-SIG-004", name="Ed25519", primitive="signature", artefact_class="source",
+    dict(id="IM-GO-SIG-004", name="Ed25519", primitive="signature", artefact_class="source",
          uses="signing", key_group=None, evidence="discovered",
          regex=r"\bed25519\.(?:NewKeyFromSeed|GenerateKey)\s*\("),
     # `crypto/mlkem` (Go 1.24, FIPS 203) is a NIST-standardised ALGORITHM, not a weak one, so
@@ -251,11 +251,11 @@ RULES = [
     # x/crypto corpus -- `ssh/mlkem.go` implements a HYBRID ML-KEM-768 + X25519 KEX -- and was
     # entirely invisible, which is the worst kind of gap: real post-quantum code scoring zero
     # findings. The level is carried in the rule name because FIPS 203 defines three parameter
-    # sets at different security categories and ECDAT's classifier keys off the name.
-    dict(id="ECD-GO-PQKEM-001", name="ML-KEM-768", primitive="kem", artefact_class="source",
+    # sets at different security categories and IndraMesh's classifier keys off the name.
+    dict(id="IM-GO-PQKEM-001", name="ML-KEM-768", primitive="kem", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"\bmlkem\.NewDecapsulationKey768\s*\(|\bmlkem\.GenerateKey768\s*\("),
-    dict(id="ECD-GO-PQKEM-002", name="ML-KEM-1024", primitive="kem", artefact_class="source",
+    dict(id="IM-GO-PQKEM-002", name="ML-KEM-1024", primitive="kem", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"\bmlkem\.NewDecapsulationKey1024\s*\(|\bmlkem\.GenerateKey1024\s*\("),
     # NO ML-KEM-512 RULE, and there never should be one. FIPS 203 defines three parameter sets
@@ -263,7 +263,7 @@ RULES = [
     # pass, asserted `mlkem.GenerateKey512`, and could never match real Go. It looked like
     # complete FIPS 203 coverage on paper. A rule for a parameter set no implementation exposes
     # is a claim of coverage that cannot be substantiated.
-    dict(id="ECD-GO-KEX-001", name="ECDH", primitive="key-agreement", artefact_class="source",
+    dict(id="IM-GO-KEX-001", name="ECDH", primitive="key-agreement", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          # `ecdh.` alone matched a STRUCT FIELD of the same name: the x/crypto OpenPGP code has
          # `pk.ecdh.parse(r)`, `pk.ecdh.serialize(w)` and `pk.ecdh.byteLen()` on a
@@ -271,7 +271,7 @@ RULES = [
          # package. The package is only ever imported under its own name, so the alternatives
          # are anchored to constructs that name a package or a curve, never a bare field.
          #
-         # `ecdh.X25519()` is DELIBERATELY ABSENT. ECD-SRC-ECDH-001 already matches the bare
+         # `ecdh.X25519()` is DELIBERATELY ABSENT. IM-SRC-ECDH-001 already matches the bare
          # token `X25519`, so including it put two ECDH components on one line. Running the
          # corpus is what caught that; reading the rules was not enough.
          regex=r"\becies\.GenerateKey\s*\(|\becdh\.P\d+\s*\("),
@@ -293,32 +293,32 @@ RULES = [
     # The constants are DEFINED in ssh/common.go as quoted wire names ("aes128-ctr"), which the
     # SSH rules above already own; matching the bare identifier would double-report the
     # definition line while adding nothing at the registration line.
-    dict(id="ECD-GO-SSHTBL-AES", name="AES", primitive="ae", artefact_class="source",
+    dict(id="IM-GO-SSHTBL-AES", name="AES", primitive="ae", artefact_class="source",
          uses="tls", key_group=1, key_map={"128": 128, "192": 192, "256": 256},
          evidence="discovered",
          # `InsecureCipherAES128CBC` also matches, because it contains `CipherAES128`. That is
          # intended: AES-CBC is registered in the same table and is grover-affected.
          regex=r"cipherModes\[(?:Insecure)?CipherAES(128|192|256)\w*\]"),
-    dict(id="ECD-GO-SSHTBL-RC4", name="RC4", primitive="stream-cipher", artefact_class="source",
+    dict(id="IM-GO-SSHTBL-RC4", name="RC4", primitive="stream-cipher", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          regex=r"cipherModes\[InsecureCipherRC4(?:128|256)?\]"),
-    dict(id="ECD-GO-SSHTBL-3DES", name="3DES", primitive="block-cipher", artefact_class="source",
+    dict(id="IM-GO-SSHTBL-3DES", name="3DES", primitive="block-cipher", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          regex=r"cipherModes\[InsecureCipher(?:TripleDESCBC|3DES\w*)\]"),
-    # NO ChaCha20 rule, deliberately. `ECD-SRC-CHACHA-001` already matches the token
+    # NO ChaCha20 rule, deliberately. `IM-SRC-CHACHA-001` already matches the token
     # `ChaCha20Poly1305`, so a table rule for `cipherModes[CipherChaCha20Poly1305]` put two
     # ChaCha20 components on one line. That is the FOURTH time the same duplicate defect has
     # appeared (loop 4's TLS rule, loop 5's `ecdh.X25519()`, and twice here) -- and the fourth
     # time it was caught by MEASURING rather than by reading. Every one of these is a rule that
     # looked obviously correct in the diff.
-    dict(id="ECD-GO-SSHTBL-MAC", name="HMAC", primitive="mac", artefact_class="source",
+    dict(id="IM-GO-SSHTBL-MAC", name="HMAC", primitive="mac", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          # One rule for the whole MAC table: the primitive is HMAC in every case, and the digest
          # inside it does not change the fact that this is an HMAC registration. Splitting
          # HMAC-SHA1 from HMAC-SHA512 would multiply rules without changing the finding, which
          # is the same mistake as the six duplicate rules removed in loop 5.
          regex=r"macModes\[(?:Insecure)?HMAC(?:SHA1|SHA256|SHA512|96|128)\w*\]"),
-    dict(id="ECD-GO-RNG-001", name="PRNG", primitive="other", artefact_class="source",
+    dict(id="IM-GO-RNG-001", name="PRNG", primitive="other", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          # `math/rand` is the non-cryptographic generator. Matched only as an explicit package
          # qualifier or a qualified call, so a local variable named `rand` cannot trigger it.
@@ -335,46 +335,46 @@ RULES = [
     # type declaration, a hash constant. The criterion in benchmark/labels/README.md counts all
     # three as positives (P3 taint source, P1b naming in executable code, P2 hash binding), the
     # same way it counts `from hashlib import sha1`. These rules close that class.
-    dict(id="ECD-GO-IMPORT-001", name="MD5", primitive="hash", artefact_class="source",
+    dict(id="IM-GO-IMPORT-001", name="MD5", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"[\"']crypto/md5[\"']|[\"']golang\.org/x/crypto/md5[\"']"),
-    dict(id="ECD-GO-IMPORT-002", name="SHA1", primitive="hash", artefact_class="source",
+    dict(id="IM-GO-IMPORT-002", name="SHA1", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"[\"']crypto/sha1[\"']|[\"']golang\.org/x/crypto/sha1[\"']"),
-    dict(id="ECD-GO-IMPORT-003", name="SHA256", primitive="hash", artefact_class="source",
+    dict(id="IM-GO-IMPORT-003", name="SHA256", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"[\"']crypto/sha256[\"']|[\"'](?:golang\.org/x/crypto/)?sha256[\"']"),
-    # sha1 already has ECD-GO-IMPORT-002, but sha512 had no import rule and was a measured false
+    # sha1 already has IM-GO-IMPORT-002, but sha512 had no import rule and was a measured false
     # negative. The three SHA-2 sizes are separate imports in Go, so all three are needed.
-    dict(id="ECD-GO-IMPORT-010", name="SHA512", primitive="hash", artefact_class="source",
+    dict(id="IM-GO-IMPORT-010", name="SHA512", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"[\"']crypto/sha512[\"']|[\"'](?:golang\.org/x/crypto/)?sha512[\"']"),
-    dict(id="ECD-GO-IMPORT-004", name="HMAC", primitive="mac", artefact_class="source",
+    dict(id="IM-GO-IMPORT-004", name="HMAC", primitive="mac", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"[\"']crypto/hmac[\"']"),
-    dict(id="ECD-GO-IMPORT-005", name="DES", primitive="block-cipher", artefact_class="source",
+    dict(id="IM-GO-IMPORT-005", name="DES", primitive="block-cipher", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"[\"']crypto/des[\"']"),
-    dict(id="ECD-GO-IMPORT-006", name="RC4", primitive="stream-cipher", artefact_class="source",
+    dict(id="IM-GO-IMPORT-006", name="RC4", primitive="stream-cipher", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"[\"']crypto/rc4[\"']"),
-    dict(id="ECD-GO-IMPORT-007", name="AES", primitive="ae", artefact_class="source",
+    dict(id="IM-GO-IMPORT-007", name="AES", primitive="ae", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"[\"']crypto/aes[\"']"),
-    dict(id="ECD-GO-IMPORT-008", name="ChaCha20", primitive="stream-cipher",
+    dict(id="IM-GO-IMPORT-008", name="ChaCha20", primitive="stream-cipher",
          artefact_class="source", uses="at-rest", key_group=None, evidence="discovered",
          regex=r"[\"']golang\.org/x/crypto/chacha20[\"']"),
-    dict(id="ECD-GO-IMPORT-009", name="X25519", primitive="key-agreement",
+    dict(id="IM-GO-IMPORT-009", name="X25519", primitive="key-agreement",
          artefact_class="source", uses="at-rest", key_group=None, evidence="discovered",
          regex=r"[\"']golang\.org/x/crypto/curve25519[\"']"),
     # P2: a hash constant bound to a field. `Hash: crypto.SHA256` is how Go's SSH KEX binds its
     # exchange hash, and it is a real algorithm binding rather than a mention.
-    dict(id="ECD-GO-HASHBIND-001", name="SHA256", primitive="hash", artefact_class="source",
+    dict(id="IM-GO-HASHBIND-001", name="SHA256", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"\bcrypto\.SHA(1|256|512)\b"),
     # P1b: a type or function declaration whose NAME is the primitive. Anchored to the
     # declaration keywords so a bare mention in an expression cannot trigger it.
-    dict(id="ECD-GO-DECL-001", name="ChaCha20", primitive="ae", artefact_class="source",
+    dict(id="IM-GO-DECL-001", name="ChaCha20", primitive="ae", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          # A Go method DECLARATION puts the primitive in the RECEIVER, not the method name:
     # `func (c *chacha20Poly1305Cipher) readCipherPacket(...)`. The primitive name appears inside
@@ -386,23 +386,23 @@ RULES = [
                 r"(?<![\w.])(?:&)?\w*[Cc]?[Hh]a?[Cc]ha20\w*Cipher\s*\{"),
     # `func newAESCTR(`, `func newAESCBCCipher(`, `func newTripleDESCBCCipher(`, `func newRC4(`
     # are all P1b declarations. Anchored to `func` so a mention in an expression cannot fire.
-    dict(id="ECD-GO-DECL-002", name="AES", primitive="ae", artefact_class="source",
+    dict(id="IM-GO-DECL-002", name="AES", primitive="ae", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"\bfunc\s+(?:\([^)]*\)\s*)?new\w*AES\w*\s*\("),
-    dict(id="ECD-GO-DECL-003", name="3DES", primitive="block-cipher", artefact_class="source",
+    dict(id="IM-GO-DECL-003", name="3DES", primitive="block-cipher", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"\bfunc\s+(?:\([^)]*\)\s*)?new\w*(?:TripleDES|3DES)\w*\s*\("),
-    dict(id="ECD-GO-DECL-004", name="RC4", primitive="stream-cipher", artefact_class="source",
+    dict(id="IM-GO-DECL-004", name="RC4", primitive="stream-cipher", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"\bfunc\s+(?:\([^)]*\)\s*)?new\w*RC4\w*\s*\("),
-    # `var c25519kp curve25519KeyPair` binds a named X25519 key-pair type. ECD-SRC-ECDH-001
+    # `var c25519kp curve25519KeyPair` binds a named X25519 key-pair type. IM-SRC-ECDH-001
     # matches the UPPERCASE token `X25519`; this type is lowercase, so there is no overlap.
-    dict(id="ECD-GO-DECL-005", name="X25519", primitive="key-agreement", artefact_class="source",
+    dict(id="IM-GO-DECL-005", name="X25519", primitive="key-agreement", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"\bvar\s+\w+\s+curve25519\w*(?:KeyPair|PublicKey|PrivateKey)\b"),
     # `poly1305.Verify` / `poly1305.Sum` OPERATE on a MAC chosen at construction. They are the
     # L2-only shape (negative in L1, positive in L2), which is exactly what the label set records.
-    dict(id="ECD-GO-DECL-006", name="Poly1305", primitive="mac", artefact_class="source",
+    dict(id="IM-GO-DECL-006", name="Poly1305", primitive="mac", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"\bpoly1305\.(?:Verify|Sum|New)\s*\("),
 
@@ -414,37 +414,37 @@ RULES = [
     # own are deliberately absent because an EXISTING rule already reports them, and a second
     # rule matching the same line produces two components that _finalise cannot collapse (the
     # key includes rule_id). These are covered by:
-    #   ChaCha20-Poly1305  -> ECD-SRC-CHACHA-001     (matches `ChaCha20Poly1305`)
-    #   X25519 / X448      -> ECD-SRC-ECDH-001       (matches `X25519`)
-    #   Diffie-Hellman     -> ECD-SRC-ECDH-001       (matches `DiffieHellman`)
-    #   Math.random()      -> ECD-SRC-JAVA-WEAKRNG-001 (matches `Math.random()`)
-    #   minVersion: TLSv1  -> ECD-CFG-TLS-001        (matches `TLSv1(\.[0-3])?`)
+    #   ChaCha20-Poly1305  -> IM-SRC-CHACHA-001     (matches `ChaCha20Poly1305`)
+    #   X25519 / X448      -> IM-SRC-ECDH-001       (matches `X25519`)
+    #   Diffie-Hellman     -> IM-SRC-ECDH-001       (matches `DiffieHellman`)
+    #   Math.random()      -> IM-SRC-JAVA-WEAKRNG-001 (matches `Math.random()`)
+    #   minVersion: TLSv1  -> IM-CFG-TLS-001        (matches `TLSv1(\.[0-3])?`)
     # Adding language-specific aliases for these would inflate the rule count while producing
     # duplicate findings at identical (file, line) locations.
-    dict(id="ECD-RUST-CIPHER-002", name="AES", primitive="ae", artefact_class="source",
+    dict(id="IM-RUST-CIPHER-002", name="AES", primitive="ae", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"\baes_gcm::\w+|\bAesGcm::new_sensitive\s*\(|\bAes256Gcm::new\s*\("),
-    dict(id="ECD-RUST-HASH-001", name="MD5", primitive="hash", artefact_class="source",
+    dict(id="IM-RUST-HASH-001", name="MD5", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          # Every alternative is Rust-qualified. A bare `\bMD5\b` was tried first and is WRONG:
          # rules are not filtered by language, so it matched `MessageDigest.getInstance("MD5")`
          # in a .java file and put a second MD5 finding on a line that already had one. The two
          # could not collapse, because the dedup key includes rule_id.
          regex=r"\bmd5::Md5\b|\bMd5::new\s*\(|\brustc_hash::md5\b|\bmd-5\b"),
-    dict(id="ECD-RUST-HASH-002", name="SHA1", primitive="hash", artefact_class="source",
+    dict(id="IM-RUST-HASH-002", name="SHA1", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"\bsha1::Sha1\b|\bSha1::new\s*\(|\bSHA1_FOR_LEGACY_USE_ONLY\b"),
-    dict(id="ECD-RUST-SIG-001", name="ECDSA", primitive="signature", artefact_class="source",
+    dict(id="IM-RUST-SIG-001", name="ECDSA", primitive="signature", artefact_class="source",
          uses="signing", key_group=None, evidence="discovered",
          regex=r"\becdsa::SigningKey\b|\becdsa::VerifyingKey\b|\bECDSA_P256_SHA256_ASN1_SIGNING\b"),
-    dict(id="ECD-RUST-SIG-002", name="Ed25519", primitive="signature", artefact_class="source",
+    dict(id="IM-RUST-SIG-002", name="Ed25519", primitive="signature", artefact_class="source",
          uses="signing", key_group=None, evidence="discovered",
          regex=r"\bed25519::\w+|\bEd25519KeyPair::generate\s*\("),
-    dict(id="ECD-RUST-SIG-003", name="RSA", primitive="signature", artefact_class="source",
+    dict(id="IM-RUST-SIG-003", name="RSA", primitive="signature", artefact_class="source",
          uses="signing", key_group=None, evidence="discovered",
          regex=r"\brsa::(?:RsaPrivateKey|RsaPublicKey|pkcs1v15\w*|Pkcs1v15Sign)\b"),
-    # ECDH and X25519 are already owned by ECD-SRC-ECDH-001; see the note above.
-    dict(id="ECD-RUST-RNG-001", name="PRNG", primitive="other", artefact_class="source",
+    # ECDH and X25519 are already owned by IM-SRC-ECDH-001; see the note above.
+    dict(id="IM-RUST-RNG-001", name="PRNG", primitive="other", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          # `thread_rng` is ChaCha-seeded but is not a CSPRNG suitable for key material, and
          # `SmallRng` is xoshiro. Both belong in a key-derivation path as a defect.
@@ -454,23 +454,23 @@ RULES = [
     # `createCipher`/`createDecipher` are intentionally NOT matched as legacy-weak: Node removed
     # them (DEP0106, End-of-Life), so the call cannot appear in running code. A rule that only ever
     # fires on a removed API is dead weight in a rule pack.
-    dict(id="ECD-JS-CIPHER-001", name="DES", primitive="block-cipher", artefact_class="source",
+    dict(id="IM-JS-CIPHER-001", name="DES", primitive="block-cipher", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          # `des-ede3-cbc` must be present AND must precede the bare `des` alternative: the shorter
          # name matched first and left the trailing quote unmatched, so 3DES -- the one that
          # actually matters here -- was the single case that failed to fire.
          regex=r"create(?:Cipheriv|Decipheriv)\s*\(\s*[\"'`]"
                 r"(?:des-ede3-cbc|des-ede3|des-ede-cbc|des-cbc|des)[\"'`]"),
-    dict(id="ECD-JS-CIPHER-002", name="RC4", primitive="stream-cipher", artefact_class="source",
+    dict(id="IM-JS-CIPHER-002", name="RC4", primitive="stream-cipher", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"create(?:Cipheriv|Decipheriv)\s*\(\s*[\"'`]rc4[\"'`]"),
-    dict(id="ECD-JS-HASH-001", name="MD5", primitive="hash", artefact_class="source",
+    dict(id="IM-JS-HASH-001", name="MD5", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"create(?:Hash|Hmac)\s*\(\s*[\"']md5[\"']|digest\s*\(\s*[\"']MD5[\"']"),
-    dict(id="ECD-JS-HASH-002", name="SHA1", primitive="hash", artefact_class="source",
+    dict(id="IM-JS-HASH-002", name="SHA1", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"create(?:Hash|Hmac)\s*\(\s*[\"'`]sha1[\"'`]|digest\s*\(\s*[\"']SHA-1[\"']"),
-    dict(id="ECD-JS-SIG-001", name="RSA", primitive="signature", artefact_class="source",
+    dict(id="IM-JS-SIG-001", name="RSA", primitive="signature", artefact_class="source",
          uses="signing", key_group=None, evidence="discovered",
          # Context-anchored throughout. A bare `RSA-SHA1` token was tried first and leaked:
          # it matched `alg = "RSA-SHA1"` in a .py file. `RSA-SHA1` is Node's and OpenSSL's
@@ -479,23 +479,23 @@ RULES = [
          # `RSA` and does not require a closing quote.
          regex=r"create(?:Sign|Verify)\s*\(\s*[\"'`]RSA|"
                 r"(?:^|[^\w.])RSA_PKCS1_PADDING\b|crypto\.constants\.RSA_PKCS1_PADDING\b"),
-    dict(id="ECD-JS-SIG-002", name="RSA-PSS", primitive="signature", artefact_class="source",
+    dict(id="IM-JS-SIG-002", name="RSA-PSS", primitive="signature", artefact_class="source",
          uses="signing", key_group=None, evidence="discovered",
          regex=r"RSA-PSS|RSA_PKCS1_PSS_PADDING|crypto\.constants\.RSA_PSS"),
-    dict(id="ECD-JS-SIG-003", name="ECDSA", primitive="signature", artefact_class="source",
+    dict(id="IM-JS-SIG-003", name="ECDSA", primitive="signature", artefact_class="source",
          uses="signing", key_group=None, evidence="discovered",
          # `'ECDSA'` is retained (Node and WebCrypto both accept it) but the bare word is not:
          # a Java `KeyPairGenerator.getInstance("ECDSA")` would otherwise gain a duplicate here.
          regex=r"[\"'`]ecdsa-with-SHA\d+[\"'`]|createSign\s*\(\s*[\"'`]EC(?:DSA)?[\"'`]"),
-    # Diffie-Hellman, Math.random() and minVersion:TLSv1 are already owned by ECD-SRC-ECDH-001,
-    # ECD-SRC-JAVA-WEAKRNG-001 and ECD-CFG-TLS-001 respectively; see the note above. Duplicating
+    # Diffie-Hellman, Math.random() and minVersion:TLSv1 are already owned by IM-SRC-ECDH-001,
+    # IM-SRC-JAVA-WEAKRNG-001 and IM-CFG-TLS-001 respectively; see the note above. Duplicating
     # them would emit two components at one location.
-    # `modp1|modp2|modp5` are NOT duplicated: ECD-CFG-TLS-001 knows nothing of DH group sizes,
+    # `modp1|modp2|modp5` are NOT duplicated: IM-CFG-TLS-001 knows nothing of DH group sizes,
     # and Node documents these three as sub-2048-bit. They are reported as their own rule
     # because the finding is "this group is too small", not "this is Diffie-Hellman".
     # A "small DH group" rule was written and REMOVED. It has to be anchored to a
     # `createDiffieHellman` call to avoid matching `String g = "modp5"` in a .java file -- and
-    # every call it can be anchored to is already matched by ECD-SRC-ECDH-001, which fires on
+    # every call it can be anchored to is already matched by IM-SRC-ECDH-001, which fires on
     # the same line. The finding "this group is too small" is a refinement of that finding, not
     # a separate component, and two components at one (file, line) cannot be collapsed. The gap
     # is recorded in the README rather than papered over with a duplicate.
@@ -505,21 +505,21 @@ RULES = [
     # Ruby exposes OpenSSL as namespaced classes, and `OpenSSL::Cipher.new('aes-256-gcm')` is
     # the single most common symmetric call in the ecosystem. There was no rule for it and `.rb`
     # was not in SOURCE_EXTENSIONS, so a Rails app produced no findings at all.
-    dict(id="ECD-RB-AES-001", name="AES", primitive="ae", artefact_class="source",
+    dict(id="IM-RB-AES-001", name="AES", primitive="ae", artefact_class="source",
          uses="at-rest", key_group=1, key_map={"128": 128, "192": 192, "256": 256},
          evidence="discovered",
          regex=r"OpenSSL::Cipher\.new\s*\(\s*[\"']aes-(\d+)"
                 r"|OpenSSL::Cipher::AES\.new\s*\(\s*[\"']?([\w-]*)"),
-    dict(id="ECD-RB-AES-002", name="ChaCha20", primitive="stream-cipher", artefact_class="source",
+    dict(id="IM-RB-AES-002", name="ChaCha20", primitive="stream-cipher", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"OpenSSL::Cipher\.new\s*\(\s*[\"'](?:chacha20|rc4)"),
     # Legacy ciphers, named as themselves so they are never reported under the AES name.
-    dict(id="ECD-RB-LEGACY-001", name="DES", primitive="block-cipher", artefact_class="source",
+    dict(id="IM-RB-LEGACY-001", name="DES", primitive="block-cipher", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"OpenSSL::Cipher\.new\s*\(\s*[\"'](?:des|des-cbc|bf-cbc|rc2|rc4|id7|"
                 r"cast5|camellia)[\"']"
                 r"|OpenSSL::Cipher\.new\s*\(\s*[\"']des-ede3[\"']"),
-    dict(id="ECD-RB-RSA-001", name="RSA", primitive="pke", artefact_class="source",
+    dict(id="IM-RB-RSA-001", name="RSA", primitive="pke", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"OpenSSL::PKey::RSA\.new\s*\(|OpenSSL::PKey\.read\s*\("),
     # Scoped to an explicit `OpenSSL::PKey::` receiver ONLY. An earlier version also allowed a
@@ -527,24 +527,24 @@ RULES = [
     # operation, not an RSA signature -- and cost 6 false positives on the Python corpus.
     # The optional `.new` matters: `OpenSSL::PKey::RSA.new.sign_pss(...)` is the idiomatic
     # one-liner, so a pattern without it would miss the most common Ruby shape there is.
-    dict(id="ECD-RB-SIG-001", name="RSA", primitive="signature", artefact_class="source",
+    dict(id="IM-RB-SIG-001", name="RSA", primitive="signature", artefact_class="source",
          uses="signing", key_group=None, evidence="discovered",
          regex=r"OpenSSL::PKey::\w+(?:\.new)?\.(?:sign|verify)(?:_pss)?\s*\("),
-    dict(id="ECD-RB-EC-001", name="ECC", primitive="signature", artefact_class="source",
+    dict(id="IM-RB-EC-001", name="ECC", primitive="signature", artefact_class="source",
          uses="signing", key_group=None, evidence="discovered",
          regex=r"OpenSSL::PKey::EC\.new\s*\(|OpenSSL::PKey::EC\.generate\s*\("),
-    dict(id="ECD-RB-DH-001", name="DH", primitive="key-agreement", artefact_class="source",
+    dict(id="IM-RB-DH-001", name="DH", primitive="key-agreement", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          regex=r"OpenSSL::PKey::DH\.new\s*\(|OpenSSL::PKey::DH\.generate_params\s*\("),
-    dict(id="ECD-RB-MAC-001", name="HMAC", primitive="mac", artefact_class="source",
+    dict(id="IM-RB-MAC-001", name="HMAC", primitive="mac", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"OpenSSL::HMAC\.(?:new|digest)\s*\(|OpenSSL::HMAC\.hexdigest\s*\("),
-    dict(id="ECD-RB-HASH-001", name="SHA1", primitive="hash", artefact_class="source",
+    dict(id="IM-RB-HASH-001", name="SHA1", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"Digest::(MD5|SHA1)\b|"
                 r"OpenSSL::Digest::(MD5|SHA1)\b|"
                 r"OpenSSL::Digest::Digest\b.*[\"']sha1[\"']"),
-    dict(id="ECD-RB-HASH-002", name="SHA", primitive="hash", artefact_class="source",
+    dict(id="IM-RB-HASH-002", name="SHA", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"Digest::SHA(?:256|384|512)\b|"
                 r"OpenSSL::Digest::SHA(?:256|384|512)\b|"
@@ -552,7 +552,7 @@ RULES = [
     # `rand` is the Ruby spelling of the same weakness. `SecureRandom` is the correct call and
     # is deliberately NOT matched here -- a rule that fired on the secure generator too would
     # make the finding meaningless.
-    dict(id="ECD-RB-WEAKRNG-001", name="PRNG", primitive="other", artefact_class="source",
+    dict(id="IM-RB-WEAKRNG-001", name="PRNG", primitive="other", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          # `\\b` was NOT enough. The Go corpus produced `c.rand()` five times, where `rand` is a
          # method on a struct that returns a crypto/rand io.Reader -- a CSPRNG, not a weak
@@ -563,14 +563,14 @@ RULES = [
          regex=r"(?<![A-Za-z0-9_.:@$])Kernel\.rand\s*\(|(?<![A-Za-z0-9_.:@$])rand\s*\(\s*\)"),
     # ---- ECC ---------------------------------------------------------------------------------
     # Key AGREEMENT only. `ec.generate_private_key(ec.SECP256R1())` is a generic key-pair
-    # generator and was previously matched here as ECDH AND by ECD-SRC-PYCA-EC-001/002 as
+    # generator and was previously matched here as ECDH AND by IM-SRC-PYCA-EC-001/002 as
     # ECDSA, so one statement produced three findings with two mutually exclusive primitives
     # (key-agreement AND signature) and the recommender offered both ML-KEM and ML-DSA for the
     # same line. A bare key-pair generator does not say which operation follows, so that form is
     # excluded here and the curve object is typed by the PYCA rules instead. Every OTHER
     # spelling below is an unambiguous key-agreement signal and is kept: removing `X25519` and
     # `EVP_PKEY_EC` with it cost real detections, which the differential tests caught.
-    dict(id="ECD-SRC-ECDH-001", name="ECDH", primitive="key-agreement", artefact_class="source",
+    dict(id="IM-SRC-ECDH-001", name="ECDH", primitive="key-agreement", artefact_class="source",
          uses="tls", key_group=1, evidence="discovered",
          # A plain alternation with no wrapping group. An earlier version wrapped this in `(?:...)`
          # and the group was never closed, which `re` accepted but which made the pattern match
@@ -594,23 +594,23 @@ RULES = [
                 r"[Ee][Cc][Dd][Hh]\w*\s*\.\s*exchange\(|"
                 r"\.exchange\(\s*(?:peer|remote|their|public|dh)[\w_]*\s*\)|"
                 r"generate_private_key\(\s*ec\.(SECP\d+R1)\(\)"),
-    dict(id="ECD-SRC-ECDSA-001", name="ECDSA", primitive="signature", artefact_class="source",
+    dict(id="IM-SRC-ECDSA-001", name="ECDSA", primitive="signature", artefact_class="source",
          uses="signing", key_group=None, evidence="discovered",
          regex=r"ec\.ECDSA\(|ECDSA_sign|Signature\.getInstance\(\s*[\"'](SHA\d+withECDSA|ECDSA)|"
                r"ecdsa\.SigningKey|SHA\d+withECDSA"),
-    dict(id="ECD-SRC-ECC-001", name="ECC", primitive="signature", artefact_class="source",
+    dict(id="IM-SRC-ECC-001", name="ECC", primitive="signature", artefact_class="source",
          uses="signing", key_group=1, evidence="discovered",
          regex=r"KeyPairGenerator\.getInstance\(\s*[\"']EC[\"']\s*\)|EC_KEY_generate_key|"
                r"(secp256r1|prime256v1|secp384r1|secp521r1)"),
     # ---- EdDSA / DSA / DH -------------------------------------------------------------------
-    dict(id="ECD-SRC-EDDSA-001", name="Ed25519", primitive="signature", artefact_class="source",
+    dict(id="IM-SRC-EDDSA-001", name="Ed25519", primitive="signature", artefact_class="source",
          uses="signing", key_group=None, evidence="discovered",
          regex=r"Ed25519PrivateKey|Ed448PrivateKey|EVP_PKEY_ED25519|\bEd25519\b|\bEd448\b"),
-    dict(id="ECD-SRC-DSA-001", name="DSA", primitive="signature", artefact_class="source",
+    dict(id="IM-SRC-DSA-001", name="DSA", primitive="signature", artefact_class="source",
          uses="signing", key_group=None, evidence="discovered",
          regex=r"EVP_PKEY_DSA|DSA_generate_parameters|dsa\.generate_parameters\(|"
                r"KeyPairGenerator\.getInstance\(\s*[\"']DSA"),
-    dict(id="ECD-SRC-DH-001", name="DH", primitive="key-agreement", artefact_class="source",
+    dict(id="IM-SRC-DH-001", name="DH", primitive="key-agreement", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          regex=r"EVP_PKEY_DH\b|DH_generate|DH_get_|ffdhe\d+|modp_\d+|"
                r"KeyAgreement\.getInstance\(\s*[\"']DH"),
@@ -621,7 +621,7 @@ RULES = [
     # matched any existing rule, so 40-odd genuine ECDSA/RSA/AES sites were invisible to us.
     # These are unambiguous: the dotted path is the library's own vocabulary, so matching it
     # cannot fire on an unrelated identifier.
-    dict(id="ECD-SRC-PYCA-AES-001", name="AES", primitive="ae", artefact_class="source",
+    dict(id="IM-SRC-PYCA-AES-001", name="AES", primitive="ae", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"algorithms\.(AES|ARC4|TripleDES|ChaCha20|ChaCha20Poly1305|Camellia|Blowfish|"
                 r"CAST5|SEED|IDEA)\b"),
@@ -629,64 +629,64 @@ RULES = [
     # was published as a SHA finding. The primitive is right and the ALGORITHM NAME is wrong,
     # which is worse than a miss: a consumer reading the CBOM is told an MD5 call is SHA-2.
     # The SHA-1-specific rule below owns MD5, and BLAKE2 has no name of its own in this table.
-    dict(id="ECD-SRC-PYCA-HASH-001", name="SHA", primitive="hash", artefact_class="source",
+    dict(id="IM-SRC-PYCA-HASH-001", name="SHA", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"hashes\.(SHA224|SHA256|SHA384|SHA512|SHA3_\d+_\d+)\b"),
-    dict(id="ECD-SRC-PYCA-HASH-002", name="SHA1", primitive="hash", artefact_class="source",
+    dict(id="IM-SRC-PYCA-HASH-002", name="SHA1", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"hashes\.SHA1\b|MD5\(\s*(?:usedforsecurity\s*=\s*False)?\s*\)"),
-    dict(id="ECD-SRC-PYCA-EC-001", name="ECC", primitive="signature", artefact_class="source",
+    dict(id="IM-SRC-PYCA-EC-001", name="ECC", primitive="signature", artefact_class="source",
          uses="signing", key_group=1, evidence="discovered",
          regex=r"ec\.(SECP(?P<sz>192|224|256|384|521)R1|SECP256K1)\b"),
-    # `exchanges.ECDH` is deliberately NOT here. ECD-SRC-ECDH-001 already matches `ECDH_compute_key`
+    # `exchanges.ECDH` is deliberately NOT here. IM-SRC-ECDH-001 already matches `ECDH_compute_key`
     # and the Java/OpenSSL ECDH forms, and listing the Python class in two rules made a single
     # `exchanges.ECDH()` reference report the same asset twice -- inflating the finding count and
     # the CBOM component list. One asset, one finding.
-    dict(id="ECD-SRC-PYCA-ECDH-001", name="ECDH", primitive="key-agreement", artefact_class="source",
+    dict(id="IM-SRC-PYCA-ECDH-001", name="ECDH", primitive="key-agreement", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          regex=r"derive_private_key\(|EllipticCurvePublicNumbers\b|ECDHPrivateKey\b"),
     # RFC 7919 finite-field groups. These are DH, not ECDH, and they name a specific group size
     # that an auditor needs -- the benchmark corpus carries them and we reported nothing at all.
-    dict(id="ECD-SRC-SSH-DH-002", name="DH", primitive="key-agreement", artefact_class="source",
+    dict(id="IM-SRC-SSH-DH-002", name="DH", primitive="key-agreement", artefact_class="source",
          uses="tls", key_group=1, evidence="discovered",
          regex=r"[\"']ffdh(?:2048|3072|4096|6144|8192)(?:-sha(?:1|256|384|512))?[\"']"),
-    dict(id="ECD-SRC-PYCA-ED-001", name="Ed25519", primitive="signature", artefact_class="source",
+    dict(id="IM-SRC-PYCA-ED-001", name="Ed25519", primitive="signature", artefact_class="source",
          uses="signing", key_group=None, evidence="discovered",
          regex=r"ed25519\.(Ed25519PrivateKey|Ed25519PublicKey)\b|ed448\.Ed448PrivateKey\b"),
     # ENCRYPTION only. `padding.PSS` is a SIGNATURE padding scheme (it is what RSASSA-PSS uses),
     # and listing it here made one identifier report as both `pke` and `signature` for the same
     # line, so the recommender offered a decrypt target and a signing target for one statement.
-    # PSS is matched by ECD-SRC-RSA-002, which is where it belongs.
-    dict(id="ECD-SRC-PYCA-RSA-001", name="RSA", primitive="pke", artefact_class="source",
+    # PSS is matched by IM-SRC-RSA-002, which is where it belongs.
+    dict(id="IM-SRC-PYCA-RSA-001", name="RSA", primitive="pke", artefact_class="source",
          uses="at-rest", key_group=1, evidence="discovered",
          regex=r"rsa\.(RSAPrivateNumbers|RSAPublicNumbers|RSAPrivateKey|RSAKey)\b|"
                 r"padding\.(OAEP|PKCS1v15)\b|asymmetric\.rsa\b"),
     # ---- hashlib direct imports ----------------------------------------------------------------
     # `from hashlib import sha1, md5` names the algorithm as a bound name. `hashlib.sha256(...)`
     # is already covered elsewhere; the import form was not.
-    dict(id="ECD-SRC-HASHLIB-001", name="SHA1", primitive="hash", artefact_class="source",
+    dict(id="IM-SRC-HASHLIB-001", name="SHA1", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"from\s+hashlib\s+import\s+[^\n]*\bsha1\b|"
                 r"from\s+hashlib\s+import\s+[^\n]*\bmd5\b.*|hashlib\.new\(\s*[\"']sha1[\"']"),
     # `hash_algo = hashlib.sha256` -- an algorithm object bound to a name. The dotted call
     # `hashlib.sha256(...)` was already covered; the ASSIGNMENT form was not, and it is how
     # libraries store an algorithm choice in a variable.
-    dict(id="ECD-SRC-HASHLIB-002", name="SHA", primitive="hash", artefact_class="source",
+    dict(id="IM-SRC-HASHLIB-002", name="SHA", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"hashlib\.(?:sha1|sha224|sha256|sha384|sha512|sha3_\d+_\d+|blake2\w*|md5)\b(?!\s*\()"),
-    dict(id="ECD-SRC-HASHLIB-003", name="SHA1", primitive="hash", artefact_class="source",
+    dict(id="IM-SRC-HASHLIB-003", name="SHA1", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"from\s+hashlib\s+import\s+[^\n]*\bmd5\b|hashlib\.md5\b(?!\s*\()"),
     # OpenSSH GCM/ChaCha cipher names, and HMAC wire names. `hmac-sha2-*` is an authentication
     # tag, not an encryption cipher, so it is a MAC rather than a cipher-suite primitive.
-    dict(id="ECD-SRC-SSH-CIPHER-002", name="AES", primitive="ae", artefact_class="source",
+    dict(id="IM-SRC-SSH-CIPHER-002", name="AES", primitive="ae", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          # OpenSSH-suffixed AES names ONLY. `chacha20-poly1305@openssh.com` was in this list
          # too, and the rule is named AES -- so the ChaCha20 constant was reported as AES. It now
-         # has its own rule, ECD-SRC-SSH-CHACHA-001. With ChaCha20 gone, the two AES rules differ
+         # has its own rule, IM-SRC-SSH-CHACHA-001. With ChaCha20 gone, the two AES rules differ
          # only by the `@openssh.com` suffix and cannot both fire on one line.
          regex=r"[\"']aes(?:128|192|256)-(?:gcm|ctr)@openssh\.com[\"']"),
-    dict(id="ECD-SRC-SSH-MAC-001", name="HMAC", primitive="mac", artefact_class="source",
+    dict(id="IM-SRC-SSH-MAC-001", name="HMAC", primitive="mac", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          regex=r"[\"'](?:hmac-sha2-(?:256|512)|hmac-sha1(?:-96|-160)?|"
                 r"umac-64@openssh\.com|umac-128@openssh\.com)[\"']"),
@@ -697,7 +697,7 @@ RULES = [
     # `group14-sha256` -- digits run straight into "-sha", no separator. But the exchange group
     # is `group-exchange-sha256`, WITH a hyphen. Writing `group(?:1|14|16|18|exchange)` therefore
     # spells "groupexchange-sha256" and never matches the single name the rule was added for.
-    dict(id="ECD-SRC-SSH-DH-001", name="DH", primitive="key-agreement", artefact_class="source",
+    dict(id="IM-SRC-SSH-DH-001", name="DH", primitive="key-agreement", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          regex=r"[\"']diffie-hellman-group(?:1|14|16|18|-exchange)-sha(?:1|256|384|512)[\"']"),
 
@@ -719,36 +719,36 @@ RULES = [
     # bare `ecdsa-sha2-nistp256` would match prose and comments; requiring the namespaced suffix
     # keeps it to executable registrations.
     # -----------------------------------------------------------------------------------------
-    dict(id="ECD-SRC-SSHNAME-001", name="ECDSA", primitive="signature", artefact_class="source",
+    dict(id="IM-SRC-SSHNAME-001", name="ECDSA", primitive="signature", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          regex=r"[\"']ecdsa-sha2-nistp(?:256|384|521)(?:-cert)?-v01@openssh\.com[\"']"),
-    dict(id="ECD-SRC-SSHNAME-002", name="RSA", primitive="signature", artefact_class="source",
+    dict(id="IM-SRC-SSHNAME-002", name="RSA", primitive="signature", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          regex=r"[\"'](?:ssh-rsa|rsa-sha2-(?:256|512))(?:-cert)?-v01@openssh\.com[\"']"),
-    dict(id="ECD-SRC-SSHNAME-003", name="Ed25519", primitive="signature", artefact_class="source",
+    dict(id="IM-SRC-SSHNAME-003", name="Ed25519", primitive="signature", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          regex=r"[\"']ssh-ed25519(?:-cert)?-v01@openssh\.com[\"']"),
-    dict(id="ECD-SRC-SSHNAME-004", name="HMAC", primitive="mac", artefact_class="source",
+    dict(id="IM-SRC-SSHNAME-004", name="HMAC", primitive="mac", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          regex=r"[\"']hmac-(?:sha2-(?:256|512)(?:-etm)?|sha1(?:-96)?|md5(?:-96)?)"
                 r"(?:-etm)?@openssh\.com[\"']"),
     # `curve25519-sha256` and `curve25519-sha256@libssh.org` are ECDH: X25519 is a Montgomery
     # curve and Diffie-Hellman on it is key agreement, not a signature. Getting this primitive
     # wrong would send an auditor to the wrong replacement algorithm.
-    dict(id="ECD-SRC-SSHNAME-005", name="ECDH", primitive="key-agreement", artefact_class="source",
+    dict(id="IM-SRC-SSHNAME-005", name="ECDH", primitive="key-agreement", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          regex=r"[\"']curve25519-sha256(?:@libssh\.org)?@openssh\.com[\"']"
                 r"|[\"']curve25519-sha256@libssh\.org[\"']"),
     # ecdh-sha2-nistp256/384/521 is Diffie-Hellman on the NIST curves. Declared BEFORE any
     # generic `ecdh` rule so the specific group name wins, and deliberately NOT matching
     # `ecdsa-sha2-*`: ECDH and ECDSA share the curve but not the job.
-    dict(id="ECD-SRC-SSHNAME-006", name="ECDH", primitive="key-agreement", artefact_class="source",
+    dict(id="IM-SRC-SSHNAME-006", name="ECDH", primitive="key-agreement", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          regex=r"[\"']ecdh-sha2-nistp(?:256|384|521)(?:-cert)?-v01@openssh\.com[\"']"),
     # A hybrid: X25519 classical PLUS ML-KEM-768. The composite is reported, and the migration
     # verifier treats it as a hybrid -- BOTH halves must be broken, so this is a weaker
     # exposure than either half alone. Reporting only ML-KEM would understate it.
-    dict(id="ECD-SRC-SSHNAME-007", name="ML-KEM-768", primitive="kem", artefact_class="source",
+    dict(id="IM-SRC-SSHNAME-007", name="ML-KEM-768", primitive="kem", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          regex=r"[\"']mlkem768x25519-(?:sha256|mlkem768x25519)@openssh\.com[\"']"
                 r"|[\"']sntrup761x25519-sha512@openssh\.com[\"']"),
@@ -756,14 +756,14 @@ RULES = [
     # not algorithms. They are excluded on purpose: a rule matching them would inflate the count
     # with entries that name no primitive at all.
     # -----------------------------------------------------------------------------------------
-    # REMOVED: ECD-SRC-PYCA-EC-002.
+    # REMOVED: IM-SRC-PYCA-EC-002.
     # Its pattern (`ec.EllipticCurvePrivateKey`, `ec.SECP\w*R1`) is a strict SUBSET of
-    # ECD-SRC-PYCA-EC-001, so `ec.generate_private_key(ec.SECP256R1())` matched both and the
+    # IM-SRC-PYCA-EC-001, so `ec.generate_private_key(ec.SECP256R1())` matched both and the
     # curve was reported twice from two rule_ids. `-001` already captures the size, so the
     # second finding carried no extra information -- only an extra CBOM component.
     # `from cryptography.hazmat.primitives.asymmetric.x25519 import ...` -- the import path
     # itself names the algorithm family.
-    dict(id="ECD-SRC-PYCA-X-001", name="X25519", primitive="key-agreement", artefact_class="source",
+    dict(id="IM-SRC-PYCA-X-001", name="X25519", primitive="key-agreement", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          regex=r"primitives\.asymmetric\.x25519\b|x25519\.(?:X25519PrivateKey|X25519PublicKey)\b"),
     # ---- SSH / TLS algorithm identifier strings -----------------------------------------------
@@ -771,88 +771,88 @@ RULES = [
     # SSH implementation is nothing BUT these strings, so a codebase that names one is using it.
     # The signature/cipher names are kept in separate rules because they imply a different
     # primitive, and conflating them is the error Phase-1 gap H6 warns about.
-    dict(id="ECD-SRC-SSH-KEX-001", name="ECDH", primitive="key-agreement", artefact_class="source",
+    dict(id="IM-SRC-SSH-KEX-001", name="ECDH", primitive="key-agreement", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          # ELLIPTIC names only. `diffie-hellman-group*` is finite-field DH and belongs to
-         # ECD-SRC-SSH-DH-001; listing it here too made one identifier report as BOTH ECDH and
+         # IM-SRC-SSH-DH-001; listing it here too made one identifier report as BOTH ECDH and
          # DH, which is a wrong algorithm name in the CBOM and an inflated finding count.
          regex=r"[\"'](?:ecdh-sha2-nistp(?:256|384|521)|"
                 r"curve25519-sha256(?:@libssh\.org)?|"
                 r"ecdh-sha2-nistp256k)[\"']"),
-    dict(id="ECD-SRC-SSH-SIG-001", name="ECDSA", primitive="signature", artefact_class="source",
+    dict(id="IM-SRC-SSH-SIG-001", name="ECDSA", primitive="signature", artefact_class="source",
          uses="signing", key_group=None, evidence="discovered",
          regex=r"[\"']ecdsa-sha2-nistp(?:256|384|521)[\"']|[\"']ssh-rsa[\"']|"
                 r"[\"']rsa-sha2-(?:256|512)[\"']|[\"']ssh-dss[\"']"),
-    dict(id="ECD-SRC-SSH-ED-001", name="Ed25519", primitive="signature", artefact_class="source",
+    dict(id="IM-SRC-SSH-ED-001", name="Ed25519", primitive="signature", artefact_class="source",
          uses="signing", key_group=None, evidence="discovered",
          regex=r"[\"']ssh-ed25519[\"']"),
-    dict(id="ECD-SRC-SSH-CIPHER-001", name="AES", primitive="ae", artefact_class="source",
+    dict(id="IM-SRC-SSH-CIPHER-001", name="AES", primitive="ae", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          # AES names ONLY. Two corrections, both found by adversarial review against real
          # x/crypto lines rather than by reading the pattern:
          #   `3des-cbc` was in this list and the rule is named AES, so
          #   `InsecureCipherTripleDESCBC = "3des-cbc"` was reported as name=AES. It is already
-         #   owned by ECD-SRC-SSH-LEGACY-001, which names it 3DES, so that line produced an AES
+         #   owned by IM-SRC-SSH-LEGACY-001, which names it 3DES, so that line produced an AES
          #   finding AND a 3DES finding for the same cipher. 3DES is removed from here.
          #   `aes128-cbc`/`aes256-cbc` were redundant with the first alternative and were
          #   removed; leaving them cannot change the outcome and only misleads a reader.
          regex=r"[\"'](?:aes(?:128|192|256)-(?:ctr|gcm|cbc))[\"']"),
-    # `chacha20-poly1305@openssh.com` was in ECD-SRC-SSH-CIPHER-002, which is named AES, so
+    # `chacha20-poly1305@openssh.com` was in IM-SRC-SSH-CIPHER-002, which is named AES, so
     # `CipherChaCha20Poly1305 = "chacha20-poly1305@openssh.com"` was reported as name=AES. It is
     # its own algorithm and gets its own rule. This is the second cipher mislabelled by that
     # rule; the pattern is that a "cipher" rule accumulates every quoted wire name and inherits
     # whichever name it was declared with.
-    dict(id="ECD-SRC-SSH-CHACHA-001", name="ChaCha20", primitive="ae", artefact_class="source",
+    dict(id="IM-SRC-SSH-CHACHA-001", name="ChaCha20", primitive="ae", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          regex=r"[\"']chacha20-poly1305@openssh\.com[\"']"),
-    dict(id="ECD-SRC-SSH-LEGACY-001", name="3DES", primitive="block-cipher", artefact_class="source",
+    dict(id="IM-SRC-SSH-LEGACY-001", name="3DES", primitive="block-cipher", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          regex=r"[\"'](?:3des-cbc|des-cbc|arcfour|arcfour256|blowfish-cbc|cast128-cbc)[\"']"),
     # ---- Symmetric --------------------------------------------------------------------------
-    dict(id="ECD-SRC-AES-001", name="AES", primitive="ae", artefact_class="source",
+    dict(id="IM-SRC-AES-001", name="AES", primitive="ae", artefact_class="source",
          uses="at-rest", key_group=1, evidence="discovered",
          key_map={"128": 128, "192": 192, "256": 256},
          regex=r"AESGCM\(|algorithms\.AES\(|AES\.new\(|Crypto\.Cipher\.AES|"
                r"Cipher\.getInstance\(\s*[\"']AES/(?:GCM|CBC|CTR|ECB)|EVP_aes_(128|192|256)"),
-    dict(id="ECD-SRC-CHACHA-001", name="ChaCha20", primitive="ae", artefact_class="source",
+    dict(id="IM-SRC-CHACHA-001", name="ChaCha20", primitive="ae", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          regex=r"ChaCha20Poly1305|EVP_chacha20"),
     # ---- Hashes -----------------------------------------------------------------------------
-    dict(id="ECD-SRC-SHA2-001", name="SHA256", primitive="hash", artefact_class="source",
+    dict(id="IM-SRC-SHA2-001", name="SHA256", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"hashes\.SHA256\(|MessageDigest\.getInstance\(\s*[\"']SHA-?256|EVP_sha256|sha256\("),
-    dict(id="ECD-SRC-SHA1-001", name="SHA1", primitive="hash", artefact_class="source",
+    dict(id="IM-SRC-SHA1-001", name="SHA1", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"hashes\.SHA1\(|MessageDigest\.getInstance\(\s*[\"']SHA-?1[\"']|EVP_sha1|sha1\("),
-    dict(id="ECD-SRC-MD5-001", name="MD5", primitive="hash", artefact_class="source",
+    dict(id="IM-SRC-MD5-001", name="MD5", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"\bmd5\(|MessageDigest\.getInstance\(\s*[\"']MD5[\"']|EVP_md5|MD5_Init"),
     # ---- Protocol / configuration -----------------------------------------------------------
-    dict(id="ECD-CFG-TLS-001", name="TLS", primitive="protocol", artefact_class="config",
+    dict(id="IM-CFG-TLS-001", name="TLS", primitive="protocol", artefact_class="config",
          uses="tls", key_group=None, evidence="configured",
          regex=r"ssl_protocols\s+[^;]+;|TLSv1(\.[0-3])?|tls1_[0-3]|MinProtocol\s*=\s*\S+"),
-    dict(id="ECD-CFG-LEGACY-001", name="LEGACY-CIPHER", primitive="protocol",
+    dict(id="IM-CFG-LEGACY-001", name="LEGACY-CIPHER", primitive="protocol",
          artefact_class="config", uses="tls", key_group=None, evidence="configured",
          regex=r"\b(3DES|DES-CBC3|RC4|NULL-SHA|EXPORT)\b"),
 
     # ---- Hardcoded Keys ----
-    dict(id="ECD-KEY-PEM-001", name="Private Key (PEM)", primitive="key", artefact_class="source",
+    dict(id="IM-KEY-PEM-001", name="Private Key (PEM)", primitive="key", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"-----BEGIN (?:RSA |EC |DSA )?PRIVATE KEY-----"),
-    dict(id="ECD-KEY-PGP-001", name="Private Key (PGP)", primitive="key", artefact_class="source",
+    dict(id="IM-KEY-PGP-001", name="Private Key (PGP)", primitive="key", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"-----BEGIN PGP PRIVATE KEY BLOCK-----"),
          
     # ---- Protocols ----
     # Apache/mod_ssl ONLY. This rule previously also carried an `ssl_protocols TLSv1.x`
-    # alternative, which was 83% redundant with ECD-CFG-TLS-001 (that rule's pattern is
+    # alternative, which was 83% redundant with IM-CFG-TLS-001 (that rule's pattern is
     # `ssl_protocols\s+[^;]+;`, a strict superset) AND missed the most common legacy nginx line
     # in existence, `ssl_protocols TLSv1 TLSv1.1;`, because it required a dotted version.
     # A rule added to catch legacy TLS that is blind to legacy TLS, and that doubles a rule
     # that is not, is worse than no rule. What is uniquely Apache's is the `SSLProtocol`
     # directive, so that is all this keeps -- case-insensitively, because Apache directives are.
     # `type="protocol"` is what routes the finding to cbom's protocol branch.
-    dict(id="ECD-PROTO-TLS-001", name="TLS Configuration", primitive="protocol", artefact_class="config",
+    dict(id="IM-PROTO-TLS-001", name="TLS Configuration", primitive="protocol", artefact_class="config",
          type="protocol", uses="tls", key_group=None, evidence="configured",
          regex=r"(?i)SSLProtocol\s+(?:all|[-+]?SSLv[0-9.]*|none)\b"),
 
@@ -867,23 +867,23 @@ RULES = [
     # `primitive="cloud-service"` and `primitive="hardware-module"` are not CycloneDX 1.7 enum
     # members, so all four were silently canonicalised to "unknown" and shipped as
     # assetType=algorithm / primitive=unknown / tier=LOW with no migration target.
-    dict(id="ECD-CLOUD-KMS-001", name="AWS KMS", primitive="cryptographic-library",
+    dict(id="IM-CLOUD-KMS-001", name="AWS KMS", primitive="cryptographic-library",
          artefact_class="source", type="library", uses="at-rest", key_group=None,
          evidence="dependency",
          regex=r"boto3\.client\(\s*['\"]kms['\"]\s*\)|aws_kms_key|kms\.Decrypt|kms\.Encrypt"),
     # `SecretClient(` alone is far too generic -- it matches any Azure SDK credential helper.
     # Anchored to the key-vault namespace instead.
-    dict(id="ECD-CLOUD-AZURE-001", name="Azure Key Vault", primitive="cryptographic-library",
+    dict(id="IM-CLOUD-AZURE-001", name="Azure Key Vault", primitive="cryptographic-library",
          artefact_class="source", type="library", uses="at-rest", key_group=None,
          evidence="dependency",
          regex=r"azure\.keyvault|KeyVaultClient|azurervault|key_vault\.client"),
-    dict(id="ECD-CLOUD-GCP-001", name="Google Cloud KMS", primitive="cryptographic-library",
+    dict(id="IM-CLOUD-GCP-001", name="Google Cloud KMS", primitive="cryptographic-library",
          artefact_class="source", type="library", uses="at-rest", key_group=None,
          evidence="dependency",
          regex=r"google-cloud-kms|KeyManagementServiceClient|google\.cloud\.kms"),
     # `PKCS11` with no boundary matches any identifier containing those six characters -- a
     # variable, a vendored filename, a comment. Anchored to what actually appears in code.
-    dict(id="ECD-HARDWARE-PKCS11-001", name="PKCS#11 HSM", primitive="cryptographic-library",
+    dict(id="IM-HARDWARE-PKCS11-001", name="PKCS#11 HSM", primitive="cryptographic-library",
          artefact_class="source", type="library", uses="at-rest", key_group=None,
          evidence="dependency",
          regex=r"\bSunPKCS11\b|\bPKCS11\b|pkcs11\.(?:get_token|lib|load)|PyKCS11"),
@@ -1072,7 +1072,7 @@ def _strip_comments(content, path):
         return content
 
 
-class ECDATScanner:
+class IndraMeshScanner:
     """Scan source files, binaries and container images for cryptographic artefacts.
 
     Findings carry canonical primitives ('pke' | 'signature' | 'key-agreement' | 'ae' | 'hash'),
@@ -1223,7 +1223,7 @@ class ECDATScanner:
                 "type": "algorithm",
                 "name": str(dl_pred),
                 "primitive": "unknown",
-                "rule_id": "ECD-ML-FALLBACK",
+                "rule_id": "IM-ML-FALLBACK",
                 "scanner": "ml-scanner",
                 "evidence_class": "discovered",
                 "artefact_class": "source",
@@ -1251,7 +1251,7 @@ class ECDATScanner:
                     "type": "library",
                     "name": marker_name,
                     "primitive": "cryptographic-library",
-                    "rule_id": "ECD-BIN-LIB-001",
+                    "rule_id": "IM-BIN-LIB-001",
                     "scanner": "binary-scanner",
                     "evidence_class": "discovered",
                     "artefact_class": "library",
@@ -1338,7 +1338,7 @@ class ECDATScanner:
                                 "type": "library",
                                 "name": marker_name,
                                 "primitive": "cryptographic-library",
-                                "rule_id": "ECD-IMG-LIB-001",
+                                "rule_id": "IM-IMG-LIB-001",
                                 "scanner": "container-scanner",
                                 "evidence_class": "configured",
                                 "artefact_class": "library",

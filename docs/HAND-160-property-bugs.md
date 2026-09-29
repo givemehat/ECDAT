@@ -31,7 +31,7 @@ with tarfile.open(fileobj=buf, mode="w") as t:
     t.addfile(i, io.BytesIO(d))
 open("hdr.tar", "wb").write(buf.getvalue()[:512])      # one bare header block
 
-ECDATScanner(enable_ml=False).scan_directory("hdr.tar")
+IndraMeshScanner(enable_ml=False).scan_directory("hdr.tar")
 # tarfile.ReadError: unexpected end of data
 #   engine/scanner.py:448 in _scan_container_image -> for member in opened.getmembers()
 #   engine/scanner.py:512 in scan_directory       -> return self._scan_path(directory_path)
@@ -58,12 +58,12 @@ same bytes on disk give two different answers.
 ```python
 open("k.py", "wb").write(b"a = rsa.newkeys(2048); b = rsa.newkeys(4096);\n")
 
-scanner = ECDATScanner(enable_ml=False)
+scanner = IndraMeshScanner(enable_ml=False)
 scanner.scan_directory("k.py")
 # 2 findings: [('RSA', 1, 2048), ('RSA', 1, 4096)]
 # scanner.coverage_manifest()["scanners_run"] == []      <-- 2 findings, "no scanner ran"
 
-[f for f in ECDATScanner(enable_ml=False).scan_directory(".") if f["file"].endswith("k.py")]
+[f for f in IndraMeshScanner(enable_ml=False).scan_directory(".") if f["file"].endswith("k.py")]
 # 1 finding: [('RSA', 1, 2048)]
 ```
 
@@ -91,7 +91,7 @@ the entire point of publishing a CBOM.
 
 ```python
 generate_cbom([{"name": "RSA", "primitive": "pke", "key_length": 2048}])
-# dependencies: [{"ref": "ECDAT-Scanned-Artefact",
+# dependencies: [{"ref": "IndraMesh-Scanned-Artefact",
 #                 "dependsOn": ["crypto-asset-0"],
 #                 "dependencyType": "uses"}]
 # jsonschema: Additional properties are not allowed ('dependencyType' was unexpected)

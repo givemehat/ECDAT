@@ -1,11 +1,11 @@
 #!/bin/bash
-# ECDAT Real-World Container & Source Demonstration Script
+# IndraMesh Real-World Container & Source Demonstration Script
 # Run this during the SIH presentation to prove the tool works on messy, real-world repositories.
 
 set -e
 
 echo "=========================================================================="
-echo " ECDAT SIH 2026: Real-World Demonstration"
+echo " IndraMesh SIH 2026: Real-World Demonstration"
 echo " Target 1: Pallets Werkzeug (Messy Python Web/Crypto utilities)"
 echo " Target 2: BC-Java (Bouncy Castle Java - Real-world Enterprise Crypto)"
 echo "=========================================================================="
@@ -19,16 +19,16 @@ curl -sL https://github.com/pallets/werkzeug/archive/refs/tags/3.0.1.tar.gz -o w
 echo "[*] Downloading Bouncy Castle (Java) source code..."
 curl -sL https://github.com/bcgit/bc-java/archive/refs/tags/r1rv77.tar.gz -o bc-java.tar.gz
 
-# 3. Running ECDAT Scan on Werkzeug
+# 3. Running IndraMesh Scan on Werkzeug
 echo ""
-echo "[*] Running ECDAT Scanner on Werkzeug (.tar.gz container/archive)..."
+echo "[*] Running IndraMesh Scanner on Werkzeug (.tar.gz container/archive)..."
 echo "    python cli.py werkzeug.tar.gz --format text"
 python cli.py werkzeug.tar.gz --format text | head -n 25
 echo "    ... (truncated for demo) ..."
 echo ""
 
-# 4. Running ECDAT Scan on BouncyCastle
-echo "[*] Running ECDAT Scanner on Bouncy Castle (.tar.gz container/archive)..."
+# 4. Running IndraMesh Scan on BouncyCastle
+echo "[*] Running IndraMesh Scanner on Bouncy Castle (.tar.gz container/archive)..."
 echo "    python cli.py bc-java.tar.gz --format cbom > bc-java-cbom.json"
 python cli.py bc-java.tar.gz --format cbom > bc-java-cbom.json
 echo "    [✔] Successfully generated Standardized CBOM for Bouncy Castle."

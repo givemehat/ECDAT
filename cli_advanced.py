@@ -1,5 +1,5 @@
 """
-ECDAT advanced entry point: the two NEW sensors that cli.py does not wire in.
+IndraMesh advanced entry point: the two NEW sensors that cli.py does not wire in.
 
     python cli_advanced.py deps       ./target
     python cli_advanced.py verify-migration ./build/app.so --format json
@@ -28,7 +28,7 @@ from engine.cbom import generate_cbom
 from engine.dependencies import DependencyScanner
 from engine.mosca import DEFAULT_POLICY, DEFAULT_Z, POLICY_DEADLINES, calculate_risk
 from engine.recommender import get_pqc_recommendation
-from engine.scanner import ECDATScanner
+from engine.scanner import IndraMeshScanner
 from engine.verify_migration import PQC_ALGORITHMS, MigrationVerifier
 # Re-exported so a caller can write `from cli_advanced import EXIT_VERIFIED` rather than
 # reaching into the engine module for a CLI contract constant.
@@ -95,9 +95,9 @@ def run_deps(target, output_format="text", fail_on="CRITICAL", ecosystems=None, 
     breaches = [f for f in findings
                 if SEVERITY_ORDER.index(f["risk"]["tier"]) >= threshold]
     os.makedirs(out_dir, exist_ok=True)
-    with open(os.path.join(out_dir, "ecdat_dependencies.json"), "w", encoding="utf-8") as fh:
+    with open(os.path.join(out_dir, "indramesh_dependencies.json"), "w", encoding="utf-8") as fh:
         json.dump({"findings": findings, "coverage": coverage}, fh, indent=2)
-    print(f"[+] dependency report -> {os.path.join(out_dir, 'ecdat_dependencies.json')}")
+    print(f"[+] dependency report -> {os.path.join(out_dir, 'indramesh_dependencies.json')}")
 
     if coverage["errors"] and not coverage["manifests_parsed"]:
         # Every manifest we found was unreadable, so "no findings" would be indistinguishable
@@ -156,7 +156,7 @@ def run_verify_migration(target, output_format="text", out_dir="."):
         print(f"    - {item}")
 
     os.makedirs(out_dir, exist_ok=True)
-    path = os.path.join(out_dir, "ecdat_migration_verification.json")
+    path = os.path.join(out_dir, "indramesh_migration_verification.json")
     with open(path, "w", encoding="utf-8") as fh:
         json.dump(report, fh, indent=2)
     if output_format == "json":
@@ -173,7 +173,7 @@ def run_all(target, z_time=DEFAULT_Z, policy="india_dst_nqm", enable_ml=True,
     capability, while a source finding keeps `discovered`. The CBOM then records the assurance
     level per component, which is the only way a reader can tell them apart downstream.
     """
-    source_scanner = ECDATScanner(enable_ml=enable_ml)
+    source_scanner = IndraMeshScanner(enable_ml=enable_ml)
     source_findings = source_scanner.scan_directory(target)
     source_coverage = source_scanner.coverage_manifest(source_findings)
 
@@ -194,7 +194,7 @@ def run_all(target, z_time=DEFAULT_Z, policy="india_dst_nqm", enable_ml=True,
     print(f"    source findings: {len(source_findings)}   dependency findings: {len(dep_findings)}")
 
     os.makedirs(out_dir, exist_ok=True)
-    cbom_path = os.path.join(out_dir, "ecdat_cbom_advanced.json")
+    cbom_path = os.path.join(out_dir, "indramesh_cbom_advanced.json")
     coverage = {
         "source_scanner": source_coverage,
         "dependency_scanner": dep_coverage,
@@ -222,7 +222,7 @@ def run_all(target, z_time=DEFAULT_Z, policy="india_dst_nqm", enable_ml=True,
 
 def main(argv=None):
     parser = argparse.ArgumentParser(
-        description="ECDAT advanced sensors: dependency manifests and PQC migration verification")
+        description="IndraMesh advanced sensors: dependency manifests and PQC migration verification")
     sub = parser.add_subparsers(dest="command", required=True)
 
     deps = sub.add_parser("deps", help="Scan dependency manifests for crypto capabilities")

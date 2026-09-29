@@ -1,4 +1,4 @@
-# ECDAT — The Complete Guide
+# IndraMesh — The Complete Guide
 
 ### From "what is a lock?" to a defensible post-quantum security tool
 
@@ -34,10 +34,10 @@
 9. [Mosca's inequality: the clock that matters](#9-moscas-inequality-the-clock-that-matters)
 
 **Part 3 — The project**
-10. [What ECDAT does, in one paragraph](#10-what-ecdat-does-in-one-paragraph)
+10. [What IndraMesh does, in one paragraph](#10-what-indramesh-does-in-one-paragraph)
 11. [System architecture](#11-system-architecture)
 12. [The eleven engines](#12-the-eleven-engines)
-13. [The three ideas that make ECDAT different](#13-the-three-ideas-that-make-ecdat-different)
+13. [The three ideas that make IndraMesh different](#13-the-three-ideas-that-make-indramesh-different)
 14. [How a single finding travels through the system](#14-how-a-single-finding-travels-through-the-system)
 
 **Part 4 — Proving it works**
@@ -77,16 +77,16 @@ exists. This is **harvest now, decrypt later**, and it is why the work starts no
 years. The US federal standard (NIST) disallows RSA and ECC for new applications from roughly
 2030–2035.
 
-**What ECDAT is.** A tool that reads a codebase and tells you *which cryptography it is using*,
+**What IndraMesh is.** A tool that reads a codebase and tells you *which cryptography it is using*,
 what risk each piece carries, and **what it could not tell you**. It also produces a machine-
 readable inventory (a CBOM) for compliance.
 
-**The unusual part.** Almost every security tool shows you a big number. ECDAT shows you the
+**The unusual part.** Almost every security tool shows you a big number. IndraMesh shows you the
 number *and the reason it might be wrong*. It has a state called `unresolved` meaning "I found
 something but I cannot honestly say what it is for." Most tools have no such state, because
 guessing looks better on a dashboard.
 
-**The proof.** Rather than claiming accuracy, ECDAT measures it on pinned third-party code
+**The proof.** Rather than claiming accuracy, IndraMesh measures it on pinned third-party code
 (CryptoAPI-Bench, paramiko, golang.org/x/crypto), reports precision and recall including the
 unflattering numbers, and mutation-tests its own suite to prove the tests can actually fail.
 
@@ -183,7 +183,7 @@ Confusing them is a classic mistake — including one we found and fixed in our 
 
 **MD5 and SHA-1 are broken.** Not "theoretically weak" — practically broken. You can produce two
 different files with the same MD5 in seconds on a laptop. This matters constantly: a certificate
-signed with SHA-1 is compromised *today*, classically, with no quantum computer involved. ECDAT
+signed with SHA-1 is compromised *today*, classically, with no quantum computer involved. IndraMesh
 flags this separately from any quantum concern, because conflating them would be dishonest.
 
 > **A trap worth knowing.** SHA-1's *output* is 160 bits. People say "SHA-1 gives 160-bit
@@ -289,7 +289,7 @@ If a certificate says *only* `digitalSignature`, it is definitely a **signature*
 But **both**? The certificate genuinely does not settle it. Anyone telling you the purpose there is
 guessing.
 
-So ECDAT returns `unresolved`, and the recommendation states *what would resolve it* — from RFC
+So IndraMesh returns `unresolved`, and the recommendation states *what would resolve it* — from RFC
 5280 evidence rather than a wildcard regex.
 
 > This connects to competitive research: our closest sibling project identifies
@@ -424,7 +424,7 @@ In the CBOM we emit, **level 0 is the alarming one**: CycloneDX defines
 RSA, ECDH, ECDSA, DH are all level 0.
 
 **A level we cannot compute is omitted, not guessed.** The schema has no "unknown" member, so when
-ECDAT cannot justify a number it leaves the property out rather than publishing a confident wrong
+IndraMesh cannot justify a number it leaves the property out rather than publishing a confident wrong
 one.
 
 > **A real bug lived here.** The lookup table ran *after* the algorithm name was upper-cased, but
@@ -469,9 +469,9 @@ The best single idea in post-quantum planning. Michele Mosca's inequality:
    bank records and government documents routinely need 10–30 years of confidentiality. For those,
    X + Y is large *right now*.
 
-### 9.2 How ECDAT uses it
+### 9.2 How IndraMesh uses it
 
-Per finding, ECDAT takes X (migration effort band), Y (data-class shelf life) and Z (policy
+Per finding, IndraMesh takes X (migration effort band), Y (data-class shelf life) and Z (policy
 deadline), evaluates the inequality, and reports a **band — not a day count**. It also explicitly
 refuses to estimate engineering cost.
 
@@ -480,9 +480,9 @@ refuses to estimate engineering cost.
 
 # Part 3 — The project
 
-## 10. What ECDAT does, in one paragraph
+## 10. What IndraMesh does, in one paragraph
 
-You point ECDAT at a folder. It reads the source, the dependency manifests, binaries, containers,
+You point IndraMesh at a folder. It reads the source, the dependency manifests, binaries, containers,
 certificates, configs and (opt-in) live TLS endpoints, and produces a list of cryptographic
 findings. For each one it resolves *what purpose* the algorithm serves, *how strong* it is
 classically and quantumly, *how confident* the identification is, and *what would resolve the
@@ -570,7 +570,7 @@ source line  ──►  scanner.py  ──►  {name, primitive, evidence_class,
 
 ### 11.4 The five evidence classes — the most important concept in the tool
 
-This is the distinction that makes ECDAT different, so it is worth a table.
+This is the distinction that makes IndraMesh different, so it is worth a table.
 
 | Class | Means | Example | Can it prove a call site? |
 |---|---|---|---|
@@ -586,13 +586,13 @@ that is not in doubt. What is in doubt is whether anyone calls RSA with it. Tool
 *confidence in the identification* with *strength of the evidence* will happily report a 100%-confident
 critical risk that is not real.
 
-**ECDAT separates the two axes entirely.** Confidence answers "am I sure I found this?" Assurance
+**IndraMesh separates the two axes entirely.** Confidence answers "am I sure I found this?" Assurance
 answers "what does finding it prove?" The console shows `proven_use` **next to** the raw total, never
 alone.
 
 ### 11.5 The `unresolved` state
 
-When the evidence does not settle a question, ECDAT returns `unresolved` rather than a guess. Real
+When the evidence does not settle a question, IndraMesh returns `unresolved` rather than a guess. Real
 cases from the engine:
 
 | Evidence | What we do |
@@ -633,7 +633,7 @@ wrong. Guessing looks better on a dashboard and is worse for the person who has 
 
 ---
 
-## 13. The three ideas that make ECDAT different
+## 13. The three ideas that make IndraMesh different
 
 ### Idea 1 — Assurance is not confidence
 
@@ -749,7 +749,7 @@ commit, never vendored into our repo, never committed.
 
 ### 16.2 How to read these honestly
 
-- **Precision is excellent** (0.89–0.99). When ECDAT says "there is RSA here," it is almost always
+- **Precision is excellent** (0.89–0.99). When IndraMesh says "there is RSA here," it is almost always
   right.
 - **Recall is uneven, and that is the real story.** Go: perfect. Java: we miss ~21%. Python: we
   miss **40%**.
@@ -880,7 +880,7 @@ Ordered by value per unit of effort — not by how easy they look.
 
 > "Every company runs cryptography it cannot inventory. Quantum computers will break RSA and ECC,
 > and the data you care about has to survive until the fix — which is why starting now is late, not
-> early. ECDAT finds the cryptography, tells you what it is *for*, and tells you what it could not
+> early. IndraMesh finds the cryptography, tells you what it is *for*, and tells you what it could not
 > determine. It reports accuracy against pinned third-party code — including the corpus where we
 > only find 60% — and it mutation-tests its own suite to prove those tests can fail. We built the
 > thing to catch confident wrong numbers, then caught four of our own."
@@ -889,7 +889,7 @@ Ordered by value per unit of effort — not by how easy they look.
 
 | # | Slide | One line |
 |---|---|---|
-| 1 | Title | ECDAT — Enterprise Cryptographic Discovery & Analysis Tool |
+| 1 | Title | IndraMesh — Enterprise Cryptographic Discovery & Analysis Tool |
 | 2 | Problem | You cannot migrate what you cannot find. HNDL makes it urgent now. |
 | 3 | Why it's hard | The algorithm name often isn't in the source. Show the `ec.generate_private_key` example. |
 | 4 | Approach | 14 engines, 7 languages, 124 rules, 9 manifest ecosystems |
@@ -978,7 +978,7 @@ streamlit run app.py
 
 # a headless scan with a schema-validated CBOM
 python cli.py <your-repo> --format cbom --out out
-python validate_cbom.py out\ecdat_report.json
+python validate_cbom.py out\indramesh_report.json
 
 # prove the test suite has teeth
 python mutation_test.py
@@ -1089,7 +1089,7 @@ read.
 > measured criticism, recorded in `docs/COMPARISON.md`.
 
 > **Honest note.** X and Y are **inputs, not measurements**. Shelf life depends on your data;
-> effort depends on your team. ECDAT's contribution is refusing to silently pick values and
+> effort depends on your team. IndraMesh's contribution is refusing to silently pick values and
 > showing the arithmetic so a human can check the result.
 
 ---
@@ -1113,15 +1113,15 @@ proofs but are slow and large — insurance if lattices fall.
 
 - **ML-KEM-768** is the current default. A **hybrid** handshake (classical ECDH **+** ML-KEM-768)
   is best practice: if either survives, the session survives.
-- **A hybrid is not one algorithm.** Both halves must be broken. ECDAT's verification reports
+- **A hybrid is not one algorithm.** Both halves must be broken. IndraMesh's verification reports
   hybrids separately for exactly this reason.
 - **Deprecated Kyber drafts are not ML-KEM.** `kyber512r1` is a pre-standardisation draft of what
   became ML-KEM-512 — a different algorithm. A migration checker reporting "migrated" because it
-  found a Kyber draft is lying. ECDAT keeps the markers visibly separate, and it is a tested rule.
+  found a Kyber draft is lying. IndraMesh keeps the markers visibly separate, and it is a tested rule.
 
 urgent as encryption" is also wrong — the risk *shape* differs.
 
-**ECDAT treats these differently on purpose.** It is one of the most important ideas in the
+**IndraMesh treats these differently on purpose.** It is one of the most important ideas in the
 project, and §13 covers the implementation.
 
 ---

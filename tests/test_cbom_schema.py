@@ -10,7 +10,7 @@ import os
 
 import pytest
 
-from engine.scanner import ECDATScanner
+from engine.scanner import IndraMeshScanner
 from engine.mosca import calculate_risk
 from engine.recommender import get_pqc_recommendation
 from engine.cbom import generate_cbom
@@ -38,7 +38,7 @@ def _build(tmp_path):
         (tmp_path / name).write_text(text, encoding="utf-8")
     (tmp_path / "libcrypto.so").write_bytes(
         b"\x7fELF" + b"\x00" * 8 + b"OpenSSL 3.0.13 libcrypto\x00")
-    scanner = ECDATScanner(enable_ml=False)
+    scanner = IndraMeshScanner(enable_ml=False)
     findings = scanner.scan_directory(str(tmp_path))
     for f in findings:
         f["risk"] = calculate_risk(f)

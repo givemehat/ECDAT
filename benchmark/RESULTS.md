@@ -1,4 +1,4 @@
-# ECDAT external-accuracy benchmark results
+# IndraMesh external-accuracy benchmark results
 
 Reproduce everything in this file with one command:
 
@@ -22,8 +22,8 @@ is repeated in every table below.**
 
 CryptoAPI-Bench ships `CryptoAPI-Bench_details.xlsx` with 182 rows of *misuse* labels
 (28 categories: `Constant Seed`, `Usage of ECB`, `RSA keysize 1024 bits`, `DES used`,
-`PBE iteration < 1000`, ...). ECDAT is a **quantum**-vulnerability detector. Those are
-different properties, so scoring ECDAT against the published labels would be a category
+`PBE iteration < 1000`, ...). IndraMesh is a **quantum**-vulnerability detector. Those are
+different properties, so scoring IndraMesh against the published labels would be a category
 error, and we do not report such a number as an accuracy figure. Instead each corpus
 carries a hand-annotated label set whose unit is one `(file, line)` location and whose
 criterion is stated in full below and in `benchmark/labels/README.md`.
@@ -49,7 +49,7 @@ A location that merely **operates** on a primitive chosen elsewhere -- `cipher.i
 PBKDF parameter objects, key-store container formats (`JKS`) and key/block-size plumbing
 are negative in both, each with a recorded reason.
 
-This criterion **favours ECDAT**: every excluded operation line is a location the tool
+This criterion **favours IndraMesh**: every excluded operation line is a location the tool
 did not report and would otherwise have counted as a false negative. That is exactly why
 L2 is reported next to L1 rather than buried.
 
@@ -116,62 +116,62 @@ Findings emitted for `paramiko`, by rule:
 
 | rule | findings |
 |---|---|
-| ECDSA | ECD-SRC-SSH-SIG-001 | 30 |
-| ECDH | ECD-SRC-ECDH-001 | 22 |
-| AES | ECD-SRC-SSH-CIPHER-001 | 14 |
-| RSA | ECD-SRC-PYCA-RSA-001 | 13 |
-| ECDH | ECD-SRC-SSH-KEX-001 | 11 |
-| DH | ECD-SRC-SSH-DH-001 | 10 |
-| AES | ECD-SRC-PYCA-AES-001 | 9 |
-| HMAC | ECD-SRC-SSH-MAC-001 | 8 |
-| SHA | ECD-SRC-PYCA-HASH-001 | 7 |
-| ECC | ECD-SRC-PYCA-EC-001 | 7 |
-| RSA | ECD-SRC-SSHNAME-002 | 6 |
-| SHA1 | ECD-SRC-HASHLIB-001 | 5 |
-| Ed25519 | ECD-SRC-SSH-ED-001 | 4 |
-| AES | ECD-SRC-SSH-CIPHER-002 | 4 |
-| HMAC | ECD-SRC-SSHNAME-004 | 4 |
-| SHA1 | ECD-SRC-SHA1-001 | 3 |
-| Ed25519 | ECD-SRC-EDDSA-001 | 3 |
-| SHA1 | ECD-SRC-HASHLIB-003 | 3 |
-| ECDSA | ECD-SRC-SSHNAME-001 | 3 |
-| ECDSA | ECD-SRC-ECDSA-001 | 2 |
-| Ed25519 | ECD-SRC-SSHNAME-003 | 2 |
-| SHA | ECD-SRC-HASHLIB-002 | 2 |
-| X25519 | ECD-SRC-PYCA-X-001 | 2 |
-| AES | ECD-SRC-JAVA-CONST-001 | 2 |
-| ECDH | ECD-SRC-SSHNAME-005 | 2 |
-| 3DES | ECD-SRC-SSH-LEGACY-001 | 2 |
-| ECDH | ECD-SRC-PYCA-ECDH-001 | 1 |
-| Ed25519 | ECD-SRC-PYCA-ED-001 | 1 |
-| AES | ECD-SRC-AES-001 | 1 |
-| SHA256 | ECD-SRC-SHA2-001 | 1 |
-| MD5 | ECD-SRC-MD5-001 | 1 |
+| ECDSA | IM-SRC-SSH-SIG-001 | 30 |
+| ECDH | IM-SRC-ECDH-001 | 22 |
+| AES | IM-SRC-SSH-CIPHER-001 | 14 |
+| RSA | IM-SRC-PYCA-RSA-001 | 13 |
+| ECDH | IM-SRC-SSH-KEX-001 | 11 |
+| DH | IM-SRC-SSH-DH-001 | 10 |
+| AES | IM-SRC-PYCA-AES-001 | 9 |
+| HMAC | IM-SRC-SSH-MAC-001 | 8 |
+| SHA | IM-SRC-PYCA-HASH-001 | 7 |
+| ECC | IM-SRC-PYCA-EC-001 | 7 |
+| RSA | IM-SRC-SSHNAME-002 | 6 |
+| SHA1 | IM-SRC-HASHLIB-001 | 5 |
+| Ed25519 | IM-SRC-SSH-ED-001 | 4 |
+| AES | IM-SRC-SSH-CIPHER-002 | 4 |
+| HMAC | IM-SRC-SSHNAME-004 | 4 |
+| SHA1 | IM-SRC-SHA1-001 | 3 |
+| Ed25519 | IM-SRC-EDDSA-001 | 3 |
+| SHA1 | IM-SRC-HASHLIB-003 | 3 |
+| ECDSA | IM-SRC-SSHNAME-001 | 3 |
+| ECDSA | IM-SRC-ECDSA-001 | 2 |
+| Ed25519 | IM-SRC-SSHNAME-003 | 2 |
+| SHA | IM-SRC-HASHLIB-002 | 2 |
+| X25519 | IM-SRC-PYCA-X-001 | 2 |
+| AES | IM-SRC-JAVA-CONST-001 | 2 |
+| ECDH | IM-SRC-SSHNAME-005 | 2 |
+| 3DES | IM-SRC-SSH-LEGACY-001 | 2 |
+| ECDH | IM-SRC-PYCA-ECDH-001 | 1 |
+| Ed25519 | IM-SRC-PYCA-ED-001 | 1 |
+| AES | IM-SRC-AES-001 | 1 |
+| SHA256 | IM-SRC-SHA2-001 | 1 |
+| MD5 | IM-SRC-MD5-001 | 1 |
 ## Explicit false positives -- `paramiko`, L1 (17)
 
 A false positive is a finding at a `(file, line)` that the labels record as NOT
 a quantum-vulnerable cryptographic use. The exclusion reason is quoted verbatim
 from the label file, so each row can be checked against the source.
 
-| file:line | why the labels exclude it | ECDAT called it | rule |
+| file:line | why the labels exclude it | IndraMesh called it | rule |
 |---|---|---|---|
-| `paramiko/ecdsakey.py:305` | line was not a labelling candidate | ECDH | ECD-SRC-ECDH-001, ECD-SRC-PYCA-ECDH-001 |
-| `paramiko/kex_curve25519.py:37` | line was not a labelling candidate | ECDH | ECD-SRC-ECDH-001 |
-| `paramiko/kex_group14.py:45` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
-| `paramiko/kex_group16.py:30` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
-| `paramiko/kex_group16.py:35` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
-| `paramiko/kex_mlkem.py:59` | byte-length constant naming a component size, not a primitive | ECDH | ECD-SRC-ECDH-001 |
-| `paramiko/kex_mlkem.py:60` | byte-length constant naming a component size, not a primitive | ECDH | ECD-SRC-ECDH-001 |
-| `paramiko/kex_mlkem.py:61` | byte-length constant naming a component size, not a primitive | ECDH | ECD-SRC-ECDH-001 |
-| `paramiko/kex_mlkem.py:112` | line was not a labelling candidate | ECDH | ECD-SRC-ECDH-001 |
-| `paramiko/pkey.py:128` | no quantum-vulnerable primitive is named on this line | AES | ECD-SRC-JAVA-CONST-001 |
-| `paramiko/pkey.py:134` | no quantum-vulnerable primitive is named on this line | AES | ECD-SRC-JAVA-CONST-001 |
-| `paramiko/rsakey.py:139` | line was not a labelling candidate | RSA | ECD-SRC-PYCA-RSA-001 |
-| `paramiko/rsakey.py:167` | line was not a labelling candidate | RSA | ECD-SRC-PYCA-RSA-001 |
-| `paramiko/transport.py:219` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
-| `paramiko/transport.py:221` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
-| `paramiko/transport.py:328` | no quantum-vulnerable primitive is named on this line | DH | ECD-SRC-SSH-DH-001 |
-| `paramiko/transport.py:329` | no quantum-vulnerable primitive is named on this line | DH | ECD-SRC-SSH-DH-001 |
+| `paramiko/ecdsakey.py:305` | line was not a labelling candidate | ECDH | IM-SRC-ECDH-001, IM-SRC-PYCA-ECDH-001 |
+| `paramiko/kex_curve25519.py:37` | line was not a labelling candidate | ECDH | IM-SRC-ECDH-001 |
+| `paramiko/kex_group14.py:45` | line was not a labelling candidate | DH | IM-SRC-SSH-DH-001 |
+| `paramiko/kex_group16.py:30` | line was not a labelling candidate | DH | IM-SRC-SSH-DH-001 |
+| `paramiko/kex_group16.py:35` | line was not a labelling candidate | DH | IM-SRC-SSH-DH-001 |
+| `paramiko/kex_mlkem.py:59` | byte-length constant naming a component size, not a primitive | ECDH | IM-SRC-ECDH-001 |
+| `paramiko/kex_mlkem.py:60` | byte-length constant naming a component size, not a primitive | ECDH | IM-SRC-ECDH-001 |
+| `paramiko/kex_mlkem.py:61` | byte-length constant naming a component size, not a primitive | ECDH | IM-SRC-ECDH-001 |
+| `paramiko/kex_mlkem.py:112` | line was not a labelling candidate | ECDH | IM-SRC-ECDH-001 |
+| `paramiko/pkey.py:128` | no quantum-vulnerable primitive is named on this line | AES | IM-SRC-JAVA-CONST-001 |
+| `paramiko/pkey.py:134` | no quantum-vulnerable primitive is named on this line | AES | IM-SRC-JAVA-CONST-001 |
+| `paramiko/rsakey.py:139` | line was not a labelling candidate | RSA | IM-SRC-PYCA-RSA-001 |
+| `paramiko/rsakey.py:167` | line was not a labelling candidate | RSA | IM-SRC-PYCA-RSA-001 |
+| `paramiko/transport.py:219` | line was not a labelling candidate | DH | IM-SRC-SSH-DH-001 |
+| `paramiko/transport.py:221` | line was not a labelling candidate | DH | IM-SRC-SSH-DH-001 |
+| `paramiko/transport.py:328` | no quantum-vulnerable primitive is named on this line | DH | IM-SRC-SSH-DH-001 |
+| `paramiko/transport.py:329` | no quantum-vulnerable primitive is named on this line | DH | IM-SRC-SSH-DH-001 |
 
 ## Explicit false positives -- `paramiko`, L2 (17)
 
@@ -179,29 +179,29 @@ A false positive is a finding at a `(file, line)` that the labels record as NOT
 a quantum-vulnerable cryptographic use. The exclusion reason is quoted verbatim
 from the label file, so each row can be checked against the source.
 
-| file:line | why the labels exclude it | ECDAT called it | rule |
+| file:line | why the labels exclude it | IndraMesh called it | rule |
 |---|---|---|---|
-| `paramiko/ecdsakey.py:305` | line was not a labelling candidate | ECDH | ECD-SRC-ECDH-001, ECD-SRC-PYCA-ECDH-001 |
-| `paramiko/kex_curve25519.py:37` | line was not a labelling candidate | ECDH | ECD-SRC-ECDH-001 |
-| `paramiko/kex_group14.py:45` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
-| `paramiko/kex_group16.py:30` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
-| `paramiko/kex_group16.py:35` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
-| `paramiko/kex_mlkem.py:59` | byte-length constant naming a component size, not a primitive | ECDH | ECD-SRC-ECDH-001 |
-| `paramiko/kex_mlkem.py:60` | byte-length constant naming a component size, not a primitive | ECDH | ECD-SRC-ECDH-001 |
-| `paramiko/kex_mlkem.py:61` | byte-length constant naming a component size, not a primitive | ECDH | ECD-SRC-ECDH-001 |
-| `paramiko/kex_mlkem.py:112` | line was not a labelling candidate | ECDH | ECD-SRC-ECDH-001 |
-| `paramiko/pkey.py:128` | no quantum-vulnerable primitive is named on this line | AES | ECD-SRC-JAVA-CONST-001 |
-| `paramiko/pkey.py:134` | no quantum-vulnerable primitive is named on this line | AES | ECD-SRC-JAVA-CONST-001 |
-| `paramiko/rsakey.py:139` | line was not a labelling candidate | RSA | ECD-SRC-PYCA-RSA-001 |
-| `paramiko/rsakey.py:167` | line was not a labelling candidate | RSA | ECD-SRC-PYCA-RSA-001 |
-| `paramiko/transport.py:219` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
-| `paramiko/transport.py:221` | line was not a labelling candidate | DH | ECD-SRC-SSH-DH-001 |
-| `paramiko/transport.py:328` | no quantum-vulnerable primitive is named on this line | DH | ECD-SRC-SSH-DH-001 |
-| `paramiko/transport.py:329` | no quantum-vulnerable primitive is named on this line | DH | ECD-SRC-SSH-DH-001 |
+| `paramiko/ecdsakey.py:305` | line was not a labelling candidate | ECDH | IM-SRC-ECDH-001, IM-SRC-PYCA-ECDH-001 |
+| `paramiko/kex_curve25519.py:37` | line was not a labelling candidate | ECDH | IM-SRC-ECDH-001 |
+| `paramiko/kex_group14.py:45` | line was not a labelling candidate | DH | IM-SRC-SSH-DH-001 |
+| `paramiko/kex_group16.py:30` | line was not a labelling candidate | DH | IM-SRC-SSH-DH-001 |
+| `paramiko/kex_group16.py:35` | line was not a labelling candidate | DH | IM-SRC-SSH-DH-001 |
+| `paramiko/kex_mlkem.py:59` | byte-length constant naming a component size, not a primitive | ECDH | IM-SRC-ECDH-001 |
+| `paramiko/kex_mlkem.py:60` | byte-length constant naming a component size, not a primitive | ECDH | IM-SRC-ECDH-001 |
+| `paramiko/kex_mlkem.py:61` | byte-length constant naming a component size, not a primitive | ECDH | IM-SRC-ECDH-001 |
+| `paramiko/kex_mlkem.py:112` | line was not a labelling candidate | ECDH | IM-SRC-ECDH-001 |
+| `paramiko/pkey.py:128` | no quantum-vulnerable primitive is named on this line | AES | IM-SRC-JAVA-CONST-001 |
+| `paramiko/pkey.py:134` | no quantum-vulnerable primitive is named on this line | AES | IM-SRC-JAVA-CONST-001 |
+| `paramiko/rsakey.py:139` | line was not a labelling candidate | RSA | IM-SRC-PYCA-RSA-001 |
+| `paramiko/rsakey.py:167` | line was not a labelling candidate | RSA | IM-SRC-PYCA-RSA-001 |
+| `paramiko/transport.py:219` | line was not a labelling candidate | DH | IM-SRC-SSH-DH-001 |
+| `paramiko/transport.py:221` | line was not a labelling candidate | DH | IM-SRC-SSH-DH-001 |
+| `paramiko/transport.py:328` | no quantum-vulnerable primitive is named on this line | DH | IM-SRC-SSH-DH-001 |
+| `paramiko/transport.py:329` | no quantum-vulnerable primitive is named on this line | DH | IM-SRC-SSH-DH-001 |
 
 ## Explicit false negatives -- `paramiko`, L1 (84)
 
-A false negative is a labelled quantum-vulnerable location ECDAT did not report.
+A false negative is a labelled quantum-vulnerable location IndraMesh did not report.
 
 | file:line | primitive (break model) | the quantum-vulnerable code |
 |---|---|---|
@@ -292,7 +292,7 @@ A false negative is a labelled quantum-vulnerable location ECDAT did not report.
 
 ## Explicit false negatives -- `paramiko`, L2 (103)
 
-A false negative is a labelled quantum-vulnerable location ECDAT did not report.
+A false negative is a labelled quantum-vulnerable location IndraMesh did not report.
 
 | file:line | primitive (break model) | the quantum-vulnerable code |
 |---|---|---|
@@ -415,7 +415,7 @@ A false negative is a labelled quantum-vulnerable location ECDAT did not report.
 3. **The L1 criterion favours the tool.** Operation lines (`cipher.init`, `.digest()`) are
    excluded from L1 and included in L2. L2 is the lower bound on recall; read it before
    quoting a recall number.
-4. **ECDAT was run with `enable_ml=False`.** The optional PyTorch classifier is therefore
+4. **IndraMesh was run with `enable_ml=False`.** The optional PyTorch classifier is therefore
    absent from these numbers, and `dl_confidence` is not populated. This is deliberate: the
    benchmark must be hermetic and reproducible on a machine with no model file.
 5. **Regex-rule coverage is the whole story here.** Every number above is a measurement of

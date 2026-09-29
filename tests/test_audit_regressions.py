@@ -179,11 +179,11 @@ def test_the_ci_scan_gate_does_not_swallow_the_exit_code():
     """The old scan step piped the command into "|| echo", which consumed the status.
 
     So a policy trip, a traceback and a bad-argument crash all exited 0, and the workflow
-    printed "ECDAT found CRITICAL quantum risk" -- the most alarming message the tool emits --
+    printed "IndraMesh found CRITICAL quantum risk" -- the most alarming message the tool emits --
     for a plain crash. A green checkmark on a DevSecOps gate that cannot fail is a false
     assurance, which is the specific thing this project exists to stop people shipping.
     """
-    wf = os.path.join(REPO, ".github", "workflows", "ecdat_scan.yml")
+    wf = os.path.join(REPO, ".github", "workflows", "indramesh_scan.yml")
     text = open(wf, encoding="utf-8").read()
     # Only executable lines are checked. The phrase "|| echo" also appears in a COMMENT
     # describing the bug that was fixed, and asserting on the whole file would make this test
@@ -191,7 +191,7 @@ def test_the_ci_scan_gate_does_not_swallow_the_exit_code():
     code = "\n".join(line for line in text.splitlines()
                      if not line.lstrip().startswith("#"))
     assert "|| echo" not in code, (
-        "the scan step still discards ECDAT's exit code, which disables the gate")
+        "the scan step still discards IndraMesh's exit code, which disables the gate")
     assert "rc=$?" in code, "the scan step no longer captures the exit code"
     assert 'exit "$rc"' in code, "the scan step no longer fails the job on a tool error"
 

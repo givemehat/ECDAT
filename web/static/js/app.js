@@ -1,5 +1,5 @@
 /**
- * ECDAT Web Console Application Logic
+ * IndraMesh Web Console Application Logic
  * Role-based Cybersecurity Dashboard for NTRO Post-Quantum Cryptography Migration (SIH26164)
  */
 
@@ -8,6 +8,7 @@ const STATE = {
   scanData: null,
   activeTab: 'posture',
   topology: null,
+  radarReticle: null,
   filterQuery: '',
   selectedTiers: new Set(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']),
   onlyHndl: false,
@@ -22,6 +23,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupIcons();
   setupTabs();
   setupEvents();
+
+  // Initialize Framer Motion micro-interactions & tactile feedback
+  if (typeof Motion !== 'undefined') {
+    Motion.setupMorphingTabs('.nav-tabs', '#tab-slider-pill');
+    Motion.setupCircularRipples('.btn-primary, .btn-secondary, .btn-outline, .chip-btn, .tab-btn');
+    Motion.setupCardSpotlight('.deck-card, .metric-card');
+    Motion.setupMagneticButtons('.btn-primary');
+  }
+
+  // Initialize Circular Radar Scanner immediately on page load
+  if (typeof CircularRadarReticle !== 'undefined') {
+    STATE.radarReticle = new CircularRadarReticle('radial-dial');
+    STATE.radarReticle.start();
+  }
+
   await loadStatus();
   
   // Initialize topology canvas
@@ -73,8 +89,11 @@ function switchTab(tabKey) {
   if (tabKey === 'history') {
     loadHistoryList();
   }
-  if (tabKey === 'posture' && STATE.scanData) {
-    renderPostureView(STATE.scanData);
+  if (tabKey === 'posture') {
+    if (STATE.radarReticle) STATE.radarReticle.start();
+    if (STATE.scanData) renderPostureView(STATE.scanData);
+  } else {
+    if (STATE.radarReticle) STATE.radarReticle.stop();
   }
 }
 
@@ -259,16 +278,22 @@ function prefersReducedMotion() {
  *  reader to ignore the very signal this is meant to provide. The class is removed and
  *  re-added to restart the animation, because re-adding an identical class does nothing.
  */
-function setMetric(id, value) {
+function setMetric(id, value, delay = 0, force = true) {
   const el = document.getElementById(id);
   if (!el) return;
   const next = String(value ?? 0);
-  const changed = el.textContent !== '' && el.textContent !== next;
+  const targetNum = parseFloat(next) || 0;
+  const prevVal = parseFloat(el.dataset.prevVal ?? (el.textContent === '' || el.textContent === '0' || el.textContent === '-' ? '0' : el.textContent.replace(/[^0-9.-]/g, ''))) || 0;
+  const shouldAnimate = force || (el.dataset.prevVal === undefined) || (prevVal !== targetNum);
   el.textContent = next;                       // the value is correct regardless of motion
-  if (!changed || prefersReducedMotion()) return;
+  el.dataset.prevVal = String(targetNum);
+  if (!shouldAnimate || prefersReducedMotion()) return;
   el.classList.remove('num-updated');
   void el.offsetWidth;                         // force reflow so the animation restarts
   el.classList.add('num-updated');
+  if (typeof Motion !== 'undefined' && typeof Motion.countTo === 'function') {
+    Motion.countTo(el, targetNum, { from: prevVal, duration: 1100, delay, forceRoll: force });
+  }
 }
 
 /** Stagger a container's children. Sets --i, capped at 6.
@@ -314,27 +339,53 @@ function renderIntegrityBanner(data) {
   const cov = data.coverage;
 
   // Every headline figure goes through setMetric rather than a bare textContent assignment, so
-  // a number that CHANGES is visibly marked as having changed. On a rescored finding that is
-  // the entire point -- a number that silently mutates is the failure mode this project exists
-  // to detect in other people's tools, and a console that does it to its own reader is not
-  // entitled to complain about theirs.
-  setMetric('metric-total', sum.total_findings);
-  setMetric('metric-proven', sum.proven_use);
-  setMetric('metric-capability', sum.capability_or_declared);
-  setMetric('metric-unresolved', sum.unresolved_purpose);
-  setMetric('metric-scanned', cov.files_scanned);
-  setMetric('metric-skipped', cov.files_skipped);
+  // a number that CHANGES is visibly marked as having changed. Staggered waves provide an
+  // unmistakable executive telemetry readout.
+  setMetric('metric-total', sum.total_findings, 0, true);
+  setMetric('metric-proven', sum.proven_use, 70, true);
+  setMetric('metric-capability', sum.capability_or_declared, 140, true);
+  setMetric('metric-unresolved', sum.unresolved_purpose, 210, true);
+  setMetric('metric-scanned', cov.files_scanned, 280, true);
+  setMetric('metric-skipped', cov.files_skipped, 350, true);
 
-  // Proof bar
+  // Proof bar & label animation
   const pctProven = sum.total_findings ? Math.round((sum.proven_use / sum.total_findings) * 100) : 0;
-  document.getElementById('proof-fill').style.width = `${pctProven}%`;
-  document.getElementById('proof-pct-label').textContent = `${pctProven}% proven use (${sum.proven_use}/${sum.total_findings})`;
+  const proofFill = document.getElementById('proof-fill');
+  if (proofFill) {
+    proofFill.style.width = `${pctProven}%`;
+  }
+  const proofLabel = document.getElementById('proof-pct-label');
+  if (proofLabel) {
+    const prevPct = parseFloat(proofLabel.dataset.prevPct || '0');
+    proofLabel.dataset.prevPct = String(pctProven);
+    proofLabel.textContent = `${pctProven}% proven use (${sum.proven_use}/${sum.total_findings})`;
+    if (typeof Motion !== 'undefined' && typeof Motion.countTo === 'function') {
+      Motion.countTo(proofLabel, pctProven, {
+        from: prevPct,
+        duration: 1100,
+        delay: 150,
+        suffix: `% proven use (${sum.proven_use}/${sum.total_findings})`,
+        forceRoll: true
+      });
+    }
+  }
 
-  // Risk Score
+  // Risk Score Badge with roll-up animation
   const scoreEl = document.getElementById('risk-score-badge');
   if (scoreEl) {
     const sVal = (typeof sum.risk_score === 'object' && sum.risk_score !== null) ? (sum.risk_score.score ?? 0) : (sum.risk_score ?? 0);
+    const prevScore = parseFloat(scoreEl.dataset.prevScore || '0');
+    scoreEl.dataset.prevScore = String(sVal);
     scoreEl.textContent = `Risk Posture: ${sVal} / 100`;
+    if (typeof Motion !== 'undefined' && typeof Motion.countTo === 'function') {
+      Motion.countTo(scoreEl, sVal, {
+        from: prevScore,
+        duration: 1100,
+        prefix: 'Risk Posture: ',
+        suffix: ' / 100',
+        forceRoll: true
+      });
+    }
   }
 }
 
@@ -452,7 +503,7 @@ function renderPlannerView(data) {
     unresolvedCallout.style.display = 'block';
     unresolvedCallout.innerHTML = `
       <strong>${declined.length} finding(s) with Unresolved Purpose:</strong>
-      ECDAT declines to name a post-quantum target for these until a human resolves what the primitive is FOR (e.g. RSA used for Signing vs Key Encapsulation).
+      IndraMesh declines to name a post-quantum target for these until a human resolves what the primitive is FOR (e.g. RSA used for Signing vs Key Encapsulation).
     `;
   } else {
     unresolvedCallout.style.display = 'none';
@@ -680,6 +731,10 @@ function showProgress(active, text = '') {
   const strip = document.getElementById('scan-progress-strip');
   strip.classList.toggle('active', active);
   document.getElementById('scan-progress-text').textContent = text;
+  setScanning(active);
+  if (STATE.radarReticle && typeof STATE.radarReticle.setScanMode === 'function') {
+    STATE.radarReticle.setScanMode(active);
+  }
 }
 
 function escapeHtml(str) {
@@ -703,11 +758,32 @@ function renderPostureView(data) {
 function renderRadialDial(data) {
   const svg = document.getElementById('radial-dial');
   if (!svg) return;
-  svg.innerHTML = '';
 
   const records = data.records || [];
   const sum = data.summary || {};
   if (!records.length) return;
+
+  // Initialize or re-layer the Circular Radar Reticle
+  if (typeof CircularRadarReticle !== 'undefined') {
+    if (!STATE.radarReticle) {
+      STATE.radarReticle = new CircularRadarReticle('radial-dial');
+    } else {
+      STATE.radarReticle.initSvgLayers();
+    }
+    STATE.radarReticle.start();
+  } else {
+    svg.innerHTML = '';
+  }
+
+  // Spokes group on top of radar background
+  let spokesGroup = svg.querySelector('#radar-spokes-group');
+  if (!spokesGroup) {
+    spokesGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    spokesGroup.setAttribute('id', 'radar-spokes-group');
+    svg.appendChild(spokesGroup);
+  } else {
+    spokesGroup.innerHTML = '';
+  }
 
   const CX = 210, CY = 210, R0 = 85, R1 = 195;
   const items = [...records].sort((a, b) => ((b.risk?.score || 0) - (a.risk?.score || 0)));
@@ -716,35 +792,25 @@ function renderRadialDial(data) {
   const sweep = 2 * Math.PI * 0.86;
   const start = Math.PI / 2 + (2 * Math.PI - sweep) / 2;
   const step = sweep / Math.max(1, N);
-  const strokeWidth = Math.max(2.4, Math.min(9, (2 * Math.PI * R0 * 0.86 / N) - 1.2));
-
-  // Concentric dashed guide rings
-  [0.33, 0.66, 1.0].forEach(frac => {
-    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    circle.setAttribute('cx', CX);
-    circle.setAttribute('cy', CY);
-    circle.setAttribute('r', R0 + (R1 - R0) * frac);
-    circle.setAttribute('fill', 'none');
-    circle.setAttribute('stroke', 'rgba(255, 255, 255, 0.08)');
-    circle.setAttribute('stroke-width', frac === 1.0 ? '1.2' : '0.8');
-    if (frac < 1.0) circle.setAttribute('stroke-dasharray', '3 5');
-    svg.appendChild(circle);
-  });
+  const strokeWidth = Math.max(2.2, Math.min(4.8, (2 * Math.PI * R0 * 0.86 / N) - 0.8));
 
   const tierColors = {
-    CRITICAL: '#EF4444',
+    CRITICAL: '#F43F5E',
     HIGH: '#F97316',
     MEDIUM: '#F59E0B',
     LOW: '#10B981',
   };
 
-  // Render each spoke
+  // Render each spoke and particle tip
   items.forEach((r, i) => {
     const a = start + step * (i + 0.5);
     const scoreVal = r.risk?.score !== undefined ? r.risk.score : (r.tier === 'CRITICAL' ? 85 : (r.tier === 'HIGH' ? 65 : (r.tier === 'MEDIUM' ? 45 : 20)));
     const scoreFrac = Math.max(0.08, Math.min(1.0, scoreVal / 100));
     const spokeLen = R0 + (R1 - R0) * scoreFrac;
-    const color = tierColors[r.tier] || '#00F0FF';
+    const color = tierColors[r.tier] || '#10B981';
+
+    const spokeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    spokeGroup.setAttribute('class', 'spoke-item spoke-enter');
 
     const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
     line.setAttribute('x1', CX + R0 * Math.cos(a));
@@ -754,11 +820,23 @@ function renderRadialDial(data) {
     line.setAttribute('stroke', color);
     line.setAttribute('stroke-width', strokeWidth);
     line.setAttribute('stroke-linecap', 'round');
-    line.setAttribute('class', 'spoke');
+    line.setAttribute('class', 'radial-spoke');
     line.setAttribute('data-index', i);
+    line.style.setProperty('--spoke-i', String(Math.min(i, 36)));
+
+    // Particle dot at outer spoke tip with subtle glow
+    const tipDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    tipDot.setAttribute('cx', CX + spokeLen * Math.cos(a));
+    tipDot.setAttribute('cy', CY + spokeLen * Math.sin(a));
+    tipDot.setAttribute('r', Math.max(2.4, strokeWidth * 0.85));
+    tipDot.setAttribute('fill', color);
+    tipDot.setAttribute('opacity', '0.95');
+    tipDot.style.setProperty('--spoke-i', String(Math.min(i, 36)));
 
     // Hover interactions
-    line.addEventListener('mouseenter', () => {
+    const onEnter = () => {
+      line.style.strokeWidth = `${strokeWidth * 1.5}px`;
+      tipDot.setAttribute('r', `${strokeWidth * 1.25}`);
       const hubTitle = document.getElementById('hub-title');
       const hubMain = document.getElementById('hub-main');
       const hubSub = document.getElementById('hub-sub');
@@ -772,18 +850,31 @@ function renderRadialDial(data) {
       if (hubSub) {
         hubSub.textContent = `${r.primitive || 'Algo'} · Risk: ${scoreVal}`;
       }
-    });
+    };
 
-    line.addEventListener('mouseleave', () => {
+    const onLeave = () => {
+      line.style.strokeWidth = `${strokeWidth}px`;
+      tipDot.setAttribute('r', `${Math.max(2.4, strokeWidth * 0.85)}`);
       resetRadialHub(sum);
-    });
+    };
 
-    line.addEventListener('click', () => {
+    line.addEventListener('mouseenter', onEnter);
+    line.addEventListener('mouseleave', onLeave);
+    tipDot.addEventListener('mouseenter', onEnter);
+    tipDot.addEventListener('mouseleave', onLeave);
+
+    spokeGroup.addEventListener('click', () => {
       openDrawer(r);
     });
 
-    svg.appendChild(line);
+    spokeGroup.appendChild(line);
+    spokeGroup.appendChild(tipDot);
+    spokesGroup.appendChild(spokeGroup);
   });
+
+  if (STATE.radarReticle && typeof STATE.radarReticle.updateTargets === 'function') {
+    STATE.radarReticle.updateTargets(items);
+  }
 
   resetRadialHub(sum);
 }
@@ -798,7 +889,12 @@ function resetRadialHub(sum) {
   }
   if (hubMain) {
     const sVal = (typeof sum.risk_score === 'object' && sum.risk_score !== null) ? (sum.risk_score.score ?? 0) : (sum.risk_score ?? 0);
+    const prevScore = parseFloat(hubMain.dataset.scoreVal || '0');
+    hubMain.dataset.scoreVal = String(sVal);
     hubMain.textContent = `${sVal} / 100`;
+    if (typeof Motion !== 'undefined' && typeof Motion.countTo === 'function') {
+      Motion.countTo(hubMain, sVal, { from: prevScore, suffix: ' / 100', forceRoll: true });
+    }
   }
   if (hubSub) {
     hubSub.textContent = `${sum.total_findings || 0} findings (${sum.proven_use || 0} proven)`;
@@ -839,45 +935,54 @@ function renderMoscaSection(data) {
 
   const tilesContainer = document.getElementById('mosca-tiles');
   if (tilesContainer) {
+    const deltaVal = isExposed ? exposure : Math.abs(Z - T);
     tilesContainer.innerHTML = `
       <div class="mosca-tile">
         <span class="mosca-tile-lbl">X &middot; Secrecy</span>
-        <span class="mosca-tile-val" style="color:#38BDF8">${X}y</span>
+        <span class="mosca-tile-val" id="mosca-val-x" style="color:#38BDF8">${X}y</span>
         <span class="mosca-tile-sub">Confidentiality</span>
       </div>
       <div class="mosca-op">+</div>
       <div class="mosca-tile">
         <span class="mosca-tile-lbl">Y &middot; Migration</span>
-        <span class="mosca-tile-val" style="color:#F59E0B">${Y}y</span>
+        <span class="mosca-tile-val" id="mosca-val-y" style="color:#F59E0B">${Y}y</span>
         <span class="mosca-tile-sub">Rollout time</span>
       </div>
       <div class="mosca-op">=</div>
       <div class="mosca-tile">
         <span class="mosca-tile-lbl">Protection Needed</span>
-        <span class="mosca-tile-val" style="color:var(--text-main)">${T}y</span>
+        <span class="mosca-tile-val" id="mosca-val-t" style="color:var(--text-main)">${T}y</span>
         <span class="mosca-tile-sub">Through ~${secureThrough}</span>
       </div>
       <div class="mosca-op">${isExposed ? '>' : '&le;'}</div>
       <div class="mosca-tile">
         <span class="mosca-tile-lbl">Z &middot; CRQC Horizon</span>
-        <span class="mosca-tile-val" style="color:var(--cyan-core)">${Z}y</span>
+        <span class="mosca-tile-val" id="mosca-val-z" style="color:var(--cyan-core)">${Z}y</span>
         <span class="mosca-tile-sub">Est. ~${crqcExpected}</span>
       </div>
       <div class="mosca-op">&rarr;</div>
-      <div class="mosca-tile highlight" style="${isExposed ? 'border-color:#EF4444' : 'border-color:#10B981'}">
+      <div class="mosca-tile highlight" style="${isExposed ? 'border-color:#F43F5E' : 'border-color:#10B981'}">
         <span class="mosca-tile-lbl">${isExposed ? 'Exposure Window' : 'Safety Margin'}</span>
-        <span class="mosca-tile-val" style="color:${isExposed ? '#EF4444' : '#10B981'}">
+        <span class="mosca-tile-val" id="mosca-val-delta" style="color:${isExposed ? '#F43F5E' : '#10B981'}">
           ${isExposed ? '+' + exposure.toFixed(1) + 'y' : (Z - T).toFixed(1) + 'y'}
         </span>
         <span class="mosca-tile-sub">${isExposed ? 'HNDL Vulnerability' : 'Ahead of threat'}</span>
       </div>
     `;
+
+    if (typeof Motion !== 'undefined' && typeof Motion.countTo === 'function') {
+      Motion.countTo(document.getElementById('mosca-val-x'), X, { suffix: 'y', from: 0, duration: 900 });
+      Motion.countTo(document.getElementById('mosca-val-y'), Y, { suffix: 'y', from: 0, duration: 900, delay: 60 });
+      Motion.countTo(document.getElementById('mosca-val-t'), T, { suffix: 'y', from: 0, duration: 900, delay: 120 });
+      Motion.countTo(document.getElementById('mosca-val-z'), Z, { suffix: 'y', from: 0, duration: 900, delay: 180 });
+      Motion.countTo(document.getElementById('mosca-val-delta'), deltaVal, { prefix: isExposed ? '+' : '', suffix: 'y', from: 0, duration: 900, delay: 240, decimals: 1 });
+    }
   }
 
   const plainEl = document.getElementById('mosca-plain-explanation');
   if (plainEl) {
     if (isExposed) {
-      plainEl.innerHTML = `Data encrypted today requires confidentiality through <strong style="color:var(--text-main)">${secureThrough}</strong> (${X}y secrecy lifetime + ${Y}y replacement rollout). A cryptanalytically relevant quantum computer is estimated to break RSA/ECC by <strong style="color:var(--cyan-core)">${crqcExpected}</strong>. That leaves a <strong style="color:#EF4444">${exposure.toFixed(1)}-year vulnerability window</strong> where harvested encrypted communications can be decrypted retroactively.`;
+      plainEl.innerHTML = `Data encrypted today requires confidentiality through <strong style="color:var(--text-main)">${secureThrough}</strong> (${X}y secrecy lifetime + ${Y}y replacement rollout). A cryptanalytically relevant quantum computer is estimated to break RSA/ECC by <strong style="color:var(--cyan-core)">${crqcExpected}</strong>. That leaves a <strong style="color:#F43F5E">${exposure.toFixed(1)}-year vulnerability window</strong> where harvested encrypted communications can be decrypted retroactively.`;
     } else {
       plainEl.innerHTML = `Data encrypted today requires protection through <strong style="color:var(--text-main)">${secureThrough}</strong> (${X}y secrecy + ${Y}y rollout). A quantum break is anticipated around <strong style="color:var(--cyan-core)">${crqcExpected}</strong>. Migration completes <strong style="color:#10B981">${(Z - T).toFixed(1)} years before CRQC arrival</strong>, keeping secrets protected.`;
     }
@@ -911,16 +1016,16 @@ function renderMoscaTimelineSvg(X, Y, T, Z, exposure) {
 
   const yHave = 65;
   svg.appendChild(sv('text', { x: L - 10, y: yHave + 16, fill: '#94A3B8', 'font-size': '11', 'font-family': 'monospace', 'text-anchor': 'end', 'font-weight': '600' }, 'HAVE'));
-  svg.appendChild(sv('rect', { x: px(0), y: yHave, width: Math.max(2, px(Z) - px(0)), height: H, fill: '#00F0FF', opacity: '0.45', rx: '3' }));
-  svg.appendChild(sv('rect', { x: px(0), y: yHave, width: Math.max(2, px(Z) - px(0)), height: H, fill: 'none', stroke: '#00F0FF', 'stroke-width': '1.2', rx: '3' }));
-  svg.appendChild(sv('text', { x: px(Z) + 12, y: yHave + 16, fill: '#00F0FF', 'font-size': '12', 'font-weight': '700', 'font-family': 'monospace' }, `${Z}y (CRQC)`));
+  svg.appendChild(sv('rect', { x: px(0), y: yHave, width: Math.max(2, px(Z) - px(0)), height: H, fill: '#10B981', opacity: '0.45', rx: '3' }));
+  svg.appendChild(sv('rect', { x: px(0), y: yHave, width: Math.max(2, px(Z) - px(0)), height: H, fill: 'none', stroke: '#10B981', 'stroke-width': '1.2', rx: '3' }));
+  svg.appendChild(sv('text', { x: px(Z) + 12, y: yHave + 16, fill: '#10B981', 'font-size': '12', 'font-weight': '700', 'font-family': 'monospace' }, `${Z}y (CRQC)`));
 
   if (exposure > 0) {
     const xGap = px(Z);
     const wGap = Math.max(2, px(T) - px(Z));
-    svg.appendChild(sv('rect', { x: xGap, y: yNeed, width: wGap, height: H, fill: '#EF4444', opacity: '0.8', rx: '3' }));
-    svg.appendChild(sv('rect', { x: xGap, y: yNeed - 4, width: wGap, height: H + 8, fill: 'none', stroke: '#EF4444', 'stroke-width': '1.5', 'stroke-dasharray': '2 2', rx: '4' }));
-    svg.appendChild(sv('text', { x: xGap + wGap / 2, y: yNeed + H + 18, fill: '#EF4444', 'font-size': '11', 'font-weight': '700', 'font-family': 'monospace', 'text-anchor': 'middle' }, `▲ ${exposure.toFixed(1)}y EXPOSED`));
+    svg.appendChild(sv('rect', { x: xGap, y: yNeed, width: wGap, height: H, fill: '#F43F5E', opacity: '0.8', rx: '3' }));
+    svg.appendChild(sv('rect', { x: xGap, y: yNeed - 4, width: wGap, height: H + 8, fill: 'none', stroke: '#F43F5E', 'stroke-width': '1.5', 'stroke-dasharray': '2 2', rx: '4' }));
+    svg.appendChild(sv('text', { x: xGap + wGap / 2, y: yNeed + H + 18, fill: '#F43F5E', 'font-size': '11', 'font-weight': '700', 'font-family': 'monospace', 'text-anchor': 'middle' }, `▲ ${exposure.toFixed(1)}y EXPOSED`));
   }
 }
 

@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from engine.fspolicy import (FilesystemPolicyError, check_root, is_credential_store,
                               resolve_within)
-from engine.scanner import ECDATScanner
+from engine.scanner import IndraMeshScanner
 
 
 # ------------------------------------------------------------------ unit: containment
@@ -116,7 +116,7 @@ def test_scanner_does_not_read_a_symlinked_private_key(tmp_path):
     except OSError:
         pytest.skip("symlink creation not permitted on this host")
 
-    scanner = ECDATScanner(enable_ml=False)
+    scanner = IndraMeshScanner(enable_ml=False)
     findings = scanner.scan_directory(str(root))
     assert findings == [], "a symlinked file must not produce findings"
     assert scanner.errors, "an unexplained skip is indistinguishable from a missed detection"
@@ -129,7 +129,7 @@ def test_scanner_never_reports_a_credential_store(tmp_path):
     root.mkdir()
     (root / ".netrc").write_text("machine api login bob password hunter2\n", encoding="utf-8")
     (root / "v.py").write_text("key = rsa.newkeys(2048)\n", encoding="utf-8")
-    scanner = ECDATScanner(enable_ml=False)
+    scanner = IndraMeshScanner(enable_ml=False)
     findings = scanner.scan_directory(str(root))
     for f in findings:
         assert "netrc" not in os.path.basename(f["file"]).lower()

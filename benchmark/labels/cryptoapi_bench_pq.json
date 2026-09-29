@@ -8,7 +8,7 @@
   "notes": "203 Java micro-programmes, published and third-party. Note: these are CONSTRUCTED benchmark cases, not production code."
  },
  "annotation": {
-  "annotated_by": "ECDAT benchmark harness author, by direct reading of every file in scope",
+  "annotated_by": "IndraMesh benchmark harness author, by direct reading of every file in scope",
   "unit": "one (file, 1-based line) location",
   "files_in_scope": 203,
   "candidate_lines_reviewed": 529,

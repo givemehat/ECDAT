@@ -419,7 +419,7 @@ def analyse_text(text, source="<text>"):
 class MigrationVerifier:
     """Verify a post-quantum migration against a file, directory or tree.
 
-    `errors` follows the same honesty contract as `DependencyScanner` and `ECDATScanner`: a
+    `errors` follows the same honesty contract as `DependencyScanner` and `IndraMeshScanner`: a
     file that could not be read is named with a reason, so an empty result is distinguishable
     from an unreadable one. The report carries `not_proven` so a reader cannot mistake
     "verified" for "verified end-to-end on the wire".

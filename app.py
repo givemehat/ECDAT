@@ -1,4 +1,4 @@
-"""ECDAT Web Console Launcher.
+"""IndraMesh Web Console Launcher.
 
 Replaces the legacy Streamlit front end with a modern, high-performance,
 cybersecurity HUD console powered by FastAPI, Uvicorn, and HTML5/Canvas.
@@ -24,18 +24,18 @@ def run_server(host: str = "0.0.0.0", port: int = 8501, reload: bool = False):
     import uvicorn
 
     print("=" * 78)
-    print("ECDAT -- Enterprise Cryptographic Discovery & Analysis Tool")
+    print("IndraMesh -- Enterprise Cryptographic Discovery & Analysis Tool")
     print(f"  Live Console:  http://127.0.0.1:{port}")
     print(f"  Localhost:     http://localhost:{port}")
     print(f"  API Docs:      http://127.0.0.1:{port}/docs")
-    print("  Engine:        FastAPI + ECDAT Core (Zero Streamlit requirement)")
+    print("  Engine:        FastAPI + IndraMesh Core (Zero Streamlit requirement)")
     print("=" * 78)
 
     uvicorn.run("server:app", host=host, port=port, log_level="info", reload=reload)
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Launch the ECDAT Web Console")
+    parser = argparse.ArgumentParser(description="Launch the IndraMesh Web Console")
     parser.add_argument("--host", default="0.0.0.0", help="Host address (default: 0.0.0.0)")
     parser.add_argument("--port", type=int, default=8501, help="Port number (default: 8501)")
     parser.add_argument("--reload", action="store_true", help="Enable live auto-reload for development")

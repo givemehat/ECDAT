@@ -486,7 +486,7 @@ def main():
                 "notes": spec["notes"],
             },
             "annotation": {
-                "annotated_by": "ECDAT benchmark harness author, by direct reading of every "
+                "annotated_by": "IndraMesh benchmark harness author, by direct reading of every "
                                 "file in scope",
                 "unit": "one (file, 1-based line) location",
                 "files_in_scope": nfiles,

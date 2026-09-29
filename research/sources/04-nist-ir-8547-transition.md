@@ -16,7 +16,7 @@
 suffix. The CSRC page's document history lists exactly one entry: `11/12/24: IR 8547 (Draft)`.
 There is no "Final" entry.
 
-Anything ECDAT says about IR 8547 must therefore be presented as a *proposed* transition plan.
+Anything IndraMesh says about IR 8547 must therefore be presented as a *proposed* transition plan.
 The tool does this correctly today: `engine/mosca.py` labels the policy
 `"NIST IR 8547 -- quantum-vulnerable PKC disallowed"`, and the console separately warns that a
 policy deadline is a procurement date while Z is a cryptanalytic estimate. That distinction is

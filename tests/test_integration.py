@@ -5,7 +5,7 @@ runs anywhere the test suite runs.
 """
 import json
 
-from engine.scanner import ECDATScanner
+from engine.scanner import IndraMeshScanner
 from engine.mosca import calculate_risk, DATA_CLASS_LIFETIME
 from engine.recommender import get_pqc_recommendation
 from engine.cbom import generate_cbom, SPEC_VERSION
@@ -23,7 +23,7 @@ ECDH_SNIPPET = (
 
 
 def _pipeline(target, z=10, policy="india_dst_nqm"):
-    scanner = ECDATScanner(enable_ml=False)
+    scanner = IndraMeshScanner(enable_ml=False)
     findings = scanner.scan_directory(target)
     enriched = []
     for f in findings:
@@ -69,7 +69,7 @@ def test_data_lifetime_drives_the_verdict(tmp_path):
     d.mkdir()
     (d / "vuln.py").write_text(RSA_SNIPPET, encoding="utf-8")
 
-    scanner = ECDATScanner(enable_ml=False)
+    scanner = IndraMeshScanner(enable_ml=False)
     base = scanner.scan_directory(str(d))
     rsa = [f for f in base if f["name"] == "RSA"][0]
 
@@ -89,16 +89,16 @@ def test_z_is_tunable_end_to_end(tmp_path):
 
     _scanner, _findings, cbom = _pipeline(str(d), z=15, policy="nist_ir_8547")
     mosca_props = {p["name"]: p["value"] for c in cbom["components"] for p in c["properties"]}
-    assert "ecd:mosca.z" in mosca_props
-    assert mosca_props["ecd:mosca.z"] == "15.0"
-    assert mosca_props["ecd:mosca.policy"] == "nist_ir_8547"
+    assert "im:mosca.z" in mosca_props
+    assert mosca_props["im:mosca.z"] == "15.0"
+    assert mosca_props["im:mosca.policy"] == "nist_ir_8547"
     # RSA is a 112-bit primitive, so IR 8547 puts it in the DEPRECATED tier with a 2030 date,
     # not the 2035 disallowance that applies to the >= 128-bit tier. Assert the status as well
     # as the year: a bare year cannot distinguish a deprecation from a ban, and that
     # distinction is the whole reason `resolve_policy_deadline` exists.
-    assert mosca_props["ecd:mosca.policy_deadline"] == "2030"
-    assert mosca_props["ecd:mosca.policy_status"] == "deprecated"
-    assert mosca_props["ecd:mosca.policy_source_is_draft"] == "true"
+    assert mosca_props["im:mosca.policy_deadline"] == "2030"
+    assert mosca_props["im:mosca.policy_status"] == "deprecated"
+    assert mosca_props["im:mosca.policy_source_is_draft"] == "true"
 
 
 # ===========================================================================================
@@ -119,10 +119,10 @@ def test_assurance_and_purpose_reach_the_cbom_end_to_end(tmp_path):
 
     _scanner, _findings, cbom = _pipeline(str(d))
     props = {p["name"]: p["value"] for c in cbom["components"] for p in c["properties"]}
-    assert props.get("ecd:assurance"), "assurance must reach the CBOM"
-    assert props.get("ecd:purpose"), "purpose must reach the CBOM"
+    assert props.get("im:assurance"), "assurance must reach the CBOM"
+    assert props.get("im:purpose"), "purpose must reach the CBOM"
     meta = {p["name"]: p["value"] for p in cbom["metadata"].get("properties", [])}
-    assert "ecd:findings_total" in meta and "ecd:proven_use" in meta, (
+    assert "im:findings_total" in meta and "im:proven_use" in meta, (
         "the raw total must never appear without the proven-use count beside it")
 
 
@@ -151,7 +151,7 @@ def test_unresolved_purpose_survives_the_whole_pipeline(tmp_path):
         assert "RESOLVE" in rec["justification"].upper(), (
             "an unresolved finding must say what evidence would resolve it")
     props = [p for c in cbom["components"] for p in c["properties"]
-             if p["name"] == "ecd:purpose"]
+             if p["name"] == "im:purpose"]
     assert props, "the unresolved purpose must be visible in the CBOM, not just the console"
 
 
@@ -170,7 +170,7 @@ def test_coverage_manifest_numbers_add_up_end_to_end(tmp_path):
     (d / "blob.bin").write_bytes(b"\x00\x01\x02" * 50)                            # binary
     (d / "bad.py").write_bytes(b"\xff\xfe\x00\x00not utf8")                       # unreadable
 
-    scanner = ECDATScanner(enable_ml=False)
+    scanner = IndraMeshScanner(enable_ml=False)
     findings = scanner.scan_directory(str(d))
     manifest = scanner.coverage_manifest(findings)
 
@@ -232,7 +232,7 @@ def test_critical_risk_is_driven_by_real_inputs_not_detector_confidence(tmp_path
     d = tmp_path / "app"
     d.mkdir()
     (d / "vuln.py").write_text(RSA_SNIPPET, encoding="utf-8")
-    scanner = ECDATScanner(enable_ml=False)
+    scanner = IndraMeshScanner(enable_ml=False)
     rsa = [f for f in scanner.scan_directory(str(d)) if f["name"] == "RSA"][0]
 
     short = calculate_risk({**rsa, "dl_confidence": 0.99,

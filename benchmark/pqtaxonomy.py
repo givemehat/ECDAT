@@ -13,7 +13,7 @@ Two break models, matching the stance documented in `engine/mosca.py`
               Applies to every public-key primitive: RSA, DSA, DH, ECDH, ECDSA, EdDSA, ElGamal.
   grover   -- Grover's algorithm gives a quadratic speed-up only. Effective security is halved
               (AES-256 -> 128 bits). NOT retroactive: a ciphertext recorded today is not made
-              readable by the arrival of a CRQC. This is why ECDAT refuses to apply Mosca's
+              readable by the arrival of a CRQC. This is why IndraMesh refuses to apply Mosca's
               inequality to symmetric primitives.
 
 import re  # noqa: E402

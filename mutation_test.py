@@ -127,7 +127,7 @@ def run_suite(repo, timeout=1200):
 
 def main():
     ap = argparse.ArgumentParser(
-        description="Mutation-test the ECDAT engine to measure whether the suite has teeth.")
+        description="Mutation-test the IndraMesh engine to measure whether the suite has teeth.")
     ap.add_argument("--verbose", action="store_true", help="extra detail on survivors")
     ap.add_argument("--keep", action="store_true", help="keep mutant copies for debugging")
     args = ap.parse_args()
@@ -136,7 +136,7 @@ def main():
         print("run this from the repository root", file=sys.stderr)
         return 2
 
-    workdir = tempfile.mkdtemp(prefix="ecdat-mutation-")
+    workdir = tempfile.mkdtemp(prefix="indramesh-mutation-")
     results = []
     try:
         print(f"Mutation testing: {len(MUTANTS)} mutants, each in an isolated repo copy\n")

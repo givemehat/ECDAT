@@ -44,7 +44,7 @@ from engine.purpose import (ASSURANCE_OBSERVED, PURPOSE_KEY_ESTABLISHMENT, PURPO
                             PURPOSE_UNRESOLVED, proven_use_count, resolve_assurance,
                             resolve_purpose, unresolved_purpose_count)
 from engine.recommender import get_pqc_recommendation
-from engine.scanner import ECDATScanner
+from engine.scanner import IndraMeshScanner
 
 try:
     from cryptography import x509
@@ -100,7 +100,7 @@ KU_DUAL = ku(digital_signature=True, key_encipherment=True)
 KU_AGREEMENT = ku(key_agreement=True, encipher_only=True)
 
 
-def build_certificate(key, common_name="ecdat.test", serial=0x1000, key_usage=None,
+def build_certificate(key, common_name="indramesh.test", serial=0x1000, key_usage=None,
                       eku=None, ca=False, not_before=None, not_after=None, digest=None):
     """A self-signed certificate with exactly the extensions a test asks for."""
     now = _now()
@@ -221,7 +221,7 @@ SHA1_RSA_OID = "1.2.840.113549.1.1.5"
 RSA_ENCRYPTION_OID = "1.2.840.113549.1.1.1"
 
 
-def sha1_certificate(key, common_name="ecdat sha1 fixture", serial=0x0BADF00D,
+def sha1_certificate(key, common_name="indramesh sha1 fixture", serial=0x0BADF00D,
                      not_before=None, not_after=None):
     """Build a SHA-1-signed, self-signed RSA certificate. Returns (der, signature_int, n, e)."""
     private = key.private_numbers()
@@ -273,7 +273,7 @@ def assert_genuine_sha1_certificate(key):
 def test_valid_certificate_produces_findings(tmp_path, rsa_key):
     """A self-signed RSA certificate yields a public-key finding and a signature finding."""
     path = write_pem(tmp_path / "server.crt",
-                     build_certificate(rsa_key, "ecdat.example", key_usage=KU_SIGNING))
+                     build_certificate(rsa_key, "indramesh.example", key_usage=KU_SIGNING))
     findings, scanner = scan_certificates(str(tmp_path))
 
     assert scanner.errors == [], f"a valid certificate must not produce errors: {scanner.errors}"
@@ -301,7 +301,7 @@ def test_findings_carry_the_source_scanner_schema(tmp_path, rsa_key):
     (source_dir / "app.py").write_text("import rsa\nkey = rsa.newkeys(2048)\n", encoding="utf-8")
     source_findings, _ = scan_certificates(str(source_dir))  # no certificates: must be empty
     assert source_findings == []
-    reference = ECDATScanner(enable_ml=False).scan_directory(str(source_dir))
+    reference = IndraMeshScanner(enable_ml=False).scan_directory(str(source_dir))
     assert reference, "the reference source scan produced nothing, so the comparison is void"
     reference_keys = set(reference[0])
 
@@ -920,7 +920,7 @@ def test_findings_survive_the_whole_pipeline(tmp_path, rsa_key):
     # The purpose the resolver reached is exported, so a reader can audit the decision.
     properties = [prop for component in document["components"]
                   for prop in component.get("properties", [])]
-    exported = {prop["value"] for prop in properties if prop["name"] == "ecd:purpose"}
+    exported = {prop["value"] for prop in properties if prop["name"] == "im:purpose"}
     assert PURPOSE_SIGNATURE in exported and PURPOSE_KEY_ESTABLISHMENT in exported, \
         f"the CBOM must export the purpose the KeyUsage settled: {exported}"
 
@@ -966,7 +966,7 @@ NO_CRYPTOGRAPHY_PROGRAM = textwrap.dedent("""
 @needs_cryptography
 def test_module_imports_and_parses_without_cryptography(tmp_path, rsa_key):
     """A fresh interpreter, `cryptography` blocked: the sensor still works and says so."""
-    certificate = build_certificate(rsa_key, "ecdat.nodeps", key_usage=KU_SIGNING)
+    certificate = build_certificate(rsa_key, "indramesh.nodeps", key_usage=KU_SIGNING)
     path = tmp_path / "server.crt"
     write_der(path, certificate)
 
@@ -982,7 +982,7 @@ def test_module_imports_and_parses_without_cryptography(tmp_path, rsa_key):
     assert report["family"] == "RSA" and report["key_size"] == 2048
     assert report["key_usage"] == ["digitalsignature", "keycertsign"], \
         "KeyUsage is the whole point of the sensor; it must survive the missing dependency"
-    assert report["subject"] == "CN=ecdat.nodeps"
+    assert report["subject"] == "CN=indramesh.nodeps"
     assert report["sig_hash"] == "SHA-256"
     assert PURPOSE_SIGNATURE in report["purposes"]
     assert report["backend_status"][0] is False, "the manifest must admit the backend is missing"
@@ -1011,7 +1011,7 @@ def test_both_backends_agree_field_for_field(tmp_path, rsa_key, ec_key, size, fa
     else:
         key = ec_key
     certificate = build_certificate(
-        key, f"ecdat.{family}{size}",
+        key, f"indramesh.{family}{size}",
         key_usage=KU_SIGNING if family == "rsa" else KU_AGREEMENT, eku=True, ca=True)
     der = certificate.public_bytes(serialization.Encoding.DER)
 
@@ -1095,7 +1095,7 @@ def test_tls_is_not_inferred_for_a_certificate_that_names_no_protocol(tmp_path, 
 @needs_cryptography
 def test_self_issued_is_not_claimed_as_self_signed(tmp_path, rsa_key):
     """subject == issuer is a NAME match. No signature is verified, so it is not called verified."""
-    write_pem(tmp_path / "self.crt", build_certificate(rsa_key, "ecdat.self", key_usage=KU_SIGNING))
+    write_pem(tmp_path / "self.crt", build_certificate(rsa_key, "indramesh.self", key_usage=KU_SIGNING))
     key = only_pubkey(scan_certificates(str(tmp_path))[0])
 
     assert key["self_issued"] is True

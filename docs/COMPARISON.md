@@ -1,10 +1,10 @@
-# ECDAT vs `sgtsujith141-wq/cryptodrishti` — evidence-based gap table
+# IndraMesh vs `sgtsujith141-wq/cryptodrishti` — evidence-based gap table
 
-Scope: ECDAT at commit `31f0bc7` plus the working tree as of this review, versus the competitor's
+Scope: IndraMesh at commit `31f0bc7` plus the working tree as of this review, versus the competitor's
 own README (`research/competitive/raw_readme/sgtsujith141-wq__cryptodrishti.md`, 1088 lines).
 Line references in the form `L123` are to that README.
 
-**Evidence rules used here.** Every ECDAT claim cites a file (and a test where one exists).
+**Evidence rules used here.** Every IndraMesh claim cites a file (and a test where one exists).
 Every competitor claim quotes their README. Anything I could not verify from the material in
 this repository is marked **unknown** — including several places where *not* knowing is
 unfavourable to us. Read the `unknown` rows as open questions, not as wins.
@@ -43,7 +43,7 @@ is a claim about real code. That is the whole honest story of this row.
 
 | Item | Better | By how much | Evidence |
 |---|---|---|---|
-| Parsing vs pattern matching | **They** | Whole class of defect | Our scanner is regex plus comment blanking (`scanner.py:228-258`). They use "Python AST analysis" plus rule packs. Their benchmark found seven defects "none visible by inspection" (L676), including `TLSv1` matching inside `TLSv1.2` and `DES` matching inside `DES-CBC3` — exactly the bug class a regex table invites. Our `ECD-CFG-LEGACY-001` regex is `\b(3DES|DES-CBC3|RC4|NULL-SHA|EXPORT)\b` (`scanner.py:97`), correct only because `3DES` is hand-listed ahead of `DES-CBC3`. |
+| Parsing vs pattern matching | **They** | Whole class of defect | Our scanner is regex plus comment blanking (`scanner.py:228-258`). They use "Python AST analysis" plus rule packs. Their benchmark found seven defects "none visible by inspection" (L676), including `TLSv1` matching inside `TLSv1.2` and `DES` matching inside `DES-CBC3` — exactly the bug class a regex table invites. Our `IM-CFG-LEGACY-001` regex is `\b(3DES|DES-CBC3|RC4|NULL-SHA|EXPORT)\b` (`scanner.py:97`), correct only because `3DES` is hand-listed ahead of `DES-CBC3`. |
 | Comment handling | **Us** | — | We blank comments and Python docstrings before matching, preserving byte offsets so reported line numbers stay correct (`scanner.py:228-258`, regression-tested). Not claimed in their README. A genuine advantage of ours. |
 | Recall on third-party code | **unknown — do not claim it** | — | Their paramiko figure: "**12 distinct cryptographic assets across 70 files in 1.3s**" (L495). Ours on the same pinned commit: 27 TP / 3 FP / 30 predicted (`benchmark/RESULTS.md`). Different units — assets vs `(file, line)` hits — and neither README reconciles them. **unknown.** |
 
@@ -54,7 +54,7 @@ is a claim about real code. That is the whole honest story of this row.
 | Spec versions | **They** | 1 version | We: `SPEC_VERSION = "1.7"` only (`engine/cbom.py:35`), no switch. They: "CycloneDX 1.6 (ECMA-424) with `cryptoProperties`" as the **default**, 1.7 supported, and "1.7 is a real implementation, not a relabelled 1.6" (L256, L720-726). |
 | 1.7-specific fields | **They** | 3 fields | Checked against our own vendored `schemas/bom-1.7.schema.json`: `algorithmProperties.curve` carries `"deprecated": true`, and `ellipticCurve` / `algorithmFamily` exist beside it. We emit **only the deprecated `curve`** (`engine/cbom.py:291-292`); we never emit `ellipticCurve` or `algorithmFamily`. They use all three and "**omit** `algorithmFamily` … when the purpose is unresolved" (L721-726). |
 | Validation | **They**, narrowly | Checksum + CI gate on both versions | We do validate: `validate_cbom.py` against a vendored schema, 4 real schema tests in `tests/test_cbom_schema.py` (I ran them: 4 passed), and a CI step that is not `\|\| true` (`.github/workflows/tests.yml`). Two deficits: the schema is not checksum-verified on load — their words, "a validator you can quietly modify is not a validator" (L713-714), apply to us; and our emitter has no internal validator, so only the fixture shapes are ever checked. They report structural and official checks **separately**, and "A run where official validation could not happen reports `checked: false` — never a pass" (L706-708). Ours exits 2 from a script — honest, but not surfaced in the product. |
-| Detection evidence in the standard field | **They** | — | We emit `evidence.occurrences` only and put confidence in a vendor property `ecd:detector_confidence` (`engine/cbom.py:342-344`). They: "detection evidence in `evidence.occurrences` and per-finding confidence in `evidence.identity`" (L256-257) — the standard location. |
+| Detection evidence in the standard field | **They** | — | We emit `evidence.occurrences` only and put confidence in a vendor property `im:detector_confidence` (`engine/cbom.py:342-344`). They: "detection evidence in `evidence.occurrences` and per-finding confidence in `evidence.identity`" (L256-257) — the standard location. |
 | Asset normalisation | **They** | Whole concept | We emit one component per *finding*, so one algorithm seen 800 times is 800 components. They: "Raw detector hits are **normalised into distinct cryptographic assets**, so one algorithm seen 800 times is one migration item with 800 call sites" (L148-150), with "purpose and assurance … part of an asset's identity" (L187-188). A consumer of our CBOM gets an inventory, not an asset graph. |
 | Corroboration / correlation | **They** | Whole module | They have `app/engine/correlate.py` with an explicit list of what correlation may never do (L623-633). We have `engine/graph.py` at 2.2 KB and nothing else. |
 | Certificate assets in the CBOM | **They** | — | We have a certificate sensor but no `cryptoProperties.assetType: "certificate"` emitter; certificates become ordinary algorithm components. `engine/cbom.py` has no certificate branch. |
@@ -76,7 +76,7 @@ is a claim about real code. That is the whole honest story of this row.
 |---|---|---|---|
 | Concept | **Tie** | — | Theirs is the origin of ours — `engine/purpose.py:3-10` quotes them and credits them. Both have the four assurance states with near-identical wording. |
 | Implementation depth | **They** | — | They resolve purpose from `RSA_sign`, `rsa.EncryptOAEP`, `Signature.getInstance` (L834-840) and fixed seven purpose defects the benchmark found (L689-691). We resolve from a flat needle list (`purpose.py:36-49`) with no class-agnostic `RSA_sign` / `rsa.EncryptOAEP` equivalents and no corpus coverage for purpose at all. **Our purpose-resolution accuracy is unmeasured — unknown.** |
-| Published in the CBOM | **Tie** | — | They export `cryptoFunctions` and `detection:assurance` (L858-859); we export `ecd:assurance` and `cryptoFunctions` (`engine/cbom.py:322-324`). |
+| Published in the CBOM | **Tie** | — | They export `cryptoFunctions` and `detection:assurance` (L858-859); we export `im:assurance` and `cryptoFunctions` (`engine/cbom.py:322-324`). |
 
 ## 6. Post-migration verification
 
@@ -141,7 +141,7 @@ is a claim about real code. That is the whole honest story of this row.
 
 | Item | Better | By how much | Evidence |
 |---|---|---|---|
-| Matrix | **They** | 2 extra versions | They: "runs the suite on Python 3.11, 3.12 and 3.13, then runs a separate smoke job that scans this repository, emits a CBOM and **fails the build if the document does not conform** to CycloneDX 1.6" (L502-506). Ours: `.github/workflows/tests.yml` pins **3.11 only** with no self-scan smoke job, and the separate `ecdat_scan.yml` gates on `--fail-on CRITICAL` but then swallows the exit with `\|\| echo "::warning::"`. **Our scan job cannot fail the build.** |
+| Matrix | **They** | 2 extra versions | They: "runs the suite on Python 3.11, 3.12 and 3.13, then runs a separate smoke job that scans this repository, emits a CBOM and **fails the build if the document does not conform** to CycloneDX 1.6" (L502-506). Ours: `.github/workflows/tests.yml` pins **3.11 only** with no self-scan smoke job, and the separate `indramesh_scan.yml` gates on `--fail-on CRITICAL` but then swallows the exit with `\|\| echo "::warning::"`. **Our scan job cannot fail the build.** |
 | What CI proves | **Tie** | — | We additionally run mutation testing and a per-file coverage report; they run benchmark regressions. Different instruments, both real. |
 
 ## 13. Submission assets
@@ -227,7 +227,7 @@ downloads, and no persistence, no overrides, no auth and no report.
 **Close it:** `app.py` — (a) a `st.download_button` emitting a self-contained HTML report built from
 the records `app.py::rate_findings` already produces; (b) persist X/Y overrides keyed on
 `(name, primitive, file)` via stdlib `sqlite3` and re-apply on rescan; (c) refuse to serve unless
-`ECDAT_TOKEN` is set or the bind address is loopback. (b) is also the fix for the missing
+`INDRAMESH_TOKEN` is set or the bind address is loopback. (b) is also the fix for the missing
 risk-input provenance in §4.
 
 ### 5. Submission assets, and a limitations page that would survive a judge

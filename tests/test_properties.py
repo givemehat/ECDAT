@@ -1,11 +1,11 @@
 """
-Property-based tests for the ECDAT engines (task HAND-160).
+Property-based tests for the IndraMesh engines (task HAND-160).
 
 WHY hypothesis AND a seeded harness
 ------------------------------------
 `pip show hypothesis` reported "Package(s) not found" on a fresh checkout, so hypothesis was
 installed for this task (6.168.1) and is used for the *generative* properties. It is configured
-with ``derandomize=True`` (profile "ecdat" below), which makes the example sequence a pure
+with ``derandomize=True`` (profile "indramesh" below), which makes the example sequence a pure
 function of the test file: a CI run and a local run explore exactly the same inputs, so a
 failure is always reproducible. Determinism is worth more than extra random exploration here --
 this tool's output goes into a signed, diffed inventory.
@@ -37,21 +37,21 @@ from engine.cbom import generate_cbom
 from engine.fspolicy import resolve_within
 from engine.mosca import calculate_risk
 from engine.recommender import get_pqc_recommendation
-from engine.scanner import ECDATScanner
+from engine.scanner import IndraMeshScanner
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SCHEMA_PATH = os.path.join(ROOT, "schemas", "bom-1.7.schema.json")
 
 # Deterministic hypothesis: identical examples on every run, in CI and locally.
 settings.register_profile(
-    "ecdat",
+    "indramesh",
     derandomize=True,
     max_examples=60,
     deadline=None,
     suppress_health_check=[HealthCheck.too_slow, HealthCheck.function_scoped_fixture,
                            HealthCheck.data_too_large],
 )
-settings.load_profile("ecdat")
+settings.load_profile("indramesh")
 
 
 # ==============================================================================================
@@ -139,7 +139,7 @@ def _schema_errors(document):
 
 
 def _scanner():
-    return ECDATScanner(enable_ml=False)
+    return IndraMeshScanner(enable_ml=False)
 
 
 def _same_file(a, b):
@@ -358,7 +358,7 @@ def test_duplicate_findings_are_collapsed(repeats, noise_lines):
 
     keys = [(f["file"], f["name"], f["rule_id"], f["line"]) for f in result]
     assert len(keys) == len(set(keys)), f"duplicate findings survived: {keys}"
-    rsa = [f for f in result if f["rule_id"] == "ECD-SRC-RSA-001"]
+    rsa = [f for f in result if f["rule_id"] == "IM-SRC-RSA-001"]
     assert len(rsa) == repeats, f"expected one finding per matching line, got {len(rsa)}"
 
 
@@ -549,7 +549,7 @@ CBOM_FINDING = st.fixed_dictionaries({
 # Schema validation dominates the runtime, so the CBOM properties use a tighter example budget
 # than the rest of the file. 25 documents drawn from a 16 x 14 x 9 x 6 x 6 strategy space is
 # ample coverage of the branches that matter; the exhaustive checks are elsewhere.
-CBOM_SETTINGS = settings(max_examples=25, parent=settings.get_profile("ecdat"))
+CBOM_SETTINGS = settings(max_examples=25, parent=settings.get_profile("indramesh"))
 
 
 @CBOM_SETTINGS
@@ -610,7 +610,7 @@ def test_cbom_is_total_for_arbitrary_key_length(findings, key_length):
         f"key_length={key_length!r} produced an invalid CBOM:\n" + _schema_errors(document))
 
 
-@settings(max_examples=40, parent=settings.get_profile("ecdat"))
+@settings(max_examples=40, parent=settings.get_profile("indramesh"))
 @given(name=st.one_of(st.text(max_size=30), st.none(), st.integers(), st.booleans(),
                       st.lists(st.integers(max_value=5), max_size=3),
                       st.dictionaries(st.text(max_size=4), st.integers(), max_size=3)))

@@ -1,4 +1,4 @@
-﻿"""ECDAT external-accuracy benchmark -- ONE COMMAND reproduces every number.
+﻿"""IndraMesh external-accuracy benchmark -- ONE COMMAND reproduces every number.
 
     python benchmark/run_benchmark.py              # measure (auto-fetches corpora if absent)
     python benchmark/run_benchmark.py --fetch      # force a fresh clone at the pinned SHAs
@@ -6,7 +6,7 @@
 
 WHAT IS MEASURED
 ----------------
-ECDATScanner(enable_ml=False) is run over each corpus exactly as an operator would run it
+IndraMeshScanner(enable_ml=False) is run over each corpus exactly as an operator would run it
 (`scan_directory`), and its findings are matched against a committed, hand-annotated,
 line-level ground truth (`benchmark/labels/*.json`).
 
@@ -41,7 +41,7 @@ sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.dirname(HERE))
 
 from annotate import CORPORA  # noqa: E402
-from engine.scanner import ECDATScanner  # noqa: E402
+from engine.scanner import IndraMeshScanner  # noqa: E402
 
 LABEL_DIR = os.path.join(HERE, "labels")
 CORPUS_DIR = os.path.join(HERE, "corpora")
@@ -156,9 +156,9 @@ def score(findings, positives, label_index):
             "labelled_code": (lab or {}).get("code"),
             "labelled_break_model": (lab or {}).get("break_model"),
             "labelled_reason": (lab or {}).get("reason"),
-            "ecdat_names": sorted({str(g.get("name")) for g in group}),
-            "ecdat_rule_ids": sorted({str(g.get("rule_id")) for g in group}),
-            "ecdat_match": [g.get("match") for g in group][:4],
+            "indramesh_names": sorted({str(g.get("name")) for g in group}),
+            "indramesh_rule_ids": sorted({str(g.get("rule_id")) for g in group}),
+            "indramesh_match": [g.get("match") for g in group][:4],
         }
 
     return {
@@ -213,7 +213,7 @@ def evaluate(name, spec, force_fetch):
     labels = load_labels(name)
     n_checked = verify_labels(name, spec, root, labels)
 
-    scanner = ECDATScanner(enable_ml=False)
+    scanner = IndraMeshScanner(enable_ml=False)
     # A corpus is normally measured by walking a directory. `scan_files` exists for the case
     # where the honest unit of measurement is a HAND-PICKED SET OF FILES rather than a whole
     # subtree -- which is not a convenience. It is the only way to publish a number from a
@@ -281,7 +281,7 @@ def evaluate(name, spec, force_fetch):
 def render_markdown(results):
     L = []
     A = L.append
-    A("# ECDAT external-accuracy benchmark results")
+    A("# IndraMesh external-accuracy benchmark results")
     A("")
     A("Reproduce everything in this file with one command:")
     A("")
@@ -307,8 +307,8 @@ def render_markdown(results):
     A("")
     A("CryptoAPI-Bench ships `CryptoAPI-Bench_details.xlsx` with 182 rows of *misuse* labels")
     A("(28 categories: `Constant Seed`, `Usage of ECB`, `RSA keysize 1024 bits`, `DES used`,")
-    A("`PBE iteration < 1000`, ...). ECDAT is a **quantum**-vulnerability detector. Those are")
-    A("different properties, so scoring ECDAT against the published labels would be a category")
+    A("`PBE iteration < 1000`, ...). IndraMesh is a **quantum**-vulnerability detector. Those are")
+    A("different properties, so scoring IndraMesh against the published labels would be a category")
     A("error, and we do not report such a number as an accuracy figure. Instead each corpus")
     A("carries a hand-annotated label set whose unit is one `(file, line)` location and whose")
     A("criterion is stated in full below and in `benchmark/labels/README.md`.")
@@ -334,7 +334,7 @@ def render_markdown(results):
     A("PBKDF parameter objects, key-store container formats (`JKS`) and key/block-size plumbing")
     A("are negative in both, each with a recorded reason.")
     A("")
-    A("This criterion **favours ECDAT**: every excluded operation line is a location the tool")
+    A("This criterion **favours IndraMesh**: every excluded operation line is a location the tool")
     A("did not report and would otherwise have counted as a false negative. That is exactly why")
     A("L2 is reported next to L1 rather than buried.")
     A("")
@@ -412,13 +412,13 @@ def render_markdown(results):
                 A("None.")
                 A("")
                 continue
-            A("| file:line | why the labels exclude it | ECDAT called it | rule |")
+            A("| file:line | why the labels exclude it | IndraMesh called it | rule |")
             A("|---|---|---|---|")
             for fp in s["false_positives"]:
                 A("| `%s:%d` | %s | %s | %s |"
                   % (fp["file"], fp["line"],
                      (fp["labelled_reason"] or "line was not a labelling candidate"),
-                     ", ".join(fp["ecdat_names"]), ", ".join(fp["ecdat_rule_ids"])))
+                     ", ".join(fp["indramesh_names"]), ", ".join(fp["indramesh_rule_ids"])))
             A("")
     for r in results:
         for v in ("L1", "L2"):
@@ -426,7 +426,7 @@ def render_markdown(results):
             A("## Explicit false negatives -- `%s`, %s (%d)"
               % (r["corpus"], v, len(s["false_negatives"])))
             A("")
-            A("A false negative is a labelled quantum-vulnerable location ECDAT did not report.")
+            A("A false negative is a labelled quantum-vulnerable location IndraMesh did not report.")
             A("")
             if not s["false_negatives"]:
                 A("None.")
@@ -482,7 +482,7 @@ def main():
     if not args.no_write:
         payload = {
             "harness": "benchmark/run_benchmark.py",
-            "scanner": "engine.scanner.ECDATScanner(enable_ml=False)",
+            "scanner": "engine.scanner.IndraMeshScanner(enable_ml=False)",
             "matching_rule": "a finding is a true positive iff its (file, line) is a labelled "
                              "positive location; distinct locations are counted, so a second "
                              "finding on an already-matched positive line is neither a TP nor "
@@ -517,7 +517,7 @@ LIMITATIONS = [
     "3. **The L1 criterion favours the tool.** Operation lines (`cipher.init`, `.digest()`) are",
     "   excluded from L1 and included in L2. L2 is the lower bound on recall; read it before",
     "   quoting a recall number.",
-    "4. **ECDAT was run with `enable_ml=False`.** The optional PyTorch classifier is therefore",
+    "4. **IndraMesh was run with `enable_ml=False`.** The optional PyTorch classifier is therefore",
     "   absent from these numbers, and `dl_confidence` is not populated. This is deliberate: the",
     "   benchmark must be hermetic and reproducible on a machine with no model file.",
     "5. **Regex-rule coverage is the whole story here.** Every number above is a measurement of",

@@ -807,13 +807,13 @@ PARSERS = {
 # The scanner
 # ---------------------------------------------------------------------------------------------
 
-RULE_DEP_LIBRARY = "ECD-DEP-LIB-001"
+RULE_DEP_LIBRARY = "IM-DEP-LIB-001"
 
 
 class DependencyScanner:
     """Scan dependency manifests for cryptographic CAPABILITIES.
 
-    Findings use the same schema as `engine.scanner.ECDATScanner` so they can be concatenated
+    Findings use the same schema as `engine.scanner.IndraMeshScanner` so they can be concatenated
     with source findings and fed through the same Mosca/recommender/CBOM pipeline. The one
     structural difference is deliberate: `evidence_class` is `"dependency"`, never
     `"discovered"`. `engine/purpose.py` maps that to ASSURANCE_CAPABILITY, and
@@ -1007,7 +1007,7 @@ class DependencyScanner:
 
     def coverage_manifest(self, findings=None):
         """What was read, what failed, and what was never in scope -- the same contract as
-        `ECDATScanner.coverage_manifest`, so one panel can render both sensors."""
+        `IndraMeshScanner.coverage_manifest`, so one panel can render both sensors."""
         manifest = {
             "scanners_run": ["dependency-scanner"] if self.manifests_read else [],
             "files_seen": self.coverage["files_seen"],

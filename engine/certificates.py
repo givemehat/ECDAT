@@ -93,11 +93,11 @@ SCANNER_NAME = "certificate-scanner"
 
 # Rule ids. The ECD- prefix matches engine/scanner.py and engine/dependencies.py, so a report
 # reads as one system.
-RULE_CERT_PUBKEY = "ECD-CERT-PUBKEY-001"
-RULE_CERT_SIGALG = "ECD-CERT-SIGALG-001"
-RULE_CERT_EXPIRY = "ECD-CERT-EXPIRY-001"
-RULE_CERT_NOT_YET_VALID = "ECD-CERT-EXPIRY-002"
-RULE_CERT_PURPOSE_UNKNOWN = "ECD-CERT-PURPOSE-001"
+RULE_CERT_PUBKEY = "IM-CERT-PUBKEY-001"
+RULE_CERT_SIGALG = "IM-CERT-SIGALG-001"
+RULE_CERT_EXPIRY = "IM-CERT-EXPIRY-001"
+RULE_CERT_NOT_YET_VALID = "IM-CERT-EXPIRY-002"
+RULE_CERT_PURPOSE_UNKNOWN = "IM-CERT-PURPOSE-001"
 
 # Files are routed by CONTENT, not by extension: a .pem fullchain and a .cer are the same object,
 # and a file with no extension at all is still found when its bytes say CERTIFICATE.
@@ -1534,7 +1534,7 @@ class CertificateScanner:
     def coverage_manifest(self, findings=None):
         """What was read, what failed, what was deliberately not read, and what is never in scope.
 
-        Same contract as `ECDATScanner.coverage_manifest` and `DependencyScanner.coverage_manifest`,
+        Same contract as `IndraMeshScanner.coverage_manifest` and `DependencyScanner.coverage_manifest`,
         so one panel can render every sensor.
         """
         available, description = parser_backend_status()

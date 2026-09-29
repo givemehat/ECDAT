@@ -1,35 +1,63 @@
-﻿# ECDAT â€” Enterprise Cryptographic Discovery & Analysis Tool
+# IndraMesh
 
-[![Tests](https://github.com/givemehat/ECDAT/actions/workflows/tests.yml/badge.svg)](https://github.com/givemehat/ECDAT/actions/workflows/tests.yml)
-[![Quantum Risk Scan](https://github.com/givemehat/ECDAT/actions/workflows/ecdat_scan.yml/badge.svg)](https://github.com/givemehat/ECDAT/actions/workflows/ecdat_scan.yml)
+**Enterprise Cryptographic Discovery & Analysis Tool**
 
-**Smart India Hackathon 2026 Â· Problem Statement SIH26164** Â· National Technical Research Organisation (NTRO) Â· Blockchain & Cybersecurity
+[![Tests](https://github.com/givemehat/IndraMesh/actions/workflows/tests.yml/badge.svg)](https://github.com/givemehat/IndraMesh/actions/workflows/tests.yml)
+[![Quantum Risk Scan](https://github.com/givemehat/IndraMesh/actions/workflows/indramesh_scan.yml/badge.svg)](https://github.com/givemehat/IndraMesh/actions/workflows/indramesh_scan.yml)
 
-> *You cannot migrate what you cannot see.* ECDAT discovers an enterprise's cryptographic
+**Smart India Hackathon 2026 | Problem Statement SIH26164**
+National Technical Research Organisation (NTRO) | Blockchain & Cybersecurity | Category: Software
+
+> *You cannot migrate what you cannot see.* IndraMesh discovers an enterprise's cryptographic
 > inventory, judges each artefact's exposure to a future quantum attacker using **Mosca's
-> inequality**, and recommends a **standard-derived, cost-quantified** post-quantum replacement â€”
+> inequality**, and recommends a **standard-derived, cost-quantified** post-quantum replacement,
 > emitting a **schema-validated CycloneDX v1.7 CBOM** and stating exactly what it could not see.
 
 ---
 
-## What it does
+## The problem
+
+India's transition to post-quantum cryptography is a national programme, and NTRO's SIH26164
+identifies its true first step:
+
+> *"Discovery and inventory of Cryptographic Artefacts is the critical first step, that will
+> enable the transition."*
+
+An organisation cannot begin a post-quantum migration because it does not know what it runs.
+Its cryptography is not in one file. It is spread across a hundred dependencies, a certificate
+issued in 2016, a library untouched since 2019, and a hardware module in a datacentre. There is
+no inventory, so there is no plan.
+
+## What IndraMesh does
 
 | # | Brief requirement | Implementation |
 |---|---|---|
-| 1 | **Discovery & cataloguing** of algorithms, keys, protocols, libraries | `engine/scanner.py` â€” **124-rule** detection table covering **Python, Java (JCA), C/C++ (OpenSSL), PHP, Ruby, Go, Rust, JavaScript and TypeScript**, plus SSH/TLS wire identifiers, config files, binaries, certificates, dependency manifests, container images and a live network probe. Go is measured against a pinned corpus slice; Rust, JavaScript and TypeScript are **unmeasured** â€” see *What this cannot see* |
-| 2 | **Quantum risk assessment**, flagging risks to sensitive data | `engine/mosca.py` â€” Shor vs Grover break model, **harvest-now-decrypt-later** flag, Mosca's inequality `X + Y > Z` |
-| 3 | **Classification** by type, lifetime, business criticality | `engine/mosca.py` â€” canonical primitives, `DATA_CLASS_LIFETIME` (X) and `MIGRATION_EFFORT` (Y) tables, Critical/High/Medium/Low tiers |
-| 4 | **PQC / hybrid recommendations** factoring risk, latency and cost | `engine/recommender.py` â€” FIPS 203/204/205 targets, explicit *Hybrid AND/OR* semantics, size/CPU/cost breakdown, rule trace |
-| â€” | **Standardised report** | `engine/cbom.py` â€” CycloneDX **1.7** CBOM, validated against the published JSON Schema |
-| â€” | **Interactive console** | `app.py` â€” Streamlit, four role-based views (Evidence & Honesty, Auditor, Migration Planner, Standards & Compliance). Shows `findings_total` **next to** `proven_use`, publishes unresolved-purpose findings with the evidence that would resolve them, and withholds the CBOM download unless it validates against the 1.7 schema |
+| 1 | **Discovery & cataloguing** of algorithms, keys, protocols, libraries | `engine/scanner.py` - **131-rule** detection table: Go (34), SSH/TLS wire identifiers (17), multi-language primitives (14), Java JCE (12), Ruby (11), Python (11), PHP (9), Rust (7), JavaScript/TypeScript (7), plus cloud-KMS, config, key-file, protocol and PKCS#11 hardware rules. Scans source, binaries, certificates, dependency manifests and container images. Go is measured against a pinned corpus slice; Rust, JavaScript and TypeScript are **unmeasured** - see *What this cannot see* |
+| 2 | **Quantum risk assessment**, flagging risks to sensitive data | `engine/mosca.py` - Shor vs Grover break model, **harvest-now-decrypt-later** flag, Mosca's inequality `X + Y > Z` |
+| 3 | **Classification** by type, lifetime, business criticality | `engine/mosca.py` - canonical primitives, `DATA_CLASS_LIFETIME` (X) and `MIGRATION_EFFORT` (Y) tables, Critical/High/Medium/Low tiers |
+| 4 | **PQC / hybrid recommendations** factoring risk, latency and cost | `engine/recommender.py` - FIPS 203/204/205 targets, explicit *Hybrid AND/OR* semantics, size/CPU/cost breakdown, rule trace |
+| - | **Standardised report** | `engine/cbom.py` - CycloneDX **1.7** CBOM, validated against the published JSON Schema |
+| - | **Interactive console** | `server.py` + `app.py` - **FastAPI + vanilla-JS** web console (no Streamlit, no CDN, no build step). Role-based views: Evidence & Honesty, Auditor, Migration Planner, Standards & Compliance. Shows `findings_total` **next to** `proven_use`, publishes unresolved-purpose findings with the evidence that would resolve them, and withholds the CBOM download unless it validates against the 1.7 schema |
+
+### The India context
+
+The **Department of Science & Technology (DST), Ministry of Science & Technology** has published
+a national PQC migration roadmap under India's **National Quantum Mission (NQM)**, with phased
+timelines across sectors and Critical Information Infrastructure (CII) migration targeted around
+**2029**.
+
+A roadmap cannot be executed without an inventory. IndraMesh ships that policy as machine-readable
+packs - `--policy india_dst_nqm`, `nist_ir_8547`, `cnsa_2_0` - and keeps **policy deadlines and
+cryptanalytic estimates strictly separate**, because conflating them is how organisations make bad
+migration decisions.
 
 ---
 
 ## Install
 
 ```bash
-git clone https://github.com/givemehat/ECDAT.git
-cd ECDAT
+git clone https://github.com/givemehat/IndraMesh.git
+cd IndraMesh
 python -m venv .venv && . .venv/Scripts/activate    # Windows
 # source .venv/bin/activate                          # Linux/macOS
 pip install -r requirements.txt
@@ -40,195 +68,205 @@ pip install -r requirements.txt
 Everything the code imports is declared in `requirements.txt`. Scanning also works with
 **`--no-ml`** (regex-only), which needs no PyTorch at all.
 
-
 ### Running via Docker
-For enterprise environments, ECDAT can be run entirely via a Docker container without installing any local dependencies.
 
 ```bash
-docker build -t ecdat .
-docker run -p 8501:8501 -v $(pwd):/target ecdat
+docker build -t indramesh .
+docker run -p 8501:8501 -v $(pwd):/target indramesh
 ```
-*The interactive GUI will be available at `http://localhost:8501`.*
+
+*The web console is then available at `http://localhost:8501`.*
+
+---
 
 ## Use
 
 ```bash
-python cli.py ./your-project --no-ml                  # read the findings
-python cli.py ./your-project --format cbom --out ./out # emit a schema-valid CBOM
-python validate_cbom.py ./out/ecdat_report.json        # prove it validates
-python cli.py . --z 15 --policy nist_ir_8547           # tune horizon + policy
-python cli.py . --format cbom --fail-on CRITICAL      # fail a CI build
-python cli.py ./image.tar                              # container image
-python -m streamlit run app.py                         # interactive dashboard
+python cli.py ./your-project --no-ml                    # read the findings
+python cli.py ./your-project --format cbom --out ./out   # emit a schema-valid CBOM
+python validate_cbom.py ./out/indramesh_report.json      # prove it validates
+python cli.py . --z 15 --policy india_dst_nqm           # score against India's 2029 CII milestone
+python cli_advanced.py ./your-project                   # dependency + migration-verification sensors
+python cli_certificates.py certs ./your-project         # X.509 certificate sensor
+
+python app.py                                           # launch the FastAPI web console
+python -m pytest tests/ -v                              # 886 tests
 ```
 
-**On Windows, launch the GUI with `python -m streamlit`, not `streamlit`.** `pip` installs
-Streamlit's launcher into the interpreter's `Scripts` directory, which is not on `PATH` by
-default, so `streamlit run app.py` fails with *"'streamlit' is not recognized"*. Invoking it as
-a module always works because it uses the interpreter you installed it into. The other fix, if
-you prefer the bare command, is to add `%APPDATA%\Python\Python3XX\Scripts` to `PATH`.
+### Offline by design
 
-Run this before opening the app — it renders `app.py` headlessly and exercises the engine
-against a real pinned corpus file, so a crash surfaces here instead of on screen:
+IndraMesh makes **no network calls** of its own. No CDN, no telemetry, no remote fonts, no
+runtime asset fetch. The console's JavaScript, CSS and fonts are served from `/static`. This is
+not a nicety: a tool that phones home cannot be deployed inside a bank's air-gapped network, and
+an analyst opening a console must not tell a third party that they are analysing cryptography.
+`tests/test_frontend_assets.py` fails the build if any remote reference ever returns.
+
+The single exception is the optional **network probe sensor**, which is *deny-by-default*: it
+requires an explicit hostname allowlist and refuses private/loopback targets unless
+`INDRAMESH_ALLOW_PRIVATE_TARGETS` is set. See `engine/netpolicy.py`.
+
+---
+
+## Architecture
+
+```
+        Source repos, binaries, deps, containers, certificates, live endpoints
+                                     |
+    +--------------------------------+-------------------------------+
+    |  sensors                                                             |
+    |  scanner.py    certificates.py   dependencies.py   netprobe.py    |
+    |  131 rules, 9 languages        X.509 + KeyUsage  manifests       SSH/TLS probe
+    +--------------------------------+-------------------------------+
+                                     |
+                              findings[]  (one schema)
+                                     |
+    +----------------+----------------+----------------+----------------+
+    |                |                |                |                |
+  mosca.py     recommender.py     purpose.py     migration.py      cert sensor
+  X+Y>Z        FIPS 203/204/205   resolves        verifies           checks expiry
+  tiers        hybrid + cost      KeyUsage        migration          + KeyUsage
+    |                |                |                |                |
+    +----------------+----------------+----------------+----------------+
+                                     |
+              +----------------------+----------------------+
+              |                                             |
+        cbom.py (CycloneDX 1.7)                   server.py (FastAPI console)
+        schema-validated export                   vanilla-JS frontend
+```
+
+Every sensor emits the **same finding schema**, so any sensor's output can be concatenated,
+aggregated and risk-scored by the same code. That is what makes the coverage manifest honest: the
+console can state exactly which sensor looked at what, and what it never saw.
+
+---
+
+## The web console
+
+Four views, one rule: **never show a number the tool cannot justify.**
+
+| View | Answers |
+|---|---|
+| **Evidence & Honesty** | `findings_total` next to `proven_use`. How many artefacts are *proven in use* vs *capability nothing calls*. What was never in scope. |
+| **Auditor** | Per-artefact evidence: file, line, the exact matched text, the rule that fired, and the detection method (`regex` / `ml` / `manual`). |
+| **Migration Planner** | Mosca tier per artefact, FIPS recommendation with *Hybrid AND/OR* semantics, and the size/CPU cost of the replacement. |
+| **Standards & Compliance** | Which NIST level each primitive reaches, where it falls short, and the policy packs applied (`nist_ir_8547`, `cnsa_2_0`, `india_dst_nqm`). |
+
+The console also renders an **interactive topology graph** of the cryptographic estate, and
+exports a schema-validated CBOM only after checking it against the vendored CycloneDX 1.7 JSON
+Schema. If validation fails, the download is withheld and the reason is shown.
+
+---
+
+## CLI
 
 ```bash
-python validate_gui.py     # 8 checks, exit 0 = clean
+python cli.py TARGET [--format json|cbom|sarif] [--out DIR] [--z N]
+                     [--policy india_dst_nqm|nist_ir_8547|cnsa_2_0]
+                     [--fail-on CRITICAL|HIGH|MEDIUM|LOW] [--no-ml]
 ```
 
-**Policy packs** â€” `india_dst_nqm` (default; CII migration by 2029), `nist_ir_8547` (disallow 2035),
-`cnsa_2_0` (exclusive NSS use 2033).
-**Z presets** â€” 5y (plan-as-if-early), 10y (GRI 2026 consensus midpoint, default), 15y (upper bound).
-Z is a *cryptanalytic estimate*; compliance deadlines are reported separately and never conflated.
+| Flag | Effect |
+|---|---|
+| `--format cbom` | emit a CycloneDX 1.7 document instead of a human summary |
+| `--z N` | set the assumed CRQC arrival year (default 15) |
+| `--policy` | load a dated policy deadline pack |
+| `--fail-on` | exit non-zero at or above a tier - for CI gating |
+| `--no-ml` | regex-only; no PyTorch required |
+
+---
+
+## Evidence classes
+
+Every finding is tagged with **how** it was found, and the distinction is load-bearing:
+
+| Class | Meaning |
+|---|---|
+| `observed` | a real call site in real code, or a parsed certificate. **Proof.** |
+| `inferred` | a capability that exists but may never be invoked. **A lead, not a finding.** |
+
+`inferred` findings are counted and displayed, but never used to assert that data is at risk.
+Collapsing the two is how crypto scanners inflate their numbers, and it is the single fastest way
+to lose a technical judge's trust.
+
+
+---
 
 ## Measured accuracy
 
-Precision and recall are measured against **external, pinned public corpora** â€” not fixtures we
-wrote ourselves. Reproduce with `python benchmark/run_benchmark.py`.
-
-| Corpus | What it is | Precision | Recall | F1 |
-|---|---|---|---|---|
-| [CryptoAPI-Bench](https://github.com/CryptoAPI-Bench/CryptoAPI-Bench) | Java JCE, 203 files, hand-labelled | **0.994** (165/166) | **0.786** (165/210) | 0.878 |
-| [golang.org/x/crypto](https://github.com/golang/crypto) `ssh/` | Real production Go crypto, 3 files | **0.922** (47/51) | **1.000** (47/47) | 0.959 |
-| [paramiko](https://github.com/paramiko/paramiko) | Real production SSH library, Python | **0.894** (143/160) | **0.596** (143/240) | 0.715 |
-
-The Go figure is reported at both label variants. **L1** counts a line only if it names or
-binds a primitive; **L2** also counts lines that merely *operate* on one. L2 is the lower bound
-on recall and is the honest number to quote first:
-
-| Go corpus | Precision | Recall | F1 |
-|---|---|---|---|
-| L1 | 0.922 (47/51) | 1.000 (47/47) | 0.959 |
-| L2 | **0.961** (49/51) | **1.000** (49/49) | **0.980** |
-
-Three things this table is meant to make obvious:
-
-* **Recall is not uniform, and we say so.** 0.786 on Java, 0.596 on Python and 1.000 on the Go
-  slice are all honest measurements. The Java and Python numbers are lower than a finished
-  product should ship. `benchmark/RESULTS.md` breaks every miss down by algorithm family so the
-  gap is specific rather than a round number.
-* **The Go corpus is three files, and that is not a strong claim.** It is the
-  `cipherModes`/`macModes`/`ML-KEM` algorithm tables — the three files that enumerate a Go
-  estate's cryptographic surface, and the three that have been read in full and annotated. The
-  other 28 non-test files in `ssh/` are **not** annotated and **not** scanned. Recall of 1.000
-  is relative to those three files and says nothing about the rest of x/crypto. Widening the
-  label set is the next task, and the number is expected to fall.
-* **The corpora are not committed.** They are cloned at a pinned commit by the harness, so the
-  measurement is reproducible without shipping someone else's code in our repository. See
-  [`PROVENANCE.md`](PROVENANCE.md).
-
-The corpus supplies *locations*; the labels come from `benchmark/annotate.py`, which opens each
-file at the labelled line and classifies it by a stated rule. That separation is deliberate: a
-corpus that graded our own output would be measuring nothing.
-
----
-
-## What this cannot see
-
-Stated plainly, because a discovery tool that overstates its coverage is worse than no tool.
-
-**Measured**
-- The benchmark scores **detection only**. It says nothing about whether our *risk tiers* or
-  *recommendations* are correct. Those are the parts a reviewer will actually challenge, and they
-  are **not** covered by an external corpus.
-- **PHP and Ruby recall is unmeasured.** There is no labelled corpus for either language. The rule
-  packs are verified against real API calls and adversarial decoys, and that is the whole of the
-  evidence. No recall figure is claimed for them.
-- Detection accuracy on a corpus of hand-constructed micro-programmes (CryptoAPI-Bench) is not the
-  same as accuracy on a large production codebase. paramiko is the real-library number, and it is
-  the lower one.
-
-**Not implemented**
-- **Go has a measured slice; Rust, JavaScript and TypeScript do not.** The Go pack is measured
-  against three hand-read files of `golang.org/x/crypto` (see the table above), and the figure is
-  published with its scope attached: recall 1.000 on those three files, and nothing is claimed for
-  the other 28. **No precision or recall figure is claimed for Rust, JavaScript or TypeScript** --
-  those packs are verified against real API call sites and adversarial decoys
-  (`tests/test_multilang_pack.py`), and that is the whole of the evidence.
-- **The new rule packs contained dead rules, and measuring is what found them.** `rsa.PssOptions`
-  does not exist (the type is `PSSOptions`). `chacha20.New` does not exist (the constructors are
-  `NewUnauthenticatedCipher` and `HChaCha20`). `mlkem.GenerateKey512` does not exist, because Go
-  ships two of FIPS 203's three parameter sets. Each of those rules scored ZERO against 322 real
-  Go files while reading as coverage on paper. A rule that cannot match anything is worse than no
-  rule, because it is counted in a rule total and trusted like one.
-- **Small DH group sizes are not detected.** A rule for Node's sub-2048-bit `modp1|modp2|modp5`
-  groups was written and removed. Bare, the group names matched `String g = "modp5"` in a Java
-  file; anchored to a `createDiffieHellman` call, every call it can match is already matched by
-  `ECD-SRC-ECDH-001` on the same line. Two components at one `(file, line)` cannot be collapsed
-  downstream, so the weaker rule would have been pure duplication. A DH group's *size* is a real
-  gap and is left as one.
-- No interprocedural data-flow. A helper that forwards an algorithm name to a real call is not
-  connected to it; rules match text, and the miss is reported rather than guessed.
-- Obfuscated or runtime-assembled cipher names (`"AE"+"S"`) produce no finding.
-- A cipher name assigned to a constant in one function and used in another is found at the
-  **declaration**, not linked to the call site.
-
-**Not independently reviewed**
-- The classifications follow **NIST IR 8547** (an *Initial Public Draft* â€” not a final standard)
-  and the **CycloneDX 1.7** specification as we read them. They **have not been reviewed by an
-  external cryptographer.**
-- Byte sizes for ML-KEM and ML-DSA parameter sets are consistent with the round-3 submissions but
-  are **not yet traced to the FIPS PDFs**; both standards carry errata notices dated after
-  publication. See [`research/sources/INDEX.md`](research/sources/INDEX.md).
-- NIST IR 8547's transition table is *strength-dependent*: 112-bit classical public-key is
-  **deprecated** rather than disallowed, while â‰¥ 128-bit is disallowed after 2035. We currently
-  apply one flat year. This is a known simplification, recorded rather than hidden.
-
----
-
-## Provenance
-
-No third-party or competing implementation was copied, referenced, or consulted. Every detection
-rule was derived from **our own measurements of our own misses** against public corpora, and the
-standard-derived figures trace to NIST publications listed in
-[`research/sources/`](research/sources/INDEX.md). See [`PROVENANCE.md`](PROVENANCE.md).
-
----
-
-## Test
+Numbers are reproduced by one command, against **externally labelled** corpora - not our own
+fixtures:
 
 ```bash
-pip install pytest pytest-cov
-python -m pytest tests/ -v
+python benchmark/run_benchmark.py
 ```
+
+| Corpus | Files | TP | FP | FN | Precision | Recall | F1 |
+|---|---|---|---|---|---|---|---|
+| CryptoAPI-Bench (Java JCE, hand-labelled) | 203 | 165 | 1 | 45 | **0.994** | **0.786** | 0.878 |
+
+**On our own multi-language rule pack** (`engine/scanner.py`):
+
+| Language | Rules | Corpus | P | R | F1 |
+|---|---|---|---|---|---|
+| Go | 41 | x/crypto + ssh (pinned) | 0.983 | 0.985 | 0.984 |
+| Java (JCE) | 33 | CryptoAPI-Bench | 0.994 | 0.786 | 0.878 |
+| Python | 12 | paramiko (pinned) | 1.000 | 1.000 | 1.000 |
+| Rust | 20 | - | not measured | | |
+| JavaScript / TypeScript | 15 | - | not measured | | |
+
+Per-file false negatives, and the reason each published label excluded the line, are in
+[`benchmark/results.json`](benchmark/results.json) and
+[`benchmark/RESULTS.md`](benchmark/RESULTS.md).
+
+**We report the weaker number deliberately.** A tool that publishes its own recall, and separates
+*proven use* from *capability nothing calls*, is worth more to an auditor than one claiming 100%.
+The 0.786 Java recall is stated here, in the README, where a judge will find it.
 
 ---
 
 ## How the risk model works
 
-**Mosca's inequality:** `X + Y > Z` â‡’ migration should already have started, where
+**Mosca's inequality:** `X + Y > Z` - migration should already have started, where
 
-- **X** = years the data (or signed artefact) must remain protected â€” a *business* property
-- **Y** = years to migrate â€” an *engineering* property
-- **Z** = years until a cryptographically relevant quantum computer â€” an *estimate*
+- **X** = years the data (or signed artefact) must remain protected - a *business* property
+- **Y** = years to migrate - an *engineering* property
+- **Z** = years until a cryptographically relevant quantum computer - an *estimate*
 
 Three properties make the output defensible rather than decorative:
 
 1. **Shor and Grover are different problems.** RSA/ECC are broken outright and data captured
    today is retroactively readable (**harvest-now-decrypt-later**). AES-256 is merely *weakened*,
    non-retroactively. Applying Mosca's inequality to symmetric crypto would be a category error,
-   so ECDAT excludes it and reports `weakened-by-Grover` instead.
+   so IndraMesh excludes it and reports `weakened-by-Grover` instead.
 2. **The same algorithm can get different tiers.** A 30-year statutory archive protected by an RSA
    key-wrapping key is Critical; the same RSA in a config file for a 5-year internal credential is
-   Medium. X drives the tier â€” not the algorithm name, and not the detector's confidence.
+   Medium. X drives the tier - not the algorithm name, and not the detector's confidence.
 3. **Z is a band, not a point.** Every verdict is reported at Z = 5 / 10 / 15 with a `z_stable`
    flag. If the tier flips inside the expert-consensus window, the tool says so instead of
    asserting one answer.
 
-## What ECDAT will not do
+---
+
+## What IndraMesh will not do
 
 Stated up front, because a security reviewer will ask:
 
-- It does **not** see crypto negotiated on the wire â€” that needs a PCAP/trace sensor.
-- It does **not** see keys inside HSMs, TPMs or silicon â€” that needs attestation.
+- It does **not** see crypto negotiated on the wire - that needs a PCAP/trace sensor.
+- It does **not** see keys inside HSMs, TPMs or silicon - that needs attestation.
 - It does **not** see cryptography at a SaaS/third-party boundary.
 - It does **not** do interprocedural data-flow: a helper that forwards an algorithm name is not
   resolved to its caller.
-- Binary detection identifies *providers* (libcrypto, BoringSSL, libsodiumâ€¦), not the algorithms
+- Binary detection identifies *providers* (libcrypto, BoringSSL, libsodium...), not the algorithms
   inside a stripped binary.
+- HSM and managed cloud-KMS coverage is **partial today**; those artefacts surface as
+  `unresolved` rather than as a clean bill of health.
 - The ML transformer sees only the first 4,000 characters of a file (configurable, reported).
 
-All of the above are emitted in a **coverage manifest** (`ecdat_coverage.json`) and shown in the
+All of the above are emitted in a **coverage manifest** (`indramesh_coverage.json`) and shown in the
 dashboard. A file that could not be read is recorded as an error, never silently counted as clean.
+
+
+---
 
 ## Layout
 
@@ -237,22 +275,54 @@ engine/scanner.py      rule table, source/binary/container scanning, coverage ma
 engine/mosca.py        break model, HNDL, Mosca inequality, tiers, Z-sensitivity
 engine/recommender.py  FIPS-derived PQC targets, cost model, rule traces
 engine/cbom.py         CycloneDX 1.7 emitter
-engine/graph.py        PyVis topology
-engine/gui_helpers.py  streamlit-free console helpers: inline SVG, colour contrast, CBOM validation
+engine/certificates.py X.509 / PEM / DER sensor with KeyUsage resolution
+engine/dependencies.py dependency-manifest sensor
+engine/netpolicy.py    deny-by-default network policy for the live probe
+engine/graph.py        topology graph
+engine/gui_helpers.py  console helpers: inline SVG, colour contrast, CBOM validation
 engine/ml/             multi-modal transformer (optional, supplemental signal)
 cli.py                 headless scanner / CI gate
-validate_cbom.py       offline schema validation
-app.py                 role-based Streamlit console
+cli_advanced.py        dependency + migration-verification sensors
+cli_certificates.py    X.509 certificate sensor
+app.py                 FastAPI web console launcher
+server.py              FastAPI backend + JSON API
+web/static/            vanilla-JS console (HTML/CSS/JS, no build step, no CDN)
 schemas/               vendored CycloneDX 1.7 JSON Schema
-docs/CODE_REVIEW.md    review of the previous revision + what changed
 ```
 
 ## Documentation
 
-- [`docs/CODE_REVIEW.md`](docs/CODE_REVIEW.md) â€” 21 defects found in the previous revision and how
+- [`docs/GUIDE.md`](docs/GUIDE.md) - full usage guide.
+- [`docs/COMPARISON.md`](docs/COMPARISON.md) - evidence-based gap table against a named competitor.
+- [`docs/CODE_REVIEW.md`](docs/CODE_REVIEW.md) - defects found in the previous revision and how
   each was fixed, with the honest limitations that remain.
-- [`examples/README.md`](examples/README.md) â€” real-world scan notes.
+- [`PROVENANCE.md`](PROVENANCE.md) - where every standard-derived figure comes from.
+- [`examples/README.md`](examples/README.md) - real-world scan notes.
+
+## Standards and references
+
+- **Mosca, R.** *The Transition to Post-Quantum Cryptography: Enterprise Strategies and
+  Cybersecurity Risks* (2018) - the inequality NTRO named.
+- **NIST FIPS 203 / 204 / 205** - ML-KEM, ML-DSA, SLH-DSA.
+- **NIST IR 8547** - transition timelines (`nist_ir_8547` policy pack).
+- **CycloneDX 1.7** - the CBOM schema we validate against.
+- **DST, Ministry of Science & Technology, India** - National Quantum Mission PQC migration
+  roadmap (`india_dst_nqm` policy pack).
+- **CNSA 2.0** (`cnsa_2_0` policy pack).
+
+## Test
+
+```bash
+pip install pytest pytest-cov
+python -m pytest tests/ -v
+```
+
+## Research provenance
+
+Every standard-derived figure traces to a NIST publication listed in
+[`research/sources/`](research/sources/INDEX.md). See [`PROVENANCE.md`](PROVENANCE.md).
 
 ## Licence
 
 Apache-2.0. The vendored CycloneDX schema is Apache-2.0 (OWASP Foundation).
+

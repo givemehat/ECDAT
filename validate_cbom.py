@@ -4,7 +4,7 @@ The previous validate_real_world.py printed "Skipping schema validation due to 4
 URL" -- i.e. the document was never actually checked. This does the check, offline, against a
 schema fetched once and cached in the repository (schemas/bom-1.7.schema.json).
 
-    python validate_cbom.py ecdat_report.json [schemas/bom-1.7.schema.json]
+    python validate_cbom.py indramesh_report.json [schemas/bom-1.7.schema.json]
 Exit code 0 = valid, 1 = invalid, 2 = schema unavailable.
 """
 import json

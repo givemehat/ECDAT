@@ -1,4 +1,4 @@
-"""Visual system for the ECDAT console.
+"""Visual system for the IndraMesh console.
 
 WHY A SEPARATE MODULE
 ---------------------
@@ -94,13 +94,13 @@ h2 { font-size: 1.9rem !important; }
 h3 { font-size: 1.4rem !important; }
 h4 { font-size: 1.12rem !important; }
 p, li, span, label { color: var(--ink); }
-.ecdat-sub, [data-testid="stCaptionContainer"] p {
+.indramesh-sub, [data-testid="stCaptionContainer"] p {
   color: var(--ink-dim) !important; font-family: var(--mono); font-size: 0.82rem !important;
 }
 
 /* Every number is monospaced and tabular, so a column of figures aligns and a reviewer can compare
    magnitudes without reading the labels. */
-.ecdat-mono, code, pre, [data-testid="stMetricValue"] {
+.indramesh-mono, code, pre, [data-testid="stMetricValue"] {
   font-family: var(--mono) !important;
   font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' 1;
 }
@@ -171,12 +171,12 @@ input[type="range"] { accent-color: var(--signal-info); }
                                              border-bottom-color: var(--signal-info); }
 
 /* ---- base for the primitives defined in app.py and gui_helpers -------------------------------- */
-.ecdat-chip { display:inline-block; padding:1px 9px; border-radius:2px; font-size:0.72rem;
+.indramesh-chip { display:inline-block; padding:1px 9px; border-radius:2px; font-size:0.72rem;
               font-weight:600; letter-spacing:0.04em; font-family:var(--mono);
               text-transform:uppercase; border:1px solid rgba(255,255,255,.12); }
-.ecdat-title { font-family: var(--display); font-size:1.6rem; line-height:1.15; margin:0; }
-.ecdat-mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
-.ecdat-foot { font-family: var(--mono); font-size: 0.76rem; color: var(--ink-faint); }
+.indramesh-title { font-family: var(--display); font-size:1.6rem; line-height:1.15; margin:0; }
+.indramesh-mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.indramesh-foot { font-family: var(--mono); font-size: 0.76rem; color: var(--ink-faint); }
 hr, [data-testid="stDivider"] { border-color: var(--panel-edge) !important; }
 
 /* ---- motion ---------------------------------------------------------------------------------
@@ -261,7 +261,7 @@ def proof_bar(proven, total, *, label="proven use", caption=None):
         f'<i style="width:{pct:.2f}%"></i></div>'
         f'<div class="ec-proof-legend"><span>{proven} {label}</span>'
         f'<span>{remainder} other finding{"s" if remainder != 1 else ""}</span></div>'
-        + (f'<div class="ecdat-foot" style="margin-top:4px">{escape(str(caption))}</div>'
+        + (f'<div class="indramesh-foot" style="margin-top:4px">{escape(str(caption))}</div>'
            if caption else ""))
 
 
@@ -422,13 +422,13 @@ def risk_ring_panel(payload):
     """
     if not payload or not payload.get("total"):
         return ('<div class="ec-ring-wrap">'
-                '<p class="ecdat-foot" style="margin:0">No findings. That is not a clean bill of '
+                '<p class="indramesh-foot" style="margin:0">No findings. That is not a clean bill of '
                 'health &mdash; an unreadable tree produces exactly the same empty result. Check '
                 'the coverage manifest.</p></div>')
     colour = score_colour(payload.get("tier"))
     return (
         f'<div class="ec-ring-wrap">{score_ring_svg(payload)}'
-        f'<p class="ecdat-foot" style="margin:.4rem 0 0">'
+        f'<p class="indramesh-foot" style="margin:.4rem 0 0">'
         f'<span style="color:{colour}">{escape(str(payload.get("shor_broken", 0)))}</span> of '
         f'<span style="color:var(--ink)">{escape(str(payload.get("total", 0)))}</span> findings are '
         f'broken by a quantum computer. Method: {escape(str(payload.get("method", "")))}. A coarse '

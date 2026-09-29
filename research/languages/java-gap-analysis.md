@@ -42,7 +42,7 @@ Read first, because it fixes everything else.
 * `score()` (line 133) walks the findings; if a finding's `(file, line)` is in that set the
   location is a hit, otherwise **every** finding there is a false positive. `tp = len(hit)`,
   `fn = len(positives) - tp`.
-* `ECDATScanner(enable_ml=False).scan_directory(...)` is the system under test, and the
+* `IndraMeshScanner(enable_ml=False).scan_directory(...)` is the system under test, and the
   scanner is passed the **absolute** path, so `f["_loc"]` is `relpath(file, corpus_root)` —
   which is what the label `file` field holds. There is no path-normalisation slack.
 * `describe()` (line 151) is what lets the harness tell a *miss* from a *mislabel*; I reuse
@@ -193,13 +193,13 @@ committed label on all 164 (`'MD2'->('MD2','grover')`, `'IDEA'->('IDEA','grover'
 ```
 === A. COUNTERFACTUAL: canonical Java line -> rules that fire ===
 Cipher cipher = Cipher.getInstance("AES");                       *** NONE ***
-Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");      ['ECD-SRC-AES-001']
-Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");      ['ECD-SRC-AES-001']
+Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");      ['IM-SRC-AES-001']
+Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");      ['IM-SRC-AES-001']
 Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");      *** NONE ***
 Cipher cipher = Cipher.getInstance("DESede/ECB/PKCS5Padding");   *** NONE ***
 Cipher cipher = Cipher.getInstance("Blowfish/ECB/PKCS5Padding"); *** NONE ***
 Cipher cipher = Cipher.getInstance("RC2/ECB/PKCS5Padding");      *** NONE ***
-Cipher cipher = Cipher.getInstance("RC4");                       ['ECD-CFG-LEGACY-001']
+Cipher cipher = Cipher.getInstance("RC4");                       ['IM-CFG-LEGACY-001']
 Cipher cipher = Cipher.getInstance("IDEA/ECB/PKCS5Padding");     *** NONE ***
 KeyGenerator keyGen = KeyGenerator.getInstance("AES");           *** NONE ***
 KeyGenerator keyGen = KeyGenerator.getInstance("DES");           *** NONE ***
@@ -224,16 +224,16 @@ alternative bolted on:
 
 | rule | JCA alternative it contains |
 |---|---|
-| `ECD-SRC-RSA-003` | `KeyPairGenerator\.getInstance\(\s*["']RSA["']\s*\)` |
-| `ECD-SRC-ECDH-001` | `KeyAgreement\.getInstance\(\s*["']ECDH` |
-| `ECD-SRC-ECDSA-001` | `Signature\.getInstance\(\s*["'](SHA\d+withECDSA\|ECDSA)` |
-| `ECD-SRC-ECC-001` | `KeyPairGenerator\.getInstance\(\s*["']EC["']\s*\)` |
-| `ECD-SRC-DSA-001` | `KeyPairGenerator\.getInstance\(\s*["']DSA` |
-| `ECD-SRC-DH-001` | `KeyAgreement\.getInstance\(\s*["']DH` |
-| `ECD-SRC-AES-001` | `Cipher\.getInstance\(\s*["']AES/(?:GCM\|CBC\|CTR\|ECB)` |
-| `ECD-SRC-SHA2-001` | `MessageDigest\.getInstance\(\s*["']SHA-?256` |
-| `ECD-SRC-SHA1-001` | `MessageDigest\.getInstance\(\s*["']SHA-?1["']` |
-| `ECD-SRC-MD5-001` | `MessageDigest\.getInstance\(\s*["']MD5["']` |
+| `IM-SRC-RSA-003` | `KeyPairGenerator\.getInstance\(\s*["']RSA["']\s*\)` |
+| `IM-SRC-ECDH-001` | `KeyAgreement\.getInstance\(\s*["']ECDH` |
+| `IM-SRC-ECDSA-001` | `Signature\.getInstance\(\s*["'](SHA\d+withECDSA\|ECDSA)` |
+| `IM-SRC-ECC-001` | `KeyPairGenerator\.getInstance\(\s*["']EC["']\s*\)` |
+| `IM-SRC-DSA-001` | `KeyPairGenerator\.getInstance\(\s*["']DSA` |
+| `IM-SRC-DH-001` | `KeyAgreement\.getInstance\(\s*["']DH` |
+| `IM-SRC-AES-001` | `Cipher\.getInstance\(\s*["']AES/(?:GCM\|CBC\|CTR\|ECB)` |
+| `IM-SRC-SHA2-001` | `MessageDigest\.getInstance\(\s*["']SHA-?256` |
+| `IM-SRC-SHA1-001` | `MessageDigest\.getInstance\(\s*["']SHA-?1["']` |
+| `IM-SRC-MD5-001` | `MessageDigest\.getInstance\(\s*["']MD5["']` |
 
 Read down the `Cipher` column: AES is enumerated, nothing else is. Read across
 `KeyGenerator`, `Mac`, `SecretKeySpec`, `SecretKeyFactory`: **absent entirely.** The table
@@ -263,7 +263,7 @@ second, separate code path):
 
 Perfect recall on SHA-256, and exactly zero on seven primitives. Zero is not a tuning
 result; it is the signature of an absent enumeration. Note that RC4 scores 0.667 *by
-accident* — it is caught by `ECD-CFG-LEGACY-001`, a config rule whose regex is
+accident* — it is caught by `IM-CFG-LEGACY-001`, a config rule whose regex is
 `\b(3DES|DES-CBC3|RC4|NULL-SHA|EXPORT)\b`, i.e. RC4 is a member of a deprecation list, not
 a recognised cipher.
 
@@ -297,10 +297,10 @@ decision, rather than assuming. Reporting these as gaps would have inflated the 
 | `PBEParameterSpec` | 20 | 0 | **Inapplicable.** Same. |
 | `PBEWith<hash>And<cipher>` strings | **0** | 0 | **Inapplicable.** Zero occurrences. |
 | ECB mode as a *mode* finding | 18 lines mention `ECB` | 14 | **Partly a red herring.** All 14 positive `ECB` lines are positive because of the *primitive* in the string (`DES/ECB/…`, `AES/ECB/…`), not because ECB is a mode. They are already counted in categories 1 and 3. 12 of 14 are misses; **2 are hits** — `EcbInSymmCryptoABPSCase1.java:13` and `EcbInSymmCryptoBBCase1.java:14`, both `Cipher.getInstance("AES/ECB/PKCS5Padding")`, caught by the `AES/(?:GCM\|CBC\|CTR\|ECB)` alternation. |
-| `Signature.getInstance` | **0** | 0 | **Inapplicable here.** Zero occurrences. (Caveat: `ECD-SRC-ECDSA-001` *does* contain a `Signature.getInstance` alternative, so I cannot claim "no Signature rule" — only that this corpus never calls it, so its absence costs nothing.) |
+| `Signature.getInstance` | **0** | 0 | **Inapplicable here.** Zero occurrences. (Caveat: `IM-SRC-ECDSA-001` *does* contain a `Signature.getInstance` alternative, so I cannot claim "no Signature rule" — only that this corpus never calls it, so its absence costs nothing.) |
 | `KeyAgreement.getInstance` | **0** | 0 | **Inapplicable here.** Zero occurrences; same caveat as above. |
 | `SecretKeyFactory.getInstance` | **0** | 0 | **Inapplicable.** Zero occurrences. |
-| `KeyPairGenerator.getInstance` | 6 | **6** | **Not a miss.** All 6 are `getInstance("RSA")` and all 6 are already hits via `ECD-SRC-RSA-003`. |
+| `KeyPairGenerator.getInstance` | 6 | **6** | **Not a miss.** All 6 are `getInstance("RSA")` and all 6 are already hits via `IM-SRC-RSA-003`. |
 | `KeyStore.getInstance` | 10 | 0 | **Inapplicable.** Labelled negative — "KeyStore container format (JKS), not a cryptographic primitive" (`annotate.py` line 125). |
 | `cipher.init` / `dec.init` | 71 | 0 | **L2-only.** All 71 labelled negative in L1: "operates on a primitive chosen elsewhere; names no primitive". See §7. |
 | `SecureRandom` | 123 | 0 | **Inapplicable.** A PRNG, excluded at `annotate.py` line 120. |
@@ -329,9 +329,9 @@ named differently from the label** — and the harness scores them as TPs anyway
 
 | label says | we emit | rule | count |
 |---|---|---|---|
-| RC4 | `LEGACY-CIPHER` | `ECD-CFG-LEGACY-001` | 8 |
-| SHA-256 | `SHA256` | `ECD-SRC-SHA2-001` | 5 |
-| SHA-1 | `SHA1` | `ECD-SRC-SHA1-001` | 2 |
+| RC4 | `LEGACY-CIPHER` | `IM-CFG-LEGACY-001` | 8 |
+| SHA-256 | `SHA256` | `IM-SRC-SHA2-001` | 5 |
+| SHA-1 | `SHA1` | `IM-SRC-SHA1-001` | 2 |
 
 ```
 .../brokencrypto/BrokenCryptoBBCase3.java:14  label=RC4  we emit LEGACY-CIPHER  (Cipher.getInstance("RC4"))

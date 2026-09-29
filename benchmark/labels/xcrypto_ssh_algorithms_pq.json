@@ -12,7 +12,7 @@
   "annotation_method": "INDEPENDENT TOKEN SWEEP, then hand adjudication of every hit. The sweep token list was written from the Go standard library package names, the SSH wire-identifier sets in RFC 4253/5656/8731, and NIST SP 800-131A -- NOT from engine/scanner.py. A sweep derived from the tool's own rules would label every finding positive and make every miss invisible. Each swept line was then read and judged against the criterion in benchmark/labels/README.md; the residue is negative by exhaustion."
  },
  "annotation": {
-  "annotated_by": "ECDAT benchmark harness author, by direct reading of every line in scope",
+  "annotated_by": "IndraMesh benchmark harness author, by direct reading of every line in scope",
   "unit": "one (file, 1-based line) location",
   "files_in_scope": 3,
   "candidate_lines_swept": 94,
@@ -1059,7 +1059,7 @@
    "break_model": "none",
    "L1_verdict": "X",
    "code": "mlkemDk, err := mlkem.NewDecapsulationKey768(seed)",
-   "reason": "ECDAT correctly detects ML-KEM-768 here, and that detection is USEFUL. It is still not a POSITIVE under this criterion, which counts quantum-VULNERABLE primitives. ML-KEM is the remedy, so a correct detection counts against precision. Recorded so the scored precision is interpretable."
+   "reason": "IndraMesh correctly detects ML-KEM-768 here, and that detection is USEFUL. It is still not a POSITIVE under this criterion, which counts quantum-VULNERABLE primitives. ML-KEM is the remedy, so a correct detection counts against precision. Recorded so the scored precision is interpretable."
   }
  ]
 }

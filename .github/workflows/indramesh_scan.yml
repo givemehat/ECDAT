@@ -1,4 +1,4 @@
-name: ECDAT Quantum Risk Scan
+name: IndraMesh Quantum Risk Scan
 
 on:
   push:
@@ -32,7 +32,7 @@ jobs:
     # bad-argument crash all exited 0, and the most alarming message the tool can emit was
     # printed for a plain crash. Only signal 1 (the gate tripping) is downgraded here; anything
     # >= 2 is a real failure and still fails the job.
-    - name: Run ECDAT scan
+    - name: Run IndraMesh scan
       run: |
         export PYTHONPATH=.
         set +e
@@ -40,25 +40,25 @@ jobs:
         rc=$?
         set -e
         if [ "$rc" -eq 0 ]; then
-          echo "ECDAT scan completed with no CRITICAL finding."
+          echo "IndraMesh scan completed with no CRITICAL finding."
         elif [ "$rc" -eq 1 ]; then
-          echo "::warning::ECDAT found CRITICAL quantum risk (see artefacts)"
+          echo "::warning::IndraMesh found CRITICAL quantum risk (see artefacts)"
         else
-          echo "::error::ECDAT scan failed to run (exit $rc) -- this is a tool failure, not a finding"
+          echo "::error::IndraMesh scan failed to run (exit $rc) -- this is a tool failure, not a finding"
           exit "$rc"
         fi
 
     - name: Summarise
       if: always()
       run: |
-        echo "### ECDAT CBOM" >> "$GITHUB_STEP_SUMMARY"
-        if [ -f ./out/ecdat_report.json ]; then
-          echo "CBOM emitted: \`out/ecdat_report.json\`" >> "$GITHUB_STEP_SUMMARY"
+        echo "### IndraMesh CBOM" >> "$GITHUB_STEP_SUMMARY"
+        if [ -f ./out/indramesh_report.json ]; then
+          echo "CBOM emitted: \`out/indramesh_report.json\`" >> "$GITHUB_STEP_SUMMARY"
         fi
-        if [ -f ./out/ecdat_coverage.json ]; then
+        if [ -f ./out/indramesh_coverage.json ]; then
           python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
         import json
-        c = json.load(open("./out/ecdat_coverage.json"))
+        c = json.load(open("./out/indramesh_coverage.json"))
         print(f"Files scanned: {c['files_scanned']}, skipped: {c['files_skipped']}")
         print(f"ML engine: {c['ml_reason']}")
         print("Never in scope:")
@@ -71,5 +71,5 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: ecdat-report
+        name: indramesh-report
         path: out/

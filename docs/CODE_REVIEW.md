@@ -1,4 +1,4 @@
-# Code Review — ECDAT (SIH26164)
+# Code Review — IndraMesh (SIH26164)
 
 **Reviewer:** automated review, 2026-09-25 · **Baseline:** commit `88caaf2` ("Part C")
 **Method:** static reading of all 34 source files, dependency audit, schema validation against the real CycloneDX 1.7 JSON Schema, and empirical test runs.
@@ -44,7 +44,7 @@ Test suite: **34 passed** before (but only after manual dependency installation)
 
 And `validate_real_world.py` printed **`"Skipping schema validation due to 404 on schema URL..."`** — the document was never verified.
 
-**Fixed:** emits CycloneDX **1.7** using the exact enum from the published schema, with `nistQuantumSecurityLevel`, standard `algorithmProperties`, `evidence.occurrences` provenance, `ecd:`-namespaced extensions, and protocols modelled as `assetType: "protocol"` + `protocolProperties`. The schema is vendored in `schemas/`, `validate_cbom.py` validates offline, and `tests/test_cbom_schema.py` fails the build on any violation.
+**Fixed:** emits CycloneDX **1.7** using the exact enum from the published schema, with `nistQuantumSecurityLevel`, standard `algorithmProperties`, `evidence.occurrences` provenance, `im:`-namespaced extensions, and protocols modelled as `assetType: "protocol"` + `protocolProperties`. The schema is vendored in `schemas/`, `validate_cbom.py` validates offline, and `tests/test_cbom_schema.py` fails the build on any violation.
 
 > **On my own process:** the first schema run of my rewritten emitter failed with 6 errors — I had guessed `key-agreement` where the schema says `key-agree`, and assumed `protocol` was a valid primitive when it is not. The schema caught my guesswork. That is exactly the class of error the original "skipping validation" note was hiding.
 

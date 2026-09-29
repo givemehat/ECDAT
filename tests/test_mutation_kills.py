@@ -25,7 +25,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from engine.mosca import _horizon_type, _tier, calculate_risk
 from engine.recommender import NO_ACTION, get_pqc_recommendation
-from engine.scanner import ECDATScanner
+from engine.scanner import IndraMeshScanner
 
 
 # ===========================================================================================
@@ -261,7 +261,7 @@ def test_kills_SCAN01_unreadable_file_is_recorded_as_an_error(tmp_path):
     p.write_text("key = rsa.newkeys(2048)\n", encoding="utf-8")
     os.chmod(p, 0o000)
     try:
-        scanner = ECDATScanner(enable_ml=False)
+        scanner = IndraMeshScanner(enable_ml=False)
         scanner.scan_directory(str(tmp_path))
         assert any("unreadable" in e["reason"] for e in scanner.errors), (
             f"an unreadable file must be named; errors={scanner.errors}")
@@ -285,7 +285,7 @@ def test_kills_SCAN01_oserror_is_recorded_platform_independently(tmp_path, monke
         return real_open(path, *a, **kw)
 
     monkeypatch.setattr("builtins.open", exploding_open)
-    scanner = ECDATScanner(enable_ml=False)
+    scanner = IndraMeshScanner(enable_ml=False)
     findings = scanner.scan_directory(str(tmp_path))
     monkeypatch.undo()
 
@@ -300,7 +300,7 @@ def test_kills_SCAN01_undecodable_file_is_recorded(tmp_path):
     """The portable sibling of the above: invalid UTF-8 must also be recorded, not ignored."""
     p = tmp_path / "bad.py"
     p.write_bytes(b"\xff\xfe\x00\x00invalid utf8")
-    scanner = ECDATScanner(enable_ml=False)
+    scanner = IndraMeshScanner(enable_ml=False)
     findings = scanner.scan_directory(str(tmp_path))
     assert findings == []
     assert scanner.errors, "an undecodable file must be recorded as an error"
@@ -328,7 +328,7 @@ def test_kills_SCAN03_symlink_escape_is_skipped_and_recorded(tmp_path):
     except OSError:
         pytest.skip("symlink creation not permitted on this host")
 
-    scanner = ECDATScanner(enable_ml=False)
+    scanner = IndraMeshScanner(enable_ml=False)
     findings = scanner.scan_directory(str(root))
     assert findings == [], f"a symlink out of the root must not be scanned: {findings}"
     assert scanner.errors, "the skip must be recorded, not silent"
@@ -338,7 +338,7 @@ def test_kills_SCAN03_symlink_escape_is_skipped_and_recorded(tmp_path):
 
 def test_kills_SCAN03_scan_root_refusal_is_recorded(tmp_path):
     """A nonexistent root is a recorded error, never an exception."""
-    scanner = ECDATScanner(enable_ml=False)
+    scanner = IndraMeshScanner(enable_ml=False)
     assert scanner.scan_directory(str(tmp_path / "does-not-exist")) == []
     assert scanner.errors, "a missing path must be recorded as an error"
 
@@ -363,7 +363,7 @@ def test_kills_SCAN03_containment_check_is_enforced_platform_independently(tmp_p
         return real_realpath(path_)
 
     monkeypatch.setattr("engine.scanner.resolve_within", fake_resolve)
-    scanner = ECDATScanner(enable_ml=False)
+    scanner = IndraMeshScanner(enable_ml=False)
     findings = scanner.scan_directory(str(root))
     monkeypatch.undo()
 

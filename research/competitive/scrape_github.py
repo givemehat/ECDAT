@@ -1,4 +1,4 @@
-"""Scrape the GitHub search API for projects competing on SIH26164 (ECDAT).
+"""Scrape the GitHub search API for projects competing on SIH26164 (IndraMesh).
 
 Scope: cryptographic bill of materials, post-quantum crypto discovery/migration tooling,
 quantum risk assessment, and CBOM generation. Raw JSON is written to raw/ so every claim in the
@@ -15,7 +15,7 @@ import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 RAW = os.path.join(HERE, "raw")
-UA = {"User-Agent": "ecdat-competitive-research",
+UA = {"User-Agent": "indramesh-competitive-research",
       "Accept": "application/vnd.github+json"}
 API = "https://api.github.com/search/repositories"
 

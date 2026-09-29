@@ -1,5 +1,5 @@
 ﻿"""
-Seeded fuzz tests for the ECDAT scanner (task HAND-160).
+Seeded fuzz tests for the IndraMesh scanner (task HAND-160).
 
 A fuzzer earns its place only if its assertions can fail. This one asserts three things the
 scanner's own docstring promises and the example-based suite never checked:
@@ -35,7 +35,7 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from engine.scanner import ECDATScanner
+from engine.scanner import IndraMeshScanner
 
 # --------------------------------------------------------------------------------------------
 # Fixed seeds. Changing any of these changes which cases run; do not change them casually.
@@ -83,7 +83,7 @@ class FuzzFailure(AssertionError):
 
 
 def _scanner():
-    return ECDATScanner(enable_ml=False)
+    return IndraMeshScanner(enable_ml=False)
 
 
 def _write(root, name, blob):

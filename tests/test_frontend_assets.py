@@ -39,7 +39,7 @@ def _read(path):
 
 
 @pytest.mark.parametrize("name", ["index.html", "css/style.css", "js/app.js",
-                                  "js/icons.js", "js/topology.js"])
+                                  "js/icons.js", "js/topology.js", "js/framer-motion.js"])
 def test_no_front_end_asset_references_a_remote_host(name):
     """The no-network guarantee, enforced on the actual shipped bytes.
 
@@ -171,7 +171,7 @@ def test_the_console_javascript_files_parse():
     import shutil
     import subprocess
     node = shutil.which("node")
-    for name in ("app.js", "icons.js", "topology.js"):
+    for name in ("app.js", "icons.js", "topology.js", "framer-motion.js"):
         path = os.path.join(STATIC, "js", name)
         if not os.path.exists(path):
             continue

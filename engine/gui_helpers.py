@@ -1,4 +1,4 @@
-"""Presentation-neutral helpers for the ECDAT console (`app.py`).
+"""Presentation-neutral helpers for the IndraMesh console (`app.py`).
 
 WHY THIS FILE EXISTS
 --------------------
@@ -203,7 +203,7 @@ def escape(text) -> str:
 
 def chip(text, colour: str) -> str:
     """A labelled pill. The label is mandatory: colour is never the only channel."""
-    return (f'<span class="ecdat-chip" style="background:{colour};color:{ink_on(colour)}">'
+    return (f'<span class="indramesh-chip" style="background:{colour};color:{ink_on(colour)}">'
             f'{escape(text)}</span>')
 
 def bar_chart_svg(entries, *, aria_label: str, empty_label: str = "0 findings",
@@ -339,7 +339,7 @@ def is_unresolved(record) -> bool:
 
 
 # The three outcomes a finding can have against a policy deadline. UNRATED is a real third state,
-# not a formatting detail: a finding with no risk result is one ECDAT could not assess, and
+# not a formatting detail: a finding with no risk result is one IndraMesh could not assess, and
 # counting it as compliant asserts a safety claim the scan never made.
 DEADLINE_WITHIN = "within window"
 DEADLINE_OVERRUN = "OVERRUN"

@@ -16,8 +16,8 @@ venv/
 env/
 
 # ---- Local scan artefacts ----
-ecdat_report.json
-ecdat_recommendations.json
+indramesh_report.json
+indramesh_recommendations.json
 *.log
 
 # ---- Scratch ----
@@ -64,6 +64,12 @@ benchmark/corpora/
 
 # Reference attachment from the SIH deck comparison; unreadable (truncated archive), kept local only
 _ref/
+
+# ---- SIH pitch kit: private working notes ----
+# Contains the problem-statement ID, our measured weak spots, and judge-question strategy.
+# Strategy material must never reach the public repo or the judging panel.
+SIH_PITCH_private.md
+*_PITCH_private.md
 
 # Reference repos
 reference_repos/

@@ -1,5 +1,5 @@
 /**
- * ECDAT Curated SVG Icons (Lucide-inspired)
+ * IndraMesh Curated SVG Icons (Lucide-inspired)
  * High-precision vector graphics with accessible sizing and stroke control.
  * Rule: Zero emoji as icons.
  */

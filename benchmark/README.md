@@ -1,6 +1,6 @@
 # External accuracy benchmark
 
-Measures `engine.scanner.ECDATScanner` for **quantum-vulnerable cryptographic use** against
+Measures `engine.scanner.IndraMeshScanner` for **quantum-vulnerable cryptographic use** against
 **externally sourced** corpora pinned by commit SHA, scored against committed line-level
 ground truth.
 

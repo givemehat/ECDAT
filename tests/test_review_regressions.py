@@ -133,16 +133,16 @@ def test_finite_field_dh_is_named_DH_not_ECDH(identifier):
     every FFDH identifier, inflating finding counts and writing "ECDH" into the CBOM for a
     group that is not elliptic at all.
     """
-    assert not re.search(_rule("ECD-SRC-SSH-KEX-001")["regex"], identifier), \
+    assert not re.search(_rule("IM-SRC-SSH-KEX-001")["regex"], identifier), \
         f"{identifier} is finite-field DH and must not match the ECDH rule"
-    assert re.search(_rule("ECD-SRC-SSH-DH-001")["regex"], identifier), \
+    assert re.search(_rule("IM-SRC-SSH-DH-001")["regex"], identifier), \
         f"{identifier} must match the DH rule"
 
 
 @pytest.mark.parametrize("identifier", ['"ecdh-sha2-nistp256"', '"curve25519-sha256"'])
 def test_genuinely_elliptic_kex_still_reports_ECDH(identifier):
     """Removing FFDH from the ECDH rule must not cost the elliptic names it should keep."""
-    assert re.search(_rule("ECD-SRC-SSH-KEX-001")["regex"], identifier)
+    assert re.search(_rule("IM-SRC-SSH-KEX-001")["regex"], identifier)
 
 
 # --------------------------------------------------------------------------------------------
@@ -152,7 +152,7 @@ def test_genuinely_elliptic_kex_still_reports_ECDH(identifier):
 def test_finding_with_no_risk_is_UNRATED_not_compliant():
     """`(risk.get(...) or 0) > deadline` collapsed a missing risk to 0, which is never > a real
     deadline, so UNRATED findings fell into the 'within window' bucket and were tallied as
-    compliant. An artefact ECDAT could not assess was reported as a pass."""
+    compliant. An artefact IndraMesh could not assess was reported as a pass."""
     assert deadline_verdict({"name": "RSA"}, 2035) == DEADLINE_UNRATED
 
 
@@ -590,7 +590,7 @@ def test_a_component_never_claims_a_nist_level_and_denies_one_is_derivable():
     ap = comp["cryptoProperties"]["algorithmProperties"]
     props = {p["name"]: p["value"] for p in comp.get("properties", [])}
     has_level = "nistQuantumSecurityLevel" in ap
-    has_gap = "ecd:nist_level_gap" in props
+    has_gap = "im:nist_level_gap" in props
     assert not (has_level and has_gap), (
         "the document must not both state a level and say none is derivable")
 
@@ -658,8 +658,8 @@ def test_a_named_digest_family_is_still_rated(name, expected):
 # CAPABILITIES ARE NOT ALGORITHMS: the 7 rules added in 66ccb92/98833bc
 # --------------------------------------------------------------------------------------------
 
-CAPABILITY_RULES = ["ECD-CLOUD-KMS-001", "ECD-CLOUD-AZURE-001", "ECD-CLOUD-GCP-001",
-                    "ECD-HARDWARE-PKCS11-001"]
+CAPABILITY_RULES = ["IM-CLOUD-KMS-001", "IM-CLOUD-AZURE-001", "IM-CLOUD-GCP-001",
+                    "IM-HARDWARE-PKCS11-001"]
 
 
 @pytest.mark.parametrize("rule_id", CAPABILITY_RULES)
@@ -688,7 +688,7 @@ def test_a_capability_is_graded_as_capability_not_used():
     `used` means "code invokes it", which for a KMS client is true but is not the claim being
     made. `capability` is the honest grade for something present but not exercised.
     """
-    rule = next(r for r in RULES if r["id"] == "ECD-CLOUD-KMS-001")
+    rule = next(r for r in RULES if r["id"] == "IM-CLOUD-KMS-001")
     finding = {"name": rule["name"], "primitive": rule["primitive"], "type": rule["type"],
                "evidence_class": rule["evidence"], "file": "a.py", "line": 1}
     grade, _ = resolve_assurance(finding)
@@ -712,7 +712,7 @@ def test_a_private_key_is_related_crypto_material_not_an_algorithm():
     `primitive="key"` -- not an enum member -- is no longer needed, and the question of which
     enum member describes a PEM header does not arise.
     """
-    finding = {"name": "Private Key (PEM)", "rule_id": "ECD-KEY-PEM-001", "type": "algorithm",
+    finding = {"name": "Private Key (PEM)", "rule_id": "IM-KEY-PEM-001", "type": "algorithm",
                "primitive": "key", "file": "a.py", "line": 1}
     doc = json.loads(generate_cbom([finding], enriched=True))
     cp = doc["components"][0]["cryptoProperties"]
@@ -725,7 +725,7 @@ def test_a_private_key_is_related_crypto_material_not_an_algorithm():
 
 def test_the_pkcs11_rule_no_longer_matches_any_identifier_containing_pkcs11():
     """`PKCS11` with no word boundary matched variables, comments and vendored filenames."""
-    rule = next(r for r in RULES if r["id"] == "ECD-HARDWARE-PKCS11-001")
+    rule = next(r for r in RULES if r["id"] == "IM-HARDWARE-PKCS11-001")
     for decoy in ("x = 'PKCS11TOKEN'", "# PKCS11ish thing", "PKCS11_ENABLED = False"):
         assert not re.search(rule["regex"], decoy), (
             "decoy %r must not match the HSM rule" % decoy)
@@ -734,15 +734,15 @@ def test_the_pkcs11_rule_no_longer_matches_any_identifier_containing_pkcs11():
 
 
 def test_the_legacy_tls_rule_does_not_duplicate_the_existing_config_rule():
-    """ECD-PROTO-TLS-001 was ~83% redundant with ECD-CFG-TLS-001 and _finalise cannot dedup it.
+    """IM-PROTO-TLS-001 was ~83% redundant with IM-CFG-TLS-001 and _finalise cannot dedup it.
 
     Different rule_id means a different dedup key, so one nginx line produced TWO
     assetType=protocol components. And the rule required a DOTTED version, so the most common
     legacy nginx line in existence, `ssl_protocols TLSv1 TLSv1.1;`, was invisible to the rule
     added to catch legacy TLS. It now keeps only the Apache `SSLProtocol` directive.
     """
-    proto = next(r for r in RULES if r["id"] == "ECD-PROTO-TLS-001")
-    cfg = next(r for r in RULES if r["id"] == "ECD-CFG-TLS-001")
+    proto = next(r for r in RULES if r["id"] == "IM-PROTO-TLS-001")
+    cfg = next(r for r in RULES if r["id"] == "IM-CFG-TLS-001")
     overlapping = [s for s in ("ssl_protocols TLSv1.1;", "ssl_protocols TLSv1 TLSv1.1;",
                                "ssl_protocols TLSv1.2 TLSv1.3;")
                    if re.search(proto["regex"], s) and re.search(cfg["regex"], s)]
@@ -811,7 +811,7 @@ def test_one_line_of_real_code_never_fires_two_rules(line):
 
     The dedup in `_finalise` is keyed on `(file, name, rule_id, line)`, so two rules with
     different ids NEVER collapse -- the same line is reported twice and the CBOM carries two
-    components for one statement. `ECD-SRC-JAVA-DIGEST-002` did exactly this to
+    components for one statement. `IM-SRC-JAVA-DIGEST-002` did exactly this to
     `MessageDigest.getInstance("SHA-256")`, and the benchmark scored it as neither better nor
     worse because it counts locations, not findings.
     """

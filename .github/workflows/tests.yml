@@ -1,4 +1,4 @@
-name: ECDAT Testing Suite
+name: IndraMesh Testing Suite
 
 on:
   push:
@@ -58,7 +58,7 @@ jobs:
       run: |
         export PYTHONPATH=.
         python cli.py ./dummy_target --format cbom --out ./out --no-ml --fail-on CRITICAL || true
-        python validate_cbom.py ./out/ecdat_report.json
+        python validate_cbom.py ./out/indramesh_report.json
 
     - name: Upload coverage report
       uses: actions/upload-artifact@v4

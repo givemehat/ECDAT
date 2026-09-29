@@ -1,5 +1,5 @@
 /**
- * ECDAT Cryptographic Topology Graph Engine
+ * IndraMesh Cryptographic Topology Graph Engine
  * High-performance 2D Canvas force-directed graph visualizer with drag, zoom, pan,
  * glowing risk tiers, and node inspection.
  */
@@ -191,13 +191,13 @@ class TopologyVisualizer {
       
       // Node glow for critical or hovered
       if (n.tier === 'CRITICAL' || n === this.hoveredNode) {
-        ctx.shadowColor = n.color || '#00F0FF';
+        ctx.shadowColor = n.color || '#10B981';
         ctx.shadowBlur = 12;
       } else {
         ctx.shadowBlur = 0;
       }
 
-      ctx.fillStyle = n.color || '#00F0FF';
+      ctx.fillStyle = n.color || '#10B981';
       ctx.fill();
       ctx.lineWidth = 1.5;
       ctx.strokeStyle = '#FFFFFF';
@@ -206,7 +206,7 @@ class TopologyVisualizer {
 
       // Draw label
       ctx.font = '10px JetBrains Mono, monospace';
-      ctx.fillStyle = n === this.hoveredNode ? '#00F0FF' : '#CBD5E1';
+      ctx.fillStyle = n === this.hoveredNode ? '#10B981' : '#CBD5E1';
       ctx.textAlign = 'center';
       ctx.fillText(n.label || n.name || '', n.x, n.y + n.radius + 12);
     }

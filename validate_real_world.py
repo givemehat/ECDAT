@@ -32,7 +32,7 @@ import jsonschema
 from engine.cbom import generate_cbom
 from engine.mosca import DEFAULT_POLICY, DEFAULT_Z, calculate_risk
 from engine.recommender import get_pqc_recommendation
-from engine.scanner import ECDATScanner
+from engine.scanner import IndraMeshScanner
 
 REPO = os.path.dirname(os.path.abspath(__file__))
 CORPUS_DIR = os.path.join(REPO, "data", "tink-java")
@@ -85,7 +85,7 @@ def run(check_only=False):
         target = os.path.join(CORPUS_DIR, "src")
         print(f"[*] scanning {os.path.relpath(target, REPO)} ...")
         started = time.time()
-        scanner = ECDATScanner(enable_ml=False)
+        scanner = IndraMeshScanner(enable_ml=False)
         findings = scanner.scan_directory(target)
         elapsed = time.time() - started
         print(f"[*] scanned {scanner.coverage['files_scanned']} files in {elapsed:.1f}s; "

@@ -1,4 +1,4 @@
-# ---- ECDAT runtime dependencies ----
+# ---- IndraMesh runtime dependencies ----
 # NOTE: this file previously omitted torch / javalang / pyvis / matplotlib / networkx,
 # all of which are imported by the code. `pip install -r requirements.txt && streamlit run app.py`
 # failed with ModuleNotFoundError on a clean machine. Fixed.
@@ -30,7 +30,7 @@ matplotlib>=3.8
 jsonschema>=4.20
 requests>=2.31
 
-# Official CycloneDX library. ECDAT emits CBOM JSON directly (engine/cbom.py) so this is
+# Official CycloneDX library. IndraMesh emits CBOM JSON directly (engine/cbom.py) so this is
 # not required at runtime, but it is useful for cross-checking output against the spec.
 cyclonedx-python-lib>=7.3.0
 

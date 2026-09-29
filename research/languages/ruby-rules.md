@@ -26,12 +26,12 @@ reading the shipped regexes and confirmed by execution:
 
 | Ruby construct | already matched by | consequence |
 |---|---|---|
-| `Ed25519::SigningKey`, `Ed25519::VerifyKey`, `Ed25519.generate_signing_key` | `ECD-SRC-EDDSA-001`, whose regex contains `\bEd25519\b` | **no new Ed25519 rule needed.** The shipped rule already emits `name="Ed25519"`, `primitive="signature"`, which is correct. |
-| `'prime256v1'`, `'secp256r1'`, `'secp384r1'`, `'secp521r1'`, `'secp256k1'` as bare curve literals | `ECD-SRC-ECC-001`, whose regex lists those five spellings | **no new curve-literal rule needed.** The shipped rule even captures the curve and the engine maps it to a size (`scanner.py:479-482`). |
-| `OpenSSL::Cipher.new('aes-256-cbc')` and friends | `ECD-SRC-SSH-CIPHER-001` (lower-case `aesNNN-ctr/gcm/cbc` inside quotes) | the *literal* is already found, but with no key size and no evidence that it is used for encryption. That gap is what this pack closes - and it is closed by the **call-anchored** rules below, not by another literal rule. |
-| `sha1(`, `md5(` | `ECD-SRC-SHA1-001`, `ECD-SRC-MD5-001` | not applicable to Ruby, since Ruby has no bare `sha1()` function, but it means the same-shaped PHP rules were correctly excluded from the PHP pack. |
+| `Ed25519::SigningKey`, `Ed25519::VerifyKey`, `Ed25519.generate_signing_key` | `IM-SRC-EDDSA-001`, whose regex contains `\bEd25519\b` | **no new Ed25519 rule needed.** The shipped rule already emits `name="Ed25519"`, `primitive="signature"`, which is correct. |
+| `'prime256v1'`, `'secp256r1'`, `'secp384r1'`, `'secp521r1'`, `'secp256k1'` as bare curve literals | `IM-SRC-ECC-001`, whose regex lists those five spellings | **no new curve-literal rule needed.** The shipped rule even captures the curve and the engine maps it to a size (`scanner.py:479-482`). |
+| `OpenSSL::Cipher.new('aes-256-cbc')` and friends | `IM-SRC-SSH-CIPHER-001` (lower-case `aesNNN-ctr/gcm/cbc` inside quotes) | the *literal* is already found, but with no key size and no evidence that it is used for encryption. That gap is what this pack closes - and it is closed by the **call-anchored** rules below, not by another literal rule. |
+| `sha1(`, `md5(` | `IM-SRC-SHA1-001`, `IM-SRC-MD5-001` | not applicable to Ruby, since Ruby has no bare `sha1()` function, but it means the same-shaped PHP rules were correctly excluded from the PHP pack. |
 
-A fifth, and the most important: **`ECD-SRC-AES-001` already matches `OpenSSL::Cipher::AES.new(...)`**
+A fifth, and the most important: **`IM-SRC-AES-001` already matches `OpenSSL::Cipher::AES.new(...)`**
 and yields `key_length=None` (F3, measured). Two rules below are consequently marked WITHDRAWN.
 
 ---
@@ -64,25 +64,25 @@ which is deliberately case-insensitive because YAML keys are not code.
 
 | id | name | primitive | uses | kg | regex |
 |---|---|---|---|---|---|
-| ECD-SRC-RUBY-AES-AEAD-001 (withdrawn) | AES | ae | at-rest | 1 | `OpenSSL::Cipher::AES\.new\(\s*(128\|192\|256)\b\s*,\s*:(?:gcm\|ccm\|ocb\|eax\|siv)\b` |
-| ECD-SRC-RUBY-AES-BLOCK-001 (withdrawn) | AES | block-cipher | at-rest | 1 | `OpenSSL::Cipher::AES\.new\(\s*(128\|192\|256)\b\s*,\s*:(?:cbc\|ctr\|cfb\|ofb)\b\|OpenSSL::Cipher::AES\.new\(\s*(128\|192\|256)\s*\)` |
-| ECD-SRC-RUBY-AES-ECB-001 | AES | block-cipher | at-rest | 1 | `OpenSSL::Cipher::AES\.new\(\s*(\d+)\s*,\s*:ecb\b` |
-| ECD-SRC-RUBY-AES-LIT-ECB-001 | AES | block-cipher | at-rest | 1 | `OpenSSL::Cipher\.new\(\s*['"]\s*aes[-_]?(128\|192\|256)[-_]?ecb` |
-| ECD-SRC-RUBY-3DES-001 | 3DES | block-cipher | at-rest | - | `OpenSSL::Cipher::DES_EDE3\b` |
-| ECD-SRC-RUBY-LEGACY-001 | LEGACY-CIPHER | block-cipher | at-rest | - | `OpenSSL::Cipher::(?:DES\|BF\|CAST5\|IDEA\|RC2)\b` |
-| ECD-SRC-RUBY-RC4-001 | RC4 | stream-cipher | at-rest | - | `OpenSSL::Cipher::RC4\b` |
-| ECD-SRC-RUBY-NULL-001 | NULL-CIPHER | block-cipher | tls | - | `OpenSSL::Cipher::NullCipher\b` |
-| ECD-SRC-RUBY-CHACHA-001 | ChaCha20 | ae | at-rest | - | `OpenSSL::Cipher::ChaCha20\.new\s*(\|OpenSSL::Cipher\.new\(\s*['"]chacha20` |
+| IM-SRC-RUBY-AES-AEAD-001 (withdrawn) | AES | ae | at-rest | 1 | `OpenSSL::Cipher::AES\.new\(\s*(128\|192\|256)\b\s*,\s*:(?:gcm\|ccm\|ocb\|eax\|siv)\b` |
+| IM-SRC-RUBY-AES-BLOCK-001 (withdrawn) | AES | block-cipher | at-rest | 1 | `OpenSSL::Cipher::AES\.new\(\s*(128\|192\|256)\b\s*,\s*:(?:cbc\|ctr\|cfb\|ofb)\b\|OpenSSL::Cipher::AES\.new\(\s*(128\|192\|256)\s*\)` |
+| IM-SRC-RUBY-AES-ECB-001 | AES | block-cipher | at-rest | 1 | `OpenSSL::Cipher::AES\.new\(\s*(\d+)\s*,\s*:ecb\b` |
+| IM-SRC-RUBY-AES-LIT-ECB-001 | AES | block-cipher | at-rest | 1 | `OpenSSL::Cipher\.new\(\s*['"]\s*aes[-_]?(128\|192\|256)[-_]?ecb` |
+| IM-SRC-RUBY-3DES-001 | 3DES | block-cipher | at-rest | - | `OpenSSL::Cipher::DES_EDE3\b` |
+| IM-SRC-RUBY-LEGACY-001 | LEGACY-CIPHER | block-cipher | at-rest | - | `OpenSSL::Cipher::(?:DES\|BF\|CAST5\|IDEA\|RC2)\b` |
+| IM-SRC-RUBY-RC4-001 | RC4 | stream-cipher | at-rest | - | `OpenSSL::Cipher::RC4\b` |
+| IM-SRC-RUBY-NULL-001 | NULL-CIPHER | block-cipher | tls | - | `OpenSSL::Cipher::NullCipher\b` |
+| IM-SRC-RUBY-CHACHA-001 | ChaCha20 | ae | at-rest | - | `OpenSSL::Cipher::ChaCha20\.new\s*(\|OpenSSL::Cipher\.new\(\s*['"]chacha20` |
 
 **WITHDRAWN, and this is the pack's most important negative result.** R-01 and R-02 are the modern
 idiomatic Ruby cipher form, `OpenSSL::Cipher::AES.new(256, :gcm)`. They work, they compile, they
-resolve the key size correctly - and `ECD-SRC-AES-001` already fires on the same text with the same
-`name="AES"`. Measured: `CROSS AES line=1 ['ECD-SRC-AES-001', 'PROPOSED']`. Under F1 that is two
+resolve the key size correctly - and `IM-SRC-AES-001` already fires on the same text with the same
+`name="AES"`. Measured: `CROSS AES line=1 ['IM-SRC-AES-001', 'PROPOSED']`. Under F1 that is two
 CBOM components for one statement, which is the exact defect the engine fixed twice before.
 
 Two ways out, and the team must pick one:
 
-* **Recommended: E9.** Add a capture group to the `AES\.new\(` alternative of `ECD-SRC-AES-001` -
+* **Recommended: E9.** Add a capture group to the `AES\.new\(` alternative of `IM-SRC-AES-001` -
   `AES\.new\(\s*(\d+)` - so the shipped rule resolves `key_length=256` instead of `None`, and
   **drop R-01 and R-02 entirely.** Cost: the shipped rule types every mode as `ae`, so a `:cbc`
   cipher is reported as AEAD. That is a real loss of precision, and it is the engine's existing
@@ -112,7 +112,7 @@ Justifications for 2.1:
 * **R-06 `LEGACY`.** The remaining legacy cipher constants of the same family
   (`DES`, `BF` = Blowfish, `CAST5`, `IDEA`, `RC2`) **[doc]**. One rule rather than five because they
   share `name` and `primitive`; the alternation is anchored on `OpenSSL::Cipher::` so it cannot fire
-  on a user's own `DES` constant. Note that `ECD-SRC-SSH-LEGACY-001` owns the lower-case *strings*
+  on a user's own `DES` constant. Note that `IM-SRC-SSH-LEGACY-001` owns the lower-case *strings*
   `des-cbc` and `3des-cbc`; the capitalised Ruby constants are a different spelling and do not
   collide with it (measured).
 * **R-07 `RC4`.** Split from R-06 only because `rc4` is a stream cipher and the primitive must say
@@ -121,11 +121,11 @@ Justifications for 2.1:
 * **R-08 `NULL`.** `OpenSSL::Cipher::NullCipher` is the export-grade null cipher - encryption with no
   authentication and no confidentiality **[doc]**. It gets its own name because calling it
   "LEGACY-CIPHER" would hide what it is, and `uses="tls"` because in practice it appears in
-  `ciphers` lists. It is the Ruby equivalent of the `NULL-SHA` token `ECD-CFG-LEGACY-001` already
+  `ciphers` lists. It is the Ruby equivalent of the `NULL-SHA` token `IM-CFG-LEGACY-001` already
   catches in configuration, and the same argument applies about the name: say what it is.
 * **R-09 `CHACHA`.** `OpenSSL::Cipher::ChaCha20` is the ChaCha20 constant of the same binding, and
   the string form is the OpenSSL cipher name. `primitive="ae"` matches the shipped
-  `ECD-SRC-CHACHA-001`, which is deliberate consistency rather than a fresh decision. The
+  `IM-SRC-CHACHA-001`, which is deliberate consistency rather than a fresh decision. The
   alternation is safe under F1: the first branch needs the `ChaCha20` constant and the second needs
   a quoted `chacha20`, so they cannot both match one line.
 
@@ -133,15 +133,15 @@ Justifications for 2.1:
 
 | id | name | primitive | uses | kg | regex |
 |---|---|---|---|---|---|
-| ECD-SRC-RUBY-RSA-NEW-001 | RSA | unknown | at-rest | 1 | `OpenSSL::PKey::RSA\.(?:new\|generate)\(\s*(\d+)` |
-| ECD-SRC-RUBY-RSA-PKE-001 | RSA | pke | at-rest | - | `(?:private_encrypt\|private_decrypt\|public_encrypt\|public_decrypt)\s*\(` |
-| ECD-SRC-RUBY-RSA-PSS-001 | RSA | signature | signing | - | `\.(?:sign\|verify)_pss\s*\(` |
-| ECD-SRC-RUBY-SIGN-001 | RSA | signature | signing | - | `(?:key\|priv\|private_key\|secret_key\|signer)\s*\.\s*(?:sign\|verify)\s*(\|\.\s*(?:sign\|verify)\s*\(\s*(?:OpenSSL::Digest\|Digest::)` |
-| ECD-SRC-RUBY-ECDH-001 | ECDH | key-agreement | tls | - | `\.dh_compute_key\s*\(` |
-| ECD-SRC-RUBY-DSA-001 | DSA | signature | signing | 1 | `OpenSSL::PKey::DSA\.(?:new\|generate)\(\s*(\d+)` |
-| ECD-SRC-RUBY-DH-001 | DH | key-agreement | tls | 1 | `OpenSSL::PKey::DH\.new\s*\(\s*(\d+)` |
-| ECD-SRC-RUBY-DH-COMPUTE-001 | DH | key-agreement | tls | - | `\.compute_key\s*\(` |
-| ECD-SRC-RUBY-PKCS7-001 | RSA | unknown | signing | - | `OpenSSL::PKCS7\.new\b` |
+| IM-SRC-RUBY-RSA-NEW-001 | RSA | unknown | at-rest | 1 | `OpenSSL::PKey::RSA\.(?:new\|generate)\(\s*(\d+)` |
+| IM-SRC-RUBY-RSA-PKE-001 | RSA | pke | at-rest | - | `(?:private_encrypt\|private_decrypt\|public_encrypt\|public_decrypt)\s*\(` |
+| IM-SRC-RUBY-RSA-PSS-001 | RSA | signature | signing | - | `\.(?:sign\|verify)_pss\s*\(` |
+| IM-SRC-RUBY-SIGN-001 | RSA | signature | signing | - | `(?:key\|priv\|private_key\|secret_key\|signer)\s*\.\s*(?:sign\|verify)\s*(\|\.\s*(?:sign\|verify)\s*\(\s*(?:OpenSSL::Digest\|Digest::)` |
+| IM-SRC-RUBY-ECDH-001 | ECDH | key-agreement | tls | - | `\.dh_compute_key\s*\(` |
+| IM-SRC-RUBY-DSA-001 | DSA | signature | signing | 1 | `OpenSSL::PKey::DSA\.(?:new\|generate)\(\s*(\d+)` |
+| IM-SRC-RUBY-DH-001 | DH | key-agreement | tls | 1 | `OpenSSL::PKey::DH\.new\s*\(\s*(\d+)` |
+| IM-SRC-RUBY-DH-COMPUTE-001 | DH | key-agreement | tls | - | `\.compute_key\s*\(` |
+| IM-SRC-RUBY-PKCS7-001 | RSA | unknown | signing | - | `OpenSSL::PKCS7\.new\b` |
 
 * **R-10 `RSA-NEW`.** `OpenSSL::PKey::RSA.new(2048)` and `RSA.generate(2048)` are the only two
   spellings, the class constant is the algorithm, and the argument is the modulus size, so the
@@ -195,12 +195,12 @@ Justifications for 2.1:
 
 | id | name | primitive | uses | kg | regex |
 |---|---|---|---|---|---|
-| ECD-SRC-RUBY-HMAC-001 | HMAC | mac | at-rest | - | `OpenSSL::HMAC\.(?:digest\|hexdigest)\s*(\|OpenSSL::HMAC\.new\s*\(` |
-| ECD-SRC-RUBY-DIGEST-SHA2-001 | SHA256 | hash | at-rest | - | `OpenSSL::Digest(?:\.new\|\[)\(\s*['"]SHA-?256['"]\|OpenSSL::Digest::SHA256\s*\.\|Digest::SHA256\s*\.\|OpenSSL::Digest\.digest\([^,]+,\s*['"]sha256['"]` |
-| ECD-SRC-RUBY-DIGEST-SHA1-001 | SHA1 | hash | at-rest | - | `OpenSSL::Digest(?:\.new\|\[)\(\s*['"]SHA-?1['"]\|OpenSSL::Digest::SHA1\s*\.\|Digest::SHA1\s*\.` |
-| ECD-SRC-RUBY-DIGEST-MD5-001 | MD5 | hash | at-rest | - | `OpenSSL::Digest(?:\.new\|\[)\(\s*['"]MD5['"]\|OpenSSL::Digest::MD5\s*\.\|Digest::MD5\s*\.` |
-| ECD-SRC-RUBY-PBKDF2-001 | PBKDF2 | kdf | at-rest | - | `OpenSSL::PKCS5\.pbkdf2_hmac\w*\s*\(` |
-| ECD-SRC-RUBY-BCRYPT-001 | bcrypt | kdf | at-rest | - | `BCrypt::Password\.(?:create\|from_hash)\|BCrypt::Engine\.hash_secret` |
+| IM-SRC-RUBY-HMAC-001 | HMAC | mac | at-rest | - | `OpenSSL::HMAC\.(?:digest\|hexdigest)\s*(\|OpenSSL::HMAC\.new\s*\(` |
+| IM-SRC-RUBY-DIGEST-SHA2-001 | SHA256 | hash | at-rest | - | `OpenSSL::Digest(?:\.new\|\[)\(\s*['"]SHA-?256['"]\|OpenSSL::Digest::SHA256\s*\.\|Digest::SHA256\s*\.\|OpenSSL::Digest\.digest\([^,]+,\s*['"]sha256['"]` |
+| IM-SRC-RUBY-DIGEST-SHA1-001 | SHA1 | hash | at-rest | - | `OpenSSL::Digest(?:\.new\|\[)\(\s*['"]SHA-?1['"]\|OpenSSL::Digest::SHA1\s*\.\|Digest::SHA1\s*\.` |
+| IM-SRC-RUBY-DIGEST-MD5-001 | MD5 | hash | at-rest | - | `OpenSSL::Digest(?:\.new\|\[)\(\s*['"]MD5['"]\|OpenSSL::Digest::MD5\s*\.\|Digest::MD5\s*\.` |
+| IM-SRC-RUBY-PBKDF2-001 | PBKDF2 | kdf | at-rest | - | `OpenSSL::PKCS5\.pbkdf2_hmac\w*\s*\(` |
+| IM-SRC-RUBY-BCRYPT-001 | bcrypt | kdf | at-rest | - | `BCrypt::Password\.(?:create\|from_hash)\|BCrypt::Engine\.hash_secret` |
 
 * **R-19 `HMAC`.** `OpenSSL::HMAC.digest`/`.hexdigest`/`.new` are the only HMAC entry points in the
   binding, so the namespaced constant is the assertion. The `name="HMAC"` is correct here and would
@@ -225,9 +225,9 @@ Justifications for 2.1:
 
 | id | name | primitive | uses | kg | regex |
 |---|---|---|---|---|---|
-| ECD-SRC-RUBY-RANDOM-001 | CSPRNG | drbg | at-rest | - | `SecureRandom\.(?:random_bytes\|hex\|base64\|urlsafe_base64\|random_number\|uuid)\b` |
-| ECD-SRC-RUBY-RANDOM-OPENSSL-001 | CSPRNG | drbg | at-rest | - | `OpenSSL::Random\.random_bytes\s*\(` |
-| ECD-SRC-RUBY-WEAKRNG-001 | LIBC-RAND | drbg | at-rest | - | `(?<![.\w:])rand\s*(\|(?<![.\w:])srand\s*(\|\bRandom\.(?:rand\|new)\b\|\bRandom::DEFAULT\b` |
+| IM-SRC-RUBY-RANDOM-001 | CSPRNG | drbg | at-rest | - | `SecureRandom\.(?:random_bytes\|hex\|base64\|urlsafe_base64\|random_number\|uuid)\b` |
+| IM-SRC-RUBY-RANDOM-OPENSSL-001 | CSPRNG | drbg | at-rest | - | `OpenSSL::Random\.random_bytes\s*\(` |
+| IM-SRC-RUBY-WEAKRNG-001 | LIBC-RAND | drbg | at-rest | - | `(?<![.\w:])rand\s*(\|(?<![.\w:])srand\s*(\|\bRandom\.(?:rand\|new)\b\|\bRandom::DEFAULT\b` |
 
 * **R-25 `SecureRandom`.** The class name plus the method list is the assertion, and enumerating the
   methods rather than matching `SecureRandom` alone is what keeps this a *use* rather than a
@@ -254,10 +254,10 @@ Justifications for 2.1:
 
 | id | name | primitive | uses | kg | regex |
 |---|---|---|---|---|---|
-| ECD-SRC-RUBY-SSLCTX-001 | TLS | protocol | tls | - | `OpenSSL::SSL::SSLContext\|OpenSSL::SSL::SSLServer\|OpenSSL::SSL::TLS1_[0-3]_VERSION` |
-| ECD-SRC-RUBY-ACTIVE-001 | AES | ae | at-rest | 1 | `ActiveSupport::(?:MessageEncryptor\|MessageVerifier)\.new\(\s*[^,()]+,\s*cipher:\s*['"]\s*aes[-_]?(128\|192\|256)` |
-| ECD-CFG-RUBY-CIPHER-001 | AES | ae | at-rest | 1 | `(?m:^[ \t]*cipher:\s*['"]?\s*aes[-_]?(128\|192\|256)\b)` |
-| ECD-CFG-RUBY-NULL-001 | NULL-CIPHER | protocol | tls | - | `ciphers\s*[=:>]{1,3}\s*['"][^'"]*(?:aNULL\|eNULL)[^'"]*['"]` |
+| IM-SRC-RUBY-SSLCTX-001 | TLS | protocol | tls | - | `OpenSSL::SSL::SSLContext\|OpenSSL::SSL::SSLServer\|OpenSSL::SSL::TLS1_[0-3]_VERSION` |
+| IM-SRC-RUBY-ACTIVE-001 | AES | ae | at-rest | 1 | `ActiveSupport::(?:MessageEncryptor\|MessageVerifier)\.new\(\s*[^,()]+,\s*cipher:\s*['"]\s*aes[-_]?(128\|192\|256)` |
+| IM-CFG-RUBY-CIPHER-001 | AES | ae | at-rest | 1 | `(?m:^[ \t]*cipher:\s*['"]?\s*aes[-_]?(128\|192\|256)\b)` |
+| IM-CFG-RUBY-NULL-001 | NULL-CIPHER | protocol | tls | - | `ciphers\s*[=:>]{1,3}\s*['"][^'"]*(?:aNULL\|eNULL)[^'"]*['"]` |
 
 * **R-28 `SSLCTX`.** `OpenSSL::SSL::SSLContext` is the only object that configures Ruby's TLS, and
   `OpenSSL::SSL::TLS1_2_VERSION` is the only way the version is stated, so the namespaced constant
@@ -266,7 +266,7 @@ Justifications for 2.1:
   same `name` and the same `rule_id`, and F1 collapses nothing here (different lines) - but if they
   were ever on the same line, one rule id still yields one finding after `_finalise`. The version
   constant is matched rather than `TLSv1.2` literals because Ruby's own spelling is
-  `OpenSSL::SSL::TLS1_2_VERSION`, and it does **not** collide with `ECD-CFG-TLS-001` (measured: that
+  `OpenSSL::SSL::TLS1_2_VERSION`, and it does **not** collide with `IM-CFG-TLS-001` (measured: that
   rule's `tls1_[0-3]` is lower-case and Ruby's constant is upper-case).
 * **R-29 `ACTIVE`.** `ActiveSupport::MessageEncryptor` and `MessageVerifier` are the two Rails
   classes that do authenticated symmetric encryption for cookies and signed messages, and the
@@ -283,7 +283,7 @@ Justifications for 2.1:
 * **R-31 `CFG-NULL`.** The OpenSSL "null cipher" tokens inside a `ciphers` assignment. The
   alternation is restricted to `aNULL|eNULL` and the rule is named `NULL-CIPHER` rather than
   `LEGACY-CIPHER` **specifically to avoid a measured collision**: an earlier version included `RC4`
-  and `3DES` and both are already owned by `ECD-CFG-LEGACY-001`, which produced a second component
+  and `3DES` and both are already owned by `IM-CFG-LEGACY-001`, which produced a second component
   with the same name on one line (measured CROSS, then fixed). `aNULL`/`eNULL` are the two tokens
   that shipped rule does not have, and they are the two that actually mean "no authentication".
 
@@ -295,9 +295,9 @@ or read the gems.
 
 | id | name | primitive | uses | kg | regex | confidence |
 |---|---|---|---|---|---|---|
-| ECD-SRC-RUBY-RBNACL-SECRETBOX-001 | XSalsa20-Poly1305 | ae | at-rest | - | `(?:RbNaCl\|Sodium\|ParagonIE_Sodium_Compat)::SecretBox\b` | high for RbNaCl |
-| ECD-SRC-RUBY-RBNACL-BOX-001 | X25519-XSalsa20-Poly1305 | pke | at-rest | - | `(?:RbNaCl\|Sodium)::Box\b` | high for RbNaCl |
-| ECD-SRC-RUBY-RBNACL-SIGN-001 | Ed25519 | signature | signing | - | `(?:RbNaCl\|Sodium)::(Sign\|Auth)\b\|\bRbNaCl::Signatures\b` | **medium** |
+| IM-SRC-RUBY-RBNACL-SECRETBOX-001 | XSalsa20-Poly1305 | ae | at-rest | - | `(?:RbNaCl\|Sodium\|ParagonIE_Sodium_Compat)::SecretBox\b` | high for RbNaCl |
+| IM-SRC-RUBY-RBNACL-BOX-001 | X25519-XSalsa20-Poly1305 | pke | at-rest | - | `(?:RbNaCl\|Sodium)::Box\b` | high for RbNaCl |
+| IM-SRC-RUBY-RBNACL-SIGN-001 | Ed25519 | signature | signing | - | `(?:RbNaCl\|Sodium)::(Sign\|Auth)\b\|\bRbNaCl::Signatures\b` | **medium** |
 
 * The `rbnacl` gem (and its `sodium` gem rename) exposes `RbNaCl::SecretBox`, `RbNaCl::Box`,
   `RbNaCl::Sign`, `RbNaCl::Auth`, `RbNaCl::Signatures` **[doc]**. The first two are the same
@@ -320,48 +320,48 @@ or read the gems.
 All 36 were executed; every one fires its own rule.
 
 ```python
-"ECD-SRC-RUBY-AES-ECB-001": "c = OpenSSL::Cipher::AES.new(256, :ecb)",
-"ECD-SRC-RUBY-AES-LIT-ECB-001": "c = OpenSSL::Cipher.new('aes-256-ecb')",
-"ECD-SRC-RUBY-3DES-001": "c = OpenSSL::Cipher::DES_EDE3.new",
-"ECD-SRC-RUBY-RC4-001": "c = OpenSSL::Cipher::RC4.new",
-"ECD-SRC-RUBY-LEGACY-001": "c = OpenSSL::Cipher::BF.new",
-"ECD-SRC-RUBY-NULL-001": "c = OpenSSL::Cipher::NullCipher.new",
-"ECD-SRC-RUBY-CHACHA-001": "c = OpenSSL::Cipher::ChaCha20.new(key)",
-"ECD-SRC-RUBY-RSA-NEW-001": "key = OpenSSL::PKey::RSA.new(2048)",
-"ECD-SRC-RUBY-RSA-PKE-001": "out = key.public_encrypt(data)",
-"ECD-SRC-RUBY-RSA-PSS-001": "sig = key.sign_pss('SHA256', data)",
-"ECD-SRC-RUBY-SIGN-001": "signature = private_key.sign(OpenSSL::Digest.new('SHA256'), data)",
-"ECD-SRC-RUBY-ECDH-001": "shared = key.dh_compute_key(peer_public_key)",
-"ECD-SRC-RUBY-DSA-001": "key = OpenSSL::PKey::DSA.new(1024)",
-"ECD-SRC-RUBY-DH-001": "dh = OpenSSL::PKey::DH.new(2048)",
-"ECD-SRC-RUBY-DH-COMPUTE-001": "shared = dh.compute_key(peer_pub)",
-"ECD-SRC-RUBY-PKCS7-001": "p7 = OpenSSL::PKCS7.new(pem)",
-"ECD-SRC-RUBY-HMAC-001": "mac = OpenSSL::HMAC.hexdigest('SHA256', key, data)",
-"ECD-SRC-RUBY-DIGEST-SHA2-001": "OpenSSL::Digest::SHA256.new",
-"ECD-SRC-RUBY-DIGEST-SHA2-001": "Digest::SHA256.hexdigest(data)",
-"ECD-SRC-RUBY-DIGEST-SHA1-001": "OpenSSL::Digest.new('SHA1')",
-"ECD-SRC-RUBY-DIGEST-SHA1-001": "Digest::SHA1.hexdigest(data)",
-"ECD-SRC-RUBY-DIGEST-MD5-001": "Digest::MD5.hexdigest(data)",
-"ECD-SRC-RUBY-PBKDF2-001": "dk = OpenSSL::PKCS5.pbkdf2_hmac(pw, salt, 20000, 32, 'SHA256')",
-"ECD-SRC-RUBY-RANDOM-001": "token = SecureRandom.hex(32)",
-"ECD-SRC-RUBY-RANDOM-OPENSSL-001": "b = OpenSSL::Random.random_bytes(32)",
-"ECD-SRC-RUBY-WEAKRNG-001": "roll = rand(6)",
-"ECD-SRC-RUBY-SSLCTX-001": "ctx = OpenSSL::SSL::SSLContext.new",
-"ECD-SRC-RUBY-ACTIVE-001": "enc = ActiveSupport::MessageEncryptor.new(key, cipher: 'aes-256-gcm')",
-"ECD-SRC-RUBY-BCRYPT-001": "h = BCrypt::Password.create(password)",
-"ECD-SRC-RUBY-RBNACL-SECRETBOX-001": "box = RbNaCl::SecretBox.new(key)",
-"ECD-SRC-RUBY-RBNACL-BOX-001": "box = RbNaCl::Box.new(peer_pk, sk)",
-"ECD-SRC-RUBY-RBNACL-SIGN-001": "sig = RbNaCl::Signatures.signature.detached(msg, sk)",
-"ECD-CFG-RUBY-CIPHER-001": "  cipher: aes-256-gcm",
-"ECD-CFG-RUBY-NULL-001": "  ciphers: 'DEFAULT:!aNULL:!eNULL'",
+"IM-SRC-RUBY-AES-ECB-001": "c = OpenSSL::Cipher::AES.new(256, :ecb)",
+"IM-SRC-RUBY-AES-LIT-ECB-001": "c = OpenSSL::Cipher.new('aes-256-ecb')",
+"IM-SRC-RUBY-3DES-001": "c = OpenSSL::Cipher::DES_EDE3.new",
+"IM-SRC-RUBY-RC4-001": "c = OpenSSL::Cipher::RC4.new",
+"IM-SRC-RUBY-LEGACY-001": "c = OpenSSL::Cipher::BF.new",
+"IM-SRC-RUBY-NULL-001": "c = OpenSSL::Cipher::NullCipher.new",
+"IM-SRC-RUBY-CHACHA-001": "c = OpenSSL::Cipher::ChaCha20.new(key)",
+"IM-SRC-RUBY-RSA-NEW-001": "key = OpenSSL::PKey::RSA.new(2048)",
+"IM-SRC-RUBY-RSA-PKE-001": "out = key.public_encrypt(data)",
+"IM-SRC-RUBY-RSA-PSS-001": "sig = key.sign_pss('SHA256', data)",
+"IM-SRC-RUBY-SIGN-001": "signature = private_key.sign(OpenSSL::Digest.new('SHA256'), data)",
+"IM-SRC-RUBY-ECDH-001": "shared = key.dh_compute_key(peer_public_key)",
+"IM-SRC-RUBY-DSA-001": "key = OpenSSL::PKey::DSA.new(1024)",
+"IM-SRC-RUBY-DH-001": "dh = OpenSSL::PKey::DH.new(2048)",
+"IM-SRC-RUBY-DH-COMPUTE-001": "shared = dh.compute_key(peer_pub)",
+"IM-SRC-RUBY-PKCS7-001": "p7 = OpenSSL::PKCS7.new(pem)",
+"IM-SRC-RUBY-HMAC-001": "mac = OpenSSL::HMAC.hexdigest('SHA256', key, data)",
+"IM-SRC-RUBY-DIGEST-SHA2-001": "OpenSSL::Digest::SHA256.new",
+"IM-SRC-RUBY-DIGEST-SHA2-001": "Digest::SHA256.hexdigest(data)",
+"IM-SRC-RUBY-DIGEST-SHA1-001": "OpenSSL::Digest.new('SHA1')",
+"IM-SRC-RUBY-DIGEST-SHA1-001": "Digest::SHA1.hexdigest(data)",
+"IM-SRC-RUBY-DIGEST-MD5-001": "Digest::MD5.hexdigest(data)",
+"IM-SRC-RUBY-PBKDF2-001": "dk = OpenSSL::PKCS5.pbkdf2_hmac(pw, salt, 20000, 32, 'SHA256')",
+"IM-SRC-RUBY-RANDOM-001": "token = SecureRandom.hex(32)",
+"IM-SRC-RUBY-RANDOM-OPENSSL-001": "b = OpenSSL::Random.random_bytes(32)",
+"IM-SRC-RUBY-WEAKRNG-001": "roll = rand(6)",
+"IM-SRC-RUBY-SSLCTX-001": "ctx = OpenSSL::SSL::SSLContext.new",
+"IM-SRC-RUBY-ACTIVE-001": "enc = ActiveSupport::MessageEncryptor.new(key, cipher: 'aes-256-gcm')",
+"IM-SRC-RUBY-BCRYPT-001": "h = BCrypt::Password.create(password)",
+"IM-SRC-RUBY-RBNACL-SECRETBOX-001": "box = RbNaCl::SecretBox.new(key)",
+"IM-SRC-RUBY-RBNACL-BOX-001": "box = RbNaCl::Box.new(peer_pk, sk)",
+"IM-SRC-RUBY-RBNACL-SIGN-001": "sig = RbNaCl::Signatures.signature.detached(msg, sk)",
+"IM-CFG-RUBY-CIPHER-001": "  cipher: aes-256-gcm",
+"IM-CFG-RUBY-NULL-001": "  ciphers: 'DEFAULT:!aNULL:!eNULL'",
 ```
 
 The two withdrawn rules keep their samples in this list so that whoever takes the alternative path
 in section 2.1 can reinstate them without re-deriving anything:
 
 ```python
-"ECD-SRC-RUBY-AES-AEAD-001": "c = OpenSSL::Cipher::AES.new(256, :gcm)",
-"ECD-SRC-RUBY-AES-BLOCK-001": "c = OpenSSL::Cipher::AES.new(128, :cbc)",
+"IM-SRC-RUBY-AES-AEAD-001": "c = OpenSSL::Cipher::AES.new(256, :gcm)",
+"IM-SRC-RUBY-AES-BLOCK-001": "c = OpenSSL::Cipher::AES.new(128, :cbc)",
 ```
 
 ---
@@ -370,9 +370,9 @@ in section 2.1 can reinstate them without re-deriving anything:
 
 | API considered | Decision | Reason |
 |---|---|---|
-| `Ed25519::SigningKey` / `::VerifyKey` / `.generate_signing_key` (the `ed25519` gem) | **NO NEW RULE** | `ECD-SRC-EDDSA-001` contains `\bEd25519\b` and already emits `Ed25519` / `signature`. |
-| bare curve literals `'prime256v1'` etc. | **NO NEW RULE** | `ECD-SRC-ECC-001` lists all five spellings and captures the curve, and the engine maps it to a key size. |
-| `OpenSSL::PKey::EC.new('prime256v1')`, `EC.generate('secp384r1')` | **NO NEW RULE** | The curve literal is the argument, so `ECD-SRC-ECC-001` fires and the engine's `ECC` handling resolves the size. A new rule would be a second component named `ECC` for one statement (F1) - and would then be *rewritten* by `scanner.py:479-491`, which overwrites `name`/`primitive` for any finding named `ECC`. |
+| `Ed25519::SigningKey` / `::VerifyKey` / `.generate_signing_key` (the `ed25519` gem) | **NO NEW RULE** | `IM-SRC-EDDSA-001` contains `\bEd25519\b` and already emits `Ed25519` / `signature`. |
+| bare curve literals `'prime256v1'` etc. | **NO NEW RULE** | `IM-SRC-ECC-001` lists all five spellings and captures the curve, and the engine maps it to a key size. |
+| `OpenSSL::PKey::EC.new('prime256v1')`, `EC.generate('secp384r1')` | **NO NEW RULE** | The curve literal is the argument, so `IM-SRC-ECC-001` fires and the engine's `ECC` handling resolves the size. A new rule would be a second component named `ECC` for one statement (F1) - and would then be *rewritten* by `scanner.py:479-491`, which overwrites `name`/`primitive` for any finding named `ECC`. |
 | `OpenSSL::PKey.read`, `OpenSSL::PKey::RSA.new(File.read(pem))` | **DECLINE** | The non-numeric form is *key loading*, not key generation, and the algorithm comes from the key file, which `engine/certificates.py` owns. Note the regex in R-10 requires `\d+`, so a PEM load does not match it - deliberate. |
 | `OpenSSL::X509::Certificate.new`, `.verify`, `.sign` | **DECLINE** | `engine/certificates.py` parses X.509 properly. A regex would duplicate a real parser with a worse one. |
 | `OpenSSL::X509::Certificate#verify(pubkey)` | **DECLINE** | Same, and the *verification* operation is a check rather than a use. |
@@ -414,7 +414,7 @@ character after `new` here is `(`, so it does match the prefix... **and this is 
 checked most carefully.** Measured: it does *not* fire, because `_strip_comments` blanks the
 `# frozen_string_literal` line, and the `NOTES` string's `OpenSSL::Cipher.new('aes-256-...')` is not
 followed by `-ecb`, so R-04's `ecb` requirement excludes it, while the withdrawn R-01/R-02 and the
-shipped `ECD-SRC-SSH-CIPHER-001` are the rules that would see it - the first two are withdrawn and
+shipped `IM-SRC-SSH-CIPHER-001` are the rules that would see it - the first two are withdrawn and
 the third is a **pre-existing** false positive on a bare string, not one this pack introduces. The
 digest rules require a following `.` (R-20/21/22), which the prose does not have.
 `sha256_digest` is not a rule token. `Aes256Cipher` and `CIPHER_NAME` are not rule tokens.
@@ -430,7 +430,7 @@ clean because I chose a decoy it happens to pass.
 NOTES = "SecureRandom is used for tokens; Random.rand is only used in a demo fixture"
 ```
 
-**Measured: one false positive - `ECD-SRC-RUBY-DIGEST-SHA1-001` on line 1.** Identical cause and
+**Measured: one false positive - `IM-SRC-RUBY-DIGEST-SHA1-001` on line 1.** Identical cause and
 identical fix to the PHP pack's D2: `_strip_comments` applies `#` handling only to `.py`/`.pyw`
 (`scanner.py:387-389`), and `#` is Ruby's *only* line-comment syntax. For Ruby this is worse than
 for PHP, because there is no alternative comment style to fall back on - essentially every
@@ -446,7 +446,7 @@ ctx.ciphers = "DEFAULT"
 cert = OpenSSL::X509::Certificate.new(pem)
 ```
 
-**Measured: one finding - `ECD-SRC-RUBY-SSLCTX-001` on line 1 - and it is correct.** An
+**Measured: one finding - `IM-SRC-RUBY-SSLCTX-001` on line 1 - and it is correct.** An
 `SSLContext` is a TLS configuration; the brief asks for TLS evidence and this is it. I originally
 placed this line in the decoy, which was my mistake: it is a true positive, and moving it here is
 the honest classification. `OpenSSL::X509::Certificate.new` is declined in section 4 because the
@@ -468,12 +468,12 @@ because R-31 requires `aNULL` or `eNULL`.
 
 **Measured: two, and both were designed out during this work.**
 
-* `CROSS AES line=1 ['ECD-SRC-AES-001', 'PROPOSED']` on `OpenSSL::Cipher::AES.new(256, :gcm)`. This
+* `CROSS AES line=1 ['IM-SRC-AES-001', 'PROPOSED']` on `OpenSSL::Cipher::AES.new(256, :gcm)`. This
   is the F3/E9 problem and the reason R-01 and R-02 are withdrawn. It is the only collision that
   cannot be resolved by editing a proposed regex.
-* `CROSS LEGACY-CIPHER line=1 ['ECD-CFG-LEGACY-001', 'PROPOSED']` on
+* `CROSS LEGACY-CIPHER line=1 ['IM-CFG-LEGACY-001', 'PROPOSED']` on
   `ciphers: 'DEFAULT:!aNULL:!eNULL:RC4-SHA'`. My rule originally matched `RC4`, which
-  `ECD-CFG-LEGACY-001` already owns; renaming the rule to `NULL-CIPHER` and restricting it to
+  `IM-CFG-LEGACY-001` already owns; renaming the rule to `NULL-CIPHER` and restricting it to
   `aNULL|eNULL` removed the collision **and** removed a contradiction, because the two rules were
   describing different defects under one name.
 
@@ -556,7 +556,7 @@ restated here, and there are three.
 | id | Ruby consequence |
 |---|---|
 | **E1** (blank `#` comments for `.php`/`.rb`) | **Hard prerequisite for this pack**, not an improvement. `#` is Ruby's only line comment, so today *every* commented-out crypto line in a Ruby file is a finding. Ruby also needs two exclusions PHP does not: `=begin`/`=end` block comments, and `#{...}` interpolation. `?#` is a character literal containing `#` and is a third. |
-| **E9** (add a capture group to `ECD-SRC-AES-001`'s `AES\.new\(`) | **Blocks two otherwise-good rules.** R-01 and R-02 are withdrawn until this is done. This is the only item in either document that prevents otherwise-correct rules from shipping. |
+| **E9** (add a capture group to `IM-SRC-AES-001`'s `AES\.new\(`) | **Blocks two otherwise-good rules.** R-01 and R-02 are withdrawn until this is done. This is the only item in either document that prevents otherwise-correct rules from shipping. |
 | **E10** (an `extensions=` key per rule) | Ruby's namespacing makes this less urgent than for PHP - measured zero collisions because every anchor is either an `OpenSSL::`/`Digest::`/`SecureRandom::`/`BCrypt::` constant or a guarded method name. Two exceptions are *not* namespaced and would benefit: R-27's bare `rand(`/`srand(` and R-17's `.compute_key(`. |
 
 Two Ruby-specific additions:

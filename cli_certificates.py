@@ -1,5 +1,5 @@
 """
-ECDAT certificate sensor entry point: `python cli_certificates.py certs ./target`
+IndraMesh certificate sensor entry point: `python cli_certificates.py certs ./target`
 
 SEPARATION, AND WHY
 -------------------
@@ -29,7 +29,7 @@ from engine.cbom import generate_cbom
 from engine.certificates import SCANNER_NAME, scan_certificates
 from engine.mosca import calculate_risk
 from engine.recommender import get_pqc_recommendation
-from engine.scanner import ECDATScanner
+from engine.scanner import IndraMeshScanner
 
 SEVERITY_ORDER = ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
 
@@ -82,7 +82,7 @@ def run_certs(target, output_format="text", fail_on="CRITICAL", prefer="auto", o
         payload = {"findings": findings, "coverage": coverage}
         if out_dir and out_dir != ".":
             os.makedirs(out_dir, exist_ok=True)
-            path = os.path.join(out_dir, "ecdat-certificates.json")
+            path = os.path.join(out_dir, "indramesh-certificates.json")
             with open(path, "w", encoding="utf-8") as handle:
                 json.dump(payload, handle, indent=2)
             print(f"[*] Wrote {path}")
@@ -102,7 +102,7 @@ def run_certs(target, output_format="text", fail_on="CRITICAL", prefer="auto", o
                       f"-> {finding['recommendation']['algorithm']}")
         if out_dir and out_dir != ".":
             os.makedirs(out_dir, exist_ok=True)
-            path = os.path.join(out_dir, "ecdat-certificates.cbom.json")
+            path = os.path.join(out_dir, "indramesh-certificates.cbom.json")
             with open(path, "w", encoding="utf-8") as handle:
                 handle.write(generate_cbom(findings, enriched=True))
             print(f"[*] Wrote {path}")
@@ -117,7 +117,7 @@ def run_certs(target, output_format="text", fail_on="CRITICAL", prefer="auto", o
 
 def run_all(target, output_format="text", fail_on="CRITICAL", enable_ml=False):
     """Source and certificates in one pass, to show the schemas really do concatenate."""
-    source = ECDATScanner(enable_ml=enable_ml)
+    source = IndraMeshScanner(enable_ml=enable_ml)
     source_findings = source.scan_directory(target)
     certificate_findings, scanner = scan_certificates(target)
     coverage = scanner.coverage_manifest(certificate_findings)

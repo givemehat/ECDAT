@@ -12,7 +12,7 @@ import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "raw_readme")
-UA = {"User-Agent": "ecdat-competitive-research", "Accept": "application/vnd.github+json"}
+UA = {"User-Agent": "indramesh-competitive-research", "Accept": "application/vnd.github+json"}
 
 # Ordered by relevance to SIH26164. The first two are sibling teams on the same statement.
 TARGETS = [

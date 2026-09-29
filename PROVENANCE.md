@@ -1,6 +1,6 @@
 # Provenance and originality statement
 
-SIH26164 · ECDAT · Enterprise Cryptographic Discovery & Analysis Tool
+SIH26164 · IndraMesh · Enterprise Cryptographic Discovery & Analysis Tool
 
 This document exists to answer one question unambiguously: **what in this repository is ours?**
 

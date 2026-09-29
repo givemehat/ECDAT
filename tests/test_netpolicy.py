@@ -20,7 +20,7 @@ while being an SSRF gadget.
 THE INVARIANT UNDER TEST, IN ONE LINE
 ---------------------------------------------------------------------------------------------------
     No input an untrusted caller controls can produce a `VettedEndpoint` whose address is not a
-    public unicast address, unless ECDAT_ALLOW_PRIVATE_TARGETS is explicitly set -- and cloud
+    public unicast address, unless INDRAMESH_ALLOW_PRIVATE_TARGETS is explicitly set -- and cloud
     instance metadata is never reachable, even then.
 
 Covered, in order of how badly a bug would hurt:
@@ -295,7 +295,7 @@ def test_teredo_is_judged_on_both_embedded_addresses():
 def test_cloud_metadata_is_refused_unconditionally(address):
     """The one address class that no environment variable can unlock.
 
-    `ECDAT_ALLOW_PRIVATE_TARGETS` exists so an operator can point the sensor at a lab server on
+    `INDRAMESH_ALLOW_PRIVATE_TARGETS` exists so an operator can point the sensor at a lab server on
     127.0.0.1. It is not a request to be able to read instance credentials, and no lab needs it.
     An SSRF gadget whose metadata path is a config option will be configured that way by someone
     at 2am, so there is deliberately no variable for it.
@@ -311,7 +311,7 @@ def test_metadata_stays_metadata_even_when_wrapped():
     `::ffff:169.254.169.254` unwraps to 169.254.169.254, and the recursive call classifies the
     inner address correctly -- but the OUTER verdict is what the caller acts on. If the wrapper
     branch ever stopped propagating the inner verdict, metadata would silently become
-    `private-target`, and `ECDAT_ALLOW_PRIVATE_TARGETS` would then unlock it. That is precisely
+    `private-target`, and `INDRAMESH_ALLOW_PRIVATE_TARGETS` would then unlock it. That is precisely
     the configuration this module refuses to have, so the propagation is pinned here.
     """
     verdict, reason = classify_address(ipaddress.ip_address("::ffff:169.254.169.254"))

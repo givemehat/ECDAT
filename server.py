@@ -1,4 +1,4 @@
-"""ECDAT Server -- Modern FastAPI backend for Enterprise Cryptographic Discovery & Analysis.
+"""IndraMesh Server -- Modern FastAPI backend for Enterprise Cryptographic Discovery & Analysis.
 
 Interfaces directly with `engine/` modules:
 - scanner.py (discovery engine)
@@ -13,6 +13,7 @@ Interfaces directly with `engine/` modules:
 - graph.py (topology visualization)
 - gui_helpers.py (rating, validation, tables)
 """
+import asyncio
 import datetime
 import json
 import os
@@ -28,7 +29,7 @@ from pydantic import BaseModel, Field
 
 from contextlib import asynccontextmanager
 
-# Ensure ECDAT directory is on sys.path
+# Ensure IndraMesh directory is on sys.path
 _REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
 if _REPO_ROOT not in sys.path:
     sys.path.insert(0, _REPO_ROOT)
@@ -74,7 +75,7 @@ from engine.mosca import (
     POLICY_DEADLINES,
     Z_PRESETS,
 )
-from engine.scanner import ECDATScanner, RULES
+from engine.scanner import IndraMeshScanner, RULES
 from engine.theme import risk_score
 from engine.verify_migration import verify_migration
 
@@ -115,14 +116,14 @@ async def lifespan(app: FastAPI):
                 x_override=None,
                 y_override=None,
             )
-            print("[ECDAT] Server auto-seeded successfully with ./dummy_target")
+            print("[IndraMesh] Server auto-seeded successfully with ./dummy_target")
     except Exception as exc:
-        print(f"[ECDAT] Startup pre-seed notice: {exc}")
+        print(f"[IndraMesh] Startup pre-seed notice: {exc}")
     yield
 
 
 app = FastAPI(
-    title="ECDAT API",
+    title="IndraMesh API",
     description="Enterprise Cryptographic Discovery & Analysis Tool API",
     version="2.0.0",
     lifespan=lifespan,
@@ -175,7 +176,7 @@ def _compute_scan_bundle(target: str, enable_ml: bool, policy: str, data_class: 
     if not os.path.exists(abs_target):
         raise HTTPException(status_code=400, detail=f"Target path does not exist: {target}")
 
-    scanner = ECDATScanner(enable_ml=enable_ml)
+    scanner = IndraMeshScanner(enable_ml=enable_ml)
     findings = scanner.scan_directory(abs_target) if os.path.isdir(abs_target) else scanner._scan_path(abs_target)
     coverage = scanner.coverage_manifest(findings)
     scanned_at = datetime.datetime.now().replace(microsecond=0).isoformat()
@@ -198,7 +199,7 @@ def _compute_scan_bundle(target: str, enable_ml: bool, policy: str, data_class: 
         y_override=y_override,
     )
 
-    subject = os.path.basename(abs_target.rstrip("/\\")) or "ECDAT-Scanned-Artefact"
+    subject = os.path.basename(abs_target.rstrip("/\\")) or "IndraMesh-Scanned-Artefact"
     cbom_str = ""
     cbom_doc = {}
     validation = {"ok": False, "state": "not-run", "errors": [], "message": "CBOM not yet built"}
@@ -323,7 +324,7 @@ def get_status():
     """Engine health, rule counts, and configuration presets."""
     return {
         "status": "online",
-        "app_name": "ECDAT",
+        "app_name": "IndraMesh",
         "title": "Enterprise Cryptographic Discovery & Analysis Tool",
         "version": "2.0.0",
         "hackathon": "Smart India Hackathon 2026 SIH26164 (NTRO)",
@@ -387,7 +388,7 @@ def rate_findings_endpoint(req: RateRequest):
     )
 
     abs_target = scan_info["abs_target"]
-    subject = os.path.basename(abs_target.rstrip("/\\")) or "ECDAT-Scanned-Artefact"
+    subject = os.path.basename(abs_target.rstrip("/\\")) or "IndraMesh-Scanned-Artefact"
     cbom_str = ""
     cbom_doc = {}
     validation = {"ok": False, "state": "not-run", "errors": [], "message": ""}
@@ -432,7 +433,7 @@ def download_cbom():
     return Response(
         content=_STATE["last_cbom"],
         media_type="application/json",
-        headers={"Content-Disposition": 'attachment; filename="ecdat_report.json"'},
+        headers={"Content-Disposition": 'attachment; filename="indramesh_report.json"'},
     )
 
 
@@ -445,7 +446,7 @@ def download_coverage():
     return Response(
         content=json.dumps(scan["coverage"], indent=2, default=str),
         media_type="application/json",
-        headers={"Content-Disposition": 'attachment; filename="ecdat_coverage.json"'},
+        headers={"Content-Disposition": 'attachment; filename="indramesh_coverage.json"'},
     )
 
 
@@ -466,7 +467,7 @@ def download_recommendations():
     return Response(
         content=json.dumps(payload, indent=2, default=str),
         media_type="application/json",
-        headers={"Content-Disposition": 'attachment; filename="ecdat_recommendations.json"'},
+        headers={"Content-Disposition": 'attachment; filename="indramesh_recommendations.json"'},
     )
 
 
@@ -546,7 +547,7 @@ def generate_executive_report_html() -> str:
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>ECDAT Executive Cryptographic Assessment Report - {scan['target']}</title>
+<title>IndraMesh Executive Cryptographic Assessment Report - {scan['target']}</title>
 <style>
   @page {{ size: A4; margin: 1.5cm; }}
   body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; background: #ffffff; margin: 0; padding: 2rem; line-height: 1.5; }}
@@ -580,7 +581,7 @@ def generate_executive_report_html() -> str:
 </div>
 <div class="header">
   <div>
-    <h1 class="title">ECDAT Cryptographic Posture Assessment</h1>
+    <h1 class="title">IndraMesh Cryptographic Posture Assessment</h1>
     <div class="subtitle">Smart India Hackathon 2026 SIH26164 (NTRO) &middot; Post-Quantum Cryptography Migration Report</div>
   </div>
   <div style="text-align:right">
@@ -640,7 +641,7 @@ def generate_executive_report_html() -> str:
 </table>
 
 <div class="footer">
-  <div>Generated by ECDAT v2.0.0 &middot; Offline Ecma-424 / CycloneDX 1.7 Verified Engine</div>
+  <div>Generated by IndraMesh v2.0.0 &middot; Offline Ecma-424 / CycloneDX 1.7 Verified Engine</div>
   <div>Compliance: NIST IR 8547 &middot; FIPS 203 (ML-KEM) &middot; FIPS 204 (ML-DSA) &middot; FIPS 205 (SLH-DSA)</div>
 </div>
 </body>
@@ -668,7 +669,7 @@ def download_executive_report_json():
     active_policy = POLICY_DEADLINES.get(cfg.get("policy", "india_dst_nqm"), {})
 
     report = {
-        "report_type": "ECDAT Post-Quantum Cryptographic Posture Assessment",
+        "report_type": "IndraMesh Post-Quantum Cryptographic Posture Assessment",
         "target": scan["target"],
         "scanned_at": scan["scanned_at"],
         "compliance_policy": active_policy,
@@ -691,7 +692,7 @@ def download_executive_report_json():
     return Response(
         content=json.dumps(report, indent=2, default=str),
         media_type="application/json",
-        headers={"Content-Disposition": 'attachment; filename="ecdat_executive_report.json"'},
+        headers={"Content-Disposition": 'attachment; filename="indramesh_executive_report.json"'},
     )
 
 
@@ -920,7 +921,7 @@ def index_page():
     if os.path.exists(index_file):
         with open(index_file, "r", encoding="utf-8") as f:
             return HTMLResponse(content=f.read())
-    return HTMLResponse("<h2>ECDAT Web UI - static files not found</h2>", status_code=404)
+    return HTMLResponse("<h2>IndraMesh Web UI - static files not found</h2>", status_code=404)
 
 
 @app.get("/_stcore/health")
@@ -936,7 +937,10 @@ def st_host_config():
 
 @app.websocket("/_stcore/stream")
 async def st_websocket_stream(websocket: WebSocket):
-    """Gracefully close any stale Streamlit websocket connections from cached browser tabs."""
+    """Gracefully keep stale Streamlit websocket connections idle so they don't reconnect in a loop."""
     await websocket.accept()
-    await websocket.send_text(json.dumps({"type": "session_status", "status": "closed"}))
-    await websocket.close()
+    try:
+        while True:
+            await asyncio.sleep(60)
+    except Exception:
+        pass
