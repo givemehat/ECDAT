@@ -1439,6 +1439,57 @@ class IndraMeshScanner:
                     data = handle.read(25 * 1024 * 1024)   # 25 MB/member cap
                 except (OSError, EOFError, KeyError):
                     self._note_error(f"{image_path}!{member.name}", "could not extract layer member")
+                if name.endswith(CONTAINER_EXTENSIONS):
+                    # Handle nested layer archives (e.g. Docker save layer blobs)
+                    try:
+                        mode = "r:gz" if (name.endswith(".tar.gz") or name.endswith(".tgz")) else "r:"
+                        with tarfile.open(fileobj=io.BytesIO(data), mode=mode) as layer_archive:
+                            for layer_mem in layer_archive.getmembers():
+                                if not layer_mem.isfile():
+                                    continue
+                                l_name = layer_mem.name.lower()
+                                try:
+                                    l_h = layer_archive.extractfile(layer_mem)
+                                    if l_h is None:
+                                        continue
+                                    l_data = l_h.read(25 * 1024 * 1024)
+                                except (OSError, EOFError, KeyError):
+                                    continue
+                                l_path = f"{image_path}!{member.name}!{layer_mem.name}"
+                                if l_name.endswith(SOURCE_EXTENSIONS) or l_name.endswith(CONFIG_EXTENSIONS):
+                                    try:
+                                        l_text = l_data.decode("utf-8")
+                                    except UnicodeDecodeError:
+                                        continue
+                                    l_findings = self._match_rules(l_path, l_text)
+                                    for f in l_findings:
+                                        f["evidence_class"] = "configured"
+                                    findings.extend(l_findings)
+                                elif l_name.endswith(BINARY_EXTENSIONS):
+                                    for f in self._scan_binary_data(l_path, l_data):
+                                        f["evidence_class"] = "configured"
+                                        findings.append(f)
+                                elif layer_mem.size and layer_mem.size < 5 * 1024 * 1024:
+                                    blob = " ".join(_extract_printable_strings(l_data))
+                                    for marker_name, rx in _COMPILED_MARKERS:
+                                        if rx.search(blob):
+                                            findings.append({
+                                                "file": l_path,
+                                                "line": None,
+                                                "type": "library",
+                                                "name": marker_name,
+                                                "primitive": "cryptographic-library",
+                                                "rule_id": "IM-IMG-LIB-001",
+                                                "scanner": "container-scanner",
+                                                "evidence_class": "configured",
+                                                "artefact_class": "library",
+                                                "uses": "at-rest",
+                                                "match": f"image layer: {layer_mem.name}",
+                                                "dl_confidence": 0.0,
+                                                "ast_depth": 0.0,
+                                            })
+                    except (tarfile.TarError, OSError, EOFError):
+                        pass
                     continue
                 if name.endswith(SOURCE_EXTENSIONS) or name.endswith(CONFIG_EXTENSIONS):
                     try:

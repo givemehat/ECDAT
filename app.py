@@ -18,6 +18,29 @@ if _REPO_ROOT not in sys.path:
 
 from server import app as fastapi_app
 
+# Graceful bridge if invoked via `streamlit run app.py`
+try:
+    import streamlit as st
+    if hasattr(st, "runtime") and st.runtime.exists():
+        st.set_page_config(page_title="IndraMesh Console", layout="wide", page_icon="🛡️")
+        st.title("🛡️ INDRAMESH (इन्द्रमेश)")
+        st.subheader("Enterprise Cryptographic Discovery, Inventory (ACDI) & Post-Quantum Migration Mesh")
+        st.info("🚀 **IndraMesh has migrated to a High-Performance FastAPI Cyber HUD Console.**")
+        st.markdown(
+            """
+            To launch the full interactive Cyber HUD console, CycloneDX v1.7 CBOM generator,
+            and real-time telemetry array, run:
+            
+            ```bash
+            python app.py
+            ```
+            Then access the HUD at **http://127.0.0.1:8501**
+            """
+        )
+except Exception:
+    pass
+
+
 
 def run_server(host: str = "0.0.0.0", port: int = 8501, reload: bool = False):
     """Start the Uvicorn web server."""

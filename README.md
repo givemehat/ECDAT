@@ -3,7 +3,12 @@
 <img src="assets/indramesh-logo.svg" alt="IndraMesh &mdash; Enterprise Cryptographic Discovery &amp; Analysis Mesh" width="100%" />
 
 <br/>
-<br/>
+
+<!-- CI/CD & Cloud Launch Badges -->
+[![Tests](https://github.com/givemehat/IndraMesh/actions/workflows/tests.yml/badge.svg)](https://github.com/givemehat/IndraMesh/actions/workflows/tests.yml)
+[![Quantum Risk Scan](https://github.com/givemehat/IndraMesh/actions/workflows/indramesh_scan.yml/badge.svg)](https://github.com/givemehat/IndraMesh/actions/workflows/indramesh_scan.yml)
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/deploy?repository=givemehat/ECDAT&branch=master&mainModule=app.py)
+[![Web Console](https://img.shields.io/badge/Console-FastAPI_%C2%B7_Port_8501-00F5D4?style=for-the-badge&logo=fastapi&logoColor=040812)](#quickstart)
 
 # INDRAMESH (इन्द्रमेश)
 ### Enterprise Cryptographic Discovery, Inventory (ACDI) &amp; Post-Quantum Migration Mesh
