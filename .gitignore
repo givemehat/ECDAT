@@ -32,6 +32,7 @@ _patch_*.py
 # One-off probes belong in the commit message or in a real test, never in the tree.
 _*.py
 _*.txt
+_*.err
 !.gitignore
 
 # ---- pyvis writes its CDN assets into ./lib when a graph is rendered ----
@@ -63,3 +64,6 @@ benchmark/corpora/
 
 # Reference attachment from the SIH deck comparison; unreadable (truncated archive), kept local only
 _ref/
+
+# Reference repos
+reference_repos/

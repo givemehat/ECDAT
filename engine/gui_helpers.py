@@ -865,12 +865,6 @@ def certificate_rows(records):
         })
     return rows
 
-    if remaining < 0:
-        return f"PASSED {abs(remaining)} year(s) ago"
-    if remaining == 0:
-        return "this year"
-    return f"{remaining} year(s) from {current_year}"
-
 
 def policy_deadline_row(policy, current_year) -> dict:
     """One policy deadline, with what it requires and where in this repo that claim comes from."""

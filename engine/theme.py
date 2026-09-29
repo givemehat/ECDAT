@@ -59,16 +59,16 @@ CSS = """
 :root {
   --chassis:     #0d1014;   /* the bench the instrument sits on */
   --panel:       #141920;   /* raised surface, one step up from the chassis */
-  --panel-edge:  #212934;   /* hairline. Always 1px, never a heavy border. */
+  --panel-edge:  #283341;   /* hairline. Always 1px, clean contrast. */
   --ink:         #e8edf2;   /* primary text */
-  --ink-dim:     #93a1b0;   /* secondary text, still AA on --panel */
-  --ink-faint:   #5d6b7a;   /* axis labels. Never carries meaning on its own. */
+  --ink-dim:     #a2b3c4;   /* secondary text, AA+ on --panel */
+  --ink-faint:   #8195a8;   /* axis labels, clearly legible on dark background */
 
   --signal-ok:   #3fb98c;   /* proven / satisfied */
   --signal-warn: #d9a441;   /* attention */
   --signal-bad:  #e5604d;   /* broken / critical */
   --signal-info: #5aa9e6;   /* informational, capability tier */
-  --signal-idle: #4a5563;   /* not run, unknown */
+  --signal-idle: #6b7785;   /* not run, unknown */
 
   --chassis-1: #141920;  --chassis-2: #1b222b;  --chassis-3: #232c37;
   --chassis-4: #2e3946;  --chassis-5: #3b4859;
@@ -106,8 +106,9 @@ p, li, span, label { color: var(--ink); }
 }
 [data-testid="stMetricValue"] { font-size: 1.75rem !important; color: var(--ink) !important;
                                 font-weight: 500 !important; }
-div[data-testid="stMetricLabel"] p { font-size: 0.72rem !important; text-transform: uppercase;
-                                    letter-spacing: 0.09em; color: var(--ink-faint) !important; }
+div[data-testid="stMetricLabel"] p { font-size: 0.76rem !important; text-transform: uppercase;
+                                    letter-spacing: 0.08em; color: var(--ink-faint) !important;
+                                    font-weight: 600 !important; }
 [data-testid="stMetricDelta"] { font-family: var(--mono); font-size: 0.78rem; }
 
 /* ---- surfaces ------------------------------------------------------------------------------ */
@@ -131,9 +132,13 @@ div[data-testid="stExpander"] {
 }
 .stButton button:active { transform: translateY(1px); }
 .stButton button[kind="primary"] {
-  background: var(--signal-info); border-color: var(--signal-info); color: #06121c; font-weight: 600;
+  background: var(--signal-info) !important; border-color: var(--signal-info) !important;
+  color: #06121c !important; font-weight: 700 !important;
 }
-.stButton button[kind="primary"]:hover { background: #78bdf0; border-color: #78bdf0; color: #06121c; }
+.stButton button[kind="primary"] * {
+  color: #06121c !important; font-weight: 700 !important;
+}
+.stButton button[kind="primary"]:hover { background: #78bdf0 !important; border-color: #78bdf0 !important; color: #06121c !important; }
 .stButton button:focus-visible { outline: 2px solid var(--signal-info); outline-offset: 2px; }
 
 /* ---- inputs --------------------------------------------------------------------------------- */
@@ -143,13 +148,15 @@ div[data-testid="stExpander"] {
 }
 input[type="range"] { accent-color: var(--signal-info); }
 
-/* ---- data tables: the densest screen in the tool, so it gets the most care --------------------- */
+/* ---- data tables --------------------------------------------------------------------------- */
 [data-testid="stDataFrame"] { border: 1px solid var(--panel-edge); border-radius: 3px; }
-[data-testid="stDataFrame"] * { font-family: var(--mono) !important; font-size: 0.78rem !important;
-                                font-variant-numeric: tabular-nums; }
+[data-testid="stDataFrame"] [role="columnheader"], [data-testid="stDataFrame"] [role="gridcell"] {
+  font-family: var(--mono) !important; font-size: 0.80rem !important;
+  font-variant-numeric: tabular-nums;
+}
 [data-testid="stDataFrame"] [role="columnheader"] {
   background: var(--chassis-2) !important; color: var(--ink-dim) !important;
-  text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.68rem !important;
+  text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.70rem !important;
   border-bottom: 1px solid var(--panel-edge) !important;
 }
 [data-testid="stDataFrame"] [role="gridcell"] { border-bottom: 1px solid #171d25 !important; }
@@ -281,7 +288,7 @@ def risk_score(findings):
     proven = sum(1 for f in findings
                  if _assurance_value(f) in (ASSURANCE_USED, ASSURANCE_OBSERVED))
     shor = sum(1 for f in findings
-               if str((f.get("risk") or {}).get("break_model", "")).lower() == "shor")
+               if str((f.get("risk") or {}).get("break_model", "")).lower() in ("broken-by-shor", "shor"))
 
     base = (shor / total) * 100.0
     evidence_bonus = (proven / total) * 10.0
@@ -318,12 +325,6 @@ def score_colour(tier):
         "low": "#3fb98c",
         "none": "#4a5563",
     }.get(tier, "#4a5563")
-    """Class for a one-shot staggered entrance. Step 0 is the base class.
-
-    Staggering four surfaces by 50ms each reads as an instrument settling into place. The delay
-    is capped by the caller: past ~4 steps the tail arrives late enough to feel broken.
-    """
-    return "ec-reveal" if step <= 0 else f"ec-reveal ec-reveal-{min(int(step), 4)}"
 
 
 def reveal(step=1):
@@ -393,8 +394,8 @@ def score_ring_svg(payload, *, size=220, track=14):
                         animation:ec-ring-cover .9s cubic-bezier(.22,1,.36,1) .12s both; opacity:.85; }}
       .ec-ring-num {{ font-family:var(--mono, monospace); font-size:{size * 0.24:.0f}px;
                       font-weight:500; fill:var(--ink, #e8edf2); font-variant-numeric:tabular-nums; }}
-      .ec-ring-sub {{ font-family:var(--mono, monospace); font-size:{size * 0.052:.0f}px;
-                      fill:var(--ink-faint, #5d6b7a); letter-spacing:.06em; text-transform:uppercase; }}
+      .ec-ring-sub {{ font-family:var(--mono, monospace); font-size:{size * 0.065:.0f}px;
+                      fill:var(--ink-dim, #b8c7d6); letter-spacing:.06em; text-transform:uppercase; font-weight:600; }}
       .ec-ring-cov {{ font-family:var(--mono, monospace); font-size:{size * 0.048:.0f}px;
                      fill:#3fb98c; }}
       @media (prefers-reduced-motion: reduce) {{

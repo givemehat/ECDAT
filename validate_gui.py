@@ -1,28 +1,22 @@
-﻿# -*- coding: utf-8 -*-
-"""Headless smoke test of the Streamlit GUI against REAL corpus data.
+# -*- coding: utf-8 -*-
+"""Comprehensive verification of the ECDAT Web Console and API.
 
-The user will test the GUI by hand in a browser. That is the right way to judge it, but it is
-not a way to find a crash on the first render. This runs the same code paths -- config parsing,
-execute_scan, every view function, and the post-scan pipeline -- against a real Go source file
-so that a broken import, a renamed helper or a None dereference surfaces here first.
-
-Streamlit is not started: the view functions are called directly, which is what the app does
-once a session exists. Anything that needs a live session raises here rather than in front of
-the user.
+Tests the FastAPI backend, REST endpoints, CycloneDX 1.7 schema validation,
+Mosca rating arithmetic, interactive topology graph, secondary sensors,
+and file browsing.
 """
 import os
 import sys
-import tempfile
+import json
 import traceback
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
-CORPUS = os.path.join(ROOT, "benchmark", "corpora", "xcrypto", "ssh", "cipher.go")
-if not os.path.isfile(CORPUS):
-    # Fall back to a small real file if the corpus was not fetched.
-    CORPUS = os.path.join(ROOT, "cli.py")
+from fastapi.testclient import TestClient
+import app
+import server
 
+client = TestClient(server.app)
 results = []
 
 
@@ -30,101 +24,175 @@ def step(name, fn):
     try:
         out = fn()
         results.append((name, "OK", out))
+        print(f"  [PASS] {name}")
         return out
-    except Exception as exc:  # noqa: BLE001 - the point is to report, not to mask
-        results.append((name, "FAIL", "%s: %s" % (type(exc).__name__, exc)))
+    except Exception as exc:
+        results.append((name, "FAIL", f"{type(exc).__name__}: {exc}"))
+        print(f"  [FAIL] {name}: {exc}")
         traceback.print_exc()
         return None
 
 
-# --- import the app the way Streamlit would -------------------------------------------------
-step("import app", lambda: __import__("app"))
+print("=" * 78)
+print("ECDAT Web Console & API Verification Suite")
+print("=" * 78)
 
-import app  # noqa: E402
-import streamlit  # noqa: E402
+# 1. Root HTML serving
+def test_root_html():
+    res = client.get("/")
+    assert res.status_code == 200
+    assert "ECDAT" in res.text
+    assert "Enterprise Cryptographic Discovery" in res.text
+    assert "CycloneDX 1.7 CBOM" in res.text
+    return f"{len(res.text)} bytes served"
 
-print("streamlit %s" % streamlit.__version__)
-print("app file    %s" % os.path.basename(app.__file__))
-print("scan target %s" % CORPUS)
+step("Serve Root HTML5 Web Console", test_root_html)
 
-# --- a Streamlit session context, so helpers that read session state work --------------------
-try:
-    from streamlit.testing.v1 import AppTest
-    at = AppTest.from_file(os.path.join(ROOT, "app.py"), default_timeout=120)
-    at.run()
-    print("\nAppTest ran. exception count: %d" % (len(at.exception) if at.exception else 0))
-    for e in (at.exception or []):
-        print("  EXCEPTION: %s" % e)
-    results.append(("streamlit AppTest", "OK" if not at.exception else "FAIL",
-                    "%d element groups" % len(at)))
-    results.append(("no runtime exception", "OK" if not at.exception else "FAIL", ""))
-except Exception as exc:  # noqa: BLE001
-    results.append(("streamlit AppTest", "FAIL", "%s: %s" % (type(exc).__name__, exc)))
-    traceback.print_exc()
+# 2. System Status API
+def test_status_api():
+    res = client.get("/api/status")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["status"] == "online"
+    assert "india_dst_nqm" in data["policies"]
+    assert "nist_ir_8547" in data["policies"]
+    assert "operational-record" in data["data_classes"]
+    return f"{len(data['policies'])} policies available"
 
-# --- the engine path, independent of Streamlit ------------------------------------------------
-step("scanner import", lambda: __import__("engine.scanner", fromlist=["RULES"]))
-from engine.scanner import ECDATScanner, RULES  # noqa: E402
-from engine.mosca import calculate_risk, quantum_break_model  # noqa: E402
+step("GET /api/status", test_status_api)
 
-print("\nrules available: %d" % len(RULES))
+# 3. Discovery Scan on dummy_target
+def test_scan_api():
+    res = client.post("/api/scan", json={
+        "target": "./dummy_target",
+        "enable_ml": False,
+        "policy": "india_dst_nqm",
+        "data_class": "operational-record",
+        "z_years": 10.0
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["summary"]["total_findings"] > 0
+    assert "records" in data
+    assert "coverage" in data
+    assert data["cbom_validation"]["ok"] is True
+    assert data["cbom_validation"]["state"] == "valid"
+    return f"{data['summary']['total_findings']} findings, CBOM {data['cbom_validation']['state']}"
 
+step("POST /api/scan on dummy_target", test_scan_api)
 
-def do_scan():
-    s = ECDATScanner(enable_ml=False)
-    findings = s._scan_path(CORPUS)
-    return findings
+# 4. Mosca Re-rating without rescan
+def test_rate_api():
+    res = client.post("/api/rate", json={
+        "z_years": 5.0,
+        "policy": "nist_ir_8547"
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["z_years"] == 5.0
+    assert data["policy"] == "nist_ir_8547"
+    return f"Re-rated at Z=5.0y, score {data['summary']['risk_score']}"
 
+step("POST /api/rate (Dynamic Mosca recalculation)", test_rate_api)
 
-findings = step("scan a real Go file", do_scan)
-if findings is not None:
-    print("findings on %s: %d" % (os.path.basename(CORPUS), len(findings)))
-    names = sorted({f.get("name") for f in findings})
-    print("  algorithms: %s" % ", ".join(str(n) for n in names[:12]))
+# 5. CBOM API & Download
+def test_cbom_api():
+    res = client.get("/api/cbom")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["validation"]["ok"] is True
+    assert data["document"]["bomFormat"] == "CycloneDX"
+    assert data["document"]["specVersion"] in ("1.6", "1.7")
 
-    def do_analyse():
-        rows = [calculate_risk(f) for f in findings]
-        return [r for r in rows if r]
-    analysed = step("mosca risk on every finding", do_analyse)
-    if analysed is not None:
-        print("risk records: %d" % len(analysed))
-        tiers = {}
-        for r in analysed:
-            tiers[r.get("tier")] = tiers.get(r.get("tier"), 0) + 1
-        print("  tiers: %s" % tiers)
-        # The break model must never be guessed: an unknown primitive has to stay unrated.
-        for nm in ("AES", "RSA", "ECDH", "ML-KEM-768", "PRNG"):
-            bm = quantum_break_model(nm, "")
-            print("    break_model(%-11s) = %s" % (nm, bm))
+    dl = client.get("/api/cbom/download")
+    assert dl.status_code == 200
+    assert "attachment" in dl.headers.get("content-disposition", "")
+    return f"Validated {data['document']['bomFormat']} {data['document']['specVersion']} CBOM"
 
-    def do_cbom():
-        from engine.cbom import generate_cbom
-        import json
-        import jsonschema
-        bom = generate_cbom(findings)
-        schema = json.load(open(os.path.join(ROOT, "schemas", "bom-1.7.schema.json"),
-                                encoding="utf-8"))
-        jsonschema.Draft7Validator(schema).validate(json.loads(bom))
-        return len(json.loads(bom).get("components", []))
-    n = step("CBOM + schema validation", do_cbom)
-    if n is not None:
-        print("CBOM components: %d (schema-valid)" % n)
+step("GET /api/cbom & /api/cbom/download", test_cbom_api)
 
-# --- gui_helpers, which the views call --------------------------------------------------------
-def do_helpers():
-    from engine import gui_helpers
-    return len([n for n in dir(gui_helpers) if not n.startswith("_")])
+# 6. Topology Graph API
+def test_topology_api():
+    res = client.get("/api/topology")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["nodes"]) > 0
+    assert len(data["links"]) > 0
 
+    html_res = client.get("/api/topology/html")
+    assert html_res.status_code == 200
+    assert "<html" in html_res.text.lower()
+    return f"{len(data['nodes'])} nodes, {len(data['links'])} links"
 
-nh = step("gui_helpers import", do_helpers)
-if nh is not None:
-    print("gui_helpers public names: %d" % nh)
+step("GET /api/topology & /api/topology/html", test_topology_api)
 
-print("\n" + "=" * 68)
-bad = [r for r in results if r[1] == "FAIL"]
-for name, status, extra in results:
-    print("  %-28s %s %s" % (name, status, extra if status == "FAIL" else ""))
-print("=" * 68)
-print("%d checks, %d failed" % (len(results), len(bad)))
-sys.exit(1 if bad else 0)
+# 7. Secondary Sensors API
+def test_sensors_api():
+    cert_res = client.post("/api/sensors/certificates", json={"target": "./dummy_target"})
+    assert cert_res.status_code == 200
 
+    dep_res = client.post("/api/sensors/dependencies", json={"target": "./dummy_target"})
+    assert dep_res.status_code == 200
+
+    ver_res = client.post("/api/sensors/verification", json={"target": "./dummy_target"})
+    assert ver_res.status_code == 200
+
+    net_res = client.post("/api/sensors/network", json={"endpoints": ["127.0.0.1:8501"], "allow_private": True})
+    assert net_res.status_code == 200
+
+    return "All 4 secondary sensors responded successfully"
+
+step("POST /api/sensors (Certificates, Dependencies, Verification, Network)", test_sensors_api)
+
+# 8. Filesystem Browser API
+def test_browse_api():
+    res = client.post("/api/browse", json={"path": "."})
+    assert res.status_code == 200
+    data = res.json()
+    assert "directories" in data
+    assert "engine" in data["directories"] or "web" in data["directories"]
+    return f"Browsed {data['current']} ({len(data['directories'])} dirs)"
+
+step("POST /api/browse (Local directory picker)", test_browse_api)
+
+# 9. Scan History API
+def test_history_api():
+    res = client.get("/api/history")
+    assert res.status_code == 200
+    items = res.json()
+    assert isinstance(items, list)
+    assert len(items) > 0
+    first_id = items[0]["id"]
+    
+    load_res = client.post("/api/history/load", json={"id": first_id})
+    assert load_res.status_code == 200
+    bundle = load_res.json()
+    assert "summary" in bundle
+    return f"{len(items)} scans in history, restored scan {first_id}"
+
+step("GET /api/history & POST /api/history/load", test_history_api)
+
+# 10. Executive Report API
+def test_report_api():
+    html_res = client.get("/api/report/html")
+    assert html_res.status_code == 200
+    assert "ECDAT Executive Cryptographic Assessment Report" in html_res.text
+    assert "Mosca Inequality Verdict" in html_res.text
+    
+    dl_res = client.get("/api/report/download")
+    assert dl_res.status_code == 200
+    data = dl_res.json()
+    assert data["report_type"] == "ECDAT Post-Quantum Cryptographic Posture Assessment"
+    return f"Generated HTML report ({len(html_res.text)} bytes) and JSON export"
+
+step("GET /api/report/html & /api/report/download", test_report_api)
+
+# Summary
+print("=" * 78)
+failures = [r for r in results if r[1] == "FAIL"]
+if not failures:
+    print(f"ALL {len(results)} GUI & API VERIFICATION STEPS PASSED PERFECTLY!")
+    sys.exit(0)
+else:
+    print(f"{len(failures)} verification step(s) failed!")
+    sys.exit(1)

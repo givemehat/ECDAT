@@ -1,0 +1,1603 @@
+/* ECDAT Modern Cybersecurity HUD / Sci-Fi FUI Design System
+   Conforming to UI/UX Pro Max standards & 21st.dev aesthetic
+   Strict zero-emoji, accessible contrast, responsive breakpoints
+*/
+
+:root {
+  --bg-deep: #070A11;
+  --bg-surface: #0D1322;
+  --bg-card: #121A2D;
+  --bg-card-hover: #17223B;
+  --bg-input: #090E1A;
+  
+  --border-subtle: #1C263B;
+  --border-active: #2A3956;
+  --border-glow: rgba(0, 240, 255, 0.35);
+  
+  --cyan-core: #00F0FF;
+  --cyan-dim: rgba(0, 240, 255, 0.12);
+  --cyan-border: rgba(0, 240, 255, 0.28);
+  
+  --emerald-pqc: #10B981;
+  --emerald-dim: rgba(16, 185, 129, 0.12);
+  
+  --rose-crit: #EF4444;
+  --rose-dim: rgba(239, 68, 68, 0.15);
+  
+  --orange-high: #F97316;
+  --orange-dim: rgba(249, 115, 22, 0.15);
+  
+  --amber-med: #F59E0B;
+  --amber-dim: rgba(245, 158, 11, 0.15);
+  
+  --blue-low: #38BDF8;
+  --blue-dim: rgba(56, 189, 248, 0.12);
+  
+  --purple-accent: #8B5CF6;
+  --purple-dim: rgba(139, 92, 246, 0.14);
+  
+  --text-main: #F1F5F9;
+  --text-dim: #94A3B8;
+  --text-muted: #64748B;
+  --text-code: #38BDF8;
+  
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+  
+  --shadow-hud: 0 4px 20px -2px rgba(0, 0, 0, 0.65);
+  --shadow-glow: 0 0 16px -2px rgba(0, 240, 255, 0.3);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-deep);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Cyber grid background layer */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-image: 
+    linear-gradient(to right, rgba(28, 38, 59, 0.25) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(28, 38, 59, 0.25) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.6;
+}
+
+/* Top subtle glow flare */
+body::after {
+  content: "";
+  position: fixed;
+  top: -150px; left: 50%;
+  transform: translateX(-50%);
+  width: 900px; height: 350px;
+  background: radial-gradient(ellipse at center, rgba(0, 240, 255, 0.12), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.app-container {
+  position: relative;
+  z-index: 1;
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 1.25rem 1.75rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* -------------------------------------------------------------------------
+   Typography & Shared Micro-components
+-------------------------------------------------------------------------- */
+.mono {
+  font-family: var(--font-mono);
+}
+
+.icon {
+  width: 1rem;
+  height: 1rem;
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.icon-lg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.icon-sm {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+/* -------------------------------------------------------------------------
+   Header / Command Brand Deck
+-------------------------------------------------------------------------- */
+.header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.25rem;
+  background: rgba(13, 19, 34, 0.85);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-hud);
+}
+
+.brand-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.brand-emblem {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(139, 92, 246, 0.25));
+  border: 1px solid var(--cyan-border);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cyan-core);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.brand-emblem::after {
+  content: "";
+  position: absolute;
+  top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: emblem-sweep 4s infinite linear;
+}
+
+@keyframes emblem-sweep {
+  0% { left: -100%; }
+  30%, 100% { left: 100%; }
+}
+
+.brand-text h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.brand-text h1 .acronym {
+  background: linear-gradient(90deg, var(--cyan-core), #60A5FA);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-family: var(--font-mono);
+}
+
+.brand-text p {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  letter-spacing: -0.01em;
+}
+
+.meta-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.25rem 0.55rem;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+}
+
+.badge-cyan {
+  background: var(--cyan-dim);
+  border: 1px solid var(--cyan-border);
+  color: var(--cyan-core);
+}
+
+.badge-purple {
+  background: var(--purple-dim);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  color: #C4B5FD;
+}
+
+.badge-emerald {
+  background: var(--emerald-dim);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #34D399;
+}
+
+.badge-rose {
+  background: var(--rose-dim);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #F87171;
+}
+
+.status-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--emerald-pqc);
+  box-shadow: 0 0 8px var(--emerald-pqc);
+  animation: pulse-ring 2s infinite ease-out;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); opacity: 0.9; }
+  50% { transform: scale(1.3); opacity: 0.5; }
+  100% { transform: scale(0.95); opacity: 0.9; }
+}
+
+/* -------------------------------------------------------------------------
+   Scan Deck / Command & Parameters Bar
+-------------------------------------------------------------------------- */
+.deck-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.15rem 1.35rem;
+  box-shadow: var(--shadow-hud);
+  position: relative;
+}
+
+.deck-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+  min-width: 260px;
+}
+
+.field-group label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.input-with-actions {
+  display: flex;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input-with-actions:focus-within {
+  border-color: var(--cyan-core);
+  box-shadow: 0 0 0 1px var(--cyan-border);
+}
+
+.text-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  padding: 0.55rem 0.85rem;
+  outline: none;
+}
+
+.text-input::placeholder {
+  color: var(--text-muted);
+}
+
+.btn-secondary {
+  background: rgba(28, 38, 59, 0.6);
+  border: none;
+  border-left: 1px solid var(--border-subtle);
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: background 0.15s, color 0.15s;
+}
+
+.btn-secondary:hover {
+  background: var(--border-subtle);
+  color: var(--text-main);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #00F0FF, #0099FF);
+  color: #070A11;
+  font-weight: 700;
+  font-size: 0.88rem;
+  letter-spacing: 0.01em;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0.6rem 1.4rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.4);
+  transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+  height: 40px;
+  white-space: nowrap;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
+}
+
+.btn-primary:active {
+  transform: translateY(1px);
+}
+
+.btn-outline {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 0.55rem 0.95rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all 0.2s;
+  height: 40px;
+  white-space: nowrap;
+}
+
+.btn-outline:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--cyan-border);
+  color: var(--cyan-core);
+}
+
+/* Quick presets chips */
+.presets-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.presets-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.chip-btn {
+  background: rgba(28, 38, 59, 0.5);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.chip-btn:hover {
+  border-color: var(--cyan-border);
+  color: var(--cyan-core);
+  background: var(--cyan-dim);
+}
+
+/* Collapsible parameters drawer in deck */
+.params-toggle-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.toggle-link {
+  color: var(--cyan-core);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: none;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.params-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.param-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.select-input {
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.84rem;
+  font-family: var(--font-sans);
+  outline: none;
+  cursor: pointer;
+}
+
+.select-input:focus {
+  border-color: var(--cyan-core);
+}
+
+.slider-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.slider-val-readout {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+
+.slider-val-readout .current-val {
+  color: var(--cyan-core);
+  font-weight: 700;
+}
+
+.range-slider {
+  width: 100%;
+  accent-color: var(--cyan-core);
+  cursor: pointer;
+}
+
+.param-hint {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* -------------------------------------------------------------------------
+   Scan Progress & Sweep Radar Banner
+-------------------------------------------------------------------------- */
+.scan-progress-strip {
+  display: none;
+  padding: 0.75rem 1.25rem;
+  background: linear-gradient(90deg, rgba(0, 240, 255, 0.08), rgba(139, 92, 246, 0.08));
+  border: 1px solid var(--cyan-border);
+  border-radius: var(--radius-md);
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
+}
+
+.scan-progress-strip.active {
+  display: flex;
+}
+
+.radar-sweep {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--cyan-core);
+  border-radius: 50%;
+  position: relative;
+}
+
+.radar-sweep::after {
+  content: "";
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 8px; height: 2px;
+  background: var(--cyan-core);
+  transform-origin: 0 0;
+  animation: sweep 1s infinite linear;
+}
+
+@keyframes sweep {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.progress-text {
+  flex: 1;
+  font-size: 0.82rem;
+  font-family: var(--font-mono);
+}
+
+/* -------------------------------------------------------------------------
+   Integrity Banner ("Read together, never alone")
+-------------------------------------------------------------------------- */
+.integrity-banner {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.15rem 1.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.integrity-headline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.integrity-headline h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.integrity-stamp {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.metric-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.85rem;
+}
+
+.metric-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.15s;
+}
+
+.metric-card:hover {
+  border-color: var(--border-active);
+  transform: translateY(-1px);
+}
+
+.metric-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.metric-value {
+  font-size: 1.65rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-main);
+  letter-spacing: -0.03em;
+}
+
+.metric-note {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+.proof-progress {
+  display: flex;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.proof-progress-fill {
+  background: var(--emerald-pqc);
+  height: 100%;
+}
+
+.proof-progress-remainder {
+  background: var(--amber-med);
+  height: 100%;
+}
+
+/* -------------------------------------------------------------------------
+   Console Navigation Tabs
+-------------------------------------------------------------------------- */
+.nav-tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 0.25rem;
+  overflow-x: auto;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 0.86rem;
+  font-weight: 600;
+  padding: 0.65rem 1.15rem;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.tab-btn:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.tab-btn.active {
+  color: var(--cyan-core);
+  background: rgba(0, 240, 255, 0.05);
+}
+
+.tab-btn.active::after {
+  content: "";
+  position: absolute;
+  bottom: -0.25rem;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--cyan-core);
+  box-shadow: 0 0 8px var(--cyan-core);
+}
+
+.tab-badge {
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-dim);
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--radius-full);
+}
+
+.tab-btn.active .tab-badge {
+  background: var(--cyan-dim);
+  color: var(--cyan-core);
+}
+
+/* Tab panes */
+.tab-content {
+  display: none;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.tab-content.active {
+  display: flex;
+}
+
+/* -------------------------------------------------------------------------
+   Callout Panels & Cards
+-------------------------------------------------------------------------- */
+.callout {
+  padding: 0.85rem 1.15rem;
+  border-left: 3px solid var(--cyan-core);
+  background: rgba(13, 19, 34, 0.6);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.callout-emerald {
+  border-left-color: var(--emerald-pqc);
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.callout-amber {
+  border-left-color: var(--amber-med);
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.callout-rose {
+  border-left-color: var(--rose-crit);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+/* -------------------------------------------------------------------------
+   Data Tables
+-------------------------------------------------------------------------- */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  text-align: left;
+}
+
+.data-table th {
+  background: rgba(28, 38, 59, 0.45);
+  color: var(--text-dim);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  padding: 0.65rem 0.9rem;
+  border-bottom: 1px solid var(--border-subtle);
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: 0.65rem 0.9rem;
+  border-bottom: 1px solid rgba(28, 38, 59, 0.6);
+  color: var(--text-main);
+  vertical-align: middle;
+}
+
+.data-table tbody tr {
+  transition: background 0.15s;
+}
+
+.data-table tbody tr:hover {
+  background: rgba(0, 240, 255, 0.03);
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Risk chips in table */
+.tier-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.02em;
+}
+
+.tier-CRITICAL {
+  background: var(--rose-dim);
+  color: #F87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.tier-HIGH {
+  background: var(--orange-dim);
+  color: #FB923C;
+  border: 1px solid rgba(249, 115, 22, 0.4);
+}
+
+.tier-MEDIUM {
+  background: var(--amber-dim);
+  color: #FBBF24;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.tier-LOW {
+  background: var(--blue-dim);
+  color: #38BDF8;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+}
+
+.hndl-badge {
+  background: rgba(244, 63, 94, 0.2);
+  color: #FDA4AF;
+  border: 1px solid rgba(244, 63, 94, 0.5);
+  font-size: 0.68rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* -------------------------------------------------------------------------
+   Search & Filter Bar
+-------------------------------------------------------------------------- */
+.filter-bar {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.filter-input {
+  flex: 1;
+  min-width: 200px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  padding: 0.45rem 0.75rem;
+  font-size: 0.82rem;
+  outline: none;
+}
+
+.filter-input:focus {
+  border-color: var(--cyan-core);
+}
+
+.filter-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* -------------------------------------------------------------------------
+   Topology Canvas Container
+-------------------------------------------------------------------------- */
+.topology-container {
+  width: 100%;
+  height: 640px;
+  background: #0A0E17;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.topology-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.topology-controls {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 10;
+}
+
+.topology-btn {
+  background: rgba(13, 19, 34, 0.85);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: all 0.15s;
+}
+
+.topology-btn:hover {
+  background: var(--border-subtle);
+  color: var(--cyan-core);
+}
+
+.topology-legend {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  background: rgba(13, 19, 34, 0.85);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  backdrop-filter: blur(8px);
+  font-size: 0.75rem;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-dim);
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+/* -------------------------------------------------------------------------
+   Finding Detail Slide-over Drawer
+-------------------------------------------------------------------------- */
+.drawer-backdrop {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+
+.drawer-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.drawer-panel {
+  position: fixed;
+  top: 0; right: 0;
+  width: 100%;
+  max-width: 680px;
+  height: 100%;
+  background: var(--bg-card);
+  border-left: 1px solid var(--border-subtle);
+  box-shadow: -8px 0 30px rgba(0, 0, 0, 0.8);
+  z-index: 101;
+  transform: translateX(100%);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.drawer-backdrop.open .drawer-panel {
+  transform: translateX(0);
+}
+
+.drawer-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-surface);
+}
+
+.drawer-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.drawer-close {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+}
+
+.drawer-close:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.drawer-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.detail-section h4 {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+.code-snippet {
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-code);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* -------------------------------------------------------------------------
+   Folder Picker Modal
+-------------------------------------------------------------------------- */
+.modal-backdrop {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 110;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-backdrop.open {
+  display: flex;
+}
+
+.modal-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.modal-body {
+  padding: 1rem 1.25rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modal-footer {
+  padding: 0.85rem 1.25rem;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  background: var(--bg-surface);
+}
+
+.folder-tree-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.folder-tree-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  transition: background 0.15s;
+}
+
+.folder-tree-item:hover {
+  background: rgba(0, 240, 255, 0.08);
+  color: var(--cyan-core);
+}
+
+/* -------------------------------------------------------------------------
+   Responsive Adaptations
+-------------------------------------------------------------------------- */
+@media (max-width: 1024px) {
+  .app-container {
+    padding: 1rem;
+  }
+  .deck-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  .metric-strip {
+    grid-template-columns: 1fr 1fr;
+  }
+  .drawer-panel {
+    max-width: 100%;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Radial Dial, Mosca Equation & Visualizer Additions
+-------------------------------------------------------------------------- */
+.radial-hub {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(13, 19, 34, 0.95), rgba(7, 10, 17, 0.98));
+  border: 1px solid var(--border-active);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.8), inset 0 0 15px rgba(0, 240, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
+  padding: 0.5rem;
+}
+
+.hub-title {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--cyan-core);
+}
+
+/* ==========================================================================================
+   MOTION SYSTEM
+   ==========================================================================================
+   Appended as one block so the animation rules are reviewable in one place instead of scattered
+   through 1,200 lines of layout.
+
+   THE TWO RULES THAT GOVERN ALL OF IT
+   -----------------------------------
+   1. MOTION IS INSTRUMENTATION, NOT ENTERTAINMENT. This is a console an analyst reads to decide
+      whether to migrate an estate. An animation that delays a number, or that loops while
+      nothing is happening, makes the tool look alive when it is not. The only animation
+      permitted to run unattended is the scanning indicator, and it is removed the moment a
+      result exists -- the console must never imply it is still thinking when it is not.
+   2. EVERY VALUE IS CORRECT WITHOUT ITS ANIMATION. Entrances set opacity and transform and then
+      settle. If motion is reduced, blocked, or never runs, every element is already in its
+      final state. An animation that is load-bearing for a displayed number is one more way to
+      show a wrong answer.
+
+   The easing is shared on purpose: cubic-bezier(.22,.61,.36,1) for entrances (fast out, gentle
+   settle) and cubic-bezier(.4,0,.2,1) for state changes. One curve system is what makes motion
+   read as one system rather than a pile of effects.
+   ========================================================================================== */
+
+:root {
+  --ease-out: cubic-bezier(.22, .61, .36, 1);
+  --ease-in-out: cubic-bezier(.4, 0, .2, 1);
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+  --t-fast: 140ms;
+  --t-base: 240ms;
+  --t-slow: 420ms;
+  --t-reveal: 620ms;
+}
+
+/* ---- entrance: staggered, one-shot, load only -----------------------------------------------
+   A single page-load cascade reads as an instrument settling into place. The stagger is capped
+   at 6 steps (--i set inline by JS); past that the tail arrives late enough to feel broken. */
+@keyframes ec-rise {
+  from { opacity: 0; transform: translate3d(0, 10px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes ec-fade {
+  from { opacity: 0; }
+
+/* ---- the scan sweep: the only unattended loop ------------------------------------------------
+   A travelling highlight on the scanning bar. It exists to say "no result yet" and it is
+   removed by JS the instant a scan returns, so it can never imply work is still happening. */
+@keyframes ec-scan {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
+}
+.scan-sweep::after {
+  content: '';
+  position: absolute; inset: 0 auto 0 0; width: 25%;
+  background: linear-gradient(90deg, transparent, var(--cyan-core), transparent);
+  opacity: .55;
+  animation: ec-scan 1.15s var(--ease-in-out) infinite;
+}
+
+/* ---- the score ring: draw-on, not fade-in -----------------------------------------------------
+   Animating stroke-dashoffset from full circumference to the computed value means the arc
+   appears to be DRAWN. The final dasharray is written into the element's own attributes by
+   app.js, so with motion disabled the ring is already correct -- the animation is a reveal of a
+   value, never the value itself. */
+@keyframes ec-ring-draw {
+  from { stroke-dashoffset: var(--ring-circumference, 1000); }
+}
+.ring-arc { animation: ec-ring-draw 1.1s var(--ease-out) both; }
+.ring-arc--secondary { animation-delay: .14s; }
+
+/* ---- value change: a number that just changed says so ---------------------------------------
+   When a rescored finding changes tier, the row flashes its new colour and settles. This is the
+   one place a transition carries information rather than decoration, so it is short and it is
+   never applied on first render (JS adds .just-changed only on an actual delta). */
+@keyframes ec-tier-flash {
+  0%   { background-color: var(--flash, var(--cyan-dim)); }
+  100% { background-color: transparent; }
+}
+.just-changed { animation: ec-tier-flash 900ms var(--ease-out) both; }
+
+/* ---- interactive affordances -------------------------------------------------------------------
+   Hover and focus states are motion too, and the cheapest kind to get right. Every interactive
+   element gets the same three properties so the whole console responds identically. */
+.btn,
+.nav-item,
+.history-item,
+.findings-table tbody tr,
+.finding-row,
+.card,
+.metric-card,
+.sensor-card {
+  transition: background-color var(--t-fast) var(--ease-out),
+              border-color     var(--t-fast) var(--ease-out),
+              color            var(--t-fast) var(--ease-out),
+              box-shadow       var(--t-base)  var(--ease-out),
+              transform        var(--t-fast) var(--ease-out);
+}
+.card:hover,
+.metric-card:hover,
+.sensor-card:hover { transform: translateY(-2px); }
+.findings-table tbody tr:hover,
+.finding-row:hover   { background-color: var(--bg-card-hover); }
+
+
+/* ---- numeric emphasis ----------------------------------------------------------------------------
+   Tabular figures so a column of numbers aligns, plus a brief lift on the value that just
+   changed. If the figure is tabular the eye compares magnitudes without reading labels. */
+.metric-value,
+.mono-num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+@keyframes ec-num-pop {
+  0%   { transform: translateY(3px); opacity: .4; }
+  100% { transform: none; opacity: 1; }
+}
+.num-updated { animation: ec-num-pop var(--t-base) var(--ease-out) both; }
+
+/* ---- connection state ----------------------------------------------------------------------------
+   The header badge reflects whether the API is reachable. It is the only ambient motion in the
+   chrome, it is slow enough not to nag, and it stops the moment the connection is healthy. */
+@keyframes ec-online-breathe {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, .45); }
+  50%      { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+}
+.status-online .status-dot { animation: ec-online-breathe 2.6s var(--ease-in-out) infinite; }
+@keyframes ec-offline-flash {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: .35; }
+}
+.status-offline .status-dot { animation: ec-offline-flash 1.1s steps(2, jump-none) infinite; }
+
+/* ---- topology: the graph settles once ----------------------------------------------------------
+   Only the container, never a re-layout: an animated canvas re-draws every frame, which is a
+   battery drain and a distraction. The nodes themselves are positioned by topology.js. */
+@keyframes ec-graph-in {
+  from { opacity: 0; transform: scale(.985); }
+  to   { opacity: 1; transform: none; }
+}
+.topology-canvas-wrap { animation: ec-graph-in var(--t-slow) var(--ease-out) both; }
+
+/* ---- REDUCED MOTION ------------------------------------------------------------------------------
+   An accessibility preference is a request, not a suggestion. Everything above is removed; every
+   element remains in its final, correct state. This block is last in the file so it wins on
+   order, and tests/test_frontend_assets.py asserts it is present. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .scan-sweep::after { display: none; }
+  .skeleton { background: var(--bg-card); }
+  .status-online .status-dot,
+  .status-offline .status-dot { animation: none; }
+}
+
+/* Keyboard focus is not optional, and it must be visible on a dark chassis. */
+:focus-visible {
+  outline: 2px solid var(--cyan-core);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ---- press feedback ----------------------------------------------------------------------------
+   A 1px translate on :active. It is the cheapest possible confirmation that a click registered,
+   which on a slow scan is the difference between "it worked" and "did it work?". */
+.btn:active,
+.nav-item:active { transform: translateY(1px) scale(.995); }
+
+/* ---- skeleton: better than a spinner ------------------------------------------------------------
+   A scanning console shows a shimmer in the shape of the content that is coming. A spinner says
+   "something is happening"; a skeleton says "here is what is arriving", which sets the reader's
+   expectation before the data lands. */
+@keyframes ec-shimmer {
+  from { background-position: -200% 0; }
+  to   { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg,
+              var(--bg-card) 0%, var(--bg-card-hover) 50%, var(--bg-card) 100%);
+  background-size: 200% 100%;
+  animation: ec-shimmer 1.4s linear infinite;
+  border-radius: 3px;
+  color: transparent !important;
+  user-select: none;
+}
+
+  to   { opacity: 1; }
+}
+@keyframes ec-slide-x {
+  from { opacity: 0; transform: translate3d(-12px, 0, 0); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes ec-scale-in {
+  from { opacity: 0; transform: scale(.96); }
+  to   { opacity: 1; transform: none; }
+}
+
+.anim-rise     { animation: ec-rise    var(--t-reveal) var(--ease-out) both; }
+.anim-fade     { animation: ec-fade    var(--t-base)    var(--ease-out) both; }
+.anim-slide-x  { animation: ec-slide-x var(--t-reveal) var(--ease-out) both; }
+.anim-scale-in { animation: ec-scale-in var(--t-base)   var(--ease-spring) both; }
+
+/* Stagger steps. Applied by setting style="--i: n" on the element; the calc does the rest. */
+.anim-stagger > * { animation: ec-rise var(--t-reveal) var(--ease-out) both;
+                     animation-delay: calc(var(--i, 0) * 60ms); }
+.anim-stagger-fast > * { animation: ec-rise var(--t-base) var(--ease-out) both;
+                          animation-delay: calc(var(--i, 0) * 35ms); }
+
+
+.hub-main {
+  font-size: 1.15rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-main);
+  margin: 0.15rem 0;
+  white-space: nowrap;
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hub-sub {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  line-height: 1.2;
+}
+
+.spoke {
+  cursor: pointer;
+  transition: stroke-width 0.15s ease, opacity 0.15s ease;
+}
+
+.spoke:hover, .spoke:focus {
+  stroke-width: 6px !important;
+  opacity: 1 !important;
+  filter: drop-shadow(0 0 8px currentColor);
+}
+
+/* Mosca mathematical tiles */
+.mosca-tiles {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.mosca-tile {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  min-width: 90px;
+}
+
+.mosca-tile.highlight {
+  border-color: var(--cyan-core);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.15);
+}
+
+.mosca-tile-lbl {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.mosca-tile-val {
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-main);
+  margin-top: 0.1rem;
+}
+
+.mosca-tile-sub {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.mosca-op {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--cyan-core);
+  padding: 0 0.2rem;
+  font-family: var(--font-mono);
+}
+
+/* Quantum composition breakdown bar */
+.composition-bar {
+  display: flex;
+  height: 14px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  margin-bottom: 0.6rem;
+}
+
+.composition-seg {
+  height: 100%;
+  transition: width 0.3s ease, opacity 0.2s;
+  cursor: pointer;
+}
+
+.composition-seg:hover {
+  filter: brightness(1.2);
+}
+
+.composition-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+}
+
+.legend-btn {
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-dim);
+  padding: 0.2rem 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  transition: all 0.15s;
+}
+
+.legend-btn:hover {
+  border-color: var(--cyan-core);
+  color: var(--text-main);
+}
+
+.legend-btn.active {
+  background: rgba(0, 240, 255, 0.1);
+  border-color: var(--cyan-core);
+  color: var(--cyan-core);
+}
+
+.legend-swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* History table */
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  margin-bottom: 0.5rem;
+  transition: border-color 0.15s;
+}
+
+.history-item:hover {
+  border-color: var(--border-active);
+}
+

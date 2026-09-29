@@ -8,10 +8,8 @@ FROM python:3.11-slim-bookworm
 # Set environment variables to prevent Python from writing .pyc files and buffer outputs.
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-# Suppress Streamlit's telemetry and email prompt
-ENV STREAMLIT_SERVER_HEADLESS=true
-ENV STREAMLIT_SERVER_PORT=8501
-ENV STREAMLIT_GATHER_USAGE_STATS=false
+# App environment configuration
+ENV PORT=8501
 
 WORKDIR /opt/ecdat
 
@@ -41,12 +39,12 @@ COPY . .
 # Create a generic volume mount point for targets
 VOLUME ["/target"]
 
-# Expose Streamlit port
+# Expose web console port
 EXPOSE 8501
 
-# Add a healthcheck for the Streamlit UI
+# Add a healthcheck for the ECDAT web console
 HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
-    CMD curl --fail --silent http://localhost:8501/_stcore/health || exit 1
+    CMD curl --fail --silent http://localhost:8501/api/status || exit 1
 
 # Default command: launch the interactive UI
-CMD ["streamlit", "run", "app.py"]
+CMD ["python", "app.py", "--host", "0.0.0.0", "--port", "8501"]

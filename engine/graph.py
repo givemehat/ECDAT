@@ -4,12 +4,36 @@ Nodes: the scanned application, each file, and each cryptographic artefact.
 Edges: file -> artefact (`uses`). A library finding is presence evidence, so it is rendered
 differently from a primitive that code actually calls.
 """
+import functools
 import os
+import re
 import tempfile
 
 from pyvis.network import Network
 
 COLORS = {"CRITICAL": "#ff4b4b", "HIGH": "#ff9f36", "MEDIUM": "#ffd166", "LOW": "#4cc9f0"}
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+@functools.lru_cache(maxsize=1)
+def _vendor_assets():
+    """Load local vendor JS/CSS so the graph functions fully offline without relative 404s."""
+    vis_js, vis_css, utils_js = "", "", ""
+    vis_js_path = os.path.join(REPO_ROOT, "lib", "vis-9.1.2", "vis-network.min.js")
+    vis_css_path = os.path.join(REPO_ROOT, "lib", "vis-9.1.2", "vis-network.css")
+    utils_js_path = os.path.join(REPO_ROOT, "lib", "bindings", "utils.js")
+
+    if os.path.exists(vis_js_path):
+        with open(vis_js_path, "r", encoding="utf-8") as f:
+            vis_js = f.read()
+    if os.path.exists(vis_css_path):
+        with open(vis_css_path, "r", encoding="utf-8") as f:
+            vis_css = f.read()
+    if os.path.exists(utils_js_path):
+        with open(utils_js_path, "r", encoding="utf-8") as f:
+            utils_js = f.read()
+
+    return vis_js, vis_css, utils_js
 
 
 def generate_crypto_graph(findings):
@@ -35,7 +59,7 @@ def generate_crypto_graph(findings):
             added.add(file_node)
             net.add_edge("App", file_node)
 
-        node_id = f"{file_node}__{f['name']}"
+        node_id = f"{file_node}____{f['name']}"
         if node_id in added:
             continue
         net.add_node(node_id, label=label, title=title,
@@ -51,9 +75,32 @@ def generate_crypto_graph(findings):
     try:
         net.save_graph(tmp_path)
         with open(tmp_path, "r", encoding="utf-8") as fh:
-            return fh.read()
+            html = fh.read()
     finally:
         try:
             os.unlink(tmp_path)
         except OSError:
             pass
+
+    # Inline local vendor assets to guarantee air-gapped offline operation without CDN or 404s
+    vis_js, vis_css, utils_js = _vendor_assets()
+    if utils_js:
+        html = re.sub(
+            r'<script\s+src="[^"]*utils\.js"></script>',
+            lambda _: f"<script>\n{utils_js}\n</script>",
+            html
+        )
+    if vis_css:
+        html = re.sub(
+            r'<link\s+rel="stylesheet"\s+href="[^"]*vis-network[^"]*\.css"[^>]*>',
+            lambda _: f"<style>\n{vis_css}\n</style>",
+            html
+        )
+    if vis_js:
+        html = re.sub(
+            r'<script\s+src="[^"]*vis-network[^"]*\.js"[^>]*></script>',
+            lambda _: f"<script>\n{vis_js}\n</script>",
+            html
+        )
+
+    return html

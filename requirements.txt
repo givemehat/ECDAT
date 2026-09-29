@@ -4,7 +4,8 @@
 # failed with ModuleNotFoundError on a clean machine. Fixed.
 
 # Web UI
-streamlit>=1.32
+fastapi>=0.110.0
+uvicorn>=0.28.0
 plotly>=5.19
 
 # Data handling
