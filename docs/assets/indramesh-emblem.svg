@@ -1,0 +1,179 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <radialGradient id="emblemBg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#091428"/>
+      <stop offset="60%" stop-color="#050a16"/>
+      <stop offset="100%" stop-color="#020409"/>
+    </radialGradient>
+
+    <!-- Core Glow Gradient -->
+    <radialGradient id="vajraCore" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="25%" stop-color="#00f5d4"/>
+      <stop offset="65%" stop-color="#0077b6"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Gold & Teal Gradients for Vajra -->
+    <linearGradient id="vGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff3b0"/>
+      <stop offset="35%" stop-color="#ffd166"/>
+      <stop offset="80%" stop-color="#f77f00"/>
+      <stop offset="100%" stop-color="#d62828"/>
+    </linearGradient>
+
+    <linearGradient id="vTeal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e0fbfc"/>
+      <stop offset="30%" stop-color="#00f5d4"/>
+      <stop offset="75%" stop-color="#0077b6"/>
+      <stop offset="100%" stop-color="#03045e"/>
+    </linearGradient>
+
+    <!-- Radar Sweep Gradient -->
+    <linearGradient id="vRadarSweep" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00f5d4" stop-opacity="0"/>
+      <stop offset="85%" stop-color="#00f5d4" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#00f5d4" stop-opacity="0.7"/>
+    </linearGradient>
+
+    <!-- Filters -->
+    <filter id="vGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="vSoftGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <style>
+    @keyframes spinClockwise {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes spinCounter {
+      from { transform: rotate(360deg); }
+      to { transform: rotate(0deg); }
+    }
+    @keyframes corePulse {
+      0%, 100% { transform: scale(0.95); opacity: 0.8; filter: drop-shadow(0 0 8px #00f5d4); }
+      50% { transform: scale(1.05); opacity: 1; filter: drop-shadow(0 0 20px #00f5d4); }
+    }
+    @keyframes radarSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes dashCycle {
+      to { stroke-dashoffset: -120; }
+    }
+
+    .emb-spin-cw {
+      transform-origin: 256px 240px;
+      animation: spinClockwise 20s linear infinite;
+    }
+    .emb-spin-ccw {
+      transform-origin: 256px 240px;
+      animation: spinCounter 16s linear infinite;
+    }
+    .emb-radar {
+      transform-origin: 256px 240px;
+      animation: radarSpin 5s linear infinite;
+    }
+    .emb-core {
+      transform-origin: 256px 240px;
+      animation: corePulse 3s ease-in-out infinite;
+    }
+    .emb-dash {
+      stroke-dasharray: 10 7;
+      animation: dashCycle 6s linear infinite;
+    }
+  </style>
+
+  <!-- Circular Outer Shield Housing -->
+  <circle cx="256" cy="256" r="250" fill="url(#emblemBg)" stroke="#00f5d4" stroke-opacity="0.3" stroke-width="2"/>
+  <circle cx="256" cy="256" r="244" fill="none" stroke="#38bdf8" stroke-opacity="0.1" stroke-width="1.5"/>
+
+  <!-- Radar Dial System -->
+  <!-- Ambient Calibrated Outer Ring -->
+  <circle cx="256" cy="240" r="195" fill="none" stroke="#00b4d8" stroke-opacity="0.3" stroke-width="1.5"/>
+  <g class="emb-spin-cw">
+    <circle cx="256" cy="240" r="185" fill="none" stroke="#00f5d4" stroke-width="2.5" class="emb-dash"/>
+    <!-- Compass Calibration Ticks -->
+    <line x1="256" y1="45" x2="256" y2="58" stroke="#00f5d4" stroke-width="3"/>
+    <line x1="256" y1="422" x2="256" y2="435" stroke="#00f5d4" stroke-width="3"/>
+    <line x1="61" y1="240" x2="74" y2="240" stroke="#00f5d4" stroke-width="3"/>
+    <line x1="438" y1="240" x2="451" y2="240" stroke="#00f5d4" stroke-width="3"/>
+    <!-- Hex Nodes -->
+    <circle cx="125" cy="115" r="3.5" fill="#00f5d4"/>
+    <circle cx="387" cy="115" r="3.5" fill="#00f5d4"/>
+    <circle cx="125" cy="365" r="3.5" fill="#00f5d4"/>
+    <circle cx="387" cy="365" r="3.5" fill="#00f5d4"/>
+  </g>
+
+  <!-- Radar Sweep Beam (Rotating 360°) -->
+  <g class="emb-radar">
+    <path d="M 256 240 L 436 150 A 195 195 0 0 0 256 45 Z" fill="url(#vRadarSweep)"/>
+    <line x1="256" y1="240" x2="436" y2="150" stroke="#00f5d4" stroke-width="2.5" stroke-linecap="round" filter="url(#vSoftGlow)"/>
+  </g>
+
+  <!-- Quantum Orbital Rings -->
+  <g class="emb-spin-ccw">
+    <ellipse cx="256" cy="240" rx="150" ry="60" fill="none" stroke="#7928ca" stroke-opacity="0.5" stroke-width="2" transform="rotate(35 256 240)"/>
+    <ellipse cx="256" cy="240" rx="150" ry="60" fill="none" stroke="#00f5d4" stroke-opacity="0.5" stroke-width="2" class="emb-dash" transform="rotate(-35 256 240)"/>
+    <circle cx="385" cy="210" r="5" fill="#00f5d4" filter="url(#vSoftGlow)"/>
+    <circle cx="127" cy="270" r="5" fill="#ffd166" filter="url(#vSoftGlow)"/>
+  </g>
+
+  <!-- Octagonal Base Cage -->
+  <g class="emb-spin-cw" opacity="0.8">
+    <polygon points="256,155 315,180 340,240 315,300 256,325 197,300 172,240 197,180" fill="none" stroke="#38bdf8" stroke-width="1.8" stroke-opacity="0.4"/>
+  </g>
+
+  <!-- ═══ THE SACRED VAJRA (Indra's Celestial Thunderbolt Diamond Shield) ═══ -->
+  <g id="VajraBody" class="emb-core">
+    <!-- North Spire -->
+    <path d="M 256 125 L 268 165 L 256 188 L 244 165 Z" fill="url(#vGold)" stroke="#fff" stroke-width="1" filter="url(#vSoftGlow)"/>
+    <!-- South Spire -->
+    <path d="M 256 355 L 268 315 L 256 292 L 244 315 Z" fill="url(#vGold)" stroke="#fff" stroke-width="1" filter="url(#vSoftGlow)"/>
+    <!-- East Spire -->
+    <path d="M 371 240 L 331 252 L 308 240 L 331 228 Z" fill="url(#vTeal)" stroke="#00f5d4" stroke-width="1" filter="url(#vSoftGlow)"/>
+    <!-- West Spire -->
+    <path d="M 141 240 L 181 252 L 204 240 L 181 228 Z" fill="url(#vTeal)" stroke="#00f5d4" stroke-width="1" filter="url(#vSoftGlow)"/>
+
+    <!-- Diagonal Blades -->
+    <path d="M 333 163 L 316 191 L 294 202 L 306 180 Z" fill="url(#vTeal)" opacity="0.95"/>
+    <path d="M 333 317 L 306 300 L 294 278 L 316 289 Z" fill="url(#vGold)" opacity="0.95"/>
+    <path d="M 179 317 L 196 289 L 218 278 L 206 300 Z" fill="url(#vTeal)" opacity="0.95"/>
+    <path d="M 179 163 L 206 180 L 218 202 L 196 191 Z" fill="url(#vGold)" opacity="0.95"/>
+
+    <!-- Central Diamond Aegis -->
+    <polygon points="256,192 290,216 304,240 290,264 256,288 222,264 208,240 222,216" fill="#040d1a" stroke="#00f5d4" stroke-width="3" filter="url(#vGlow)"/>
+
+    <!-- Cryptographic Mesh Lattice Lines -->
+    <line x1="256" y1="192" x2="256" y2="288" stroke="#38bdf8" stroke-width="1.5"/>
+    <line x1="208" y1="240" x2="304" y2="240" stroke="#38bdf8" stroke-width="1.5"/>
+    <line x1="222" y1="216" x2="290" y2="264" stroke="#ffd166" stroke-width="1.2"/>
+    <line x1="222" y1="264" x2="290" y2="216" stroke="#ffd166" stroke-width="1.2"/>
+
+    <!-- Central Quantum Core -->
+    <circle cx="256" cy="240" r="24" fill="url(#vajraCore)"/>
+    <circle cx="256" cy="240" r="10" fill="#ffffff" filter="url(#vGlow)"/>
+    <circle cx="256" cy="240" r="4" fill="#00f5d4"/>
+  </g>
+
+  <!-- Platform Title Curved or Lower Placement -->
+  <g transform="translate(0, 460)">
+    <text x="256" y="0" text-anchor="middle" fill="#00f5d4" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="28" letter-spacing="0.25em" filter="url(#vSoftGlow)">INDRAMESH</text>
+    <text x="256" y="22" text-anchor="middle" fill="#94a3b8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="600" font-size="11" letter-spacing="0.15em">POST-QUANTUM CRYPTO MESH</text>
+  </g>
+</svg>
