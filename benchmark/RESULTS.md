@@ -64,8 +64,8 @@ counts it came from; no ratio is reported without them.
 
 | corpus | labels | TP | FP | FN | precision | recall | F1 |
 |---|---|---|---|---|---|---|---|
-| `paramiko` | L1 | 156 | 17 | 84 | 0.9017 = 156/173 | 0.65 = 156/240 | 0.7554 |
-| `paramiko` | L2 | 156 | 17 | 103 | 0.9017 = 156/173 | 0.6023 = 156/259 | 0.7222 |
+| `paramiko` | L1 | 172 | 17 | 68 | 0.9101 = 172/189 | 0.7167 = 172/240 | 0.8019 |
+| `paramiko` | L2 | 172 | 17 | 87 | 0.9101 = 172/189 | 0.6641 = 172/259 | 0.7679 |
 
 ### File-level view (secondary)
 
@@ -83,22 +83,22 @@ counts it came from; no ratio is reported without them.
 | `paramiko` | Curve25519 (shor) | 2 | 2 | 1.0 |
 | `paramiko` | Diffie-Hellman (shor) | 3 | 3 | 1.0 |
 | `paramiko` | EC (shor) | 1 | 0 | 0.0 |
-| `paramiko` | ECDH (shor) | 30 | 9 | 0.3 |
+| `paramiko` | ECDH (shor) | 30 | 11 | 0.3667 |
 | `paramiko` | ECDSA (shor) | 42 | 14 | 0.3333 |
 | `paramiko` | ED25519 (shor) | 1 | 1 | 1.0 |
 | `paramiko` | Ed25519 (shor) | 19 | 7 | 0.3684 |
-| `paramiko` | EllipticCurvePrivateKey (shor) | 3 | 0 | 0.0 |
-| `paramiko` | HMAC (grover) | 16 | 12 | 0.75 |
+| `paramiko` | EllipticCurvePrivateKey (shor) | 3 | 3 | 1.0 |
+| `paramiko` | HMAC (grover) | 16 | 16 | 1.0 |
 | `paramiko` | MD5 (grover) | 5 | 4 | 0.8 |
 | `paramiko` | RSA (shor) | 37 | 35 | 0.9459 |
-| `paramiko` | SHA-1 (grover) | 3 | 0 | 0.0 |
+| `paramiko` | SHA-1 (grover) | 3 | 1 | 0.3333 |
 | `paramiko` | SHA-256 (grover) | 3 | 3 | 1.0 |
 | `paramiko` | SHA-384 (grover) | 1 | 1 | 1.0 |
 | `paramiko` | SHA-512 (grover) | 3 | 3 | 1.0 |
 | `paramiko` | SHA1 (grover) | 5 | 5 | 1.0 |
-| `paramiko` | SHA256 (grover) | 7 | 3 | 0.4286 |
-| `paramiko` | SHA512 (grover) | 1 | 0 | 0.0 |
-| `paramiko` | X25519 (shor) | 22 | 18 | 0.8182 |
+| `paramiko` | SHA256 (grover) | 7 | 6 | 0.8571 |
+| `paramiko` | SHA512 (grover) | 1 | 1 | 1.0 |
+| `paramiko` | X25519 (shor) | 22 | 20 | 0.9091 |
 | `paramiko` | secp256r1 (shor) | 3 | 3 | 1.0 |
 | `paramiko` | secp384r1 (shor) | 2 | 2 | 1.0 |
 | `paramiko` | secp521r1 (shor) | 2 | 2 | 1.0 |
@@ -126,19 +126,24 @@ Findings emitted for `paramiko`, by rule:
 | HMAC | IM-SRC-SSH-MAC-001 | 8 |
 | SHA | IM-SRC-PYCA-HASH-001 | 7 |
 | ECC | IM-SRC-PYCA-EC-001 | 7 |
+| SHA256 | IM-SRC-HASHLIB-004 | 6 |
 | RSA | IM-SRC-SSHNAME-002 | 6 |
-| SHA1 | IM-SRC-HASHLIB-001 | 5 |
+| SHA1 | IM-SRC-HASHLIB-001 | 4 |
+| ECC | IM-SRC-PYCA-ECTYPE-001 | 4 |
 | Ed25519 | IM-SRC-SSH-ED-001 | 4 |
+| MD5 | IM-SRC-SSH-MAC-002 | 4 |
 | AES | IM-SRC-SSH-CIPHER-002 | 4 |
 | HMAC | IM-SRC-SSHNAME-004 | 4 |
 | SHA1 | IM-SRC-SHA1-001 | 3 |
+| X25519 | IM-SRC-SSH-HYBRID-001 | 3 |
 | Ed25519 | IM-SRC-EDDSA-001 | 3 |
-| SHA1 | IM-SRC-HASHLIB-003 | 3 |
+| MD5 | IM-SRC-HASHLIB-003 | 3 |
 | ECDSA | IM-SRC-SSHNAME-001 | 3 |
 | ECDSA | IM-SRC-ECDSA-001 | 2 |
 | Ed25519 | IM-SRC-SSHNAME-003 | 2 |
 | SHA | IM-SRC-HASHLIB-002 | 2 |
 | X25519 | IM-SRC-PYCA-X-001 | 2 |
+| ECDH | IM-SRC-PYCA-ECDH-002 | 2 |
 | AES | IM-SRC-JAVA-CONST-001 | 2 |
 | ECDH | IM-SRC-SSHNAME-005 | 2 |
 | 3DES | IM-SRC-SSH-LEGACY-001 | 2 |
@@ -147,6 +152,7 @@ Findings emitted for `paramiko`, by rule:
 | AES | IM-SRC-AES-001 | 1 |
 | SHA256 | IM-SRC-SHA2-001 | 1 |
 | MD5 | IM-SRC-MD5-001 | 1 |
+| SHA1 | IM-SRC-SSH-HASH-NAME-001 | 1 |
 ## Explicit false positives -- `paramiko`, L1 (17)
 
 A false positive is a finding at a `(file, line)` that the labels record as NOT
@@ -199,7 +205,7 @@ from the label file, so each row can be checked against the source.
 | `paramiko/transport.py:328` | no quantum-vulnerable primitive is named on this line | DH | IM-SRC-SSH-DH-001 |
 | `paramiko/transport.py:329` | no quantum-vulnerable primitive is named on this line | DH | IM-SRC-SSH-DH-001 |
 
-## Explicit false negatives -- `paramiko`, L1 (84)
+## Explicit false negatives -- `paramiko`, L1 (68)
 
 A false negative is a labelled quantum-vulnerable location IndraMesh did not report.
 
@@ -226,7 +232,6 @@ A false negative is a labelled quantum-vulnerable location IndraMesh did not rep
 | `paramiko/ecdsakey.py:149` | ECDSA (shor) | `self.ecdsa_curve = self._ECDSA_CURVES.get_by_key_format_identifier(` |
 | `paramiko/ecdsakey.py:152` | ECDSA (shor) | `key_types = self._ECDSA_CURVES.get_key_format_identifier_list()` |
 | `paramiko/ecdsakey.py:176` | ECDSA (shor) | `return cls._ECDSA_CURVES.get_key_format_identifier_list()` |
-| `paramiko/ecdsakey.py:250` | EllipticCurvePrivateKey (shor) | `def private_key(self) -> Optional[ec.EllipticCurvePrivateKey]:` |
 | `paramiko/ecdsakey.py:256` | ECDSA (shor) | `Generate a new private ECDSA key.  This factory function can be used to` |
 | `paramiko/ecdsakey.py:260` | ECDSA (shor) | `:returns: A new private key (`.ECDSAKey`) object` |
 | `paramiko/ecdsakey.py:263` | ECDSA (shor) | `curve = cls._ECDSA_CURVES.get_by_key_length(bits)` |
@@ -245,7 +250,6 @@ A false negative is a labelled quantum-vulnerable location IndraMesh did not rep
 | `paramiko/kex_curve25519.py:63` | ECDH (shor) | `elif not self.transport.server_mode and (ptype == _MSG_KEXECDH_REPLY):` |
 | `paramiko/kex_curve25519.py:97` | ECDH (shor) | `m.add_byte(c_MSG_KEXECDH_REPLY)` |
 | `paramiko/kex_ecdh_nist.py:2` | ECDH (shor) | `Ephemeral Elliptic Curve Diffie-Hellman (ECDH) key exchange` |
-| `paramiko/kex_ecdh_nist.py:6` | SHA256 (grover) | `from hashlib import sha256, sha384, sha512` |
 | `paramiko/kex_ecdh_nist.py:15` | ECDH (shor) | `_MSG_KEXECDH_INIT, _MSG_KEXECDH_REPLY = range(30, 32)` |
 | `paramiko/kex_ecdh_nist.py:16` | ECDH (shor) | `c_MSG_KEXECDH_INIT, c_MSG_KEXECDH_REPLY = [byte_chr(c) for c in range(30, 32)]` |
 | `paramiko/kex_ecdh_nist.py:35` | ECDH (shor) | `self.transport._expect_packet(_MSG_KEXECDH_INIT)` |
@@ -254,21 +258,13 @@ A false negative is a labelled quantum-vulnerable location IndraMesh did not rep
 | `paramiko/kex_ecdh_nist.py:50` | ECDH (shor) | `if self.transport.server_mode and (ptype == _MSG_KEXECDH_INIT):` |
 | `paramiko/kex_ecdh_nist.py:52` | ECDH (shor) | `elif not self.transport.server_mode and (ptype == _MSG_KEXECDH_REPLY):` |
 | `paramiko/kex_ecdh_nist.py:55` | ECDH (shor) | `"KexECDH asked to handle packet type {:d}".format(ptype)` |
-| `paramiko/kex_ecdh_nist.py:71` | ECDH (shor) | `K = self.P.exchange(ec.ECDH(), self.Q_C)` |
 | `paramiko/kex_ecdh_nist.py:98` | ECDH (shor) | `m.add_byte(c_MSG_KEXECDH_REPLY)` |
-| `paramiko/kex_ecdh_nist.py:117` | ECDH (shor) | `K = self.P.exchange(ec.ECDH(), self.Q_S)` |
-| `paramiko/kex_gex.py:26` | SHA256 (grover) | `from hashlib import sha256` |
-| `paramiko/kex_group14.py:26` | SHA256 (grover) | `from hashlib import sha256` |
-| `paramiko/kex_group16.py:24` | SHA512 (grover) | `from hashlib import sha512` |
 | `paramiko/kex_mlkem.py:9` | ECDH (shor) | `ECDH/X25519 key agreement; the final shared secret is the hash of the` |
 | `paramiko/kex_mlkem.py:49` | X25519 (shor) | `Combines ML-KEM-768 (FIPS 203) with X25519. The shared secret is` |
 | `paramiko/kex_mlkem.py:51` | X25519 (shor) | ```K_CL`` is the X25519 shared secret.` |
-| `paramiko/kex_mlkem.py:54` | X25519 (shor) | `name = "mlkem768x25519-sha256"` |
 | `paramiko/pkey.py:37` | EC (shor) | `from cryptography.hazmat.primitives.asymmetric.ec import (` |
-| `paramiko/pkey.py:38` | EllipticCurvePrivateKey (shor) | `EllipticCurvePrivateKey,` |
 | `paramiko/pkey.py:173` | ECDSA (shor) | `from paramiko import ECDSAKey, Ed25519Key, RSAKey` |
 | `paramiko/pkey.py:215` | Ed25519 (shor) | `key_class = Ed25519Key` |
-| `paramiko/pkey.py:216` | EllipticCurvePrivateKey (shor) | `elif isinstance(loaded, asymmetric.ec.EllipticCurvePrivateKey):` |
 | `paramiko/pkey.py:217` | ECDSA (shor) | `key_class = ECDSAKey` |
 | `paramiko/pkey.py:234` | Ed25519 (shor) | `For example, ``PKey.from_type_string("ssh-ed25519", <public bytes>)``` |
 | `paramiko/pkey.py:235` | Ed25519 (shor) | `will (if successful) return a new `.Ed25519Key`.` |
@@ -280,17 +276,11 @@ A false negative is a labelled quantum-vulnerable location IndraMesh did not rep
 | `paramiko/sftp_file.py:376` | SHA-1 (grover) | `For example, ``check('sha1', 0, 1024, 512)`` will return a string of` |
 | `paramiko/sftp_file.py:382` | SHA-1 (grover) | `the name of the hash algorithm to use (normally ``"sha1"`` or` |
 | `paramiko/sftp_file.py:383` | MD5 (grover) | ```"md5"``)` |
-| `paramiko/sftp_server.py:83` | SHA-1 (grover) | `_hash_class = {"sha1": sha1, "md5": md5}` |
 | `paramiko/transport.py:97` | ECDSA (shor) | `from paramiko.ecdsakey import ECDSAKey` |
 | `paramiko/transport.py:98` | Ed25519 (shor) | `from paramiko.ed25519key import Ed25519Key` |
-| `paramiko/transport.py:193` | HMAC (grover) | `"hmac-md5",` |
-| `paramiko/transport.py:195` | HMAC (grover) | `"hmac-md5-96",` |
-| `paramiko/transport.py:226` | X25519 (shor) | `_preferred_kex = ("mlkem768x25519-sha256",) + _preferred_kex` |
-| `paramiko/transport.py:295` | HMAC (grover) | `"hmac-md5": {"class": md5, "size": 16},` |
-| `paramiko/transport.py:296` | HMAC (grover) | `"hmac-md5-96": {"class": md5, "size": 12},` |
 | `paramiko/util.py:149` | SHA256 (grover) | `as ``hashlib.sha256``.` |
 
-## Explicit false negatives -- `paramiko`, L2 (103)
+## Explicit false negatives -- `paramiko`, L2 (87)
 
 A false negative is a labelled quantum-vulnerable location IndraMesh did not report.
 
@@ -317,7 +307,6 @@ A false negative is a labelled quantum-vulnerable location IndraMesh did not rep
 | `paramiko/ecdsakey.py:149` | ECDSA (shor) | `self.ecdsa_curve = self._ECDSA_CURVES.get_by_key_format_identifier(` |
 | `paramiko/ecdsakey.py:152` | ECDSA (shor) | `key_types = self._ECDSA_CURVES.get_key_format_identifier_list()` |
 | `paramiko/ecdsakey.py:176` | ECDSA (shor) | `return cls._ECDSA_CURVES.get_key_format_identifier_list()` |
-| `paramiko/ecdsakey.py:250` | EllipticCurvePrivateKey (shor) | `def private_key(self) -> Optional[ec.EllipticCurvePrivateKey]:` |
 | `paramiko/ecdsakey.py:256` | ECDSA (shor) | `Generate a new private ECDSA key.  This factory function can be used to` |
 | `paramiko/ecdsakey.py:260` | ECDSA (shor) | `:returns: A new private key (`.ECDSAKey`) object` |
 | `paramiko/ecdsakey.py:263` | ECDSA (shor) | `curve = cls._ECDSA_CURVES.get_by_key_length(bits)` |
@@ -338,7 +327,6 @@ A false negative is a labelled quantum-vulnerable location IndraMesh did not rep
 | `paramiko/kex_curve25519.py:97` | ECDH (shor) | `m.add_byte(c_MSG_KEXECDH_REPLY)` |
 | `paramiko/kex_curve25519.py:129` | None (not-affected) | `self.transport._set_K_H(K, self.hash_algo(hm.asbytes()).digest())` |
 | `paramiko/kex_ecdh_nist.py:2` | ECDH (shor) | `Ephemeral Elliptic Curve Diffie-Hellman (ECDH) key exchange` |
-| `paramiko/kex_ecdh_nist.py:6` | SHA256 (grover) | `from hashlib import sha256, sha384, sha512` |
 | `paramiko/kex_ecdh_nist.py:15` | ECDH (shor) | `_MSG_KEXECDH_INIT, _MSG_KEXECDH_REPLY = range(30, 32)` |
 | `paramiko/kex_ecdh_nist.py:16` | ECDH (shor) | `c_MSG_KEXECDH_INIT, c_MSG_KEXECDH_REPLY = [byte_chr(c) for c in range(30, 32)]` |
 | `paramiko/kex_ecdh_nist.py:35` | ECDH (shor) | `self.transport._expect_packet(_MSG_KEXECDH_INIT)` |
@@ -347,31 +335,23 @@ A false negative is a labelled quantum-vulnerable location IndraMesh did not rep
 | `paramiko/kex_ecdh_nist.py:50` | ECDH (shor) | `if self.transport.server_mode and (ptype == _MSG_KEXECDH_INIT):` |
 | `paramiko/kex_ecdh_nist.py:52` | ECDH (shor) | `elif not self.transport.server_mode and (ptype == _MSG_KEXECDH_REPLY):` |
 | `paramiko/kex_ecdh_nist.py:55` | ECDH (shor) | `"KexECDH asked to handle packet type {:d}".format(ptype)` |
-| `paramiko/kex_ecdh_nist.py:71` | ECDH (shor) | `K = self.P.exchange(ec.ECDH(), self.Q_C)` |
 | `paramiko/kex_ecdh_nist.py:91` | None (not-affected) | `H = self.hash_algo(hm.asbytes()).digest()` |
 | `paramiko/kex_ecdh_nist.py:98` | ECDH (shor) | `m.add_byte(c_MSG_KEXECDH_REPLY)` |
-| `paramiko/kex_ecdh_nist.py:117` | ECDH (shor) | `K = self.P.exchange(ec.ECDH(), self.Q_S)` |
 | `paramiko/kex_ecdh_nist.py:137` | None (not-affected) | `self.transport._set_K_H(K, self.hash_algo(hm.asbytes()).digest())` |
-| `paramiko/kex_gex.py:26` | SHA256 (grover) | `from hashlib import sha256` |
 | `paramiko/kex_gex.py:236` | None (not-affected) | `H = self.hash_algo(hm.asbytes()).digest()` |
 | `paramiko/kex_gex.py:278` | None (not-affected) | `self.transport._set_K_H(K, self.hash_algo(hm.asbytes()).digest())` |
-| `paramiko/kex_group14.py:26` | SHA256 (grover) | `from hashlib import sha256` |
 | `paramiko/kex_group14.py:117` | None (not-affected) | `self.transport._set_K_H(K, self.hash_algo(hm.asbytes()).digest())` |
 | `paramiko/kex_group14.py:141` | None (not-affected) | `H = self.hash_algo(hm.asbytes()).digest()` |
-| `paramiko/kex_group16.py:24` | SHA512 (grover) | `from hashlib import sha512` |
 | `paramiko/kex_mlkem.py:9` | ECDH (shor) | `ECDH/X25519 key agreement; the final shared secret is the hash of the` |
 | `paramiko/kex_mlkem.py:49` | X25519 (shor) | `Combines ML-KEM-768 (FIPS 203) with X25519. The shared secret is` |
 | `paramiko/kex_mlkem.py:51` | X25519 (shor) | ```K_CL`` is the X25519 shared secret.` |
-| `paramiko/kex_mlkem.py:54` | X25519 (shor) | `name = "mlkem768x25519-sha256"` |
 | `paramiko/kex_mlkem.py:141` | None (not-affected) | `K_bytes = self.hash_algo(k_pq + k_cl).digest()` |
 | `paramiko/kex_mlkem.py:160` | None (not-affected) | `H = self.hash_algo(hm.asbytes()).digest()` |
 | `paramiko/kex_mlkem.py:194` | None (not-affected) | `K_bytes = self.hash_algo(k_pq + k_cl).digest()` |
 | `paramiko/kex_mlkem.py:212` | None (not-affected) | `H = self.hash_algo(hm.asbytes()).digest()` |
 | `paramiko/pkey.py:37` | EC (shor) | `from cryptography.hazmat.primitives.asymmetric.ec import (` |
-| `paramiko/pkey.py:38` | EllipticCurvePrivateKey (shor) | `EllipticCurvePrivateKey,` |
 | `paramiko/pkey.py:173` | ECDSA (shor) | `from paramiko import ECDSAKey, Ed25519Key, RSAKey` |
 | `paramiko/pkey.py:215` | Ed25519 (shor) | `key_class = Ed25519Key` |
-| `paramiko/pkey.py:216` | EllipticCurvePrivateKey (shor) | `elif isinstance(loaded, asymmetric.ec.EllipticCurvePrivateKey):` |
 | `paramiko/pkey.py:217` | ECDSA (shor) | `key_class = ECDSAKey` |
 | `paramiko/pkey.py:234` | Ed25519 (shor) | `For example, ``PKey.from_type_string("ssh-ed25519", <public bytes>)``` |
 | `paramiko/pkey.py:235` | Ed25519 (shor) | `will (if successful) return a new `.Ed25519Key`.` |
@@ -384,15 +364,9 @@ A false negative is a labelled quantum-vulnerable location IndraMesh did not rep
 | `paramiko/sftp_file.py:376` | SHA-1 (grover) | `For example, ``check('sha1', 0, 1024, 512)`` will return a string of` |
 | `paramiko/sftp_file.py:382` | SHA-1 (grover) | `the name of the hash algorithm to use (normally ``"sha1"`` or` |
 | `paramiko/sftp_file.py:383` | MD5 (grover) | ```"md5"``)` |
-| `paramiko/sftp_server.py:83` | SHA-1 (grover) | `_hash_class = {"sha1": sha1, "md5": md5}` |
 | `paramiko/sftp_server.py:350` | None (not-affected) | `sum_out += hash_obj.digest()` |
 | `paramiko/transport.py:97` | ECDSA (shor) | `from paramiko.ecdsakey import ECDSAKey` |
 | `paramiko/transport.py:98` | Ed25519 (shor) | `from paramiko.ed25519key import Ed25519Key` |
-| `paramiko/transport.py:193` | HMAC (grover) | `"hmac-md5",` |
-| `paramiko/transport.py:195` | HMAC (grover) | `"hmac-md5-96",` |
-| `paramiko/transport.py:226` | X25519 (shor) | `_preferred_kex = ("mlkem768x25519-sha256",) + _preferred_kex` |
-| `paramiko/transport.py:295` | HMAC (grover) | `"hmac-md5": {"class": md5, "size": 16},` |
-| `paramiko/transport.py:296` | HMAC (grover) | `"hmac-md5-96": {"class": md5, "size": 12},` |
 | `paramiko/transport.py:1896` | None (not-affected) | `out = sofar = hash_algo(m.asbytes()).digest()` |
 | `paramiko/transport.py:1902` | None (not-affected) | `digest = hash_algo(m.asbytes()).digest()` |
 | `paramiko/transport.py:1924` | None (not-affected) | `return cipher.encryptor()` |

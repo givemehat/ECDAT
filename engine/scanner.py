@@ -139,8 +139,13 @@ RULES = [
          regex=r"String\s+\w+\s*=\s*[\"']RSA(?:/[\w-]+)*[\"']"),
     dict(id="IM-SRC-JAVA-CONST-004", name="SHA", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
-         regex=r"String\s+\w+\s*=\s*[\"'](?:SHA-?1|SHA-?224|SHA-?256|SHA-?384|SHA-?512|MD5|"
-                r"MD2|MD4)[\"']"),
+         # MD5/MD2/MD4 were moved to IM-SRC-JAVA-CONST-004-MD5. This rule reports name="SHA",
+         # so `String H = "MD5";` was published as a SHA-family hash. MD2 and MD4 are weaker
+         # still and are not members of the SHA family at all.
+         regex=r"String\s+\w+\s*=\s*[\"'](?:SHA-?1|SHA-?224|SHA-?256|SHA-?384|SHA-?512)[\"']"),
+    dict(id="IM-SRC-JAVA-CONST-004-MD5", name="MD5", primitive="hash", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"String\s+\w+\s*=\s*[\"'](?:MD5|MD2|MD4)[\"']"),
     # SecureRandom vs the non-cryptographic generators. `new java.util.Random()` and
     # `Math.random()` are what CryptoAPI-Bench is built to catch, and the tool could not see
     # them at all because no rule named the weak generators.
@@ -186,8 +191,13 @@ RULES = [
          regex=r"sodium_crypto_sign_(?:open|verify_detached|keypair)\s*\("),
     dict(id="IM-PHP-HASH-001", name="SHA1", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
-         regex=r"\bhash\s*\(\s*[\"']sha1[\"']|\bhash_hmac\s*\(\s*[\"']sha1[\"']"
-                r"|\bhash\s*\(\s*[\"']md5[\"']|\bhash_hmac\s*\(\s*[\"']md5[\"']"),
+         # The two `md5` alternatives were moved to IM-PHP-HASH-002. This rule is named SHA1
+         # and every SHA-1 it reports is genuine, but it also matched `hash('md5')` and
+         # published it as SHA-1 -- a false assertion about a live asset, not a gap.
+         regex=r"\bhash\s*\(\s*[\"']sha1[\"']|\bhash_hmac\s*\(\s*[\"']sha1[\"']"),
+    dict(id="IM-PHP-HASH-002", name="MD5", primitive="hash", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"\bhash\s*\(\s*[\"']md5[\"']|\bhash_hmac\s*\(\s*[\"']md5[\"']"),
     # `rand()` and `mt_rand()` are not cryptographic. Reported as their own primitive so the
     # recommendation is "replace the generator", not "migrate this cipher".
     dict(id="IM-PHP-WEAKRNG-001", name="PRNG", primitive="other", artefact_class="source",
@@ -541,9 +551,15 @@ RULES = [
          regex=r"OpenSSL::HMAC\.(?:new|digest)\s*\(|OpenSSL::HMAC\.hexdigest\s*\("),
     dict(id="IM-RB-HASH-001", name="SHA1", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
-         regex=r"Digest::(MD5|SHA1)\b|"
-                r"OpenSSL::Digest::(MD5|SHA1)\b|"
+         # `Digest::MD5` and `OpenSSL::Digest::MD5` were moved to IM-RB-HASH-003. Same defect
+         # as the Python and PHP rules above: a rule named SHA1 that also fires on MD5 and
+         # publishes the result under the SHA-1 name.
+         regex=r"Digest::SHA1\b|"
+                r"OpenSSL::Digest::SHA1\b|"
                 r"OpenSSL::Digest::Digest\b.*[\"']sha1[\"']"),
+    dict(id="IM-RB-HASH-003", name="MD5", primitive="hash", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         regex=r"Digest::MD5\b|OpenSSL::Digest::MD5\b"),
     dict(id="IM-RB-HASH-002", name="SHA", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"Digest::SHA(?:256|384|512)\b|"
@@ -570,6 +586,70 @@ RULES = [
     # excluded here and the curve object is typed by the PYCA rules instead. Every OTHER
     # spelling below is an unambiguous key-agreement signal and is kept: removing `X25519` and
     # `EVP_PKEY_EC` with it cost real detections, which the differential tests caught.
+    # ---- Added 2026-09-29 against MEASURED misses on the paramiko corpus -------------------------
+    # L1 recall was 0.650 (156/240) with FP=17. Reading `variants.L1.false_negatives` in
+    # benchmark/results.json gives the exact missed lines, so these rules are pinned to real
+    # source locations rather than guessed at. Grouped by the shape of the miss, and every
+    # group below names the corpus lines that motivated it.
+    #
+    # 1. MD5 over SSH. `transport.py` registers `"hmac-md5"` and `"hmac-md5-96"`. The existing
+    #    MAC rule listed hmac-sha2-* / hmac-sha1 / umac-* and had no MD5 entry, so 4 labelled
+    #    positives went unreported. MD5 in an SSH MAC is Grover-affected at 2^64 preimage.
+    dict(id="IM-SRC-SSH-MAC-002", name="MD5", primitive="mac", artefact_class="source",
+         uses="tls", key_group=None, evidence="discovered",
+         regex=r"[\"'](?:hmac-md5(?:-96)?|hmac-ripemd160)[\"']"),
+    # 2. `from hashlib import sha256, sha384, sha512` -- the import FORM of a SHA-2 name.
+    #    IM-SRC-HASHLIB-002 covers `hashlib.sha256` as a dotted reference, and IM-SRC-SHA2-001
+    #    covers `sha256(` as a CALL, but binding the name via an import matched neither. Five
+    #    corpus lines take this shape (kex_ecdh_nist.py:6, kex_gex.py:26, kex_group14.py:26,
+    #    kex_group16.py:24, and the L2 `util.py:149` prose form). This is a taint source: the
+    #    bound name is what the KEX later calls, so the algorithm is chosen at the import.
+    dict(id="IM-SRC-HASHLIB-004", name="SHA256", primitive="hash", artefact_class="source",
+         uses="tls", key_group=None, evidence="discovered",
+         regex=r"from\s+hashlib\s+import\s+[^\n]*\bsha(?:224|256|384|512)\b|"
+                r"from\s+hashlib\s+import\s+[^\n]*\bsha3_\d+_\d+\b"),
+    # 3. SSH KEX identifiers that name a curve. `"mlkem768x25519-sha256"` is the standardised
+    #    hybrid (RFC 9370) -- and the corpus names it in a `name = "..."` binding at
+    #    kex_mlkem.py:54 and in the preference tuple at transport.py:226. Neither mentions
+    #    `X25519` as a bare token, so IM-SRC-ECDH-001 could not see them. The hybrid is
+    #    reported as X25519 (classical half, Shor-vulnerable) rather than as ML-KEM, because
+    #    it is the X25519 half that a CRQC breaks; the migration verifier is what decides
+    #    whether the PQC half is genuinely present.
+    dict(id="IM-SRC-SSH-HYBRID-001", name="X25519", primitive="key-agreement", artefact_class="source",
+         uses="tls", key_group=None, evidence="discovered",
+         regex=r"[\"']mlkem\d+x25519[\w-]*[\"']|[\"']x25519-ka-[\w-]+[\"']"),
+    # 4. The `cryptography` type-name idiom. `EllipticCurvePrivateKey` appears as a return
+    #    annotation (ecdsakey.py:250), in a multi-line import (pkey.py:38) and inside an
+    #    `isinstance` check (pkey.py:216) -- three labelled positives, zero rule coverage.
+    #    An EC private-key TYPE is a Shor-vulnerable key existing, whatever it is then used for.
+    #
+    #    `EllipticCurvePublicKey` is DELIBERATELY EXCLUDED, and the first version of this rule
+    #    included it. Running the corpus showed why: all three of the public-key occurrences
+    #    (ecdsakey.py:167, kex_ecdh_nist.py:67 and :113) are labelled NEGATIVE, because a public
+    #    key is by definition the published half -- naming its type does not evidence a secret
+    #    that a CRQC could recover. A private-key type does. The distinction is not cosmetic:
+    #    including the public form cost 3 false positives and no true positives.
+    dict(id="IM-SRC-PYCA-ECTYPE-001", name="ECC", primitive="signature", artefact_class="source",
+         uses="signing", key_group=None, evidence="discovered",
+         regex=r"\bEllipticCurvePrivateKey\b"),
+    # 5. `"sha1"` as a bare quoted registry key -- sftp_server.py:83 `_hash_class = {"sha1":
+    #    sha1, "md5": md5}`. The dict binds the name to the hash, so the algorithm is
+    #    determined on that line.
+    #
+    #    The alternative `\b_hash_class\b` was REMOVED. It was meant as a belt-and-braces catch
+    #    for the same line, but the name also appears on sftp_server.py:309 and :311 where the
+    #    dict is merely being READ -- the algorithm is not chosen there. That cost 2 false
+    #    positives and gained nothing, so the rule is now anchored to the quoted key alone.
+    dict(id="IM-SRC-SSH-HASH-NAME-001", name="SHA1", primitive="hash", artefact_class="source",
+         uses="tls", key_group=None, evidence="discovered",
+         regex=r"[\"']sha-?1[\"']\s*[:,}\)]"),
+    # 6. `ec.ECDH()` is the `cryptography` factory that selects elliptic-curve DH. The existing
+    #    ECDH rule matches `exchanges.ECDH` and `derive_private_key(` but not this form, and the
+    #    corpus calls it at kex_ecdh_nist.py:71 and :117. Deliberately NOT matching `.exchange(`,
+    #    which the corpus labels NEGATIVE in L1 -- it operates on a key chosen elsewhere.
+    dict(id="IM-SRC-PYCA-ECDH-002", name="ECDH", primitive="key-agreement", artefact_class="source",
+         uses="tls", key_group=None, evidence="discovered",
+         regex=r"\bec\.ECDH\s*\("),
     dict(id="IM-SRC-ECDH-001", name="ECDH", primitive="key-agreement", artefact_class="source",
          uses="tls", key_group=1, evidence="discovered",
          # A plain alternation with no wrapping group. An earlier version wrapped this in `(?:...)`
@@ -634,7 +714,17 @@ RULES = [
          regex=r"hashes\.(SHA224|SHA256|SHA384|SHA512|SHA3_\d+_\d+)\b"),
     dict(id="IM-SRC-PYCA-HASH-002", name="SHA1", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
-         regex=r"hashes\.SHA1\b|MD5\(\s*(?:usedforsecurity\s*=\s*False)?\s*\)"),
+         # The `MD5(...)` alternative that used to live here was moved to IM-SRC-PYCA-MD5-001.
+         # It matched no SHA-1, so a bare `MD5()` from pycryptodome was published as SHA-1 --
+         # the same false-assertion defect as IM-SRC-HASHLIB-003, and found the same way.
+         regex=r"hashes\.SHA1\b"),
+    dict(id="IM-SRC-PYCA-MD5-001", name="MD5", primitive="hash", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         # `usedforsecurity=False` is a pycryptodome escape hatch for MD5 in a non-security
+         # role (a cache key, a checksum). It is still MD5, still 128-bit, and is reported
+         # as such -- but the flag is preserved in the evidence so an analyst can triage it.
+         regex=r"\bMD5\s*\(\s*(?:usedforsecurity\s*=\s*False)?\s*\)"
+                r"|\bMD5\s*\.\s*(?:new|construct)\s*\("),
     dict(id="IM-SRC-PYCA-EC-001", name="ECC", primitive="signature", artefact_class="source",
          uses="signing", key_group=1, evidence="discovered",
          regex=r"ec\.(SECP(?P<sz>192|224|256|384|521)R1|SECP256K1)\b"),
@@ -666,16 +756,48 @@ RULES = [
     # is already covered elsewhere; the import form was not.
     dict(id="IM-SRC-HASHLIB-001", name="SHA1", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
-         regex=r"from\s+hashlib\s+import\s+[^\n]*\bsha1\b|"
-                r"from\s+hashlib\s+import\s+[^\n]*\bmd5\b.*|hashlib\.new\(\s*[\"']sha1[\"']"),
+         # `md5` was REMOVED from this rule's alternation. It was here twice -- once in
+         # IM-SRC-HASHLIB-001 and again in IM-SRC-HASHLIB-003 -- so `from hashlib import md5`
+         # matched two rules that both name the algorithm `SHA1`. `_finalise` dedups on
+         # (file, name, rule_id, line), so two different rule_ids cannot collapse, and the
+         # MD5 import was published as a SHA-1 finding on a second component.
+         #
+         # MD5 now belongs to IM-SRC-HASHLIB-003 alone, and this rule owns SHA-1. The
+         # benchmark cannot see this class of bug because it scores distinct LOCATIONS, so
+         # one location reported twice still counts as a single true positive.
+         regex=r"from\s+hashlib\s+import\s+[^\n]*\bsha1\b|hashlib\.new\(\s*[\"']sha1[\"']"),
     # `hash_algo = hashlib.sha256` -- an algorithm object bound to a name. The dotted call
     # `hashlib.sha256(...)` was already covered; the ASSIGNMENT form was not, and it is how
     # libraries store an algorithm choice in a variable.
     dict(id="IM-SRC-HASHLIB-002", name="SHA", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
-         regex=r"hashlib\.(?:sha1|sha224|sha256|sha384|sha512|sha3_\d+_\d+|blake2\w*|md5)\b(?!\s*\()"),
-    dict(id="IM-SRC-HASHLIB-003", name="SHA1", primitive="hash", artefact_class="source",
+         # `md5` was removed and `blake2` is handled below. This rule reports name="SHA", so a
+         # `hashlib.md5` reference was being published as a SHA-family hash. BLAKE2 is not a
+         # member of the SHA family at all; it is a separate BLAKE2 design with its own
+         # security argument, and calling it SHA was simply wrong. The generic name "SHA" is
+         # itself a compromise -- it is used only where a rule genuinely spans SHA-1/2/3 and
+         # the specific member cannot be told from the call site.
+         regex=r"hashlib\.(?:sha224|sha256|sha384|sha512|sha3_\d+_\d+)\b(?!\s*\()"),
+    dict(id="IM-SRC-HASHLIB-BLAKE2-001", name="BLAKE2", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
+         # BLAKE2 has its own entry so it is no longer folded into the generic SHA name. It is
+         # not quantum-vulnerable in the Shor sense and is a sound Grover target at 256-bit
+         # output, so the CBOM strength table resolves it by name.
+         regex=r"hashlib\.blake2\w*\b(?!\s*\()"),
+    dict(id="IM-SRC-HASHLIB-003", name="MD5", primitive="hash", artefact_class="source",
+         uses="at-rest", key_group=None, evidence="discovered",
+         # WAS name="SHA1". The regex has never matched a SHA-1 -- it matches only `md5`. So
+         # every MD5 import and every bare `hashlib.md5` reference was published to the CBOM
+         # under the algorithm name SHA-1.
+         #
+         # That is worse than a miss. A miss leaves a gap the analyst can see; this asserts
+         # something false about a live asset. MD5 is a 128-bit broken hash with a
+         # practical chosen-prefix collision attack; SHA-1 is 160-bit with a demonstrated
+         # collision. They are different algorithms with different break models, and the
+         # classicalSecurityLevel emitted for them differs too. The benchmark CANNOT see
+         # this class of bug: it scores (file, line) LOCATIONS, and a line that names the
+         # wrong algorithm is still the right location. It was found by writing a test that
+         # asserts the reported NAME, not by measuring.
          regex=r"from\s+hashlib\s+import\s+[^\n]*\bmd5\b|hashlib\.md5\b(?!\s*\()"),
     # OpenSSH GCM/ChaCha cipher names, and HMAC wire names. `hmac-sha2-*` is an authentication
     # tag, not an encryption cipher, so it is a MAC rather than a cipher-suite primitive.
@@ -823,7 +945,13 @@ RULES = [
          regex=r"hashes\.SHA256\(|MessageDigest\.getInstance\(\s*[\"']SHA-?256|EVP_sha256|sha256\("),
     dict(id="IM-SRC-SHA1-001", name="SHA1", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
-         regex=r"hashes\.SHA1\(|MessageDigest\.getInstance\(\s*[\"']SHA-?1[\"']|EVP_sha1|sha1\("),
+         # `hashlib.sha1` as a bare dotted REFERENCE (bound to a name, not called) is matched
+         # here. IM-SRC-HASHLIB-002 used to cover it while reporting name="SHA", so a
+         # `h = hashlib.sha1` assignment was published as a generic SHA-family hash rather
+         # than as SHA-1. SHA-1 and SHA-2 have different break models, so this distinction
+         # changes the quantum-risk verdict and not merely the label.
+         regex=r"hashes\.SHA1\(|MessageDigest\.getInstance\(\s*[\"']SHA-?1[\"']|EVP_sha1|sha1\("
+                r"|hashlib\.sha1\b(?!\s*\()"),
     dict(id="IM-SRC-MD5-001", name="MD5", primitive="hash", artefact_class="source",
          uses="at-rest", key_group=None, evidence="discovered",
          regex=r"\bmd5\(|MessageDigest\.getInstance\(\s*[\"']MD5[\"']|EVP_md5|MD5_Init"),

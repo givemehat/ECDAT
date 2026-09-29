@@ -11,6 +11,7 @@ Regressions encoded here (all fixed 2026-09-25):
 """
 import io
 import os
+import re
 import tarfile
 
 import pytest
@@ -211,6 +212,34 @@ def test_every_rule_is_actually_executed(tmp_path, scanner):
         "IM-SRC-SSHNAME-005": 'KEX = "curve25519-sha256@libssh.org"',
         "IM-SRC-SSHNAME-006": '"ecdh-sha2-nistp256-cert-v01@openssh.com": ECDHKey,',
         "IM-SRC-SSHNAME-007": 'KEX = "mlkem768x25519-sha256@openssh.com"',
+        # --- Added 2026-09-29 with the rules that recovered 16 labelled paramiko misses.
+        #
+        # Each sample below is the VERBATIM source line from the pinned corpus that motivated
+        # the rule, with the file and line number in a comment. A sample invented to satisfy
+        # this assertion would prove the regex compiles and nothing more; these are the lines
+        # the benchmark actually scored as misses.
+        # paramiko/kex_ecdh_nist.py:6, kex_gex.py:26, kex_group14.py:26, kex_group16.py:24
+        "IM-SRC-HASHLIB-004": "from hashlib import sha256, sha384, sha512",
+        # paramiko/transport.py:193 and :195 register these in the MAC preference table.
+        "IM-SRC-SSH-MAC-002": '        "hmac-md5",',
+        # paramiko/kex_mlkem.py:54 -- the RFC 9370 hybrid name, bound to `name =`.
+        "IM-SRC-SSH-HYBRID-001": '    name = "mlkem768x25519-sha256"',
+        # paramiko/ecdsakey.py:250 (return annotation), pkey.py:216 (isinstance).
+        "IM-SRC-PYCA-ECTYPE-001": "    def private_key(self) -> ec.EllipticCurvePrivateKey:",
+        # paramiko/kex_ecdh_nist.py:71 and :117.
+        "IM-SRC-PYCA-ECDH-002": "K = self.P.exchange(ec.ECDH(), self.Q_C)",
+        # paramiko/sftp_server.py:83.
+        "IM-SRC-SSH-HASH-NAME-001": '    _hash_class = {"sha1": sha1, "md5": md5}',
+        # --- Rules split out of the MD5/SHA-1 mislabelling fix, 2026-09-29.
+        #
+        # Four rules reported `name="SHA1"` (or `"SHA"`) while their regex matched MD5, so every
+        # MD5 call site was published to the CBOM as SHA-1. Each half now has its own rule with
+        # a name that matches what it detects. BLAKE2 was likewise folded into a rule named SHA.
+        "IM-SRC-PYCA-MD5-001": "h = MD5.new(digest_size=16)",
+        "IM-PHP-HASH-002": "hash('md5')",
+        "IM-RB-HASH-003": "OpenSSL::Digest::MD5.new",
+        "IM-SRC-HASHLIB-BLAKE2-001": "h = hashlib.blake2b",
+        "IM-SRC-JAVA-CONST-004-MD5": 'String HASH_ALGO = "MD5";',
     }
 
     assert set(samples) == {r["id"] for r in RULES}, "a rule has no positive test"
@@ -593,4 +622,124 @@ def test_duplicate_findings_are_collapsed(tmp_path, scanner):
     findings = scanner.scan_directory(str(tmp_path))
     rsa = [f for f in findings if f["name"] == "RSA"]
     assert len({f["line"] for f in rsa}) == len(rsa), "same line should not appear twice"
+
+
+# ============================ regression: the two precision fixes, 2026-09-29 ==================
+#
+# Both of these were FPs I introduced myself and then removed. They are kept as tests because
+# the temptation to re-add them is obvious -- on their face both look like they would help
+# recall. What separates them from the misses they were meant to catch is stated per test.
+
+
+def test_public_ec_key_type_is_not_a_finding(tmp_path, scanner):
+    """`EllipticCurvePublicKey` names the PUBLISHED half of a key pair.
+
+    The first version of IM-SRC-PYCA-ECTYPE-001 matched both key types and cost 3 false
+    positives for zero true positives: every public-key occurrence in the paramiko corpus
+    (ecdsakey.py:167, kex_ecdh_nist.py:67 and :113) is labelled negative. A public key is by
+    definition public; naming its type does not evidence a secret a CRQC could recover.
+    """
+    _write(str(tmp_path / "pub.py"),
+           "def get_public(self):\n    return self.pubkey\n")
+    findings = scanner.scan_directory(str(tmp_path))
+    assert not [f for f in findings if f["rule_id"] == "IM-SRC-PYCA-ECTYPE-001"], \
+        "a public key type must not be reported as a Shor-vulnerable secret"
+
+
+def test_private_ec_key_type_is_still_a_finding(tmp_path, scanner):
+    """The converse, so the fix above cannot be over-applied to gut the rule."""
+    _write(str(tmp_path / "priv.py"),
+           "def private_key(self) -> ec.EllipticCurvePrivateKey:\n    return self._k\n")
+    findings = scanner.scan_directory(str(tmp_path))
+    assert [f for f in findings
+            if f["name"] == "ECC" and f["rule_id"] == "IM-SRC-PYCA-ECTYPE-001"], \
+        "a private key type is a Shor-vulnerable secret and must be reported"
+
+
+def test_reading_a_hash_registry_is_not_selecting_an_algorithm(tmp_path, scanner):
+    """`_hash_class` on its own does not choose a hash.
+
+    The removed alternative matched the identifier anywhere it appeared, including
+    sftp_server.py:309 and :311 where the dict is only being read. Selection happens at the
+    quoted key on the declaration line, which IM-SRC-SSH-HASH-NAME-001 still matches.
+    """
+    _write(str(tmp_path / "reg.py"),
+           "cls = self._hash_class[name]\nother = _hash_class\n")
+    findings = scanner.scan_directory(str(tmp_path))
+    assert not [f for f in findings if f["rule_id"] == "IM-SRC-SSH-HASH-NAME-001"], \
+        "reading a registry must not be reported as selecting a hash algorithm"
+
+
+def test_md5_import_is_not_also_reported_as_sha1(tmp_path, scanner):
+    """IM-SRC-HASHLIB-001 and -003 both matched `from hashlib import md5`, and both name SHA1.
+
+    Dedup is on (file, name, rule_id, line), so two rule_ids cannot collapse and the MD5
+    import was published as a second SHA-1 component. The benchmark cannot catch this class
+    of bug: it scores distinct LOCATIONS, so a location reported twice is still one TP.
+    """
+    _write(str(tmp_path / "m.py"), "from hashlib import md5\n")
+    findings = scanner.scan_directory(str(tmp_path))
+    assert [f for f in findings if f["name"] == "MD5"], "the MD5 import must be reported"
+    assert not [f for f in findings if f["name"] == "SHA1"], \
+        "an MD5 import must not also be published as a SHA-1 finding"
+
+
+# ---- The general form of the defect above, checked across the WHOLE table --------------------
+#
+# Four separate rules reported `name="SHA1"` or `name="SHA"` while their regex matched `md5`
+# (and one folded BLAKE2 into the SHA family). Each was found by hand, one at a time. This test
+# makes the class impossible to reintroduce: any rule whose regex can match an md5 token must be
+# NAMED for MD5.
+#
+# This is a NAME-vs-REGEX consistency check, and it is the kind the benchmark structurally
+# cannot perform. The benchmark scores (file, line) locations -- a line that names the wrong
+# algorithm is still the right location, so it scores as a true positive. Every one of these
+# four bugs was invisible to measurement and visible only to a test that asks "is the name true?"
+
+
+def test_no_rule_publishes_md5_under_a_sha_name():
+    md5_tokens = re.compile(r"md5", re.I)
+    offenders = [
+        (r["id"], r["name"]) for r in RULES
+        if md5_tokens.search(r["regex"]) and r["name"] not in ("MD5", "HMAC")
+    ]
+    assert not offenders, (
+        "these rules match an md5 token but are not named MD5, so every MD5 call site they "
+        f"fire on is published under the wrong algorithm name: {offenders}"
+    )
+
+
+def test_no_rule_publishes_blake2_under_the_sha_family():
+    """BLAKE2 is a separate design, not a SHA member."""
+    blake = re.compile(r"blake2", re.I)
+    offenders = [
+        (r["id"], r["name"]) for r in RULES
+        if blake.search(r["regex"]) and r["name"] not in ("BLAKE2",)
+    ]
+    assert not offenders, (
+        f"blake2 matched but the rule is not named BLAKE2: {offenders}"
+    )
+
+
+def test_every_misnamed_hash_rule_still_detects_its_own_algorithm(tmp_path):
+    """The converse guard, so the split cannot be 'fixed' by deleting detection.
+
+    Each of the four rules that was split must still fire on the algorithm it is named for.
+    Without this, the obvious way to make the test above pass is to drop the md5 alternation
+    entirely -- which converts a false assertion into a silent gap, and is strictly worse.
+    """
+    _write(str(tmp_path / "all.py"), (
+        "from hashlib import md5\n"
+        "import hashlib\n"
+        "a = hashlib.md5\n"
+        "b = hashlib.sha1\n"
+        "c = hashlib.blake2b\n"
+    ))
+    findings = IndraMeshScanner(enable_ml=False).scan_directory(str(tmp_path))
+    names = {f["name"] for f in findings}
+    assert "MD5" in names, "MD5 detection was lost while fixing the mislabelling"
+    assert "SHA1" in names, "SHA-1 detection must not be collateral damage"
+    assert "BLAKE2" in names, "BLAKE2 detection was lost while splitting it out"
+
+
 

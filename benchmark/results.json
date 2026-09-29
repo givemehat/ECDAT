@@ -43,15 +43,15 @@
      "SaaS / third-party boundary crypto (requires attestation)",
      "silicon-embedded keys (requires attestation)"
     ],
-    "findings_total": 185,
+    "findings_total": 204,
     "assurance_histogram": {
      "observed": 0,
-     "used": 185,
+     "used": 204,
      "declared": 0,
      "capability": 0
     },
-    "proven_use": 185,
-    "unresolved_purpose": 71
+    "proven_use": 204,
+    "unresolved_purpose": 75
    },
    "scan_errors": [],
    "findings_by_rule": {
@@ -65,19 +65,24 @@
     "HMAC | IM-SRC-SSH-MAC-001": 8,
     "SHA | IM-SRC-PYCA-HASH-001": 7,
     "ECC | IM-SRC-PYCA-EC-001": 7,
+    "SHA256 | IM-SRC-HASHLIB-004": 6,
     "RSA | IM-SRC-SSHNAME-002": 6,
-    "SHA1 | IM-SRC-HASHLIB-001": 5,
+    "SHA1 | IM-SRC-HASHLIB-001": 4,
+    "ECC | IM-SRC-PYCA-ECTYPE-001": 4,
     "Ed25519 | IM-SRC-SSH-ED-001": 4,
+    "MD5 | IM-SRC-SSH-MAC-002": 4,
     "AES | IM-SRC-SSH-CIPHER-002": 4,
     "HMAC | IM-SRC-SSHNAME-004": 4,
     "SHA1 | IM-SRC-SHA1-001": 3,
+    "X25519 | IM-SRC-SSH-HYBRID-001": 3,
     "Ed25519 | IM-SRC-EDDSA-001": 3,
-    "SHA1 | IM-SRC-HASHLIB-003": 3,
+    "MD5 | IM-SRC-HASHLIB-003": 3,
     "ECDSA | IM-SRC-SSHNAME-001": 3,
     "ECDSA | IM-SRC-ECDSA-001": 2,
     "Ed25519 | IM-SRC-SSHNAME-003": 2,
     "SHA | IM-SRC-HASHLIB-002": 2,
     "X25519 | IM-SRC-PYCA-X-001": 2,
+    "ECDH | IM-SRC-PYCA-ECDH-002": 2,
     "AES | IM-SRC-JAVA-CONST-001": 2,
     "ECDH | IM-SRC-SSHNAME-005": 2,
     "3DES | IM-SRC-SSH-LEGACY-001": 2,
@@ -85,22 +90,23 @@
     "Ed25519 | IM-SRC-PYCA-ED-001": 1,
     "AES | IM-SRC-AES-001": 1,
     "SHA256 | IM-SRC-SHA2-001": 1,
-    "MD5 | IM-SRC-MD5-001": 1
+    "MD5 | IM-SRC-MD5-001": 1,
+    "SHA1 | IM-SRC-SSH-HASH-NAME-001": 1
    },
    "variants": {
     "L1": {
      "counts": {
-      "TP": 156,
+      "TP": 172,
       "FP": 17,
-      "FN": 84,
+      "FN": 68,
       "labelled_positives": 240,
-      "findings_total": 185
+      "findings_total": 204
      },
-     "precision": 0.9017,
-     "precision_fraction": "156/173",
-     "recall": 0.65,
-     "recall_fraction": "156/240",
-     "f1": 0.7554,
+     "precision": 0.9101,
+     "precision_fraction": "172/189",
+     "recall": 0.7167,
+     "recall_fraction": "172/240",
+     "f1": 0.8019,
      "f1_note": "F1 is computed from the ROUNDED precision/recall, so it may differ in the 4th decimal from an F1 computed from the raw counts.",
      "false_positives": [
       {
@@ -743,23 +749,6 @@
        "labelled_code": "return cls._ECDSA_CURVES.get_key_format_identifier_list()",
        "labelled_break_model": "shor",
        "labelled_reason": "P1: names the ECDSA primitive in executable code",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/ecdsakey.py",
-       "line": 250,
-       "labelled_primitive": "EllipticCurvePrivateKey",
-       "labelled_code": "def private_key(self) -> Optional[ec.EllipticCurvePrivateKey]:",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: names the EllipticCurvePrivateKey primitive in executable code",
        "indramesh_names": [
         "None"
        ],
@@ -1078,23 +1067,6 @@
       },
       {
        "file": "paramiko/kex_ecdh_nist.py",
-       "line": 6,
-       "labelled_primitive": "SHA256",
-       "labelled_code": "from hashlib import sha256, sha384, sha512",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: binds 'sha256' to the sha256 hash, which is used as a digest below",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_ecdh_nist.py",
        "line": 15,
        "labelled_primitive": "ECDH",
        "labelled_code": "_MSG_KEXECDH_INIT, _MSG_KEXECDH_REPLY = range(30, 32)",
@@ -1231,96 +1203,11 @@
       },
       {
        "file": "paramiko/kex_ecdh_nist.py",
-       "line": 71,
-       "labelled_primitive": "ECDH",
-       "labelled_code": "K = self.P.exchange(ec.ECDH(), self.Q_C)",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: ec.ECDH selects the ECDH primitive",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_ecdh_nist.py",
        "line": 98,
        "labelled_primitive": "ECDH",
        "labelled_code": "m.add_byte(c_MSG_KEXECDH_REPLY)",
        "labelled_break_model": "shor",
        "labelled_reason": "P1: names the ECDH primitive in executable code",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_ecdh_nist.py",
-       "line": 117,
-       "labelled_primitive": "ECDH",
-       "labelled_code": "K = self.P.exchange(ec.ECDH(), self.Q_S)",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: ec.ECDH selects the ECDH primitive",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_gex.py",
-       "line": 26,
-       "labelled_primitive": "SHA256",
-       "labelled_code": "from hashlib import sha256",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: binds 'sha256' to the sha256 hash, which is used as a digest below",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_group14.py",
-       "line": 26,
-       "labelled_primitive": "SHA256",
-       "labelled_code": "from hashlib import sha256",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: binds 'sha256' to the sha256 hash, which is used as a digest below",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_group16.py",
-       "line": 24,
-       "labelled_primitive": "SHA512",
-       "labelled_code": "from hashlib import sha512",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: binds 'sha512' to the sha512 hash, which is used as a digest below",
        "indramesh_names": [
         "None"
        ],
@@ -1383,46 +1270,12 @@
        ]
       },
       {
-       "file": "paramiko/kex_mlkem.py",
-       "line": 54,
-       "labelled_primitive": "X25519",
-       "labelled_code": "name = \"mlkem768x25519-sha256\"",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'mlkem768x25519-sha256' names a quantum-vulnerable primitive",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
        "file": "paramiko/pkey.py",
        "line": 37,
        "labelled_primitive": "EC",
        "labelled_code": "from cryptography.hazmat.primitives.asymmetric.ec import (",
        "labelled_break_model": "shor",
        "labelled_reason": "P3: binds the imported ( names to the ec primitive",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/pkey.py",
-       "line": 38,
-       "labelled_primitive": "EllipticCurvePrivateKey",
-       "labelled_code": "EllipticCurvePrivateKey,",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: names the EllipticCurvePrivateKey primitive in executable code",
        "indramesh_names": [
         "None"
        ],
@@ -1457,23 +1310,6 @@
        "labelled_code": "key_class = Ed25519Key",
        "labelled_break_model": "shor",
        "labelled_reason": "P1: names the Ed25519 primitive in executable code",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/pkey.py",
-       "line": 216,
-       "labelled_primitive": "EllipticCurvePrivateKey",
-       "labelled_code": "elif isinstance(loaded, asymmetric.ec.EllipticCurvePrivateKey):",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: names the EllipticCurvePrivateKey primitive in executable code",
        "indramesh_names": [
         "None"
        ],
@@ -1672,23 +1508,6 @@
        ]
       },
       {
-       "file": "paramiko/sftp_server.py",
-       "line": 83,
-       "labelled_primitive": "SHA-1",
-       "labelled_code": "_hash_class = {\"sha1\": sha1, \"md5\": md5}",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'sha1' names a quantum-vulnerable primitive",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
        "file": "paramiko/transport.py",
        "line": 97,
        "labelled_primitive": "ECDSA",
@@ -1712,91 +1531,6 @@
        "labelled_code": "from paramiko.ed25519key import Ed25519Key",
        "labelled_break_model": "shor",
        "labelled_reason": "P1: names the Ed25519 primitive in executable code",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 193,
-       "labelled_primitive": "HMAC",
-       "labelled_code": "\"hmac-md5\",",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'hmac-md5' names a quantum-vulnerable primitive",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 195,
-       "labelled_primitive": "HMAC",
-       "labelled_code": "\"hmac-md5-96\",",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'hmac-md5-96' names a quantum-vulnerable primitive",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 226,
-       "labelled_primitive": "X25519",
-       "labelled_code": "_preferred_kex = (\"mlkem768x25519-sha256\",) + _preferred_kex",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'mlkem768x25519-sha256' names a quantum-vulnerable primitive",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 295,
-       "labelled_primitive": "HMAC",
-       "labelled_code": "\"hmac-md5\": {\"class\": md5, \"size\": 16},",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'hmac-md5' names a quantum-vulnerable primitive",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 296,
-       "labelled_primitive": "HMAC",
-       "labelled_code": "\"hmac-md5-96\": {\"class\": md5, \"size\": 12},",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'hmac-md5-96' names a quantum-vulnerable primitive",
        "indramesh_names": [
         "None"
        ],
@@ -1871,8 +1605,8 @@
       },
       "ECDH (shor)": {
        "labelled": 30,
-       "detected": 9,
-       "recall": 0.3
+       "detected": 11,
+       "recall": 0.3667
       },
       "ECDSA (shor)": {
        "labelled": 42,
@@ -1891,13 +1625,13 @@
       },
       "EllipticCurvePrivateKey (shor)": {
        "labelled": 3,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 3,
+       "recall": 1.0
       },
       "HMAC (grover)": {
        "labelled": 16,
-       "detected": 12,
-       "recall": 0.75
+       "detected": 16,
+       "recall": 1.0
       },
       "MD5 (grover)": {
        "labelled": 5,
@@ -1911,8 +1645,8 @@
       },
       "SHA-1 (grover)": {
        "labelled": 3,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 1,
+       "recall": 0.3333
       },
       "SHA-256 (grover)": {
        "labelled": 3,
@@ -1936,18 +1670,18 @@
       },
       "SHA256 (grover)": {
        "labelled": 7,
-       "detected": 3,
-       "recall": 0.4286
+       "detected": 6,
+       "recall": 0.8571
       },
       "SHA512 (grover)": {
        "labelled": 1,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 1,
+       "recall": 1.0
       },
       "X25519 (shor)": {
        "labelled": 22,
-       "detected": 18,
-       "recall": 0.8182
+       "detected": 20,
+       "recall": 0.9091
       },
       "secp256r1 (shor)": {
        "labelled": 3,
@@ -1968,17 +1702,17 @@
     },
     "L2": {
      "counts": {
-      "TP": 156,
+      "TP": 172,
       "FP": 17,
-      "FN": 103,
+      "FN": 87,
       "labelled_positives": 259,
-      "findings_total": 185
+      "findings_total": 204
      },
-     "precision": 0.9017,
-     "precision_fraction": "156/173",
-     "recall": 0.6023,
-     "recall_fraction": "156/259",
-     "f1": 0.7222,
+     "precision": 0.9101,
+     "precision_fraction": "172/189",
+     "recall": 0.6641,
+     "recall_fraction": "172/259",
+     "f1": 0.7679,
      "f1_note": "F1 is computed from the ROUNDED precision/recall, so it may differ in the 4th decimal from an F1 computed from the raw counts.",
      "false_positives": [
       {
@@ -2621,23 +2355,6 @@
        "labelled_code": "return cls._ECDSA_CURVES.get_key_format_identifier_list()",
        "labelled_break_model": "shor",
        "labelled_reason": "P1: names the ECDSA primitive in executable code",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/ecdsakey.py",
-       "line": 250,
-       "labelled_primitive": "EllipticCurvePrivateKey",
-       "labelled_code": "def private_key(self) -> Optional[ec.EllipticCurvePrivateKey]:",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: names the EllipticCurvePrivateKey primitive in executable code",
        "indramesh_names": [
         "None"
        ],
@@ -2990,23 +2707,6 @@
       },
       {
        "file": "paramiko/kex_ecdh_nist.py",
-       "line": 6,
-       "labelled_primitive": "SHA256",
-       "labelled_code": "from hashlib import sha256, sha384, sha512",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: binds 'sha256' to the sha256 hash, which is used as a digest below",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_ecdh_nist.py",
        "line": 15,
        "labelled_primitive": "ECDH",
        "labelled_code": "_MSG_KEXECDH_INIT, _MSG_KEXECDH_REPLY = range(30, 32)",
@@ -3143,23 +2843,6 @@
       },
       {
        "file": "paramiko/kex_ecdh_nist.py",
-       "line": 71,
-       "labelled_primitive": "ECDH",
-       "labelled_code": "K = self.P.exchange(ec.ECDH(), self.Q_C)",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: ec.ECDH selects the ECDH primitive",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_ecdh_nist.py",
        "line": 91,
        "labelled_primitive": null,
        "labelled_code": "H = self.hash_algo(hm.asbytes()).digest()",
@@ -3194,45 +2877,11 @@
       },
       {
        "file": "paramiko/kex_ecdh_nist.py",
-       "line": 117,
-       "labelled_primitive": "ECDH",
-       "labelled_code": "K = self.P.exchange(ec.ECDH(), self.Q_S)",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: ec.ECDH selects the ECDH primitive",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_ecdh_nist.py",
        "line": 137,
        "labelled_primitive": null,
        "labelled_code": "self.transport._set_K_H(K, self.hash_algo(hm.asbytes()).digest())",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_gex.py",
-       "line": 26,
-       "labelled_primitive": "SHA256",
-       "labelled_code": "from hashlib import sha256",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: binds 'sha256' to the sha256 hash, which is used as a digest below",
        "indramesh_names": [
         "None"
        ],
@@ -3279,23 +2928,6 @@
       },
       {
        "file": "paramiko/kex_group14.py",
-       "line": 26,
-       "labelled_primitive": "SHA256",
-       "labelled_code": "from hashlib import sha256",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: binds 'sha256' to the sha256 hash, which is used as a digest below",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_group14.py",
        "line": 117,
        "labelled_primitive": null,
        "labelled_code": "self.transport._set_K_H(K, self.hash_algo(hm.asbytes()).digest())",
@@ -3318,23 +2950,6 @@
        "labelled_code": "H = self.hash_algo(hm.asbytes()).digest()",
        "labelled_break_model": "not-affected",
        "labelled_reason": "operates on a primitive chosen elsewhere; names no primitive (counted positive only in sensitivity variant L2)",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_group16.py",
-       "line": 24,
-       "labelled_primitive": "SHA512",
-       "labelled_code": "from hashlib import sha512",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P3: binds 'sha512' to the sha512 hash, which is used as a digest below",
        "indramesh_names": [
         "None"
        ],
@@ -3386,23 +3001,6 @@
        "labelled_code": "``K_CL`` is the X25519 shared secret.",
        "labelled_break_model": "shor",
        "labelled_reason": "P1: names the X25519 primitive in executable code",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/kex_mlkem.py",
-       "line": 54,
-       "labelled_primitive": "X25519",
-       "labelled_code": "name = \"mlkem768x25519-sha256\"",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'mlkem768x25519-sha256' names a quantum-vulnerable primitive",
        "indramesh_names": [
         "None"
        ],
@@ -3500,23 +3098,6 @@
       },
       {
        "file": "paramiko/pkey.py",
-       "line": 38,
-       "labelled_primitive": "EllipticCurvePrivateKey",
-       "labelled_code": "EllipticCurvePrivateKey,",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: names the EllipticCurvePrivateKey primitive in executable code",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/pkey.py",
        "line": 173,
        "labelled_primitive": "ECDSA",
        "labelled_code": "from paramiko import ECDSAKey, Ed25519Key, RSAKey",
@@ -3539,23 +3120,6 @@
        "labelled_code": "key_class = Ed25519Key",
        "labelled_break_model": "shor",
        "labelled_reason": "P1: names the Ed25519 primitive in executable code",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/pkey.py",
-       "line": 216,
-       "labelled_primitive": "EllipticCurvePrivateKey",
-       "labelled_code": "elif isinstance(loaded, asymmetric.ec.EllipticCurvePrivateKey):",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P1: names the EllipticCurvePrivateKey primitive in executable code",
        "indramesh_names": [
         "None"
        ],
@@ -3772,23 +3336,6 @@
       },
       {
        "file": "paramiko/sftp_server.py",
-       "line": 83,
-       "labelled_primitive": "SHA-1",
-       "labelled_code": "_hash_class = {\"sha1\": sha1, \"md5\": md5}",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'sha1' names a quantum-vulnerable primitive",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/sftp_server.py",
        "line": 350,
        "labelled_primitive": null,
        "labelled_code": "sum_out += hash_obj.digest()",
@@ -3828,91 +3375,6 @@
        "labelled_code": "from paramiko.ed25519key import Ed25519Key",
        "labelled_break_model": "shor",
        "labelled_reason": "P1: names the Ed25519 primitive in executable code",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 193,
-       "labelled_primitive": "HMAC",
-       "labelled_code": "\"hmac-md5\",",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'hmac-md5' names a quantum-vulnerable primitive",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 195,
-       "labelled_primitive": "HMAC",
-       "labelled_code": "\"hmac-md5-96\",",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'hmac-md5-96' names a quantum-vulnerable primitive",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 226,
-       "labelled_primitive": "X25519",
-       "labelled_code": "_preferred_kex = (\"mlkem768x25519-sha256\",) + _preferred_kex",
-       "labelled_break_model": "shor",
-       "labelled_reason": "P4: algorithm identifier 'mlkem768x25519-sha256' names a quantum-vulnerable primitive",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 295,
-       "labelled_primitive": "HMAC",
-       "labelled_code": "\"hmac-md5\": {\"class\": md5, \"size\": 16},",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'hmac-md5' names a quantum-vulnerable primitive",
-       "indramesh_names": [
-        "None"
-       ],
-       "indramesh_rule_ids": [
-        "None"
-       ],
-       "indramesh_match": [
-        null
-       ]
-      },
-      {
-       "file": "paramiko/transport.py",
-       "line": 296,
-       "labelled_primitive": "HMAC",
-       "labelled_code": "\"hmac-md5-96\": {\"class\": md5, \"size\": 12},",
-       "labelled_break_model": "grover",
-       "labelled_reason": "P4: algorithm identifier 'hmac-md5-96' names a quantum-vulnerable primitive",
        "indramesh_names": [
         "None"
        ],
@@ -4072,8 +3534,8 @@
       },
       "ECDH (shor)": {
        "labelled": 30,
-       "detected": 9,
-       "recall": 0.3
+       "detected": 11,
+       "recall": 0.3667
       },
       "ECDSA (shor)": {
        "labelled": 42,
@@ -4092,13 +3554,13 @@
       },
       "EllipticCurvePrivateKey (shor)": {
        "labelled": 3,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 3,
+       "recall": 1.0
       },
       "HMAC (grover)": {
        "labelled": 16,
-       "detected": 12,
-       "recall": 0.75
+       "detected": 16,
+       "recall": 1.0
       },
       "MD5 (grover)": {
        "labelled": 5,
@@ -4117,8 +3579,8 @@
       },
       "SHA-1 (grover)": {
        "labelled": 3,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 1,
+       "recall": 0.3333
       },
       "SHA-256 (grover)": {
        "labelled": 3,
@@ -4142,18 +3604,18 @@
       },
       "SHA256 (grover)": {
        "labelled": 7,
-       "detected": 3,
-       "recall": 0.4286
+       "detected": 6,
+       "recall": 0.8571
       },
       "SHA512 (grover)": {
        "labelled": 1,
-       "detected": 0,
-       "recall": 0.0
+       "detected": 1,
+       "recall": 1.0
       },
       "X25519 (shor)": {
        "labelled": 22,
-       "detected": 18,
-       "recall": 0.8182
+       "detected": 20,
+       "recall": 0.9091
       },
       "secp256r1 (shor)": {
        "labelled": 3,
