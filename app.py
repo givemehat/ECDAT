@@ -305,7 +305,7 @@ def scan_header(scan, records):
     will look first -- and a bare count at that moment is exactly the number this tool refuses to
     show on its own. Filled is proven use; the empty remainder is everything merely reachable.
     """
-    from engine.theme import proof_bar
+    from engine.theme import proof_bar, risk_ring_panel, risk_score
     st.markdown(
         f'<div class="ecdat-foot">Scan of <span class="ecdat-mono">'
         f'{escape(short_path(scan["target"]))}</span> at {escape(scan["scanned_at"])} '
@@ -315,6 +315,12 @@ def scan_header(scan, records):
                           caption="Proven use is a call site or an observed artefact. "
                                  "Everything else is a capability nothing has been shown to call."),
                 unsafe_allow_html=True)
+
+    # The ring is the first thing a non-technical reader sees, and it is deliberately paired with
+    # the proof bar above rather than replacing it. A score on its own is a verdict; the score next
+    # to the share that is actually evidenced is the tool's argument in one glance.
+    if records:
+        st.markdown(risk_ring_panel(risk_score(records)), unsafe_allow_html=True)
 
 
 # ---------------------------------------------------------------------------------------------

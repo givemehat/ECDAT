@@ -18,7 +18,8 @@ from engine.gui_helpers import (ASSURANCE_COLOURS, TIER_COLOURS, assurance_count
                                 evidence_needed, ink_on, proven_use, queue_rows,
                                 sensor_status_rows, short_path, tier_counts, unresolved_split,
                                 validate_cbom_document, verification_rows, verification_summary)
-from engine.theme import proof_bar, reveal, scanning_indicator
+from engine.theme import (proof_bar, reveal, risk_ring_panel, risk_score, scanning_indicator,
+                                score_ring_svg)
 
 SCHEMA = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                       "schemas", "bom-1.7.schema.json")
@@ -395,3 +396,92 @@ def test_reveal_is_capped_so_the_tail_never_arrives_late():
 def test_scanning_indicator_is_the_only_unattended_animation():
     assert "ec-scanning" in scanning_indicator("scanning")
     assert scanning_indicator("probing").count("probing") == 1
+
+
+# ===========================================================================================
+# The risk ring.
+#
+# The ring is the first thing a non-technical judge looks at, so its failure modes are
+# reputational rather than technical. Three of them are asserted below, in order of how badly
+# they would read on a projector.
+# ===========================================================================================
+
+def _finding(shor=False, level="capability"):
+    return {"risk": {"break_model": "shor" if shor else "grover"},
+            "assurance": {"value": level}}
+
+
+def test_the_ring_score_is_never_shown_without_its_working():
+    """A gauge is a verdict with no argument attached.
+
+    The panel must state how the number was reached. A reader who cannot recompute it cannot
+    challenge it, and a security tool that emits an unexplainable score is doing the exact thing
+    it exists to prevent.
+    """
+    payload = risk_score([_finding(shor=True, level="used")] * 6
+                         + [_finding(shor=False)] * 2)
+    panel = risk_ring_panel(payload)
+    assert "Method:" in panel
+    assert "not a measurement" in panel
+    assert "6" in panel and "8" in panel          # the actual inputs, not just a score
+
+
+def test_zero_findings_is_never_rendered_as_a_perfect_score():
+    """The single most dangerous possible misreading.
+
+    A ring reading 0 with a green arc says "you are safe". But zero findings is what an
+    UNREADABLE tree produces too. The empty case must refuse to draw a ring at all.
+    """
+    payload = risk_score([])
+    assert payload["score"] == 0 and payload["total"] == 0
+    panel = risk_ring_panel(payload)
+    assert "<svg" not in panel, "an empty scan must not draw a score ring at all"
+    assert "not a clean bill of health" in panel
+
+
+def test_the_ring_is_animatable_and_correct_without_the_animation():
+    """The dash offsets are written as the SETTLED state; the animation only approaches them.
+
+    If motion is reduced, blocked, or never runs, the ring must still show the right value. An
+    animation that is load-bearing for a displayed number is one more way to show a wrong answer.
+    """
+    payload = {"score": 42.0, "tier": "moderate", "total": 10, "proven": 3, "shor_broken": 4}
+    svg = score_ring_svg(payload)
+    assert "stroke-dasharray" in svg
+    assert "prefers-reduced-motion" in svg, "the ring must honour a reduced-motion preference"
+    assert "animation:none" in svg
+    # The final dasharray encodes the value, not zero -- that is the settled state.
+    assert "stroke-dasharray:0.00" not in svg
+
+
+def test_the_ring_carries_a_readable_label_not_just_colour():
+    """Colour is never the only channel, in this project, and that includes the ring."""
+    svg = score_ring_svg({"score": 70.0, "tier": "high", "total": 9, "proven": 2,
+                          "shor_broken": 6})
+    assert 'role="img"' in svg
+    assert "aria-label=" in svg
+    assert "70" in svg and "2 of 9" in svg
+    assert "high" in svg
+
+
+def test_proven_evidence_raises_the_score_but_only_slightly():
+    """The weighting is a stated opinion and the test states it too.
+
+    If evidence dominated the score, a tool that found more unevidenced capability would look
+    "safer" for being less thorough -- which is backwards. The bonus is capped at 10 points.
+    """
+    without = risk_score([_finding(shor=True)] * 10 + [_finding(shor=False)] * 10)
+    with_ev = risk_score([_finding(shor=True, level="used")] * 10 + [_finding(shor=False)] * 10)
+    # 50% Shor-broken gives a base of 50 either way; the 10 proven findings add 5 points.
+    assert 0 < (with_ev["score"] - without["score"]) <= 10.0
+    assert round(without["score"], 1) == 50.0
+
+
+def test_the_ring_survives_a_record_with_no_risk_block():
+    """Scan output crosses a JSON boundary; a record may arrive with no risk at all.
+
+    It must render as a lower score, never as a crash on the headline screen.
+    """
+    payload = risk_score([{"name": "x"}, {"name": "y", "risk": {"break_model": "shor"}}])
+    assert payload["total"] == 2 and payload["shor_broken"] == 1
+    assert score_ring_svg(payload).startswith("<svg")

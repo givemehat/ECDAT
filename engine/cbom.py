@@ -110,6 +110,43 @@ CLASSICAL_STRENGTH_BITS = {
     # MD5 is not "128-bit". It is a 128-bit OUTPUT, broken by collision in seconds and with no
     # security value whatsoever. 0 is the honest number.
     "SHA-1": 87, "MD5": 0, "3DES": 112,
+    # Stream ciphers and the wide-block/legacy block ciphers. These were MISSING entirely, and a
+    # missing entry is not neutral: `_classical_strength` returns 0 for an unknown name, so every
+    # ChaCha20 and Blowfish finding was published as `classicalSecurityLevel: 0` -- "no security".
+    # ChaCha20 is a NIST SP 800-38E standard with a 256-bit key and no practical attack, and it
+    # is the default in TLS cipher suites that AES dominates on low-end hardware. Reporting it as
+    # worthless is the same class of error as publishing Ed25519 at 0, which was itself a bug we
+    # fixed earlier (the mixed-case keys in this table were once unreachable).
+    #
+    # 3DES is 168-bit raw but ~112-bit effective (Sweet32 birthday bounds on the 64-bit block),
+    # so 112 is the honest figure rather than 168.
+    "ChaCha20": 256, "XChaCha20": 256, "ChaCha8": 128, "Salsa20": 256,
+    "Blowfish": 56, "CAST5": 128, "IDEA": 128, "SEED": 128, "Camellia-128": 128,
+    "Camellia-192": 192, "Camellia-256": 256, "Twofish": 256, "RC4": 0,
+    # RC4 and MD5 are both here deliberately, with 0. A 1990s stream cipher with practical
+    # keystream biases has no security value, and saying so is more useful than omitting it.
+    #
+    # The ELLIPTIC-CURVE and DH families. These are NOT stored here. They were, and that was a
+    # bug: `CLASSICAL_STRENGTH_BITS` is consulted on an EXACT name match BEFORE the key length
+    # is considered, so "ECDH" -> 128 shadowed every parameter set, and `{"name": "ECDH",
+    # "key_length": 384}` reported 128 instead of 192. The family defaults now live only in
+    # `_KEY_LENGTH_STRENGTH` and are reached through `_strength_for_key_length`, which runs
+    # first -- so a known parameter set always wins and an unknown curve still gets the
+    # conservative P-256-class figure rather than falling through to 0.
+    #
+    # DH and DHE are the exception to the rule above: they have no NIST-named parameter sets, so
+    # the 2048-bit MODP figure is recorded as their name-level value. 112 rather than 2048 is
+    # deliberate -- this field means security STRENGTH, and writing the key length here is
+    # precisely the error the table's own docstring warns about.
+    #
+    # THE BARE "DH" KEY IS THE TRAP, and it is why the substring fallback must be length-sorted.
+    # A naive `for key in table` reached "DH" while scanning the name "ECDH" and answered 112, so
+    # every curve-based key exchange was reported as a 2048-bit MODP group. That turned an
+    # UNRATED unknown into a confident "deprecated" verdict in mosca.py -- a sentinel becoming a
+    # verdict, which is the one failure mode this module's whole design exists to prevent. The
+    # substring fallback now iterates longest-key-first, and a bare name with no size resolves to
+    # unknown instead.
+    "DH": 112, "DHE": 112, "MODP": 112,
 }
 
 # Post-quantum algorithm families, matched on the name BEFORE any primitive-based rule. ML-KEM,
@@ -342,32 +379,88 @@ def _classical_strength(finding, primitive):
     # worse than no table.
     if name in CLASSICAL_STRENGTH_BITS:
         return CLASSICAL_STRENGTH_BITS[name]
+
+    # A KNOWN KEY LENGTH OUTRANKS A FAMILY DEFAULT, and this check therefore sits ABOVE the
+    # upper-cased table lookup -- not after it. The table carries family entries ("ECDH": 128) so
+    # that a finding with no curve at all stops falling through to `return 0`, and an earlier
+    # ordering let those family keys shadow the parameter sets: `{"name": "ECDH",
+    # "key_length": 384}` reported 128 instead of 192, making a P-384 finding look like P-256
+    # purely because the table had just been made more generous. Being imprecise must never be
+    # rewarded with a better-looking number.
+    key_bits = _coerce_int(finding.get("key_length"))
+    if key_bits is not None:
+        sized = _strength_for_key_length(upper, key_bits)
+        if sized is not None:
+            return sized
+
     if upper in CLASSICAL_STRENGTH_BITS_UPPER:
         return CLASSICAL_STRENGTH_BITS_UPPER[upper]
-    for key, bits in CLASSICAL_STRENGTH_BITS_UPPER.items():
-        if key in upper:
-            return bits
-    key_bits = _coerce_int(finding.get("key_length"))
-    # A bare family name plus a key length is the shape the SCANNER emits: "RSA" + 2048. Look the
-    # parameter set up from the length, otherwise every finding from our own rules would report
-    # strength 0 -- technically "not stated" while the information was sitting in the same dict.
-    if key_bits and upper:
-        for family, table in (
-            ("RSA", {"1024": 80, "2048": 112, "3072": 128, "4096": 152}),
-            ("DSA", {"1024": 80, "2048": 112, "3072": 128}),
-            ("EC", {"192": 96, "224": 112, "256": 128, "384": 192, "521": 256}),
-            ("ECDSA", {"192": 96, "224": 112, "256": 128, "384": 192, "521": 256}),
-        ):
-            if family in upper and str(key_bits) in table:
-                return table[str(key_bits)]
-    # Fall back on the primitive: symmetric and hash primitives are judged by key/digest size,
-    # which for these IS the strength. Asymmetric without a recognised parameter set is unknown,
-    # and 0 is the honest answer -- it means "not stated", not "zero security".
-    if primitive in ("ae", "block-cipher", "stream-cipher", "mac", "hash", "xof", "kdf"):
-        return key_bits or 0
-    if primitive == "drbg":
-        return 0
-    return 0
+
+    # Substring fallback, and it must be WORD-BOUNDED with the longest key first.
+    #
+    # "ECDH" contains "DH" and "ECDSA" contains "DS". Two independent bugs lived here, and both
+    # turned an UNRATED unknown into a confident verdict:
+    #   1. plain substring matching reached "DH" while scanning the name "ECDH" and answered 112,
+    #      so every curve-based key exchange was reported as a 2048-bit MODP group;
+    #   2. without length ordering, a family containing another family shadows it.
+    # Word boundaries fix (1) -- `\bDH\b` does not match inside "ECDH" -- and longest-first
+    # ordering fixes (2). mosca.py then read 112, selected the `lt_128` tier, and published
+    # "deprecated" for an algorithm whose curve it had never seen.
+    for key in sorted(CLASSICAL_STRENGTH_BITS_UPPER, key=len, reverse=True):
+        if re.search(rf"\b{re.escape(key)}\b", upper):
+            return CLASSICAL_STRENGTH_BITS_UPPER[key]
+
+    # Nothing in the table and no usable key length. Return None, NOT 0: an unknown algorithm is
+    # unknown, and in this field 0 means "no security whatsoever". The schema has no "unknown"
+    # member, so the honest move is to omit the property, which `_crypto_properties` does.
+    return None
+
+
+# NIST SP 800-57 Part 1 Rev 5 strength by PARAMETER SET, for the case where the algorithm name
+# is a bare family and the parameter is the key length. Extracted from the inline table that used
+# to live at the bottom of `_classical_strength`, because the function now has to consult it
+# BEFORE the family fallbacks, and duplicating the numbers in two places is how a table drifts.
+# The SECP224R1 entry is 112, not 96: 224-bit curves were removed from SP 800-57's second
+# edition after a 2013 transition, and the historical 96-bit figure is not what a current tool
+# should publish.
+_KEY_LENGTH_STRENGTH = {
+    "RSA": {1024: 80, 2048: 112, 3072: 128, 4096: 152, 7680: 192, 15360: 256},
+    "DSA": {1024: 80, 2048: 112, 3072: 128},
+    "EC":   {192: 96, 224: 112, 256: 128, 384: 192, 521: 256},
+    # ELLIPTIC-CURVE and DIFFIE-HELLMAN are checked by substring, so "EC" must not preempt them.
+    # The loop below therefore tests the longer family names first.
+    "ECDSA": {192: 96, 224: 112, 256: 128, 384: 192, 521: 256},
+    "ECDH":  {192: 96, 224: 112, 256: 128, 384: 192, 521: 256},
+    "DH":    {1024: 80, 2048: 112, 3072: 128, 4096: 152, 7680: 192, 15360: 256},
+    "DHE":   {1024: 80, 2048: 112, 3072: 128, 4096: 152, 7680: 192, 15360: 256},
+    "MODP":  {1024: 80, 2048: 112, 3072: 128, 4096: 152, 7680: 192, 15360: 256},
+    # SYMMETRIC and HASH: for these the key/digest size IS the strength, so the length alone is
+    # enough. AES-256 is 256 because a 256-bit key is a 256-bit claim, not because "AES" appears.
+    "AES":   {128: 128, 192: 192, 256: 256},
+    "SHA":   {1: 87, 224: 112, 256: 128, 384: 192, 512: 256},
+    "CHACHA": {256: 256},
+}
+
+# Longest first, so "ECDSA" is tested before "EC" and "ECDH" before "EC".
+_STRENGTH_FAMILY_ORDER = ("ECDSA", "ECDH", "SHA", "CHACHA", "AES", "RSA", "DSA", "DHE", "MODP",
+                          "DH", "EC")
+
+
+def _strength_for_key_length(upper_name, key_bits):
+    """Security strength implied by a bare family name plus a key length, or None.
+
+    Extracted so `_classical_strength` can consult the parameter set BEFORE the family defaults.
+    The ordering inside is the subtle part: "EC" is a substring of both "ECDSA" and "ECDH", so
+    the longer families are tested first. Getting that backwards reports every ECDSA-P-256 as a
+    192-bit curve, which is a security OVERSTATEMENT rather than an error of precision.
+    """
+    if not upper_name or not key_bits:
+        return None
+    for family in _STRENGTH_FAMILY_ORDER:
+        table = _KEY_LENGTH_STRENGTH[family]
+        if family in upper_name and key_bits in table:
+            return table[key_bits]
+    return None
 
 
 def _crypto_functions(finding, primitive):
@@ -431,15 +524,24 @@ def _algorithm_properties(finding, primitive):
         props["curve"] = str(finding["curve"])
     # `uses` (at-rest / tls / signing) has no CycloneDX field; it is emitted as an `ecd:uses`
     # property instead, so it never invalidates the base document.
+    #
     # classicalSecurityLevel is EQUIVALENT SECURITY IN BITS (NIST SP 800-57), not key length.
-    props["classicalSecurityLevel"] = _classical_strength(finding, primitive)
-    if not props["classicalSecurityLevel"] and primitive == "hash":
-        # REMOVED: this published an unmeasured hash as 128-bit. `_classical_strength` returned
-        # 0 for MD5 and BLAKE2b -- "I could not determine this" -- and the fallback turned that
-        # absence into a confident 128, which is the safe-looking direction and therefore the
-        # dangerous one. An unknown strength is now reported as unknown (the property is simply
-        # absent) rather than invented.
-        props["classicalSecurityLevel"] = 0
+    #
+    # A None result is OMITTED, not emitted as JSON null. CycloneDX types this field as a
+    # non-nullable integer, so `"classicalSecurityLevel": null` fails schema validation and takes
+    # the whole CBOM with it -- the property has to be absent from the dict, not present-and-empty.
+    # This is the same discipline the comment below describes for the quantum level, and it is
+    # what makes an unknown curve (an ECDSA finding whose curve the scanner could not see) leave
+    # no trace rather than an invalid one.
+    strength = _classical_strength(finding, primitive)
+    if strength is not None:
+        props["classicalSecurityLevel"] = strength
+    # REMOVED, TWICE, AND NOW FOR THE THIRD REASON: the old fallback read
+    #     if not props["classicalSecurityLevel"] and primitive == "hash":
+    #         props["classicalSecurityLevel"] = 0
+    # which published an unmeasured hash as 0, and then (after a partial fix) an ECDSA with an
+    # unknown curve as 0. Both are worse than saying nothing. MD5 genuinely IS 0 and is in the
+    # table, so the special case is no longer needed for it either.
     # 0 is a load-bearing claim in this field -- "a CRQC breaks this" -- so it is emitted only
     # when the tool can justify it. `_nist_quantum_level` returns None for a category it does
     # not know, and an unknown category is OMITTED rather than published as 0. Emitting 0 for

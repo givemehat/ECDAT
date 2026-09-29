@@ -344,3 +344,175 @@ def test_the_stylesheet_makes_no_remote_request():
         assert needle not in code, (
             f"the stylesheet references {needle!r} in executable CSS; the console promises "
             f"to make no network request. Declare a local font stack instead.")
+
+
+# ===========================================================================================
+# Classical strength, held against NIST SP 800-57 -- a table we did not write.
+#
+# The reason this file is separate from the rest of the suite is that it is NOT testing our
+# implementation against our own expectations. Every other test checks self-consistency. This
+# one holds a table we authored against the published standard, because a table that is wrong in
+# a way our own suite agrees with is invisible from the inside.
+#
+# A missing entry is NOT neutral: `_classical_strength` returns 0 for an unknown name, so an
+# absent algorithm is published as `classicalSecurityLevel: 0` -- "no security whatsoever". That
+# is how Ed25519, ChaCha20 and Blowfish were all reported as worthless before this test existed.
+# ===========================================================================================
+
+# NIST SP 800-57 Part 1 Rev 5, Tables 2 and 3.
+NIST_SP800_57 = [
+    ("RSA", 2048, 112), ("RSA", 3072, 128), ("RSA", 4096, 152),
+    ("ECDH", 256, 128), ("ECDH", 384, 192), ("ECDH", 521, 256),
+    ("AES-128", 128, 128), ("AES-192", 192, 192), ("AES-256", 256, 256),
+    ("SHA-256", None, 128), ("SHA-384", None, 192), ("SHA-512", None, 256),
+    ("ChaCha20", None, 256), ("XChaCha20", None, 256),
+    # 3DES is 168-bit raw but ~112-bit effective via Sweet32 birthday bounds on its 64-bit block.
+    ("3DES", None, 112),
+    # Blowfish has a 56-bit effective key: the 64-bit block size caps it regardless of key length.
+    ("Blowfish", None, 56),
+    # Deliberately zero, and asserted as zero so nobody "fixes" it upward later.
+    ("MD5", None, 0), ("RC4", None, 0),
+]
+
+
+@pytest.mark.parametrize("name,bits,want", NIST_SP800_57)
+def test_classical_strength_matches_nist_sp_800_57(name, bits, want):
+    from engine.cbom import _classical_strength
+    got = _classical_strength({"name": name, "key_length": bits}, "x")
+    assert got == want, f"{name} ({bits}): NIST SP 800-57 says {want}, we publish {got}"
+
+
+def test_no_standard_primitive_is_published_as_having_no_security():
+    """The silent-gap check. A missing table entry reports 0, so absence reads as "worthless".
+
+    Every one of these was previously absent and therefore reported as `classicalSecurityLevel:
+    0`. ChaCha20 in particular is a NIST SP 800-38E standard that TLS prefers on hardware where
+    AES-NI is unavailable, so calling it worthless inverts the actual advice.
+    """
+    from engine.cbom import _classical_strength
+    # ECDSA and EC are deliberately NOT in this list. A finding whose curve the scanner could
+    # not see is genuinely unknown, and the correct answer is None -- which omits the property.
+    # Asserting a number there would be exactly the guess this project refuses to make.
+    for name in ("ChaCha20", "Blowfish", "CAST5", "IDEA", "SEED", "Camellia-256", "Twofish",
+                 "Ed25519", "DH", "AES-256", "SHA-256"):
+        got = _classical_strength({"name": name, "key_length": None}, "x")
+        assert got not in (None, 0), (
+            f"{name} has no entry in the strength table, so it is published as 0 -- which "
+            f"reads as 'no security', not as 'unknown'. Add it, or return None deliberately.")
+
+
+def test_a_bare_family_name_plus_key_length_resolves_to_its_parameter_set():
+    """The scanner emits `{"name": "RSA", "key_length": 2048}`, not `{"name": "RSA-2048"}`.
+
+    Without the length fallback, every finding from our own rules would report strength 0 while
+    the information sat in the same dict.
+    """
+    from engine.cbom import _classical_strength
+    assert _classical_strength({"name": "RSA", "key_length": 2048}, "signature") == 112
+    assert _classical_strength({"name": "RSA", "key_length": 3072}, "signature") == 128
+    assert _classical_strength({"name": "ECDSA", "key_length": 384}, "signature") == 192
+
+
+def test_exact_parameter_sets_beat_family_defaults():
+    """A known curve must report its own strength, not a family average.
+
+    The table once carried "ECDH": 128 as a name-level entry, and because the exact-name lookup
+    runs before the key-length logic, `{"name": "ECDH", "key_length": 384}` reported 128 instead
+    of 192 -- a P-384 finding made to look like P-256 purely because the table had just been made
+    more generous elsewhere. Being imprecise must never be rewarded with a better-looking number.
+    """
+    from engine.cbom import _classical_strength
+    for bits, want in ((256, 128), (384, 192), (521, 256)):
+        assert _classical_strength({"name": "ECDH", "key_length": bits}, "x") == want, bits
+        assert _classical_strength({"name": "ECDSA", "key_length": bits}, "x") == want, bits
+
+
+def test_an_unknown_curve_is_omitted_rather_than_guessed():
+    """The honest answer to "which curve?" when the scanner could not see it is NOTHING.
+
+    `_classical_strength` returns None, `_algorithm_properties` omits `classicalSecurityLevel`
+    entirely, and the CBOM simply does not make the claim. Publishing 0 there would say "no
+    security whatsoever" about what is almost always P-256; publishing 256 would claim a curve
+    the tool never saw. Omission is the only defensible answer, and the schema has no "unknown"
+    member precisely so a tool has to choose this deliberately.
+    """
+    from engine.cbom import _algorithm_properties, _classical_strength
+
+    assert _classical_strength({"name": "ECDSA", "key_length": None}, "x") is None
+    props = _algorithm_properties(
+        {"name": "ECDSA", "primitive": "signature", "key_length": None, "uses": "at-rest"},
+        "signature")
+    assert "classicalSecurityLevel" not in props
+    # ...but the quantum verdict is still stated, because that one does not depend on the curve.
+    assert props.get("nistQuantumSecurityLevel") == 0
+
+
+def test_a_dh_group_reports_strength_not_key_length():
+    """112, not 2048.
+
+    `classicalSecurityLevel` means security STRENGTH. Writing the key length into it is the
+    single most common version of this bug -- it overstates a 2048-bit MODP group by an order of
+    magnitude, and RSA-2048 has the same 112-bit figure for the same reason.
+    """
+    from engine.cbom import _classical_strength
+    for name in ("DH", "DHE", "MODP"):
+        got = _classical_strength({"name": name, "key_length": None}, "x")
+        assert got == 112, f"{name} reports {got}; a 2048-bit MODP group is ~112-bit security"
+
+
+def test_a_family_name_cannot_shadow_a_family_contained_inside_it():
+    """`DH` must not match inside `ECDH`, and `DS` must not match inside `ECDSA`.
+
+    This was a live defect, twice over. The substring fallback iterated the table in insertion
+    order, reached the key "DH" while scanning the name "ECDH", and answered 112 -- so every
+    curve-based key exchange was reported as a 2048-bit MODP group. mosca.py then selected the
+    `lt_128` tier and published "deprecated" for an algorithm whose curve had never been seen:
+    an UNRATED unknown turned into a confident verdict, which is the single failure mode this
+    project exists to prevent, reintroduced by making a table MORE generous.
+
+    Longest-key-first ordering alone does not fix it -- both fixes are required, and both are
+    asserted here.
+    """
+    from engine.cbom import _classical_strength
+
+    # A curve family with no stated size is UNKNOWN, not a MODP group.
+    assert _classical_strength({"name": "ECDH", "key_length": None}, "key-agreement") is None
+    assert _classical_strength({"name": "ECDSA", "key_length": None}, "signature") is None
+    # ...while a real DH group still resolves.
+    assert _classical_strength({"name": "DH", "key_length": None}, "key-agreement") == 112
+    assert _classical_strength({"name": "DHE", "key_length": None}, "key-agreement") == 112
+    # A composite name containing both must not take the shorter family's value either.
+    assert _classical_strength({"name": "ECDH-X25519"}, "key-agreement") in (None, 128)
+
+
+
+def test_an_unknown_strength_is_omitted_from_the_document_not_emitted_as_null():
+    """A null in the CBOM fails CycloneDX validation and invalidates the whole document.
+
+    The field is a non-nullable integer, so an unknown strength has to leave the property
+    ABSENT from the dict rather than present-and-empty. This asserts the emitted document,
+    not the intermediate, because the intermediate carrying None was the actual bug.
+    """
+    import json
+    from engine.cbom import generate_cbom
+
+    doc = generate_cbom([{
+        "file": "a.py", "line": 1, "type": "algorithm", "name": "ECDSA",
+        "primitive": "signature", "evidence_class": "used", "artefact_class": "library",
+        "uses": "at-rest", "match": "sign()", "scanner": "s", "key_length": None,
+    }])
+    text = json.dumps(doc)
+    doc = json.loads(generate_cbom([{
+        "file": "a.py", "line": 1, "type": "algorithm", "name": "ECDSA",
+        "primitive": "signature", "evidence_class": "used", "artefact_class": "library",
+        "uses": "at-rest", "match": "sign()", "scanner": "s", "key_length": None,
+    }]))
+    assert "null" not in text, "a null in the CBOM fails schema validation"
+
+    # Checked on the parsed document, not on a JSON string: json.dumps separator spacing is an
+    # implementation detail, and a test that breaks when the library changes it is testing
+    # the library rather than the code.
+    comp = doc["components"][0]["cryptoProperties"]["algorithmProperties"]
+    assert "classicalSecurityLevel" not in comp, "an unknown strength must be omitted"
+    # The quantum verdict does not depend on the curve, so it is still stated.
+    assert comp.get("nistQuantumSecurityLevel") == 0

@@ -35,7 +35,8 @@ that happens to be interactive. Both degrade to the platform stack when the netw
 unavailable, because a tool that must run air-gapped still has to be legible offline.
 """
 
-from engine.gui_helpers import escape
+from engine.gui_helpers import _assurance_value, escape
+from engine.purpose import ASSURANCE_OBSERVED, ASSURANCE_USED
 
 CSS = """
 <style>
@@ -202,6 +203,12 @@ hr, [data-testid="stDivider"] { border-color: var(--panel-edge) !important; }
                    font-size:0.68rem; color:var(--ink-faint); margin-top:3px;
                    text-transform:uppercase; letter-spacing:.06em; }
 
+/* ---- the risk ring's container ---------------------------------------------------------------- */
+.ec-ring-wrap { display:flex; flex-direction:column; align-items:center; text-align:center;
+                max-width:340px; }
+.ec-ring { overflow:visible; }
+.ec-ring text { font-family:var(--mono); }
+
 /* Reduced motion is honoured properly. An accessibility preference is not a suggestion. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important;
@@ -251,6 +258,74 @@ def proof_bar(proven, total, *, label="proven use", caption=None):
            if caption else ""))
 
 
+def risk_score(findings):
+    """A single 0-100 number for the estate, with the WORKING stated next to it.
+
+    This is a judgement aid for someone who will not read the tables, so it is deliberately
+    coarse. It is NOT a precision instrument and must never be presented as one: two estates with
+    the same score can have completely different postures. The function therefore returns the
+    score AND its inputs, and the caller is expected to show them.
+
+    The weighting is a stated opinion, not a measurement:
+      * a Shor-broken public-key primitive dominates -- it is the whole point of the tool
+      * proven use adds a small bonus, because an evidenced exposure is one someone can act on,
+        and a capability nobody calls is work that can be deferred
+    The bonus is small on purpose. If evidence dominated the score, a tool that found lots of
+    unevidenced capability would look "safer" for being less thorough, which is backwards.
+    """
+    if not findings:
+        return {"score": 0, "tier": "none", "shor_broken": 0, "total": 0, "proven": 0,
+                "method": "no findings; this is NOT a clean bill of health"}
+
+    total = len(findings)
+    proven = sum(1 for f in findings
+                 if _assurance_value(f) in (ASSURANCE_USED, ASSURANCE_OBSERVED))
+    shor = sum(1 for f in findings
+               if str((f.get("risk") or {}).get("break_model", "")).lower() == "shor")
+
+    base = (shor / total) * 100.0
+    evidence_bonus = (proven / total) * 10.0
+    score = max(0.0, min(100.0, base + evidence_bonus))
+
+    if score >= 75:
+        tier = "critical"
+    elif score >= 50:
+        tier = "high"
+    elif score >= 25:
+        tier = "elevated"
+    elif score > 0:
+        tier = "moderate"
+    else:
+        tier = "low"
+
+    return {
+        "score": round(score, 1),
+        "tier": tier,
+        "shor_broken": shor,
+        "total": total,
+        "proven": proven,
+        "method": f"{shor}/{total} Shor-broken, plus a {evidence_bonus:.0f}-point evidence bonus",
+    }
+
+
+def score_colour(tier):
+    """One colour per severity tier, taken from the same tokens the chips use."""
+    return {
+        "critical": "#e5604d",
+        "high": "#d9a441",
+        "elevated": "#c98a3c",
+        "moderate": "#5aa9e6",
+        "low": "#3fb98c",
+        "none": "#4a5563",
+    }.get(tier, "#4a5563")
+    """Class for a one-shot staggered entrance. Step 0 is the base class.
+
+    Staggering four surfaces by 50ms each reads as an instrument settling into place. The delay
+    is capped by the caller: past ~4 steps the tail arrives late enough to feel broken.
+    """
+    return "ec-reveal" if step <= 0 else f"ec-reveal ec-reveal-{min(int(step), 4)}"
+
+
 def reveal(step=1):
     """Class for a one-shot staggered entrance. Step 0 is the base class.
 
@@ -258,6 +333,106 @@ def reveal(step=1):
     is capped by the caller: past ~4 steps the tail arrives late enough to feel broken.
     """
     return "ec-reveal" if step <= 0 else f"ec-reveal ec-reveal-{min(int(step), 4)}"
+
+
+def score_ring_svg(payload, *, size=220, track=14):
+    """The risk ring, as a self-contained SVG string.
+
+    TWO arcs, deliberately. The inner arc is the score; the outer arc is the share of findings
+    that are PROVEN USE. Drawing only the score would be the exact failure this project exists
+    to avoid -- a confident-looking number with the qualifier hidden in a table three screens
+    down. Together they are the tool's whole thesis in one glance: the risk, and how sure we are.
+
+    WHY SVG AND NOT conic-gradient. A conic-gradient cannot be transitioned smoothly on the
+    angle that matters and cannot be read by a screen reader as a value. `<circle>` with
+    `stroke-dasharray` is both animatable and labelable, which is why this is markup and not a
+    style.
+
+    WHY THE FINAL VALUE IS IN THE MARKUP. The dash offsets are written as the settled state and
+    the animation only *approaches* them. If the animation never runs -- reduced motion, a
+    browser that blocks transitions, a screenshot tool, an iframe that loads late -- the ring is
+    already correct. An animation that is load-bearing for a displayed value is one more way to
+    show a wrong answer.
+    """
+    score = max(0.0, min(100.0, float(payload.get("score", 0) or 0)))
+    total = int(payload.get("total", 0) or 0)
+    proven = int(payload.get("proven", 0) or 0)
+    colour = score_colour(payload.get("tier", "none"))
+
+    c = size / 2.0
+    r = (size - track) / 2.0 - 6
+    circumference = 2 * 3.141592653589793 * r
+    # A 300-degree sweep leaves a 60-degree gap at the bottom. A full circle reads as
+    # "complete" and a bare arc reads as a bar; a gap reads as a dial.
+    sweep = 300.0
+    score_frac = (score / 100.0) * (sweep / 360.0)
+    cover_frac = ((proven / total) if total else 0.0) * (sweep / 360.0)
+
+    score_dash = f"{score_frac * circumference:.2f} {circumference:.2f}"
+    cover_dash = f"{cover_frac * circumference:.2f} {circumference:.2f}"
+    track_dash = f"{sweep / 360.0 * circumference:.2f} {circumference:.2f}"
+    label = (f"Risk score {score:g} out of 100, tier {payload.get('tier', 'unknown')}. "
+             f"{proven} of {total} findings are proven use.")
+
+    return f"""<svg viewBox="0 0 {size} {size}" width="{size}" height="{size}"
+     role="img" aria-label="{escape(label)}" class="ec-ring">
+  <defs>
+    <style>
+      @keyframes ec-ring-sweep {{ from {{ stroke-dashoffset: {circumference:.2f}; }}
+                               to   {{ stroke-dashoffset: {score_frac * circumference:.2f}; }} }}
+      @keyframes ec-ring-cover {{ from {{ stroke-dashoffset: {circumference:.2f}; }}
+                               to   {{ stroke-dashoffset: {cover_frac * circumference:.2f}; }} }}
+      .ec-ring-track {{ fill:none; stroke:#232c37; stroke-width:{track - 6}; }}
+      .ec-ring-score {{ fill:none; stroke:{colour}; stroke-width:{track}; stroke-linecap:round;
+                        stroke-dasharray:{score_dash};
+                        transform:rotate(150deg); transform-origin:{c}px {c}px;
+                        animation:ec-ring-sweep .9s cubic-bezier(.22,1,.36,1) both; }}
+      .ec-ring-cover {{ fill:none; stroke:#3fb98c; stroke-width:{track - 8}; stroke-linecap:round;
+                        stroke-dasharray:{cover_dash};
+                        transform:rotate(150deg); transform-origin:{c}px {c}px;
+                        animation:ec-ring-cover .9s cubic-bezier(.22,1,.36,1) .12s both; opacity:.85; }}
+      .ec-ring-num {{ font-family:var(--mono, monospace); font-size:{size * 0.24:.0f}px;
+                      font-weight:500; fill:var(--ink, #e8edf2); font-variant-numeric:tabular-nums; }}
+      .ec-ring-sub {{ font-family:var(--mono, monospace); font-size:{size * 0.052:.0f}px;
+                      fill:var(--ink-faint, #5d6b7a); letter-spacing:.06em; text-transform:uppercase; }}
+      .ec-ring-cov {{ font-family:var(--mono, monospace); font-size:{size * 0.048:.0f}px;
+                     fill:#3fb98c; }}
+      @media (prefers-reduced-motion: reduce) {{
+        .ec-ring-score, .ec-ring-cover {{ animation:none !important; }}
+      }}
+    </style>
+  </defs>
+  <circle class="ec-ring-track" cx="{c}" cy="{c}" r="{r:.2f}" stroke-dasharray="{track_dash}"
+          transform="rotate(150deg)" transform-origin="{c}px {c}px" />
+  <circle class="ec-ring-score" cx="{c}" cy="{c}" r="{r:.2f}" />
+  <circle class="ec-ring-cover" cx="{c}" cy="{c}" r="{r + track / 2 + 2:.2f}" />
+  <text class="ec-ring-num" x="{c}" y="{c + size * 0.06:.1f}" text-anchor="middle">{score:g}</text>
+  <text class="ec-ring-sub" x="{c}" y="{c + size * 0.18:.1f}" text-anchor="middle">{escape(str(payload.get('tier', '')))}</text>
+  <text class="ec-ring-cov" x="{c}" y="{c + size * 0.30:.1f}" text-anchor="middle">{proven}/{total} proven</text>
+</svg>"""
+
+
+def risk_ring_panel(payload):
+    """Ring plus the sentence that stops it being read as a verdict.
+
+    A bare gauge is a verdict with no argument attached. The caption is not decoration: it states
+    the method and that a zero is not a clean bill of health, which are the two things a reader
+    needs before acting on the number.
+    """
+    if not payload or not payload.get("total"):
+        return ('<div class="ec-ring-wrap">'
+                '<p class="ecdat-foot" style="margin:0">No findings. That is not a clean bill of '
+                'health &mdash; an unreadable tree produces exactly the same empty result. Check '
+                'the coverage manifest.</p></div>')
+    colour = score_colour(payload.get("tier"))
+    return (
+        f'<div class="ec-ring-wrap">{score_ring_svg(payload)}'
+        f'<p class="ecdat-foot" style="margin:.4rem 0 0">'
+        f'<span style="color:{colour}">{escape(str(payload.get("shor_broken", 0)))}</span> of '
+        f'<span style="color:var(--ink)">{escape(str(payload.get("total", 0)))}</span> findings are '
+        f'broken by a quantum computer. Method: {escape(str(payload.get("method", "")))}. A coarse '
+        f'aid, not a measurement &mdash; two estates with the same score can differ completely.'
+        f'</p></div>')
 
 
 def scanning_indicator(text="scanning"):
