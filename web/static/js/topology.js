@@ -28,6 +28,8 @@ class TopologyVisualizer {
   resize() {
     if (!this.canvas || !this.container) return;
     const rect = this.container.getBoundingClientRect();
+    const oldW = this.width || 0;
+    const oldH = this.height || 0;
     this.width = rect.width;
     this.height = rect.height;
     
@@ -35,6 +37,18 @@ class TopologyVisualizer {
     this.canvas.width = this.width * dpr;
     this.canvas.height = this.height * dpr;
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    if (this.nodes.length && (oldW < 100 || oldH < 100) && this.width > 200) {
+      const cx = this.width / 2;
+      const cy = this.height / 2;
+      this.nodes.forEach((n, idx) => {
+        const angle = (idx / this.nodes.length) * Math.PI * 2;
+        const rad = Math.min(this.width, this.height) * 0.3;
+        n.x = cx + Math.cos(angle) * rad;
+        n.y = cy + Math.sin(angle) * rad;
+      });
+      this.startSimulation();
+    }
     this.render();
   }
 

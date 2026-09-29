@@ -71,10 +71,19 @@ A roadmap cannot be executed without an inventory. IndraMesh ships that policy a
 
 ## Working Prototype Showcase
 
-IndraMesh provides a high-throughput, headless CLI for automated CI/CD gating and an interactive **FastAPI + Vanilla-JS Web Console** (zero CDN, air-gapped certified).
+IndraMesh provides a high-throughput, headless CLI for automated CI/CD gating and an interactive **FastAPI + Vanilla-JS Web Console** (zero CDN, air-gapped certified). The bottom-half viewports below highlight the focused operational suites:
 
-### 1. Radar Posture Dial & Exposure Window
-Dynamic SVG radial spoke dial visualizing discovered cryptographic assets by quantum exposure tier, alongside Mosca's inequality equation terms ($X + Y \text{ vs } Z$) and need/have timeline bars.
+### 1. Unified Command Center & Real-Time Discovery HUD
+The top-half operational deck controls discovery scan targets, compliance policies, data lifetime classes ($X$), and cryptanalytic horizons ($Z$), backed by real-time integrity metrics and proof ratios:
+
+<div align="center">
+  <img src="assets/prototype-dashboard-posture.png" alt="IndraMesh Command Center and Discovery HUD" width="100%" />
+</div>
+
+---
+
+### 2. Radar Posture Dial & Mosca Exposure Window
+Dynamic SVG radial spoke dial visualizing discovered cryptographic assets by quantum exposure tier, alongside Michele Mosca's inequality equation terms ($X + Y \text{ vs } Z$), need/have timeline bars, and estate composition:
 
 <div align="center">
   <img src="assets/prototype-radar-posture-dial.png" alt="Radar Posture Dial and Mosca Exposure Window" width="100%" />
@@ -82,26 +91,8 @@ Dynamic SVG radial spoke dial visualizing discovered cryptographic assets by qua
 
 ---
 
-### 2. Force-Directed Cryptographic Topology Map
-Interactive visual mesh illustrating relationships between source code files, cryptographic primitives, and post-quantum migration targets.
-
-<div align="center">
-  <img src="assets/prototype-topology-graph.png" alt="Force-Directed Cryptographic Topology Map" width="100%" />
-</div>
-
----
-
-### 3. CycloneDX 1.7 CBOM Document Preview & Validator
-Live preview of the Ecma-424 compliant Cryptography Bill of Materials (CBOM), validated strictly against the vendored CycloneDX v1.7 JSON Schema.
-
-<div align="center">
-  <img src="assets/prototype-cbom-preview.png" alt="CycloneDX 1.7 CBOM Preview" width="100%" />
-</div>
-
----
-
-### 4. Migration Remediation Workstream Planner
-Prioritized queue of cryptographic migrations featuring direct NIST FIPS targets, latency trade-offs, and packet overhead calculations.
+### 3. Migration Remediation Workstream Planner
+Actionable remediation queue prioritized by latest safe migration start year and risk margin. Features direct NIST FIPS targets (ML-KEM-768, ML-DSA-65), cost bands, packet overheads, and migration actions:
 
 <div align="center">
   <img src="assets/prototype-migration-planner.png" alt="IndraMesh Migration Planner" width="100%" />
@@ -109,17 +100,47 @@ Prioritized queue of cryptographic migrations featuring direct NIST FIPS targets
 
 ---
 
-### 5. Multi-Sensor Discovery Array & Evidence Ledger
-X.509 certificate inspector, dependency manifest scanner, post-migration verifier, and SSRF-vetting live network probe.
+### 4. Auditor Rule Trace & Mosca Arithmetic Ledger
+Auditor-grade inspection view featuring interactive algorithm search, Harvest-Now-Decrypt-Later (HNDL) filtering, rule ID traces, and exact call-site source locations:
+
+<div align="center">
+  <img src="assets/prototype-auditor-mosca.png" alt="Auditor Mosca Rule Trace" width="100%" />
+</div>
+
+---
+
+### 5. CycloneDX 1.7 CBOM Document Preview & Validator
+Live preview of the Ecma-424 compliant Cryptography Bill of Materials (CBOM), validated strictly against the vendored CycloneDX v1.7 JSON Schema with one-click export:
+
+<div align="center">
+  <img src="assets/prototype-cbom-preview.png" alt="CycloneDX 1.7 CBOM Preview" width="100%" />
+</div>
+
+---
+
+### 6. Force-Directed Cryptographic Topology Map
+Interactive visual mesh illustrating relationships between source code files, cryptographic primitives, and post-quantum migration targets with physics simulation:
+
+<div align="center">
+  <img src="assets/prototype-topology-graph.png" alt="Force-Directed Cryptographic Topology Map" width="100%" />
+</div>
+
+---
+
+### 7. Multi-Sensor Discovery Array
+Secondary discovery sensor suite comprising X.509 certificate inspector, dependency manifest scanner, post-migration verifier, and SSRF-vetting live network probe:
 
 <div align="center">
   <img src="assets/prototype-sensor-array.png" alt="Sensor Array" width="100%" />
 </div>
 
-<br/>
+---
+
+### 8. Evidence & Honesty Coverage Matrix
+Defensive audit trail stating what each finding proves (used vs observed vs declared vs capability) and explicitly declaring all out-of-scope boundaries:
 
 <div align="center">
-  <img src="assets/prototype-auditor-mosca.png" alt="Auditor Mosca Rule Trace" width="100%" />
+  <img src="assets/prototype-evidence-honesty.png" alt="Evidence and Honesty Matrix" width="100%" />
 </div>
 
 ---

@@ -608,8 +608,11 @@ def queue_rows(records, deadline_year=None) -> list:
             status = "target named"
         rows.append({
             "Artefact": record.get("name"),
+            "Primitive": record.get("primitive", ""),
             "Tier": record.get("tier"),
+            "Risk tier": record.get("tier"),
             "Target": rec.get("algorithm"),
+            "Target algorithm": rec.get("algorithm"),
             "Status": status,
             "Action": rec.get("action"),
             "Assurance": _assurance_value(record) or "unrated",
@@ -621,6 +624,7 @@ def queue_rows(records, deadline_year=None) -> list:
             "vs deadline": versus,
             "Cost band": rec.get("cost_band"),
             "Size impact": rec.get("tradeoff_size"),
+            "Packet overhead": rec.get("tradeoff_size"),
             "Standards": ", ".join(rec.get("standard_basis") or []) or "n/a",
             "Location": location(record),
         })

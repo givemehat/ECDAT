@@ -511,16 +511,20 @@ function renderPlannerView(data) {
 
   // Queue rows
   (data.queue_rows || []).forEach(row => {
+    const tier = row['Tier'] || row['Risk tier'] || 'LOW';
+    const target = row['Target'] || row['Target algorithm'] || 'None';
+    const primitive = row['Primitive'] || row['Artefact'] || 'asymmetric';
+    const overhead = row['Size impact'] || row['Packet overhead'] || 'Baseline';
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td><span class="tier-chip tier-${row['Risk tier'] || 'LOW'}">${row['Risk tier']}</span></td>
+      <td><span class="tier-chip tier-${tier}">${escapeHtml(tier)}</span></td>
       <td><strong>${escapeHtml(row['Artefact'] || '')}</strong></td>
-      <td class="mono">${escapeHtml(row['Primitive'] || '')}</td>
-      <td><span class="badge badge-purple">${escapeHtml(row['Target algorithm'] || 'None')}</span></td>
-      <td class="mono">${escapeHtml(row['Latest safe start'] || '')}</td>
-      <td>${escapeHtml(row['Cost band'] || '')}</td>
-      <td class="mono">${escapeHtml(row['Packet overhead'] || '')}</td>
-      <td>${escapeHtml(row['Action'] || '')}</td>
+      <td class="mono">${escapeHtml(primitive)}</td>
+      <td><span class="badge badge-purple">${escapeHtml(target)}</span></td>
+      <td class="mono">${escapeHtml(String(row['Latest safe start'] || '2026'))}</td>
+      <td>${escapeHtml(row['Cost band'] || 'LOW')}</td>
+      <td class="mono">${escapeHtml(overhead)}</td>
+      <td>${escapeHtml(row['Action'] || 'Review and migrate')}</td>
     `;
     tbody.appendChild(tr);
   });
