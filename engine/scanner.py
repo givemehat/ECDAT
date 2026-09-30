@@ -807,11 +807,11 @@ RULES = [
          # too, and the rule is named AES -- so the ChaCha20 constant was reported as AES. It now
          # has its own rule, IM-SRC-SSH-CHACHA-001. With ChaCha20 gone, the two AES rules differ
          # only by the `@openssh.com` suffix and cannot both fire on one line.
-         regex=r"[\"']aes(?:128|192|256)-(?:gcm|ctr)@openssh\.com[\"']"),
+         regex=r"[\"']?aes(?:128|192|256)-(?:gcm|ctr)@openssh\.com[\"']?"),
     dict(id="IM-SRC-SSH-MAC-001", name="HMAC", primitive="mac", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          regex=r"[\"'](?:hmac-sha2-(?:256|512)|hmac-sha1(?:-96|-160)?|"
-                r"umac-64@openssh\.com|umac-128@openssh\.com)[\"']"),
+                r"umac-64@openssh\.com|umac-128@openssh\.com)[\"']?"),
     # `diffie-hellman-group-exchange-sha256` is finite-field DH, NOT ECDH. The KEX rule above
     # deliberately lists only the elliptic names; this is the missing DH half.
     #
@@ -843,13 +843,13 @@ RULES = [
     # -----------------------------------------------------------------------------------------
     dict(id="IM-SRC-SSHNAME-001", name="ECDSA", primitive="signature", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
-         regex=r"[\"']ecdsa-sha2-nistp(?:256|384|521)(?:-cert)?-v01@openssh\.com[\"']"),
+         regex=r"[\"']?ecdsa-sha2-nistp(?:256|384|521)(?:-cert)?-v01@openssh\.com[\"']?"),
     dict(id="IM-SRC-SSHNAME-002", name="RSA", primitive="signature", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
-         regex=r"[\"'](?:ssh-rsa|rsa-sha2-(?:256|512))(?:-cert)?-v01@openssh\.com[\"']"),
+         regex=r"[\"']?(?:ssh-rsa|rsa-sha2-(?:256|512))(?:-cert)?-v01@openssh\.com[\"']?"),
     dict(id="IM-SRC-SSHNAME-003", name="Ed25519", primitive="signature", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
-         regex=r"[\"']ssh-ed25519(?:-cert)?-v01@openssh\.com[\"']"),
+         regex=r"[\"']?ssh-ed25519(?:-cert)?-v01@openssh\.com[\"']?"),
     dict(id="IM-SRC-SSHNAME-004", name="HMAC", primitive="mac", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          regex=r"[\"']hmac-(?:sha2-(?:256|512)(?:-etm)?|sha1(?:-96)?|md5(?:-96)?)"
@@ -859,21 +859,21 @@ RULES = [
     # wrong would send an auditor to the wrong replacement algorithm.
     dict(id="IM-SRC-SSHNAME-005", name="ECDH", primitive="key-agreement", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
-         regex=r"[\"']curve25519-sha256(?:@libssh\.org)?@openssh\.com[\"']"
-                r"|[\"']curve25519-sha256@libssh\.org[\"']"),
+         regex=r"[\"']?curve25519-sha256(?:@libssh\.org)?@openssh\.com[\"']?"
+                r"|[\"']?curve25519-sha256@libssh\.org[\"']?"),
     # ecdh-sha2-nistp256/384/521 is Diffie-Hellman on the NIST curves. Declared BEFORE any
     # generic `ecdh` rule so the specific group name wins, and deliberately NOT matching
     # `ecdsa-sha2-*`: ECDH and ECDSA share the curve but not the job.
     dict(id="IM-SRC-SSHNAME-006", name="ECDH", primitive="key-agreement", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
-         regex=r"[\"']ecdh-sha2-nistp(?:256|384|521)(?:-cert)?-v01@openssh\.com[\"']"),
+         regex=r"[\"']?ecdh-sha2-nistp(?:256|384|521)(?:-cert)?-v01@openssh\.com[\"']?"),
     # A hybrid: X25519 classical PLUS ML-KEM-768. The composite is reported, and the migration
     # verifier treats it as a hybrid -- BOTH halves must be broken, so this is a weaker
     # exposure than either half alone. Reporting only ML-KEM would understate it.
     dict(id="IM-SRC-SSHNAME-007", name="ML-KEM-768", primitive="kem", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
-         regex=r"[\"']mlkem768x25519-(?:sha256|mlkem768x25519)@openssh\.com[\"']"
-                r"|[\"']sntrup761x25519-sha512@openssh\.com[\"']"),
+         regex=r"[\"']?mlkem768x25519-(?:sha256|mlkem768x25519)@openssh\.com[\"']?"
+                r"|[\"']?sntrup761x25519-sha512@openssh\.com[\"']?"),
     # `ext-info-c`, `kex-strict-c-v00@openssh.com` and `server-sig-algs` are PROTOCOL markers,
     # not algorithms. They are excluded on purpose: a rule matching them would inflate the count
     # with entries that name no primitive at all.
@@ -926,7 +926,7 @@ RULES = [
     # whichever name it was declared with.
     dict(id="IM-SRC-SSH-CHACHA-001", name="ChaCha20", primitive="ae", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
-         regex=r"[\"']chacha20-poly1305@openssh\.com[\"']"),
+         regex=r"[\"']?chacha20-poly1305@openssh\.com[\"']?"),
     dict(id="IM-SRC-SSH-LEGACY-001", name="3DES", primitive="block-cipher", artefact_class="source",
          uses="tls", key_group=None, evidence="discovered",
          regex=r"[\"'](?:3des-cbc|des-cbc|arcfour|arcfour256|blowfish-cbc|cast128-cbc)[\"']"),

@@ -240,6 +240,16 @@ def test_every_rule_is_actually_executed(tmp_path, scanner):
         "IM-RB-HASH-003": "OpenSSL::Digest::MD5.new",
         "IM-SRC-HASHLIB-BLAKE2-001": "h = hashlib.blake2b",
         "IM-SRC-JAVA-CONST-004-MD5": 'String HASH_ALGO = "MD5";',
+        # --- OpenSSH identifiers as they appear in a REAL sshd_config, where they are BARE.
+        #
+        # These ten regexes previously DEMANDED a surrounding quote, so a deployed SSH server's
+        # entire negotiation policy -- `HostKeyAlgorithms rsa-sha2-512`, no quotes -- produced
+        # nothing at all. Found while checking a reviewer's point that the algorithm is often
+        # negotiated rather than named at a call site: the config that declares WHAT gets
+        # negotiated was the thing we could not see.
+        "IM-SRC-SSHNAME-002": "HostKeyAlgorithms rsa-sha2-512-cert-v01@openssh.com",
+        "IM-SRC-SSHNAME-003": "HostKeyAlgorithms ssh-ed25519-cert-v01@openssh.com",
+        "IM-SRC-SSHNAME-007": "KexAlgorithms mlkem768x25519-sha256@openssh.com",
     }
 
     assert set(samples) == {r["id"] for r in RULES}, "a rule has no positive test"
@@ -682,6 +692,32 @@ def test_md5_import_is_not_also_reported_as_sha1(tmp_path, scanner):
     assert [f for f in findings if f["name"] == "MD5"], "the MD5 import must be reported"
     assert not [f for f in findings if f["name"] == "SHA1"], \
         "an MD5 import must not also be published as a SHA-1 finding"
+
+
+def test_real_sshd_config_negotiation_policy_is_visible(tmp_path, scanner):
+    """A deployed SSH server's cipher/KEX policy is BARE -- no quotes around the identifier.
+
+    Every OpenSSH wire-identifier rule demanded a surrounding quote, which is correct for the
+    Java/JS string-literal form and wrong for `sshd_config`, so the whole negotiation policy of
+    a real server scanned as empty. This is the concrete form of the objection that the
+    algorithm a system runs is often decided by configuration rather than named at a call
+    site -- and the file that decides it was invisible.
+
+    The finding is published at `configured` evidence, not `discovered`, because a policy line
+    states what MAY be negotiated rather than what a given connection did.
+    """
+    _write(str(tmp_path / "sshd_config"),
+           "Host *\n"
+           "  Ciphers aes256-gcm@openssh.com\n"
+           "  KexAlgorithms mlkem768x25519-sha256@openssh.com\n"
+           "  HostKeyAlgorithms ssh-ed25519-cert-v01@openssh.com\n")
+    findings = scanner.scan_directory(str(tmp_path))
+    names = {f["name"] for f in findings}
+    assert {"AES", "ML-KEM-768", "Ed25519"} <= names, (
+        f"the SSH negotiation policy must be visible; got {sorted(names)}")
+    for f in findings:
+        assert f["evidence_class"] == "configured", (
+            "a policy line is declared policy, not observed execution")
 
 
 # ---- The general form of the defect above, checked across the WHOLE table --------------------
