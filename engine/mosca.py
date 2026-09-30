@@ -1,3 +1,5 @@
+from datetime import date
+
 """
 Mosca's inequality:  X + Y > Z  =>  migration should already have started.
 
@@ -344,7 +346,12 @@ def _resolve_x(finding, horizon, user_x):
 
 
 def _resolve_y(finding, user_y):
-    """Y in years from an artefact-class table plus a bounded, reported complexity adjustment."""
+    """Y in years from an artefact-class table plus a bounded, reported complexity adjustment.
+
+    `observed_history`, when supplied, takes precedence over the table -- see
+    `migration_rate_from_history`. Deriving Y from an organisation's own completed migrations
+    replaces a guess with a measurement.
+    """
     if user_y is not None:
         if user_y < 0:
             raise ValueError("Migration Time (Y) cannot be negative.")
@@ -365,6 +372,70 @@ def _resolve_y(finding, user_y):
     if adjustment:
         reason += f"; +{adjustment}y complexity adjustment (AST depth {ast_depth:.0f})"
     return base, adjustment, reason
+
+
+def migration_rate_from_history(completed_migrations):
+    """Derive a migration rate (years per artefact class) from an org's own track record.
+
+    WHY THIS EXISTS. Y -- migration time -- is the term almost nobody measures. Z is
+    unknowable, so it gets argued about and must be hardcoded; but Y is entirely knowable,
+    because every organisation has already completed crypto migrations and has the dates.
+    Deriving Y from that record is the difference between an assumption and a measurement.
+
+    WHAT IT ACCEPTS. A list of completed migrations, each a mapping with:
+      * `artefact_class` -- matched against MIGRATION_EFFORT keys (config, protocol, source,
+        library, hsm-tpm, firmware, ca-root)
+      * `started` / `finished` -- ISO dates, either order-independent
+
+    WHAT IT RETURNS. (rate, n, note). `rate` is the MEDIAN elapsed years for that class, which
+    is used in preference to the generic table when the caller supplies history. The median
+    rather than the mean because one aborted nine-year attempt should not define the
+    organisation's velocity.
+
+    Returns (None, 0, reason) when nothing usable is supplied, and the caller falls back to the
+    table. It never invents a number and never raises on malformed input -- a bad history
+    silently degrading to the documented table is better than a crash in a risk report.
+    """
+    if not completed_migrations:
+        return None, 0, "no migration history supplied; using the generic effort table"
+
+    per_class = {}
+    skipped = []
+    for i, m in enumerate(completed_migrations or []):
+        if not isinstance(m, dict):
+            skipped.append(f"entry {i}: not a mapping")
+            continue
+        cls = str(m.get("artefact_class") or "").strip().lower()
+        if cls not in MIGRATION_EFFORT:
+            skipped.append(f"entry {i}: artefact_class {cls!r} not in the effort table")
+            continue
+        start, end = m.get("started"), m.get("finished")
+        if not start or not end:
+            skipped.append(f"entry {i}: missing started/finished")
+            continue
+        try:
+            elapsed = (date.fromisoformat(str(end)) - date.fromisoformat(str(start))).days / 365.25
+        except (ValueError, TypeError):
+            skipped.append(f"entry {i}: unparseable dates ({start!r} -> {end!r})")
+            continue
+        if elapsed < 0:
+            skipped.append(f"entry {i}: finished before started")
+            continue
+        per_class.setdefault(cls, []).append(elapsed)
+
+    if not per_class:
+        return None, 0, ("no usable history (" + "; ".join(skipped[:3]) +
+                         "); using the generic effort table")
+
+    # Median of the per-observation medians, so one class with many entries does not dominate.
+    rates = {cls: sorted(v)[len(v) // 2] for cls, v in per_class.items()}
+    overall = sorted(rates.values())[len(rates) // 2]
+    note = (f"derived from {sum(len(v) for v in per_class.values())} completed migration(s) "
+            f"of this organisation; per-class median(s): "
+            + ", ".join(f"{c}={r:.1f}y" for c, r in sorted(rates.items()))
+            + (f"; {len(skipped)} entr(y/ies) skipped" if skipped else ""))
+    return overall, sum(len(v) for v in per_class.values()), note
+
 
 
 def _grover_effective_bits(name, key_length):
@@ -399,13 +470,21 @@ def _grover_effective_bits(name, key_length):
     return None
 
 
-def _tier(break_model, subject, is_vulnerable, hndl, margin, effective_bits):
+def _tier(break_model, subject, is_vulnerable, hndl, margin, effective_bits,
+          margin_at_boundary=False):
     """Tier from the inequality outcome and exposure type -- not from the algorithm family."""
     if break_model == "broken-by-Shor":
         if not subject:
             return "LOW"
         if hndl or (is_vulnerable and margin >= 10):
             return "CRITICAL"
+        # ZERO SLACK. Mosca's inequality is not satisfied yet, but X + Y == Z means there is no
+        # headroom at all: the migration has to be finished today, and any slip exposes the
+        # artefact. Reporting MEDIUM here made a boundary indistinguishable from an artefact
+        # with two years of margin -- the two produced the SAME tier, so "0.0 years of headroom"
+        # and "comfortably inside" looked identical on the panel. HIGH says: act now.
+        if margin_at_boundary:
+            return "HIGH"
         if is_vulnerable:
             return "HIGH"
         return "MEDIUM"           # not yet exposed per the inequality
@@ -417,11 +496,18 @@ def _tier(break_model, subject, is_vulnerable, hndl, margin, effective_bits):
 
 
 def calculate_risk(finding, user_x=None, user_y=None, z_collapse_time=None,
-                   policy=None, current_year=None, include_z_band=True):
+                   policy=None, current_year=None, include_z_band=True,
+                   migration_history=None):
     """Apply Mosca's inequality (X + Y > Z) to one finding.
 
     Returns a dict with the verdict plus every input and reason used to reach it, so the GUI
     and the CBOM can explain the number instead of asserting it.
+
+    `migration_history` -- a list of the organisation's COMPLETED migrations, in the form
+    `migration_rate_from_history` documents. When supplied and usable, Y is derived from that
+    record rather than from the generic effort table, so the output MEASURES the organisation
+    instead of restating an assumption about it. See that function for why Y is the term worth
+    measuring rather than Z, which cannot be.
     """
     import datetime
 
@@ -452,6 +538,14 @@ def calculate_risk(finding, user_x=None, user_y=None, z_collapse_time=None,
 
     x_years, x_reason = _resolve_x(finding, horizon, user_x)
     y_base, y_adjust, y_reason = _resolve_y(finding, user_y)
+    y_source = "effort-table"
+    if migration_history and user_y is None:
+        rate, n, hist_note = migration_rate_from_history(migration_history)
+        if rate is not None:
+            y_base = rate
+            y_adjust = 0.0        # the measured rate supersedes the generic complexity bump
+            y_reason = hist_note
+            y_source = "observed-migration-history"
     y_years = y_base + y_adjust
 
     # Round to a precision far finer than any real input BEFORE comparing, because the verdict
@@ -467,12 +561,39 @@ def calculate_risk(finding, user_x=None, user_y=None, z_collapse_time=None,
     total = round(x_years + y_years, PRECISION)
     z_cmp = round(float(z_years), PRECISION)
     x_cmp = round(float(x_years), PRECISION)
-    margin = round(total - z_cmp, 2)
-    is_vulnerable = bool(subject and total > z_cmp)
+    raw_margin = total - z_cmp
+    # The margin is rounded for DISPLAY but the boundary test must use the raw value.
+    #
+    # Rounding first produced a verdict that was wrong in the dangerous direction. With
+    # X=10, Y=3, Z=13 the true margin is +0.0 to within float representation -- sometimes
+    # 1.8e-15 above, sometimes below. `round(raw, 2)` printed "0.00" for both, and the
+    # strict `total > z_cmp` test then read FALSE, dropping a Shor-vulnerable artefact from
+    # HIGH to MEDIUM. Margin -2.00 and margin 0.00 produced the SAME tier, so an artefact
+    # sitting exactly ON the inequality was reported as though it were comfortably inside it.
+    #
+    # Mosca's inequality is X + Y > Z: at X + Y == Z you have not yet lost, but you have also
+    # not yet started, and the clock runs the instant you do. A boundary is not a pass. So the
+    # test is `raw_margin > 0`, computed before any rounding, and an exact boundary counts as
+    # exposed.
+    margin = round(raw_margin, 2)
+    boundary_tolerance = 1e-6
+    margin_at_boundary = bool(subject and abs(raw_margin) <= boundary_tolerance)
+    # `is_vulnerable` is kept FAITHFUL to Mosca's published inequality, which is strict:
+    # X + Y > Z. At X + Y == Z the inequality is false, and reporting True would mean the tool
+    # no longer implements the framework it claims to implement -- which is the more serious
+    # error of the two, because a reviewer checking the mathematics would find it immediately.
+    #
+    # The reviewer's objection to the boundary is nonetheless correct, and it is answered in
+    # `_tier` rather than here: zero slack means the migration must begin NOW, so a boundary
+    # artefact is tiered HIGH despite `is_vulnerable` being False. The two fields answer
+    # different questions -- "is the inequality satisfied?" and "how much time is left?" -- and
+    # a single boolean cannot carry both.
+    is_vulnerable = bool(subject and raw_margin > 0.0)
     hndl_exposed = bool(subject and horizon == HORIZON_CONFIDENTIALITY and x_cmp > z_cmp)
     effective_bits = _grover_effective_bits(name, key_length)
 
-    tier = _tier(break_model, subject, is_vulnerable, hndl_exposed, margin, effective_bits)
+    tier = _tier(break_model, subject, is_vulnerable, hndl_exposed, margin,
+                 effective_bits, margin_at_boundary)
 
     # Z-sensitivity: the verdict must be shown as a band, not a single number, because Z is
     # an estimate. If the tier flips inside the band, say so rather than asserting one answer.
@@ -533,6 +654,8 @@ def calculate_risk(finding, user_x=None, user_y=None, z_collapse_time=None,
         "policy_deadline": resolved_deadline,
         "x_reason": x_reason,
         "y_reason": y_reason,
+    "y_source": y_source,
+    "margin_at_boundary": margin_at_boundary,
         "assumptions": [
             f"X={round(x_years, 2)}y from {x_reason}",
             f"Y={round(y_years, 2)}y from {y_reason}",

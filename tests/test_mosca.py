@@ -102,10 +102,73 @@ def test_sha1_is_flagged():
 
 
 def test_boundary_exactly_equal_is_not_vulnerable():
+    """X + Y == Z does NOT satisfy Mosca's inequality, which is strict (X + Y > Z).
+
+    `is_vulnerable` therefore stays False. That is deliberate: the tool must implement the
+    published framework exactly, or a reviewer checking the mathematics finds a discrepancy.
+
+    But the TIER changed. Zero slack means the migration must start now, so a boundary artefact
+    is HIGH. Previously this was MEDIUM -- identical to an artefact with two years of headroom,
+    which is the defect a LinkedIn reviewer identified: "a margin of exactly 0.0y is the boundary
+    of the inequality, not the safe side, and green reads as a pass."
+    """
     r = calculate_risk(dict(name="RSA", primitive="pke"), 4.0, 4.0, 8.0)
     assert r["x_y"] == 8.0
-    assert r["is_vulnerable"] is False
-    assert r["tier"] == "MEDIUM"          # broken by Shor, but not yet past the inequality
+    assert r["is_vulnerable"] is False, "the published inequality is strict; it is not satisfied"
+    assert r["margin_at_boundary"] is True
+    assert r["tier"] == "HIGH", "zero slack is not the safe side"
+
+
+def test_boundary_is_distinguishable_from_real_headroom():
+    """The regression that motivated the change: 0.0 years of margin and -2.0 years of margin
+    both produced MEDIUM, so a boundary artefact and a comfortably-inside one were
+    indistinguishable on the panel."""
+    at_boundary = calculate_risk(dict(name="RSA", primitive="pke"), 4.0, 4.0, 8.0)
+    inside = calculate_risk(dict(name="RSA", primitive="pke"), 3.0, 3.0, 8.0)   # margin -2.0
+    assert at_boundary["margin"] == 0.00
+    assert inside["margin"] == -2.00
+    assert at_boundary["tier"] != inside["tier"], (
+        "a zero-slack boundary must not read the same as an artefact with real headroom")
+    assert at_boundary["margin_at_boundary"] is False or at_boundary["margin_at_boundary"] is True
+
+
+def test_migration_history_can_supply_y():
+    """Y is the term an organisation can actually measure, unlike Z.
+
+    Supplying completed migrations replaces the generic effort table with the org's own median
+    velocity, and the provenance is reported as `observed-migration-history` so the number is
+    never mistaken for the assumption it replaced.
+    """
+    history = [
+        {"artefact_class": "source", "started": "2021-01-01", "finished": "2021-06-01"},
+        {"artefact_class": "source", "started": "2022-01-01", "finished": "2022-09-01"},
+    ]
+    table_based = calculate_risk(dict(name="RSA", primitive="pke"), 4.0, None, 8.0)
+    measured = calculate_risk(dict(name="RSA", primitive="pke"), 4.0, None, 8.0,
+                              migration_history=history)
+    assert table_based["y_source"] == "effort-table"
+    assert measured["y_source"] == "observed-migration-history"
+    assert measured["y"] < table_based["y"], (
+        "this org's recorded velocity is faster than the generic table assumed")
+    assert "median" in measured["y_reason"]
+
+
+def test_malformed_migration_history_degrades_to_the_table():
+    """A bad history must never crash a risk report or invent a number."""
+    for bad in ([{"nonsense": 1}, "garbage", None], [], [{"artefact_class": "source"}]):
+        r = calculate_risk(dict(name="RSA", primitive="pke"), 4.0, None, 8.0,
+                           migration_history=bad)
+        assert r["y_source"] == "effort-table"
+        assert r["y"] == calculate_risk(dict(name="RSA", primitive="pke"), 4.0, None, 8.0)["y"]
+
+
+def test_explicit_user_y_beats_history():
+    """An explicit override is a deliberate human decision and outranks a derived rate."""
+    history = [{"artefact_class": "source", "started": "2021-01-01", "finished": "2021-02-01"}]
+    r = calculate_risk(dict(name="RSA", primitive="pke"), 4.0, 5.0, 8.0,
+                       migration_history=history)
+    assert r["y"] == 5.0
+    assert r["y_source"] == "effort-table"
 
 
 def test_slightly_over_boundary_is_high():
