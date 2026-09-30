@@ -120,10 +120,10 @@ Findings emitted for `paramiko`, by rule:
 | ECDH | IM-SRC-ECDH-001 | 22 |
 | AES | IM-SRC-SSH-CIPHER-001 | 14 |
 | RSA | IM-SRC-PYCA-RSA-001 | 13 |
+| HMAC | IM-SRC-SSH-MAC-001 | 12 |
 | ECDH | IM-SRC-SSH-KEX-001 | 11 |
 | DH | IM-SRC-SSH-DH-001 | 10 |
 | AES | IM-SRC-PYCA-AES-001 | 9 |
-| HMAC | IM-SRC-SSH-MAC-001 | 8 |
 | SHA | IM-SRC-PYCA-HASH-001 | 7 |
 | ECC | IM-SRC-PYCA-EC-001 | 7 |
 | SHA256 | IM-SRC-HASHLIB-004 | 6 |

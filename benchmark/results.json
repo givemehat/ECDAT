@@ -43,14 +43,14 @@
      "SaaS / third-party boundary crypto (requires attestation)",
      "silicon-embedded keys (requires attestation)"
     ],
-    "findings_total": 204,
+    "findings_total": 208,
     "assurance_histogram": {
      "observed": 0,
-     "used": 204,
+     "used": 208,
      "declared": 0,
      "capability": 0
     },
-    "proven_use": 204,
+    "proven_use": 208,
     "unresolved_purpose": 75
    },
    "scan_errors": [],
@@ -59,10 +59,10 @@
     "ECDH | IM-SRC-ECDH-001": 22,
     "AES | IM-SRC-SSH-CIPHER-001": 14,
     "RSA | IM-SRC-PYCA-RSA-001": 13,
+    "HMAC | IM-SRC-SSH-MAC-001": 12,
     "ECDH | IM-SRC-SSH-KEX-001": 11,
     "DH | IM-SRC-SSH-DH-001": 10,
     "AES | IM-SRC-PYCA-AES-001": 9,
-    "HMAC | IM-SRC-SSH-MAC-001": 8,
     "SHA | IM-SRC-PYCA-HASH-001": 7,
     "ECC | IM-SRC-PYCA-EC-001": 7,
     "SHA256 | IM-SRC-HASHLIB-004": 6,
@@ -100,7 +100,7 @@
       "FP": 17,
       "FN": 68,
       "labelled_positives": 240,
-      "findings_total": 204
+      "findings_total": 208
      },
      "precision": 0.9101,
      "precision_fraction": "172/189",
@@ -1706,7 +1706,7 @@
       "FP": 17,
       "FN": 87,
       "labelled_positives": 259,
-      "findings_total": 204
+      "findings_total": 208
      },
      "precision": 0.9101,
      "precision_fraction": "172/189",
